@@ -1,0 +1,65 @@
+form {
+	margin: 2rem 0;
+}
+
+button,
+input[type=submit] {
+	font-size: 1rem;
+	padding: 0.5rem 1rem;
+	background: var(--darker);
+	color: var(--paper);
+	font-weight: bold;
+	border: 2px solid var(--darker);
+	border-radius: 0.125rem;
+	background: var(--darker);
+	margin: 2rem 0 0;
+	display: block;
+	width: max-content;
+	transition: background .2s;
+}
+
+:where(button, input[type=submit]):where(:hover, :focus) {
+	background: var(--accent);
+} 
+
+label,
+fieldset {
+	font-weight: bold;
+	display: inline-block;
+}
+
+fieldset {
+	padding: 0;
+	border: 0;
+}
+
+input {
+	display: block;
+	font-size: inherit;
+	padding: 0.5rem;
+	border: 1px solid var(--darker);
+	border-radius: 0.125rem;
+	width: 100%;
+	accent-color: var(--accent);
+	background-color: transparent;
+}
+
+input[type=radio],
+input[type=checkbox] {
+	display: initial;
+	width: auto;
+}
+
+:where(input[type=radio],
+	input[type=checkbox]):not(:checked)+label {
+	font-weight: normal;
+}
+
+.form-section,
+fieldset {
+	margin-top: 1.5rem;
+}
+
+::placeholder {
+	color: var(--dark);
+}
