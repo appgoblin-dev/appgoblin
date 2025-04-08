@@ -40,12 +40,10 @@ h3 {
 
 h4 {
 	font-size: clamp(1.5rem, calc(1.5rem + 1vw), 1.8rem);
-	;
 }
 
 h5 {
 	font-size: clamp(1.35rem, calc(1.35rem + 1vw), 1.5rem);
-	;
 }
 
 h6 {

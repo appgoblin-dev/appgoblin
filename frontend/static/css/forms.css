@@ -3,7 +3,7 @@ form {
 }
 
 button,
-input[type=submit] {
+input[type='submit'] {
 	font-size: 1rem;
 	padding: 0.5rem 1rem;
 	background: var(--darker);
@@ -15,12 +15,12 @@ input[type=submit] {
 	margin: 2rem 0 0;
 	display: block;
 	width: max-content;
-	transition: background .2s;
+	transition: background 0.2s;
 }
 
-:where(button, input[type=submit]):where(:hover, :focus) {
+:where(button, input[type='submit']):where(:hover, :focus) {
 	background: var(--accent);
-} 
+}
 
 label,
 fieldset {
@@ -44,14 +44,13 @@ input {
 	background-color: transparent;
 }
 
-input[type=radio],
-input[type=checkbox] {
+input[type='radio'],
+input[type='checkbox'] {
 	display: initial;
 	width: auto;
 }
 
-:where(input[type=radio],
-	input[type=checkbox]):not(:checked)+label {
+:where(input[type='radio'], input[type='checkbox']):not(:checked) + label {
 	font-weight: normal;
 }
 

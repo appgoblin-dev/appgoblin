@@ -36,7 +36,7 @@ img {
 		margin-bottom: 4rem;
 	}
 
-	img+h1 {
+	img + h1 {
 		margin-top: 1rem;
 	}
 }
@@ -53,7 +53,7 @@ li {
 		margin-bottom: 6rem;
 	}
 
-	img+h2 {
+	img + h2 {
 		margin-top: 1rem;
 	}
 
@@ -76,7 +76,7 @@ li {
 
 .post-footer a {
 	background-color: var(--lightAccent);
-	padding: .5rem 0.75rem;
+	padding: 0.5rem 0.75rem;
 	text-transform: uppercase;
 	font-family: var(--primaryFont);
 	font-weight: bold;
@@ -95,7 +95,7 @@ li {
 	height: 1rem;
 	top: 0;
 	opacity: 0.2;
-	transition: opacity .2s;
+	transition: opacity 0.2s;
 }
 
 @media (min-width: 48rem) {
