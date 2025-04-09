@@ -9,7 +9,7 @@
 	// For best results limit to 3-5 options max
 	const navigation = [
 		{ label: 'Blog', href: '/blog' },
-		{ label: 'About', href: '/about' },
+		{ label: 'About', href: '/about' }
 		// Enable this to show the test sandbox page
 		// { label: 'Sandbox', href: '/sandbox' }
 	];
@@ -52,10 +52,7 @@
 		<!-- Navigation -->
 		<nav class="flex gap-2">
 			{#each navigation as route}
-				<a
-					class="btn hover:preset-tonal-tertiary"
-					href={route.href}
-				>
+				<a class="btn hover:preset-tonal-tertiary" href={route.href}>
 					{route.label}
 				</a>
 			{/each}
