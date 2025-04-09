@@ -1,0 +1,29 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+import { SITE_TITLE, SITE_DESCRIPTION } from '@src/consts';
+
+import BaseHead from '@components/BaseHead.astro';
+import Header from '@components/Header.svelte';
+import Footer from '@components/Footer.astro';
+
+type Props = CollectionEntry<'blog'>['data'];
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="cerberus" class="dark">
+	<head >
+		<BaseHead title={title || SITE_TITLE} description={description || SITE_DESCRIPTION} />
+	</head>
+	<body>
+        <div class="grid min-h-screen grid-rows-[auto_1fr_auto]">
+            <Header client:load />
+            <main>
+                <slot />
+            </main>
+            <Footer />
+        </div>
+	</body>
+</html>

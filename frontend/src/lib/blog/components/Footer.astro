@@ -1,0 +1,50 @@
+---
+interface SocialLink {
+	title: string;
+	url: string;
+	target: string;
+}
+
+const currentYear = new Date().getFullYear();
+const socialLinks: SocialLink[] = [
+	{
+		title: 'Github',
+		url: 'https://www.github.com',
+		target: '_blank'
+	},
+	{
+		title: 'LinkedIn',
+		url: 'https://www.linkedin.com',
+		target: '_blank'
+	},
+	{
+		title: 'Bluesky',
+		url: 'https://www.bsky.com',
+		target: '_blank'
+	},
+	{
+		title: 'Email',
+		url: 'mailto:contact@email.com',
+		target: ''
+	}
+];
+---
+
+<footer class="section-padding border-surface-500/10 border-t py-5">
+	<div class="container mx-auto flex flex-col items-center gap-5">
+		<div class="flex space-x-4">
+			{socialLinks.map(link => (
+				<a
+					class="btn btn-sm hover:preset-tonal-tertiary"
+					href={link.url}
+					target={link.target}
+					rel="noreferrer"
+					title={link.title}
+				>
+					{link.title}
+				</a>
+			))}
+		</div>
+		<p class="text-xs opacity-50">© Copyright {currentYear}. All rights reserved.</p>
+	</div>
+</footer>

@@ -1,0 +1,51 @@
+---
+import LayoutRoot from '@layouts/LayoutRoot.astro';
+
+import { getCollection } from 'astro:content';
+import FormattedDate from '@components/FormattedDate.astro';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<LayoutRoot title="" description="" pubDate={new Date()}>
+	<div>
+		<!-- Header -->
+		<header class="flex justify-center items-center px-4 py-5 md:py-10">
+			<!-- https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text -->
+			<svg class="container mx-auto w-full" viewBox="0 0 1750 280" xmlns="http://www.w3.org/2000/svg">
+				<text
+					font-size={345}
+					x="50%"
+					y="50%"
+					dominant-baseline="central"
+					text-anchor="middle"
+					class="fill-surface-950-50 uppercase font-bold"
+				>
+					Our Blog
+				</text>
+			</svg>
+		</header>
+
+		<hr class="hr container mx-auto" />
+
+		<!-- Articles -->
+		<nav class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 md:px-0 py-4 md:py-10">
+			{
+				posts.map((post) => (
+					<a href={`/blog/${post.id}/`} class="card border border-surface-100-900 hover:preset-tonal overflow-hidden">
+						<img width={720} height={360} src={post.data.heroImage} alt={post.data.title} class="w-full" />
+						<article class="grid grid-cols-1 gap-4 p-4">
+							<div class="space-y-4">
+								<p class="text-xs opacity-75"><FormattedDate date={post.data.pubDate} /></p>
+								<h2 class="h2">{post.data.title}</h2>
+								<p class="opacity-75">{post.data.description}</p>
+							</div>
+						</article>
+					</a>
+				))
+			}
+		</nav>
+	</div>
+</LayoutRoot>

@@ -1,0 +1,94 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+import LayoutRoot from '@layouts/LayoutRoot.astro';
+import FormattedDate from '@components/FormattedDate.astro';
+
+type BlogMetaData = CollectionEntry<'blog'>['data'];
+interface Props extends BlogMetaData {
+	content: string;
+}
+
+const { title, description, pubDate, updatedDate, heroImage, content } = Astro.props;
+
+// https://dev.to/michaelburrows/calculate-the-estimated-reading-time-of-an-article-using-javascript-2k9l
+function readingTime() {
+	const text = content;
+	const wpm = 225;
+	const words = text.trim().split(/\s+/).length;
+	const time = Math.ceil(words / wpm);
+	const minutePlural = time > 1 ? 's' : '';
+	return `${time} min${minutePlural}`;
+}
+
+---
+
+<LayoutRoot title={title} description={description} pubDate={new Date()}>
+	<article>
+		<!-- Header -->
+		<header class="p-5 md:p-10">
+			<div class="container mx-auto">
+				<h1 class="h1">{title}</h1>
+			</div>
+		</header>
+
+		<hr class="hr container mx-auto" />
+
+		<!-- Metadata -->
+		<section class="p-4 md:p-10">
+			<div class="container mx-auto">
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-20">
+					<!-- Description -->
+					<div class="space-y-2">
+						<p>{description}</p>
+					</div>
+					<!-- Author -->
+					<div class="space-y-2">
+						<p class="text-xs">Author</p>
+						<div class="grid grid-cols-1">
+							<p class="text-2xl font-bold">
+								<span>Contributor</span>
+							</p>
+						</div>
+					</div>
+					<!-- Published -->
+					<div class="space-y-2">
+						<p class="text-xs">Published</p>
+						<time class="text-2xl font-bold">
+							<FormattedDate date={pubDate} />
+							{
+								updatedDate && (
+									<div class="text-xs opacity-75">
+										Last updated on <FormattedDate date={updatedDate} />
+									</div>
+								)
+							}
+						</time>
+					</div>
+					<!-- Reading Time -->
+					<div class="space-y-2">
+						<p class="text-xs">Reading Time</p>
+						<p class="text-2xl font-bold">
+							{readingTime()}
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Hero Banner -->
+		{heroImage && (
+			<section class="preset-filled-surface-950-50 p-5 md:p-10">
+				<div class="container mx-auto flex justify-center items-center">
+					{/* Replace `w-ull` with `max-w-full` if you prefer smaller images */}
+					<img width={960} height={480} src={heroImage} alt={title} class="bg-surface-500 aspect-video w-full rounded-container overflow-hidden" />
+				</div>
+			</section>
+		)}
+
+		<!-- Slot -->
+		<div class="container mx-auto space-y-8 px-4 py-10">
+			<slot />
+		</div>
+	</article>
+</LayoutRoot>

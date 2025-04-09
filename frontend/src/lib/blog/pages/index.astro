@@ -1,0 +1,140 @@
+---
+import LayoutRoot from '@layouts/LayoutRoot.astro';
+
+import { getCollection } from 'astro:content';
+import FormattedDate from '@components/FormattedDate.astro';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const authors = (await getCollection('authors')).sort(
+	// Alphabetical by id
+	(a, b) => (a.id < b.id) ? -1 : (a.id > b.id) ? 1 : 0
+);
+---
+
+<LayoutRoot title="" description="" pubDate={new Date()}>
+	<div>
+		<!-- DEBUG -->
+		<!-- <pre class="pre">{JSON.stringify(posts, null, 2)}</pre> -->
+
+		<!-- Header -->
+		<header class="flex justify-center items-center px-4 py-5 md:py-10">
+			<!-- Responsive Title -->
+			<!-- NOTE: you may need to adjust the font-size based on the number of characters -->
+			<!-- https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text -->
+			<svg class="container mx-auto w-full" viewBox="0 0 1750 280" xmlns="http://www.w3.org/2000/svg">
+				<text
+					font-size={250}
+					x="50%"
+					y="50%"
+					dominant-baseline="central"
+					text-anchor="middle"
+					class="fill-surface-950-50 uppercase font-bold"
+				>
+					Hello World
+				</text>
+			</svg>
+		</header>
+
+		<hr class="hr container mx-auto" />
+
+		<!-- Featured -->
+		<section class="p-4 md:py-10">
+			<div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4">
+				<!-- The Top Post -->
+				<a class="card border border-surface-100-900 hover:preset-tonal overflow-hidden" href={`/blog/${posts[0].id}/`}>
+					<img
+						class="w-full aspect-video rounded-container"
+						src={posts[0].data.heroImage}
+						alt="Portfolio"
+					/>
+					<article class="p-4 space-y-4">
+						<time class="text-xs opacity-75"><FormattedDate date={posts[0].data.pubDate} /></time>
+						<h2 class="h2">{posts[0].data.title}</h2>
+						<p class="opacity-75">{posts[0].data.description}</p>
+					</article>
+				</a>
+				<!-- Additional Featured Posts -->
+				<div class="grid grid-cols-1 gap-4 place-content-start">
+					<!-- Loop Posts 2-4 -->
+					{posts.slice(1, 4).map((post) => (
+						<a class="card border border-surface-100-900 hover:preset-tonal overflow-hidden" href={`/blog/${post.id}/`}>
+							<article class="grid grid-cols-1 sm:grid-cols-[280px_1fr]">
+								<img
+									class="w-full aspect-video"
+									src={post.data.heroImage}
+									alt="Portfolio"
+								/>
+								<div class="space-y-2 p-4">
+									<time class="text-xs opacity-75"><FormattedDate date={post.data.pubDate} /></time>
+									<h2 class="h2">{post.data.title}</h2>
+									<p class="opacity-75">{posts[0].data.description}</p>
+								</div>
+							</article>
+						</a>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<!-- Latest -->
+		<section class="preset-filled-surface-950-50 p-5 md:p-10">
+			<div class="container mx-auto space-y-4 md:space-y-10">
+				<h2 class="h3">Latest Posts</h2>
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+					{posts.slice(1, 5).map((post) => (
+						<a class="card border border-surface-900-100 hover:bg-surface-900-100 overflow-hidden" href={`/blog/${post.id}/`}>
+							<img
+								class="w-full aspect-video"
+								src={post.data.heroImage}
+								alt="Portfolio"
+							/>
+							<article class="p-4 space-y-2">
+								<time class="block text-base">
+									<FormattedDate date={post.data.pubDate} />
+								</time>
+								<h3 class="h3">{post.data.title}</h3>
+								<p class="opacity-75">{posts[0].data.description}</p>
+							</article>
+						</a>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<!-- Authors / Categories -->
+	<section class="preset-filled-primary-500 p-5 md:p-10">
+		<div class="container mx-auto">
+			<div class="grid grid-cols-1 lg:grid-cols-[1fr_2fr] items-center gap-10 lg:gap-20">
+				<!-- Categories -->
+				<div class="space-y-4">
+					<h2 class="h3">Our Authors</h2>
+					<p class="opacity-75">
+						Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis cum voluptatum nihil at laboriosam, amet quae eveniet molestiae ipsam sint a ab nostrum aut reprehenderit veritatis? Aut quia nesciunt ration
+					</p>
+				</div>
+				<!-- Authors -->
+				<div class="space-y-4">
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-10">
+						{authors.map((author) => (
+							<a class="text-center space-y-2" href={author.data.website} target="_blank">
+								<img
+									class="w-full max-w-xs aspect-square mx-auto rounded-full overflow-hidden"
+									src={author.data.portrait}
+									alt={author.data.id}
+								/>
+								<div>
+									<h4 class="h2 md:h3">{author.data.name}</h4>
+									<p class="opacity-75">{author.data.title}</p>
+								</div>
+							</a>
+						))}
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	</div>
+</LayoutRoot>
