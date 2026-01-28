@@ -3,6 +3,7 @@
 </script>
 
 <div class="overflow-x-auto relative">
+	<p class="text-primary-700-300">Ad Creatives:</p>
 	<div
 		class="flex gap-3 snap-x snap-mandatory overflow-x-auto scrollbar-hide border-2 border-surface-100-900 p-4 pr-4"
 	>

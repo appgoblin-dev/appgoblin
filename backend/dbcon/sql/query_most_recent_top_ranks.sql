@@ -4,6 +4,7 @@ SELECT
     store_id,
     store,
     installs,
+    developer_name,
     rating_count,
     rating,
     installs_sum_1w,

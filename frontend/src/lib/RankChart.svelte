@@ -70,6 +70,7 @@
 
 		const option: echarts.EChartsOption = {
 			color: plotColors,
+			backgroundColor: 'rgba(0, 0, 0, 0.3)',
 			dataset: { source: plotData },
 			dimensions: dimensions,
 			grid: {

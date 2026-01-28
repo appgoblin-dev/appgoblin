@@ -111,7 +111,6 @@
 	};
 
 	// Ad and API tracking info
-	console.log('app', app);
 	const adCreativeCount = $derived(app.ad_creative_count ?? 0);
 	const hasAdMonetization = $derived((app?.ad_monetized_creative_count ?? 0) > 0);
 	const apiLastCrawled = $derived(formatDate(app.api_last_crawled));

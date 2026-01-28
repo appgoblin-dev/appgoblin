@@ -25,12 +25,9 @@
 			</p>
 		{/if}
 
-		<!-- <p class="text-primary-700-300">
-			File Types:<span class="text-primary-900-100 mx-2">{app.file_types.join(', ')}</span>
-		</p> -->
 		{#if app.ad_networks && app.ad_networks.length > 0}
 			<p class="text-primary-700-300">Ad Networks:</p>
-			<div class="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-4">
+			<div class="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-2">
 				{#each app.ad_networks as ad_network}
 					<CompanyButton
 						companyDomain={ad_network.domain}

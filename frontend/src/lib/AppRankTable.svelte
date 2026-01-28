@@ -140,7 +140,7 @@
 						<td class="text-sm md:text-base"
 							><span class="ml-2 md:ml-8">{row.original.rank}</span></td
 						>
-						<td>
+						<td class="py-2">
 							<AppCard app={row.original as RankedApps} showHeader={false} />
 						</td>
 					</tr>

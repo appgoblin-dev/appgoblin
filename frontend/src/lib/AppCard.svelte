@@ -66,7 +66,7 @@
 				<div class="flex flex-row">
 					<div class="flex text-left flex-col">
 						<img
-							class="h-18 md:h-28 w-18 md:w-28 p-2 rounded-lg"
+							class="w-18 md:w-24 rounded-lg"
 							src={app.app_icon_url}
 							alt={app.name}
 							referrerpolicy="no-referrer"
