@@ -51,6 +51,7 @@ from dbcon.queries import (
     get_company_sdks,
     get_company_stats,
     get_company_tree,
+    get_mediation_adapters,
     get_tag_source_category_totals,
     get_topapps_for_company,
     get_topapps_for_company_parent,
@@ -64,6 +65,7 @@ from dbcon.static import (
     get_company_logos_df,
     get_company_open_source,
     get_company_secondary_domains,
+    get_mediation_companies,
     get_parent_companies,
 )
 
@@ -784,11 +786,37 @@ class CompaniesController(Controller):
             final_ad_domain_overview = None
             final_publishers_overview = None
 
+        mediation_companies = get_mediation_companies(state)
+
+        if company_domain in mediation_companies["company_domain"].tolist():
+            mediation_adapters = get_mediation_adapters(state, company_domain)
+            if category:
+                if category == "overview":
+                    mediation_adapters = (
+                        mediation_adapters.groupby(
+                            [
+                                "adapter_string",
+                                "adapter_company_domain",
+                                "adapter_company_name",
+                                "adapter_logo_url",
+                            ]
+                        )[["app_count"]]
+                        .sum()
+                        .reset_index()
+                    )
+                else:
+                    mediation_adapters = mediation_adapters[
+                        mediation_adapters["app_category"] == category
+                    ]
+            mediation_adapters = mediation_adapters.to_dict(orient="records")
+        else:
+            mediation_adapters = None
+
         overview = make_company_stats(df=df)
 
         overview.adstxt_ad_domain_overview = final_ad_domain_overview
         overview.adstxt_publishers_overview = final_publishers_overview
-
+        overview.mediation_adapters = mediation_adapters
         duration = round((time.perf_counter() * 1000 - start), 2)
         logger.info(f"GET /api/companies/{company_domain} took {duration}ms")
         return overview

@@ -136,6 +136,31 @@
 	{/snippet}
 </CompaniesLayout>
 
+{#if data.companyDetails && data.companyDetails.mediation_adapters}
+	<WhiteCard>
+		{#snippet title()}
+			<span>Mediation Adapters</span>
+		{/snippet}
+		<div class="p-2">
+			{#each data.companyDetails.mediation_adapters as adapter}
+				<div class="text-sm text-gray-600 flex items-center gap-2">
+					{#if adapter.adapter_company_domain}
+						<CompanyButton
+							companyName={adapter.adapter_company_name}
+							companyDomain={adapter.adapter_company_domain}
+							companyLogoUrl={adapter.adapter_logo_url}
+							size="sm"
+						/>
+					{:else}
+						<span class="text-gray-500">{adapter.adapter_string}</span>
+					{/if}
+					<span class="text-gray-500">{adapter.app_count}</span>
+				</div>
+			{/each}
+		</div>
+	</WhiteCard>
+{/if}
+
 {#if data.companyCreatives && data.companyCreatives.length > 0}
 	<WhiteCard>
 		{#snippet title()}

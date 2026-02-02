@@ -29,6 +29,7 @@ class StaticData:
     country_map: pd.DataFrame
     company_open_source: pd.DataFrame
     company_api_call_countrys: pd.DataFrame
+    mediation_companies: pd.DataFrame
 
 
 def load_static_data(engine) -> StaticData:
@@ -92,6 +93,15 @@ def load_static_data(engine) -> StaticData:
         engine,
     )
 
+    logger.info("Loading mediation companies...")
+    mediation_companies = pd.read_sql(
+        """SELECT ad.domain_name as company_domain, c.name as company_name, c.logo_url as company_logo_url 
+           FROM adtech.company_mediation_patterns as mc
+           LEFT JOIN adtech.companies as c ON mc.company_id = c.id
+           LEFT JOIN domains as ad ON c."domain_id" = ad."id";""",
+        engine,
+    )
+
     logger.info("Static data loading complete!")
 
     return StaticData(
@@ -109,6 +119,7 @@ def load_static_data(engine) -> StaticData:
         country_map=country_map,
         company_open_source=company_open_source,
         company_api_call_countrys=company_api_call_countrys,
+        mediation_companies=mediation_companies,
     )
 
 
@@ -181,3 +192,8 @@ def get_company_open_source(state: State) -> pd.DataFrame:
 def get_company_api_call_countrys(state: State) -> pd.DataFrame:
     """Get company api call countrys (preloaded at startup)."""
     return state.static_data.company_api_call_countrys
+
+
+def get_mediation_companies(state: State) -> pd.DataFrame:
+    """Get mediation companies (preloaded at startup)."""
+    return state.static_data.mediation_companies
