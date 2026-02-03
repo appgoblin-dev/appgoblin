@@ -790,25 +790,30 @@ class CompaniesController(Controller):
 
         if company_domain in mediation_companies["company_domain"].tolist():
             mediation_adapters = get_mediation_adapters(state, company_domain)
-            if category:
-                if category == "overview":
-                    mediation_adapters = (
-                        mediation_adapters.groupby(
-                            [
-                                "adapter_string",
-                                "adapter_company_domain",
-                                "adapter_company_name",
-                                "adapter_logo_url",
-                            ]
-                        )[["app_count"]]
-                        .sum()
-                        .reset_index()
-                    )
-                else:
-                    mediation_adapters = mediation_adapters[
-                        mediation_adapters["app_category"] == category
-                    ]
-            mediation_adapters = mediation_adapters.to_dict(orient="records")
+            if category is None:
+                mediation_adapters = (
+                    mediation_adapters.groupby(
+                        [
+                            "adapter_company_domain",
+                            "adapter_company_name",
+                            "adapter_logo_url",
+                        ],
+                        dropna=False,
+                    )[["app_count"]]
+                    .sum()
+                    .reset_index()
+                )
+                mediation_adapters = mediation_adapters[
+                    mediation_adapters["app_count"] > 1
+                ]
+            else:
+                mediation_adapters = mediation_adapters[
+                    mediation_adapters["app_category"] == category
+                ]
+
+            mediation_adapters = mediation_adapters.sort_values(
+                by="app_count", ascending=False
+            ).to_dict(orient="records")
         else:
             mediation_adapters = None
 

@@ -9,6 +9,7 @@
 	import CompanyCategoryPie from '$lib/CompanyCategoryPie.svelte';
 	import AdsTxtTotalsBox from '$lib/AdsTxtTotalsBox.svelte';
 	import CompanyTableGrid from '$lib/CompanyTableGrid.svelte';
+	import MediationAdaptersTable from '$lib/MediationAdaptersTable.svelte';
 	import CompanyTree from '$lib/CompanyTree.svelte';
 	import CompanySDKs from '$lib/CompanySDKs.svelte';
 	import WhiteCard from '$lib/WhiteCard.svelte';
@@ -141,23 +142,7 @@
 		{#snippet title()}
 			<span>Mediation Adapters</span>
 		{/snippet}
-		<div class="p-2">
-			{#each data.companyDetails.mediation_adapters as adapter}
-				<div class="text-sm text-gray-600 flex items-center gap-2">
-					{#if adapter.adapter_company_domain}
-						<CompanyButton
-							companyName={adapter.adapter_company_name}
-							companyDomain={adapter.adapter_company_domain}
-							companyLogoUrl={adapter.adapter_logo_url}
-							size="sm"
-						/>
-					{:else}
-						<span class="text-gray-500">{adapter.adapter_string}</span>
-					{/if}
-					<span class="text-gray-500">{adapter.app_count}</span>
-				</div>
-			{/each}
-		</div>
+		<MediationAdaptersTable adapters={data.companyDetails.mediation_adapters} />
 	</WhiteCard>
 {/if}
 
