@@ -15,6 +15,9 @@ export interface Session extends SessionFlags {
 
 type SessionValidationResult = { session: Session; user: User } | { session: null; user: null };
 
+// Default persistent login duration (hours).
+export const DEFAULT_SESSION_DURATION_HOURS = 24 * 30;
+
 interface SessionRow {
 	id: string;
 	user_id: number;

@@ -5,6 +5,7 @@ import { RefillingTokenBucket } from '$lib/server/auth/rate-limit';
 import { verifyPasswordStrength } from '$lib/server/auth/password';
 import {
 	createSession,
+	DEFAULT_SESSION_DURATION_HOURS,
 	generateSessionToken,
 	setSessionTokenCookie
 } from '$lib/server/auth/session';
@@ -102,11 +103,15 @@ async function action(event: RequestEvent) {
 	setEmailVerificationRequestCookie(event, emailVerificationRequest);
 
 	const sessionFlags: SessionFlags = {
-		twoFactorVerified: false
+		twoFactorVerified: true
 	};
 	const sessionToken = generateSessionToken();
-	// Create session-only cookie (expires when browser closes)
-	const session = await createSession(sessionToken, user.id, sessionFlags, 0);
-	setSessionTokenCookie(event, sessionToken, null);
-	throw redirect(302, '/auth/2fa/setup');
+	const session = await createSession(
+		sessionToken,
+		user.id,
+		sessionFlags,
+		DEFAULT_SESSION_DURATION_HOURS
+	);
+	setSessionTokenCookie(event, sessionToken, session.expiresAt);
+	throw redirect(302, '/auth/verify-email');
 }

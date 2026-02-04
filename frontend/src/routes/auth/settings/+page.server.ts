@@ -10,6 +10,7 @@ import { verifyPasswordHash, verifyPasswordStrength } from '$lib/server/auth/pas
 import { getUserPasswordHash, getUserRecoverCode, updateUserPassword } from '$lib/server/auth/user';
 import {
 	createSession,
+	DEFAULT_SESSION_DURATION_HOURS,
 	generateSessionToken,
 	invalidateUserSessions,
 	setSessionTokenCookie
@@ -109,9 +110,13 @@ async function updatePasswordAction(event: RequestEvent) {
 	const sessionFlags: SessionFlags = {
 		twoFactorVerified: session.twoFactorVerified
 	};
-	// Create session-only cookie (expires when browser closes)
-	const newSession = await createSession(sessionToken, user.id, sessionFlags, 0);
-	setSessionTokenCookie(event, sessionToken, null);
+	const newSession = await createSession(
+		sessionToken,
+		user.id,
+		sessionFlags,
+		DEFAULT_SESSION_DURATION_HOURS
+	);
+	setSessionTokenCookie(event, sessionToken, newSession.expiresAt);
 	return {
 		password: {
 			message: 'Updated password'

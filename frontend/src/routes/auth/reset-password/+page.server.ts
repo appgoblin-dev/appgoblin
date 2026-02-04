@@ -7,6 +7,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { verifyPasswordStrength } from '$lib/server/auth/password';
 import {
 	createSession,
+	DEFAULT_SESSION_DURATION_HOURS,
 	generateSessionToken,
 	invalidateUserSessions,
 	setSessionTokenCookie
@@ -73,9 +74,13 @@ async function action(event: RequestEvent) {
 		twoFactorVerified: passwordResetSession.twoFactorVerified
 	};
 	const sessionToken = generateSessionToken();
-	// Create session-only cookie (expires when browser closes)
-	const session = await createSession(sessionToken, user.id, sessionFlags, 0);
-	setSessionTokenCookie(event, sessionToken, null);
+	const session = await createSession(
+		sessionToken,
+		user.id,
+		sessionFlags,
+		DEFAULT_SESSION_DURATION_HOURS
+	);
+	setSessionTokenCookie(event, sessionToken, session.expiresAt);
 	await deletePasswordResetSessionTokenCookie(event);
 	return redirect(302, '/');
 }

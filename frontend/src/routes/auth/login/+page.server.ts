@@ -5,6 +5,7 @@ import { RefillingTokenBucket, Throttler } from '$lib/server/auth/rate-limit';
 import { verifyPasswordHash } from '$lib/server/auth/password';
 import {
 	createSession,
+	DEFAULT_SESSION_DURATION_HOURS,
 	generateSessionToken,
 	setSessionTokenCookie
 } from '$lib/server/auth/session';
@@ -86,18 +87,19 @@ async function action(event: RequestEvent) {
 	}
 	throttler.reset(user.id);
 	const sessionFlags: SessionFlags = {
-		twoFactorVerified: false
+		twoFactorVerified: true
 	};
 	const sessionToken = generateSessionToken();
-	// Create session-only cookie (expires when browser closes)
-	const session = await createSession(sessionToken, user.id, sessionFlags, 0);
-	setSessionTokenCookie(event, sessionToken, null);
+	const session = await createSession(
+		sessionToken,
+		user.id,
+		sessionFlags,
+		DEFAULT_SESSION_DURATION_HOURS
+	);
+	setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
 	if (!user.emailVerified) {
 		return redirect(302, '/auth/verify-email');
 	}
-	if (!user.registered2FA) {
-		return redirect(302, '/auth/2fa/setup');
-	}
-	return redirect(302, '/auth/2fa');
+	return redirect(302, '/');
 }
