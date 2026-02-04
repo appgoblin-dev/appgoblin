@@ -406,9 +406,14 @@ def make_companies_stats(
     def get_rating_count_d30(mask: pd.Series) -> int:
         return df.loc[mask, "rating_count_d30"].sum()
 
+    def get_app_count(mask: pd.Series) -> int:
+        return int(df.loc[mask, "app_count"].sum())
+
     # Calculate overall stats
     overall_stats = {
         "total_companies": df["company_domain"].nunique(),
+        "sdk_ios_total_apps": get_app_count(is_apple & is_sdk),
+        "sdk_android_total_apps": get_app_count(is_google & is_sdk),
         "sdk_ios_total_companies": get_unique_company_counts(is_apple & is_sdk),
         "sdk_android_total_companies": get_unique_company_counts(is_google & is_sdk),
         "adstxt_direct_ios_total_companies": get_unique_company_counts(
@@ -452,16 +457,17 @@ def make_companies_stats(
         "sdk_total_apps": int(
             tag_source_category_app_counts[is_sdk]["cat_total_app_count"].sum()
         ),
-        "sdk_android_total_apps": int(
-            tag_source_category_app_counts[is_sdk & is_google][
-                "cat_total_app_count"
-            ].sum()
-        ),
-        "sdk_ios_total_apps": int(
-            tag_source_category_app_counts[is_sdk & is_apple][
-                "cat_total_app_count"
-            ].sum()
-        ),
+        # This gives the same sum regardless of copmany type
+        # "sdk_android_total_apps": int(
+        #     tag_source_category_app_counts[is_sdk & is_google][
+        #         "cat_total_app_count"
+        #     ].sum()
+        # ),
+        # "sdk_ios_total_apps": int(
+        #     tag_source_category_app_counts[is_sdk & is_apple][
+        #         "cat_total_app_count"
+        #     ].sum()
+        # ),
     }
 
     overview.update_stats("all", **sdk_app_counts)
