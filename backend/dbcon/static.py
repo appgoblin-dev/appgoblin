@@ -96,8 +96,9 @@ def load_static_data(engine) -> StaticData:
     logger.info("Loading mediation companies...")
     mediation_companies = pd.read_sql(
         """SELECT ad.domain_name as company_domain, c.name as company_name, c.logo_url as company_logo_url 
-           FROM adtech.company_mediation_patterns as mc
-           LEFT JOIN adtech.companies as c ON mc.company_id = c.id
+           FROM adtech.sdk_mediation_patterns as mc
+           LEFT JOIN adtech.sdks s on mc.sdk_id = s.id
+           LEFT JOIN adtech.companies as c ON s.company_id = c.id
            LEFT JOIN domains as ad ON c."domain_id" = ad."id";""",
         engine,
     )

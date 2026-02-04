@@ -11,9 +11,10 @@ LEFT JOIN
     version_strings AS vs
     ON
         sass.version_string_id = vs.id
-LEFT JOIN adtech.companies AS c ON sass.company_id = c.id
+LEFT JOIN adtech.sdks AS sd ON sass.sdk_id = sd.id
+LEFT JOIN adtech.companies AS c ON sd.company_id = c.id
 LEFT JOIN domains AS d ON c.domain_id = d.id
-LEFT JOIN adtech.company_categories AS cc ON sass.company_id = cc.company_id
+LEFT JOIN adtech.company_categories AS cc ON sd.company_id = cc.company_id
 LEFT JOIN adtech.categories AS c2 ON cc.category_id = c2.id
 WHERE
     sa.store_id = :store_id
