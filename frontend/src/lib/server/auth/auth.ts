@@ -62,24 +62,13 @@ export function requireFullAuth(event: RequestEvent) {
  */
 export function redirectIfAuthenticated(event: RequestEvent) {
 	if (event.locals.session !== null && event.locals.user !== null) {
-		// If fully authenticated, go to home
-		if (
-			event.locals.user.emailVerified &&
-			event.locals.user.registered2FA &&
-			//event.locals.session.twoFactorVerified
-			true
-		) {
+		// If authenticated and email verified, go to home
+		if (event.locals.user.emailVerified) {
 			throw redirect(302, '/');
 		}
 		// Otherwise continue with auth flow
 		if (!event.locals.user.emailVerified) {
 			throw redirect(302, '/auth/verify-email');
-		}
-		if (!event.locals.user.registered2FA) {
-			throw redirect(302, '/auth/2fa/setup');
-		}
-		if (!event.locals.session.twoFactorVerified) {
-			//throw redirect(302, '/auth/2fa');
 		}
 	}
 }
