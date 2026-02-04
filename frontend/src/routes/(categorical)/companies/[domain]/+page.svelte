@@ -9,6 +9,7 @@
 	import CompanyCategoryPie from '$lib/CompanyCategoryPie.svelte';
 	import AdsTxtTotalsBox from '$lib/AdsTxtTotalsBox.svelte';
 	import CompanyTableGrid from '$lib/CompanyTableGrid.svelte';
+	import MediationAdaptersTable from '$lib/MediationAdaptersTable.svelte';
 	import CompanyTree from '$lib/CompanyTree.svelte';
 	import CompanySDKs from '$lib/CompanySDKs.svelte';
 	import WhiteCard from '$lib/WhiteCard.svelte';
@@ -135,6 +136,15 @@
 		</WhiteCard>
 	{/snippet}
 </CompaniesLayout>
+
+{#if data.companyDetails && data.companyDetails.mediation_adapters}
+	<WhiteCard>
+		{#snippet title()}
+			<span>Mediation Adapters</span>
+		{/snippet}
+		<MediationAdaptersTable adapters={data.companyDetails.mediation_adapters} />
+	</WhiteCard>
+{/if}
 
 {#if data.companyCreatives && data.companyCreatives.length > 0}
 	<WhiteCard>

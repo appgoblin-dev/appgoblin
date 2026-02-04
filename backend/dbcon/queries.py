@@ -960,6 +960,16 @@ def get_sitemap_apps(dbcon: PostgresCon) -> pd.DataFrame:
     return df
 
 
+def get_mediation_adapters(state: State, company_domain: str) -> pd.DataFrame:
+    """Get mediation adapters."""
+    df = pd.read_sql(
+        sql.mediation_adapters,
+        state.dbcon.engine,
+        params={"company_domain": company_domain},
+    )
+    return df
+
+
 def insert_sdk_scan_request(
     state: State, store_id: str | list[str], user_id: int | None
 ) -> None:
