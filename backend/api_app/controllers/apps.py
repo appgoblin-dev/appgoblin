@@ -921,6 +921,16 @@ class AppController(Controller):
         require_iap = bool(data.get("require_iap", False))
         require_ads = bool(data.get("require_ads", False))
         mydate = data.get("mydate", "2024-01-01")
+        category = data.get("category")
+        store = data.get("store")
+        min_installs = data.get("min_installs")
+        max_installs = data.get("max_installs")
+        min_rating_count = data.get("min_rating_count")
+        max_rating_count = data.get("max_rating_count")
+        min_installs_d30 = data.get("min_installs_d30")
+        max_installs_d30 = data.get("max_installs_d30")
+        sort_col = data.get("sort_col", "installs")
+        sort_order = data.get("sort_order", "desc")
 
         # Ensure domains are lists of strings
         if isinstance(include_domains, str):
@@ -935,7 +945,8 @@ class AppController(Controller):
         logger.info(
             f"Crossfilter query: include={len(include_domains)} domains, "
             f"exclude={len(exclude_domains)} domains, sdk_api={require_sdk_api}, "
-            f"iap={require_iap}, ads={require_ads}, date={mydate}"
+            f"iap={require_iap}, ads={require_ads}, date={mydate}, "
+            f"category={category}, store={store}, sort={sort_col} {sort_order}"
         )
 
         try:
@@ -947,7 +958,18 @@ class AppController(Controller):
                 require_iap=require_iap,
                 require_ads=require_ads,
                 mydate=mydate,
+                category=category,
+                store=store,
+                min_installs=min_installs,
+                max_installs=max_installs,
+                min_rating_count=min_rating_count,
+                max_rating_count=max_rating_count,
+                min_installs_d30=min_installs_d30,
+                max_installs_d30=max_installs_d30,
+                sort_col=sort_col,
+                sort_order=sort_order,
             )
+            apps_df = extend_app_icon_url(apps_df)
             apps_list = apps_df.to_dict(orient="records")
         except Exception as e:
             logger.error(f"Crossfilter query failed: {e}")

@@ -2,10 +2,10 @@ const API_BASE_URL = 'http://localhost:8000/api';
 import { error } from '@sveltejs/kit';
 
 export class ApiClient {
-	constructor(private fetch: typeof globalThis.fetch) {}
+	constructor(private fetch: typeof globalThis.fetch) { }
 
 	private async checkStatus(resp: Response, name: string) {
-		if (resp.status === 200) {
+		if (resp.status === 200 || resp.status === 201) {
 			return resp.json();
 		} else if (resp.status === 404) {
 			console.log(`${name} API: ${resp.status}`);
@@ -54,6 +54,46 @@ export class ApiClient {
 			}
 
 			// If it's already a SvelteKit error, re-throw it
+			throw err;
+		}
+	}
+
+	async post(endpoint: string, body: any, name: string, timeoutMs: number = 30000) {
+		console.log(`${API_BASE_URL}${endpoint} fetch (POST) ${name}`);
+
+		try {
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+			const resp = await this.fetch(`${API_BASE_URL}${endpoint}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(body),
+				signal: controller.signal
+			});
+
+			clearTimeout(timeoutId);
+			const checkedResp = await this.checkStatus(resp, name);
+
+			if (checkedResp.error) {
+				throw error(checkedResp.status, checkedResp.error);
+			}
+
+			return checkedResp;
+		} catch (err) {
+			if (err instanceof DOMException && err.name === 'AbortError') {
+				console.error(`${name} Request timeout after ${timeoutMs}ms`);
+				throw error(504, `${name}: Request timeout`);
+			}
+			if (
+				err instanceof TypeError &&
+				(err.message.includes('fetch') || err.message.includes('terminated'))
+			) {
+				console.error(`${name} Network error: ${err.message}`);
+				throw error(503, `${name}: Service unavailable`);
+			}
 			throw err;
 		}
 	}

@@ -898,6 +898,16 @@ def query_apps_crossfilter(
     require_iap: bool = False,
     require_ads: bool = False,
     mydate: str = "2024-01-01",
+    category: str | None = None,
+    store: int | None = None,
+    min_installs: int | None = None,
+    max_installs: int | None = None,
+    min_rating_count: int | None = None,
+    max_rating_count: int | None = None,
+    min_installs_d30: int | None = None,
+    max_installs_d30: int | None = None,
+    sort_col: str = "installs",
+    sort_order: str = "desc",
 ) -> pd.DataFrame:
     """Query apps for analytics dashboard."""
     # Ensure domains are lists, not None
@@ -914,6 +924,14 @@ def query_apps_crossfilter(
     except (ValueError, TypeError):
         parsed_date = datetime.date(2024, 1, 1)
 
+    # Validate sort_col to prevent injection (though utilizing param binding in SQL for logic selection)
+    allowed_sort_cols = ["installs", "rating_count", "installs_d30", "review_count", "rating"]
+    if sort_col not in allowed_sort_cols:
+        sort_col = "installs"
+
+    if sort_order not in ["asc", "desc"]:
+        sort_order = "desc"
+
     df = pd.read_sql(
         sql.apps_crossfilter,
         state.dbcon.engine,
@@ -924,6 +942,16 @@ def query_apps_crossfilter(
             "require_iap": bool(require_iap),
             "require_ads": bool(require_ads),
             "mydate": parsed_date,
+            "category": category,
+            "store": store,
+            "min_installs": min_installs,
+            "max_installs": max_installs,
+            "min_rating_count": min_rating_count,
+            "max_rating_count": max_rating_count,
+            "min_installs_d30": min_installs_d30,
+            "max_installs_d30": max_installs_d30,
+            # "sort_col": sort_col,
+            # "sort_order": sort_order,
         },
     )
     return df
