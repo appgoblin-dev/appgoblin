@@ -80,7 +80,6 @@
 	const formError = $derived(() => form?.error ?? '');
 	const hasSearched = $derived(() => !!form?.success || !!form?.error);
 
-
 	// Filtered companies for dropdowns - with null safety
 	let filteredIncludeCompanies = $derived(() => {
 		if (!companies || companies.length === 0) return [];
@@ -161,7 +160,6 @@
 		const company = companies.find((c) => c?.company_domain === domain);
 		return company?.company_name || domain;
 	}
-
 </script>
 
 <svelte:head>
@@ -183,9 +181,7 @@
 
 	<div class="grid grid-cols-2 lg:grid-cols-[320px_1fr] gap-4 md:gap-6">
 		<!-- Sidebar Filters -->
-		<aside
-			class="card preset-tonal p-4 space-y-5 lg:sticky lg:top-20 overflow-y-auto "
-		>
+		<aside class="card preset-tonal p-4 space-y-5 lg:sticky lg:top-20 overflow-y-auto">
 			<div class="flex items-center gap-2 pb-3 border-b border-surface-300-700">
 				<Filter size={20} class="text-primary-500" />
 				<h2 class="text-lg font-semibold">Filters</h2>
@@ -219,12 +215,12 @@
 					formData.append('sort_col', sorting[0]?.id || 'installs');
 					formData.append('sort_order', sorting[0]?.desc ? 'desc' : 'asc');
 
-				isLoading = true;
+					isLoading = true;
 
-				return async ({ update }) => {
-					await update({ reset: false }); // Don't reset form fields
-					isLoading = false;
-				};
+					return async ({ update }) => {
+						await update({ reset: false }); // Don't reset form fields
+						isLoading = false;
+					};
 				}}
 				class="space-y-5"
 			>
@@ -500,7 +496,7 @@
 
 		<!-- Results Table -->
 		<main class="card preset-tonal p-4 overflow-hidden">
-		{#if !hasSearched()}
+			{#if !hasSearched()}
 				<div class="text-center py-16 text-surface-500">
 					<Filter size={48} class="mx-auto mb-4 opacity-50" />
 					<p class="text-lg font-medium">Configure your filters</p>
@@ -513,7 +509,7 @@
 					<Loader2 size={48} class="mx-auto mb-4 animate-spin text-primary-500" />
 					<p class="text-lg font-medium">Searching apps...</p>
 				</div>
-		{:else if form?.success && formApps().length === 0}
+			{:else if form?.success && formApps().length === 0}
 				<div class="text-center py-16 text-surface-500">
 					<X size={48} class="mx-auto mb-4 opacity-50" />
 					<p class="text-lg font-medium">No apps found</p>
@@ -522,12 +518,12 @@
 			{:else}
 				<div class="mb-4 flex items-center justify-between flex-wrap gap-2">
 					<p class="text-sm text-surface-600-400">
-					Found <strong>{formApps().length}</strong> apps matching your criteria
+						Found <strong>{formApps().length}</strong> apps matching your criteria
 					</p>
 				</div>
-			{#if form?.success}
-				<CrossfilterAppsTable apps={formApps()} filename={exportFilename} bind:sorting />
-			{/if}
+				{#if form?.success}
+					<CrossfilterAppsTable apps={formApps()} filename={exportFilename} bind:sorting />
+				{/if}
 			{/if}
 		</main>
 	</div>

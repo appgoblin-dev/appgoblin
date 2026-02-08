@@ -925,7 +925,13 @@ def query_apps_crossfilter(
         parsed_date = datetime.date(2024, 1, 1)
 
     # Validate sort_col to prevent injection (though utilizing param binding in SQL for logic selection)
-    allowed_sort_cols = ["installs", "rating_count", "installs_d30", "review_count", "rating"]
+    allowed_sort_cols = [
+        "installs",
+        "rating_count",
+        "installs_d30",
+        "review_count",
+        "rating",
+    ]
     if sort_col not in allowed_sort_cols:
         sort_col = "installs"
 

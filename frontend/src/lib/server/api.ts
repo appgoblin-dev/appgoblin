@@ -2,7 +2,7 @@ const API_BASE_URL = 'http://localhost:8000/api';
 import { error } from '@sveltejs/kit';
 
 export class ApiClient {
-	constructor(private fetch: typeof globalThis.fetch) { }
+	constructor(private fetch: typeof globalThis.fetch) {}
 
 	private async checkStatus(resp: Response, name: string) {
 		if (resp.status === 200 || resp.status === 201) {

@@ -51,12 +51,24 @@ export const actions = {
 			mydate: data.get('mydate')?.toString(),
 			category: data.get('category')?.toString() || null,
 			store: data.get('store') ? parseInt(data.get('store')!.toString()) : null,
-			min_installs: data.get('min_installs') ? parseInt(data.get('min_installs')!.toString()) : null,
-			max_installs: data.get('max_installs') ? parseInt(data.get('max_installs')!.toString()) : null,
-			min_rating_count: data.get('min_rating_count') ? parseInt(data.get('min_rating_count')!.toString()) : null,
-			max_rating_count: data.get('max_rating_count') ? parseInt(data.get('max_rating_count')!.toString()) : null,
-			min_installs_d30: data.get('min_installs_d30') ? parseInt(data.get('min_installs_d30')!.toString()) : null,
-			max_installs_d30: data.get('max_installs_d30') ? parseInt(data.get('max_installs_d30')!.toString()) : null,
+			min_installs: data.get('min_installs')
+				? parseInt(data.get('min_installs')!.toString())
+				: null,
+			max_installs: data.get('max_installs')
+				? parseInt(data.get('max_installs')!.toString())
+				: null,
+			min_rating_count: data.get('min_rating_count')
+				? parseInt(data.get('min_rating_count')!.toString())
+				: null,
+			max_rating_count: data.get('max_rating_count')
+				? parseInt(data.get('max_rating_count')!.toString())
+				: null,
+			min_installs_d30: data.get('min_installs_d30')
+				? parseInt(data.get('min_installs_d30')!.toString())
+				: null,
+			max_installs_d30: data.get('max_installs_d30')
+				? parseInt(data.get('max_installs_d30')!.toString())
+				: null,
 			sort_col: data.get('sort_col')?.toString() || 'installs',
 			sort_order: data.get('sort_order')?.toString() || 'desc'
 		};
