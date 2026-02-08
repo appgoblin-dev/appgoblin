@@ -1,14 +1,14 @@
 repos:
   # Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.0
+    rev: v0.15.0
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
   # Mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.18.1
+    rev: v1.19.1
     hooks:
       - id: mypy
         additional_dependencies: ["types-requests", "types-PyYAML"]
@@ -33,7 +33,7 @@ repos:
           - prettier
           - prettier-plugin-svelte
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.35.0
+    rev: v10.0.0
     hooks:
       - id: eslint
         name: eslint
@@ -61,12 +61,12 @@ repos:
         require_serial: true
   ## SQL ##
   - repo: https://github.com/sqlfluff/sqlfluff
-    rev: 3.4.2
+    rev: 4.0.0
     hooks:
       - id: sqlfluff-lint
-        args: ["--config", "backend/pyproject.toml"] # Specify the config file location here
+        args: ["--config", "backend/pyproject.toml"]
       - id: sqlfluff-fix
-        args: ["--config", "backend/pyproject.toml"] # Specify the config file location here
+        args: ["--config", "backend/pyproject.toml"]
         # Arbitrary arguments to show an example
         # args: [--rules, "LT02,CP02"]
         # additional_dependencies: ['<dbt-adapter>', 'sqlfluff-templater-dbt']
