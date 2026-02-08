@@ -103,43 +103,50 @@
 			.map((score) => toNumber(accessor(score)))
 			.filter((value): value is number => value !== null);
 
-	const keywordData = isKeywordData(data.myKeywords) ? data.myKeywords : null;
+	const keywordData = $derived(isKeywordData(data.myKeywords) ? data.myKeywords : null);
 
-	const keywordScores = keywordData?.keyword_scores ?? [];
+	const keywordScores = $derived(keywordData?.keyword_scores ?? []);
 
-	const trackedKeywords = keywordScores.length;
+	const trackedKeywords = $derived(keywordScores.length);
 
-	const rankedKeywordCount = keywordScores.filter((score) => {
-		const latest = toNumber(score.latest_app_rank);
-		const best = toNumber(score.d30_best_rank);
-		return latest !== null || best !== null;
-	}).length;
-
-	const unrankedKeywords = keywordScores.filter((score) => {
-		const latest = toNumber(score.latest_app_rank);
-		const best = toNumber(score.d30_best_rank);
-		return latest === null && best === null;
+	const rankedKeywordCount = $derived.by(() => {
+		return keywordScores.filter((score) => {
+			const latest = toNumber(score.latest_app_rank);
+			const best = toNumber(score.d30_best_rank);
+			return latest !== null || best !== null;
+		}).length;
 	});
 
-	const averageOpportunity = average(
-		getNumericValues(keywordScores, (score) => score.opportunity_score)
+	const unrankedKeywords = $derived.by(() => {
+		return keywordScores.filter((score) => {
+			const latest = toNumber(score.latest_app_rank);
+			const best = toNumber(score.d30_best_rank);
+			return latest === null && best === null;
+		});
+	});
+
+	const averageOpportunity = $derived(
+		average(getNumericValues(keywordScores, (score) => score.opportunity_score))
 	);
 
-	const averageDifficulty = average(
-		getNumericValues(keywordScores, (score) => score.keyword_difficulty)
+	const averageDifficulty = $derived(
+		average(getNumericValues(keywordScores, (score) => score.keyword_difficulty))
 	);
 
-	const top10Coverage =
-		rankedKeywordCount > 0
-			? (keywordScores.filter((score) => {
-					const rank = toNumber(score.latest_app_rank) ?? toNumber(score.d30_best_rank);
-					return rank !== null && rank <= 10;
-				}).length /
-					rankedKeywordCount) *
-				100
-			: null;
+	const top10Coverage = $derived.by(() => {
+		if (rankedKeywordCount <= 0) {
+			return null;
+		}
 
-	const bestRank = (() => {
+		const top10Count = keywordScores.filter((score) => {
+			const rank = toNumber(score.latest_app_rank) ?? toNumber(score.d30_best_rank);
+			return rank !== null && rank <= 10;
+		}).length;
+
+		return (top10Count / rankedKeywordCount) * 100;
+	});
+
+	const bestRank = $derived.by(() => {
 		const ranks: number[] = [];
 		for (const score of keywordScores) {
 			const latest = toNumber(score.latest_app_rank);
@@ -155,52 +162,60 @@
 			return null;
 		}
 		return Math.min(...ranks);
-	})();
+	});
 
-	const topOpportunityKeywords = [...keywordScores]
-		.filter((score) => toNumber(score.opportunity_score) !== null)
-		.sort(
-			(a, b) =>
-				(toNumber(b.opportunity_score) ?? Number.NEGATIVE_INFINITY) -
-				(toNumber(a.opportunity_score) ?? Number.NEGATIVE_INFINITY)
-		)
-		.slice(0, 5);
+	const topOpportunityKeywords = $derived.by(() => {
+		return [...keywordScores]
+			.filter((score) => toNumber(score.opportunity_score) !== null)
+			.sort(
+				(a, b) =>
+					(toNumber(b.opportunity_score) ?? Number.NEGATIVE_INFINITY) -
+					(toNumber(a.opportunity_score) ?? Number.NEGATIVE_INFINITY)
+			)
+			.slice(0, 5);
+	});
 
-	const unrankedOpportunityKeywords = [...unrankedKeywords]
-		.filter(
-			(score) =>
-				toNumber(score.opportunity_score) !== null || toNumber(score.keyword_difficulty) !== null
-		)
-		.sort(
-			(a, b) =>
-				(toNumber(b.opportunity_score) ?? Number.NEGATIVE_INFINITY) -
-				(toNumber(a.opportunity_score) ?? Number.NEGATIVE_INFINITY)
-		)
-		.slice(0, 5);
+	const unrankedOpportunityKeywords = $derived.by(() => {
+		return [...unrankedKeywords]
+			.filter(
+				(score) =>
+					toNumber(score.opportunity_score) !== null || toNumber(score.keyword_difficulty) !== null
+			)
+			.sort(
+				(a, b) =>
+					(toNumber(b.opportunity_score) ?? Number.NEGATIVE_INFINITY) -
+					(toNumber(a.opportunity_score) ?? Number.NEGATIVE_INFINITY)
+			)
+			.slice(0, 5);
+	});
 
-	const defensiveKeywords = [...keywordScores]
-		.filter((score) => {
-			const rank = toNumber(score.latest_app_rank) ?? toNumber(score.d30_best_rank);
-			return rank !== null && rank <= 5;
-		})
-		.sort((a, b) => {
-			const aRank =
-				toNumber(a.latest_app_rank) ?? toNumber(a.d30_best_rank) ?? Number.POSITIVE_INFINITY;
-			const bRank =
-				toNumber(b.latest_app_rank) ?? toNumber(b.d30_best_rank) ?? Number.POSITIVE_INFINITY;
-			return aRank - bRank;
-		})
-		.slice(0, 5);
+	const defensiveKeywords = $derived.by(() => {
+		return [...keywordScores]
+			.filter((score) => {
+				const rank = toNumber(score.latest_app_rank) ?? toNumber(score.d30_best_rank);
+				return rank !== null && rank <= 5;
+			})
+			.sort((a, b) => {
+				const aRank =
+					toNumber(a.latest_app_rank) ?? toNumber(a.d30_best_rank) ?? Number.POSITIVE_INFINITY;
+				const bRank =
+					toNumber(b.latest_app_rank) ?? toNumber(b.d30_best_rank) ?? Number.POSITIVE_INFINITY;
+				return aRank - bRank;
+			})
+			.slice(0, 5);
+	});
 
-	const highCompetitionKeywords = [...keywordScores]
-		.sort(
-			(a, b) =>
-				(toNumber(b.app_count) ?? Number.NEGATIVE_INFINITY) -
-				(toNumber(a.app_count) ?? Number.NEGATIVE_INFINITY)
-		)
-		.slice(0, 5);
+	const highCompetitionKeywords = $derived.by(() => {
+		return [...keywordScores]
+			.sort(
+				(a, b) =>
+					(toNumber(b.app_count) ?? Number.NEGATIVE_INFINITY) -
+					(toNumber(a.app_count) ?? Number.NEGATIVE_INFINITY)
+			)
+			.slice(0, 5);
+	});
 
-	const hasKeywordData = keywordScores.length > 0;
+	const hasKeywordData = $derived(keywordScores.length > 0);
 
 	const buildSummary = (app: AppFullDetail) => {
 		if (!hasKeywordData) {
