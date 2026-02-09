@@ -3,9 +3,36 @@
 	let titlePadding = 'p-2 md:p-4';
 	let contentPadding = 'p-2 md:p-4';
 	let cardPadding = 'p-2 md:p-4';
-	let pricingText = 'mt-2 text-sm opacity-80';
 
 	let loading = false;
+	/** @type {string | null} */
+	let activePriceKey = null;
+
+	/** @param {{ result: import('@sveltejs/kit').ActionResult }} param0 */
+	const handleSubscribeResult = async ({ result }) => {
+		console.log('Form result:', result);
+
+		if (result.type === 'redirect') {
+			console.log('Redirecting to:', result.location);
+			window.location.href = result.location;
+			return;
+		}
+
+		if (result.type === 'failure') {
+			console.error('Form failed:', result.data);
+		}
+
+		loading = false;
+		activePriceKey = null;
+	};
+
+	/** @param {{ formElement: HTMLFormElement }} param0 */
+	const subscribeEnhance = ({ formElement }) => {
+		activePriceKey = formElement.dataset.priceKey ?? null;
+		loading = true;
+
+		return handleSubscribeResult;
+	};
 </script>
 
 <svelte:head>
@@ -16,102 +43,173 @@
 	<h1 class="text-3xl font-bold text-primary-900-100">Pricing</h1>
 
 	<div class="card preset-filled-surface-100-900 {cardPadding}">
-		<h2 class="h2 {titlePadding}">Paid Datasets</h2>
+		<h2 class="h2 {titlePadding}">Plans & Pricing</h2>
 		<div class={contentPadding}>
-			<p>Some datasets for B2B companies and are offered as paid features.</p>
+			<p>Simple pricing for teams that need clear data access.</p>
 
 			<br />
 
-			<div class="space-y-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-				<div class="card preset-filled-surface-50-950 p-4">
-					<h4 class="h4 font-semibold text-primary-900-100">ASO & Marketing Tools</h4>
-					<p class={pricingText}>Free</p>
-					<p class="my-2 font-bold">
-						Use Cases: ASO, SDK analysis, tracker analysis, app trends, app competitor analysis.
-					</p>
-					<ul class="list-disc list-inside space-y-2">
-						<li class="list-disc">
-							Free access to AppGoblin's web tools for app marketing and app competitor analysis.
-						</li>
+			<div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+				<div class="card preset-filled-surface-50-950 p-4 flex flex-col gap-3">
+					<div>
+						<p class="text-xs uppercase tracking-wide opacity-60">Free</p>
+						<p class="text-2xl font-semibold">$0</p>
+						<p class="text-xs opacity-70">Indie devs, researchers, casual users</p>
+					</div>
+					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
+						<li>Advanced per-SDK results</li>
+						<li>Keyword tools, comparisons, rankings</li>
+						<li>Ad intelligence, trending apps</li>
+						<li>Email alerts/saved searches</li>
 					</ul>
+					<p class="text-xs opacity-60">Included with every account</p>
 				</div>
-				<div class="card preset-filled-surface-50-950 p-4">
-					<h4 class="h4 font-semibold text-primary-900-100">B2B Competitor SDK Client List</h4>
-					<p class={pricingText}>$300 per company list</p>
-					<p class="my-2 font-bold">
-						Use Cases: B2B Competitor analysis. Sales prospecting. Market research.
-					</p>
-					<ul class="list-disc list-inside space-y-2">
-						<li class="list-disc">See exactly which apps are using a company or SDK.</li>
-						<li>Publisher Name and Domain</li>
-						<li class="list-disc">Includes app installs</li>
-						<li class="list-disc">Other AppGoblin stats available on request.</li>
-					</ul>
-					<a
-						class="btn preset-outlined-tertiary-500 p-2 md:p-4 mt-4"
-						href="mailto:contact@appgoblin.info?subject=Competitor%20SDK%20Client%20List"
-					>
-						<p class="text-center text-sm md:text-base">Get Client List</p>
-					</a>
-				</div>
-				<div class="card preset-filled-surface-50-950 p-4 space-y-2">
-					<h4 class="h4 font-semibold text-primary-900-100">Full App-Ads.txt Datasets</h4>
-					<p class={pricingText}>$300/month</p>
-					<p class="my-2 font-bold">
-						Use Cases: Programmatic fraud detection. Ad network analysis. DSP bid enrichment.
-					</p>
-					<ul class="list-disc list-inside space-y-2">
-						<li class="list-disc">Reports updated daily</li>
-						<li class="list-disc">Data available as large compressed TSV (~60GB uncompressed)</li>
-						<li class="list-disc">Individual ad networks.</li>
-						<li class="list-disc">Small customizations available.</li>
+
+				<div class="card preset-filled-surface-50-950 p-4 flex flex-col gap-3">
+					<div>
+						<p class="text-xs uppercase tracking-wide opacity-60">Premium Supporter</p>
+						<p class="text-2xl font-semibold">$49</p>
+						<p class="text-xs opacity-70">Freelance ASO, small teams, power users</p>
+					</div>
+					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
+						<li>Everything in Free</li>
+						<li>App exports (CSV/Excel/JSON)</li>
 					</ul>
 					<form
 						method="POST"
 						action="?/subscribe"
-						use:enhance={() => {
-							loading = true;
-
-							return async ({ result }) => {
-								console.log('Form result:', result);
-
-								if (result.type === 'redirect') {
-									console.log('Redirecting to:', result.location);
-									window.location.href = result.location;
-									return; // Don't set loading = false, we're leaving the page
-								}
-
-								if (result.type === 'failure') {
-									console.error('Form failed:', result.data);
-								}
-
-								loading = false;
-							};
-						}}
+						use:enhance={subscribeEnhance}
+						data-price-key="app_dev"
+						class="mt-auto"
 					>
-						<button
-							type="submit"
-							disabled={loading}
-							class="btn preset-filled-primary-500 w-full mt-4"
-						>
-							{loading ? 'Redirecting to checkout...' : 'Subscribe Now'}
+						<input type="hidden" name="priceKey" value="app_dev" />
+						<button type="submit" disabled={loading} class="btn preset-filled-primary-500 w-full">
+							{loading && activePriceKey === 'app_dev' ? 'Redirecting to checkout...' : 'Subscribe'}
 						</button>
 					</form>
 				</div>
 
-				<div class="card preset-filled-surface-50-950 p-4">
-					<h4 class="h4 font-semibold text-primary-900-100">Custom Reports, API Integrations</h4>
-					<p class={pricingText}>Contact for quote</p>
-					<p>
-						Need something specific? Custom reports, API integrations, or deeper analytics can be
-						arranged. Please reach out with your requirements for a quote.
-					</p>
-					<a
-						class="btn preset-outlined-tertiary-500 p-2 md:p-4 mt-4"
-						href="mailto:contact@appgoblin.info?subject=Custom%20Reports%20and%20API%20Integrations"
+				<div class="card preset-filled-surface-50-950 p-4 flex flex-col gap-3">
+					<div>
+						<p class="text-xs uppercase tracking-wide opacity-60">Business SDK</p>
+						<p class="text-2xl font-semibold">$299</p>
+						<p class="text-xs opacity-70">Ad tech, SDK vendors, competitive intel teams</p>
+					</div>
+					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
+						<li>Everything in Premium</li>
+						<li>SDK exports and usage lists</li>
+						<li>Bulk company reports</li>
+					</ul>
+					<form
+						method="POST"
+						action="?/subscribe"
+						use:enhance={subscribeEnhance}
+						data-price-key="b2b_sdk"
+						class="mt-auto"
 					>
-						<p class="text-center text-sm md:text-base">Contact for Quote</p>
-					</a>
+						<input type="hidden" name="priceKey" value="b2b_sdk" />
+						<button type="submit" disabled={loading} class="btn preset-filled-primary-500 w-full">
+							{loading && activePriceKey === 'b2b_sdk' ? 'Redirecting to checkout...' : 'Subscribe'}
+						</button>
+					</form>
+				</div>
+
+				<div class="card preset-filled-surface-50-950 p-4 flex flex-col gap-3">
+					<div>
+						<p class="text-xs uppercase tracking-wide opacity-60">App-Ads.txt</p>
+						<p class="text-2xl font-semibold">$299</p>
+						<p class="text-xs opacity-70">Ad networks, publishers, ad ops teams</p>
+					</div>
+					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
+						<li>Everything in Premium</li>
+						<li>Daily app-ads.txt downloads</li>
+						<li>Historical snapshots</li>
+					</ul>
+					<form
+						method="POST"
+						action="?/subscribe"
+						use:enhance={subscribeEnhance}
+						data-price-key="b2b_appads"
+						class="mt-auto"
+					>
+						<input type="hidden" name="priceKey" value="b2b_appads" />
+						<button type="submit" disabled={loading} class="btn preset-filled-primary-500 w-full">
+							{loading && activePriceKey === 'b2b_appads'
+								? 'Redirecting to checkout...'
+								: 'Subscribe'}
+						</button>
+					</form>
+				</div>
+
+				<div
+					class="card preset-filled-surface-50-950 p-4 flex flex-col gap-3 border border-primary-500/40"
+				>
+					<div>
+						<p class="text-xs uppercase tracking-wide opacity-60">Premium B2B</p>
+						<p class="text-2xl font-semibold">$499</p>
+						<p class="text-xs opacity-70">Agencies and larger companies</p>
+					</div>
+					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
+						<li>Business SDK + App-Ads.txt</li>
+						<li>Combined access + higher limits</li>
+					</ul>
+					<form
+						method="POST"
+						action="?/subscribe"
+						use:enhance={subscribeEnhance}
+						data-price-key="b2b_premium"
+						class="mt-auto"
+					>
+						<input type="hidden" name="priceKey" value="b2b_premium" />
+						<button type="submit" disabled={loading} class="btn preset-filled-primary-500 w-full">
+							{loading && activePriceKey === 'b2b_premium'
+								? 'Redirecting to checkout...'
+								: 'Subscribe'}
+						</button>
+					</form>
+				</div>
+			</div>
+
+			<div class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+				<div class="card preset-filled-surface-50-950 p-5 space-y-3">
+					<h3 class="text-lg font-semibold">For Researchers, Journalists, and Academics</h3>
+					<p class="text-sm text-surface-600-400">
+						AppGoblin supports independent research and journalism. If you're a student, academic
+						researcher, or investigative journalist working on mobile advertising, privacy, or app
+						ecosystems, you're welcome to reach out for collaboration.
+					</p>
+				</div>
+
+				<div class="card preset-filled-surface-50-950 p-5 space-y-3">
+					<h3 class="text-lg font-semibold">Free Resources</h3>
+					<p class="text-sm text-surface-600-400">
+						The majority of AppGoblin's marketing data and ASO features are free to browse. Some
+						open source data sets are available for free download at
+						<a
+							href="https://github.com/appgoblin-dev/appgoblin-data"
+							class="underline decoration-primary-500/60 hover:decoration-primary-500"
+						>
+							github.com/appgoblin-dev/appgoblin-data
+						</a>
+						. Feel free to reach out if there are other parts of data you'd like to see exported.
+					</p>
+					<p class="text-sm text-surface-600-400">
+						The code is maintained open source for transparency. The data is collected with
+						<a
+							href="https://github.com/appgoblin-dev/adscrawler"
+							class="underline decoration-primary-500/60 hover:decoration-primary-500"
+						>
+							github.com/appgoblin-dev/adscrawler
+						</a>
+						and the website code can be found at
+						<a
+							href="https://github.com/appgoblin-dev/appgoblin"
+							class="underline decoration-primary-500/60 hover:decoration-primary-500"
+						>
+							github.com/appgoblin-dev/appgoblin
+						</a>
+						.
+					</p>
 				</div>
 			</div>
 		</div>

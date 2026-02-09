@@ -55,6 +55,10 @@
 		</a>
 	{/if}
 	<div class={myDivider}></div>
+	<a href="/pricing" class={topBarFont}>
+		<p class={isHighlighted('/pricing') ? topBarHighlightedFont : topBarFont}>PRICING</p>
+	</a>
+	<div class={myDivider}></div>
 	<a href="/about" class={topBarFont}>
 		<p class={isHighlighted('/about') ? topBarHighlightedFont : topBarFont}>ABOUT</p>
 	</a>

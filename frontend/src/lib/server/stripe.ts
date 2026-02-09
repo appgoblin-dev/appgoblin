@@ -2,15 +2,32 @@ import Stripe from 'stripe';
 import { db } from '$lib/server/auth/db';
 import { error } from '@sveltejs/kit';
 
-import { STRIPE_SECRET_KEY, STRIPE_B2B_ID } from '$env/static/private';
-
-console.log('Stripe secret key:', STRIPE_SECRET_KEY);
+import {
+	STRIPE_SECRET_KEY,
+	STRIPE_PRICE_APP_DEV_ID,
+	STRIPE_PRICE_B2B_SDK_ID,
+	STRIPE_PRICE_B2B_APPADS_ID,
+	STRIPE_PRICE_B2B_PREMIUM_ID
+} from '$env/static/private';
 
 export const stripe = new Stripe(STRIPE_SECRET_KEY, {
 	apiVersion: '2026-01-28.clover'
 });
 
-export async function createCheckoutSession(userId: number, email: string) {
+export const STRIPE_PRICES = {
+	app_dev: STRIPE_PRICE_APP_DEV_ID,
+	b2b_sdk: STRIPE_PRICE_B2B_SDK_ID,
+	b2b_appads: STRIPE_PRICE_B2B_APPADS_ID,
+	b2b_premium: STRIPE_PRICE_B2B_PREMIUM_ID
+} as const;
+
+export type StripePriceKey = keyof typeof STRIPE_PRICES;
+
+export async function createCheckoutSession(
+	userId: number,
+	email: string,
+	priceKey: StripePriceKey
+) {
 	try {
 		// Create or get customer
 		let stripeCustomerId: string | null = null;
@@ -36,12 +53,18 @@ export async function createCheckoutSession(userId: number, email: string) {
 			]);
 		}
 
+		const priceId = STRIPE_PRICES[priceKey];
+
+		if (!priceId) {
+			throw error(400, 'Invalid Stripe price key');
+		}
+
 		const session = await stripe.checkout.sessions.create({
 			customer: stripeCustomerId,
 			billing_address_collection: 'auto',
 			line_items: [
 				{
-					price: STRIPE_B2B_ID,
+					price: priceId,
 					quantity: 1
 				}
 			],

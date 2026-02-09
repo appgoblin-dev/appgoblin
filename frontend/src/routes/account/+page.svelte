@@ -119,6 +119,11 @@
 									{data.subscription.status}
 								{/if}
 							</p>
+							{#if data.subscriptionTier}
+								<p class="text-sm text-surface-500">Plan: {data.subscriptionTier}</p>
+							{:else}
+								<p class="text-sm text-surface-500">Plan: Unknown</p>
+							{/if}
 							<p class="text-sm text-surface-500">
 								{#if data.subscription.cancel_at}
 									Access available until end of period
@@ -141,7 +146,7 @@
 					</form>
 				{:else}
 					<div class="text-center py-4">
-						<p class="text-surface-600-400 mb-4">You don't have an active subscription.</p>
+						<p class="text-surface-600-400 mb-2">Plan: Free</p>
 						<a href="/pricing" class="btn preset-filled-primary-500">View Pricing</a>
 					</div>
 				{/if}

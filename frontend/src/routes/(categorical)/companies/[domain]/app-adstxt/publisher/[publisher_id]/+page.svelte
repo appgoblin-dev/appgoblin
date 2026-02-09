@@ -104,8 +104,9 @@
 			Full List of Apps
 		{/snippet}
 		<p class="p-2">
-			Full lists of apps, app-ads.txt, metrics and more are available. Please see pricing page or
-			email: contact@appgoblin.info
+			Full lists of apps, app-ads.txt, metrics and more are available. Please see <a href="/pricing"
+				>pricing page</a
+			>
 		</p>
 	</WhiteCard>
 </div>
