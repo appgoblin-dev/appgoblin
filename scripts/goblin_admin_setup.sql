@@ -222,8 +222,8 @@ CREATE INDEX subscriptions_status_idx ON public.subscriptions USING btree (
 -- This allows you to grant different capabilities per subscription
 CREATE TABLE public.subscription_features (
     id serial4 NOT NULL,
-    subscription_id int4 NOT NULL,
     -- e.g., 'app-ads-txt', 'b2b-premium', 'aso-premium'
+    subscription_id int4 NOT NULL,
     feature_tag text NOT NULL,
     created_at timestamptz DEFAULT now() NOT NULL,
 
@@ -244,57 +244,6 @@ CREATE INDEX subscription_features_feature_tag_idx ON public.subscription_featur
     feature_tag
 );
 
--- ============================================================================
--- 5. SUBSCRIPTION PRODUCTS (OPTIONAL - FOR REFERENCE)
--- ============================================================================
--- Optional table to track Stripe products/prices and their feature mappings
--- This makes it easier to automatically assign features when creating subscriptions
-CREATE TABLE public.subscription_products (
-    id serial4 NOT NULL,
-    stripe_product_id text NOT NULL,
-    stripe_price_id text NOT NULL,
-    name text NOT NULL, -- Display name (e.g., "Premium Plan")
-    description text NULL,
-    is_active bool DEFAULT true NOT NULL,
-    created_at timestamptz DEFAULT now() NOT NULL,
-
-    CONSTRAINT subscription_products_pkey PRIMARY KEY (id),
-    CONSTRAINT subscription_products_stripe_price_id_key UNIQUE (
-        stripe_price_id
-    )
-);
-
-CREATE INDEX subscription_products_stripe_product_id_idx ON public.subscription_products USING btree (
-    stripe_product_id
-);
-
--- ============================================================================
--- 6. PRODUCT FEATURES (OPTIONAL - FOR REFERENCE)
--- ============================================================================
--- Maps products to their included features
--- When a subscription is created for a product, auto-assign these features
-CREATE TABLE public.product_features (
-    id serial4 NOT NULL,
-    product_id int4 NOT NULL,
-    feature_tag text NOT NULL, -- e.g., 'app-ads-txt', 'b2b-premium'
-    created_at timestamptz DEFAULT now() NOT NULL,
-
-    CONSTRAINT product_features_pkey PRIMARY KEY (id),
-    CONSTRAINT product_features_unique UNIQUE (product_id, feature_tag),
-    CONSTRAINT product_features_product_id_fkey FOREIGN KEY (product_id)
-    REFERENCES public.subscription_products (id) ON DELETE CASCADE
-);
-
-CREATE INDEX product_features_product_id_idx ON public.product_features USING btree (
-    product_id
-);
-CREATE INDEX product_features_feature_tag_idx ON public.product_features USING btree (
-    feature_tag
-);
-
--- ============================================================================
--- 7. STRIPE CUSTOMER LINK (OPTIONAL)
--- ============================================================================
 -- Add Stripe customer ID to users table for individual subscriptions
 ALTER TABLE public.users
 ADD COLUMN stripe_customer_id text NULL;
@@ -303,11 +252,7 @@ CREATE INDEX users_stripe_customer_id_idx ON public.users USING btree (
     stripe_customer_id
 );
 
--- ============================================================================
--- 8. HELPER FUNCTIONS
--- ============================================================================
 
--- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS trigger AS $$
 BEGIN
@@ -316,7 +261,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Apply to relevant tables
 CREATE TRIGGER update_organizations_updated_at BEFORE UPDATE ON public.organizations
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -328,9 +272,3 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 -- ============================================================================
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO frontend;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO frontend;
-
--- ============================================================================
--- 10. EXAMPLE DATA / COMMON FEATURE TAGS
--- ============================================================================
--- You can insert common feature tags as reference
--- COMMENT ON TABLE subscription_features IS 'Common feature tags: app-ads-txt, b2b-premium, aso-premium, analytics-advanced, api-access, white-label';

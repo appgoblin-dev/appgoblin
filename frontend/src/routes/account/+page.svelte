@@ -6,7 +6,9 @@
 	import ShieldCheck from 'lucide-svelte/icons/shield-check';
 	import LogOut from 'lucide-svelte/icons/log-out';
 
-	let { data } = $props();
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
@@ -102,9 +104,53 @@
 			</div>
 		</section>
 
+		<!-- Subscription Section -->
+		<section class="space-y-4">
+			<h2 class="text-lg font-semibold">Subscription</h2>
+
+			<div class="p-4 rounded-lg bg-surface-100-900 border border-surface-200-800">
+				{#if data.subscription}
+					<div class="flex justify-between items-center mb-4">
+						<div>
+							<p class="font-medium text-lg capitalize">
+								{#if data.subscription.status === 'active' && data.subscription.cancel_at}
+									Active (Cancels {new Date(data.subscription.cancel_at).toLocaleDateString()})
+								{:else}
+									{data.subscription.status}
+								{/if}
+							</p>
+							<p class="text-sm text-surface-500">
+								{#if data.subscription.cancel_at}
+									Access available until end of period
+								{:else}
+									Renews on {new Date(data.subscription.current_period_end).toLocaleDateString()}
+								{/if}
+							</p>
+						</div>
+						<span
+							class="badge {data.subscription.status === 'active'
+								? 'preset-filled-success-500'
+								: 'preset-filled-warning-500'}"
+						>
+							{data.subscription.status}
+						</span>
+					</div>
+
+					<form method="POST" action="?/portal" use:enhance>
+						<button type="submit" class="btn preset-tonal w-full">Manage Subscription</button>
+					</form>
+				{:else}
+					<div class="text-center py-4">
+						<p class="text-surface-600-400 mb-4">You don't have an active subscription.</p>
+						<a href="/pricing" class="btn preset-filled-primary-500">View Pricing</a>
+					</div>
+				{/if}
+			</div>
+		</section>
+
 		<!-- Sign Out -->
 		<section class="pt-4 border-t border-surface-300-700">
-			<form method="post" use:enhance>
+			<form method="post" action="?/logout" use:enhance>
 				<button class="btn preset-tonal w-full flex items-center justify-center gap-2">
 					<span class="flex items-center justify-center gap-2"> <LogOut size={18} /> Sign Out</span>
 				</button>
