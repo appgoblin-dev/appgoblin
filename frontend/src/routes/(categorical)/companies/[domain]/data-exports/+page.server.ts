@@ -1,4 +1,5 @@
 import { db } from '$lib/server/auth/db';
+import { buildAppAdsTxtUrl, buildCompanyVerifiedAppsUrl } from '$lib/server/downloads';
 
 import type { PageServerLoad } from './$types';
 
@@ -19,6 +20,15 @@ export const load: PageServerLoad = async ({ locals, params, parent }) => {
 	const parentData = await parent();
 	const tree = parentData.companyTree as { queried_company_name?: string } | undefined;
 	const companyName = tree?.queried_company_name ?? params.domain ?? '';
+	const domain = params.domain ?? '';
 
-	return { canDownload, companyName };
+	const downloadUrls = canDownload
+		? {
+				appAdsTxt: buildAppAdsTxtUrl(domain),
+				companyVerifiedAndroid: buildCompanyVerifiedAppsUrl(domain, 'android'),
+				companyVerifiedIos: buildCompanyVerifiedAppsUrl(domain, 'ios')
+			}
+		: null;
+
+	return { canDownload, companyName, downloadUrls };
 };

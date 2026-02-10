@@ -1,8 +1,13 @@
-import loadConfig from '$lib/loadConfig.js';
+import { redirect } from '@sveltejs/kit';
+import { requirePaidSubscription } from '$lib/server/auth/auth';
+import { buildAppAdsTxtUrl } from '$lib/server/downloads';
 
-export async function load({ params }) {
-	const domain = params.domain || '';
-	const adstxtEndpoint = loadConfig();
-	const downloadUrl = adstxtEndpoint && domain ? `${adstxtEndpoint}${domain}/latest.csv` : null;
-	return { downloadUrl };
-}
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async (event) => {
+	await requirePaidSubscription(event);
+	const domain = event.params.domain || '';
+	const downloadUrl = buildAppAdsTxtUrl(domain);
+	if (downloadUrl) throw redirect(302, downloadUrl);
+	return { downloadUrl: null };
+};

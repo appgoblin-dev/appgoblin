@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
+import { db } from './db';
 
 /**
  * Require authentication for a route
@@ -55,6 +56,25 @@ export function requireFullAuth(event: RequestEvent) {
 	//require2FASetup(user);
 	//require2FAVerified(session);
 	return { session, user };
+}
+
+/**
+ * Require an active or trialing subscription; redirect to /pricing otherwise.
+ * Use for paid-only routes (e.g. data export downloads).
+ */
+export async function requirePaidSubscription(event: RequestEvent) {
+	if (!event.locals.user) {
+		throw redirect(302, '/pricing');
+	}
+	const row = await db.queryOne<{ status: string }>(
+		`SELECT status FROM subscriptions
+		 WHERE user_id = $1 AND status IN ('active', 'trialing')
+		 ORDER BY created_at DESC LIMIT 1`,
+		[event.locals.user.id]
+	);
+	if (!row) {
+		throw redirect(302, '/pricing');
+	}
 }
 
 /**

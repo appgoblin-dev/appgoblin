@@ -12,7 +12,6 @@
 </script>
 
 <p>Download for {page.params.domain} app-ads.txt. Download should start automatically.</p>
-
 {#if data.downloadUrl}
 	<p>
 		If it didn't start,
