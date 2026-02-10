@@ -7,7 +7,8 @@ import {
 	STRIPE_PRICE_APP_DEV_ID,
 	STRIPE_PRICE_B2B_SDK_ID,
 	STRIPE_PRICE_B2B_APPADS_ID,
-	STRIPE_PRICE_B2B_PREMIUM_ID
+	STRIPE_PRICE_B2B_PREMIUM_ID,
+	APPGOBLIN_ENDPOINT_URL
 } from '$env/static/private';
 
 export const stripe = new Stripe(STRIPE_SECRET_KEY, {
@@ -69,8 +70,8 @@ export async function createCheckoutSession(
 				}
 			],
 			mode: 'subscription',
-			success_url: `http://localhost:5173/account?success=true`, // TODO check base URL
-			cancel_url: `http://localhost:5173/pricing?canceled=true`
+			success_url: `${APPGOBLIN_ENDPOINT_URL}/account?success=true`,
+			cancel_url: `${APPGOBLIN_ENDPOINT_URL}/pricing?canceled=true`
 		});
 
 		return session.url;
@@ -93,7 +94,7 @@ export async function createPortalSession(userId: number) {
 
 		const session = await stripe.billingPortal.sessions.create({
 			customer: user.provider_customer_id,
-			return_url: `http://localhost:5173/account`
+			return_url: `${APPGOBLIN_ENDPOINT_URL}/account`
 		});
 
 		return session.url;

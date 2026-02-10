@@ -2,10 +2,7 @@ import { stripe } from '$lib/server/stripe';
 import { db } from '$lib/server/auth/db';
 import type { RequestHandler } from './$types';
 
-const WEBHOOK_SECRET = 'whsec_b866541f2e6b2e3989fa574e20bef87e4d0124c9690e034442ffa44629996dc6';
-// User didn't provide one, so we might need to skip signature verification or assume dev.
-// For now, I'll assume we can trust the body or use a placeholder if not provided, but properly it should be verified.
-// Given the instructions, I'll implement standard verification code but note that it needs the secret.
+import { STRIPE_WEBHOOK_SECRET } from '$env/static/private';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const body = await request.text();
@@ -13,20 +10,15 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	let event;
 
-	if (WEBHOOK_SECRET && sig) {
+	if (STRIPE_WEBHOOK_SECRET && sig) {
 		try {
-			event = stripe.webhooks.constructEvent(body, sig, WEBHOOK_SECRET);
+			event = stripe.webhooks.constructEvent(body, sig, STRIPE_WEBHOOK_SECRET);
 		} catch (err: any) {
 			console.error(`Webhook signature verification failed.`, err);
 			return new Response(`Webhook Error: ${err.message}`, { status: 400 });
 		}
 	} else {
-		// Fallback for dev without secret (NOT SECURE for prod)
-		try {
-			event = JSON.parse(body);
-		} catch (err: any) {
-			return new Response(`Webhook Error: ${err.message}`, { status: 400 });
-		}
+		return new Response('Webhook signature missing or invalid', { status: 400 });
 	}
 
 	try {
@@ -76,12 +68,18 @@ async function handleSubscriptionUpdated(subscription: any) {
 
 	const customerId = subscription.customer as string;
 	const status = subscription.status;
-	const priceId = subscription.items.data[0]?.price.id;
-	const productField = subscription.items.data[0]?.price?.product;
+	const lineItem = subscription.items?.data?.[0];
+	const priceId = lineItem?.price?.id;
+	const productField = lineItem?.price?.product;
 	const productId =
 		typeof productField === 'string'
 			? productField
 			: ((productField as { id?: string })?.id ?? null);
+
+	if (!priceId || !productId) {
+		console.error('Subscription missing price/product', { priceId, productId });
+		return;
+	}
 
 	const currentPeriodStartVal =
 		subscription.current_period_start ?? subscription.items.data[0]?.current_period_start;
@@ -101,8 +99,8 @@ async function handleSubscriptionUpdated(subscription: any) {
 	const currentPeriodEnd = currentPeriodEndVal ? new Date(currentPeriodEndVal * 1000) : new Date();
 
 	const cancelAt = subscription.cancel_at ? new Date(subscription.cancel_at * 1000) : null;
-	const canceledAt = subscription.cancel_requested_at
-		? new Date(subscription.canceled_requested_at * 1000)
+	const cancelRequestedAt = subscription.canceled_at
+		? new Date(subscription.canceled_at * 1000)
 		: null;
 	const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
 
@@ -180,7 +178,7 @@ async function handleSubscriptionUpdated(subscription: any) {
 			currentPeriodStart,
 			currentPeriodEnd,
 			cancelAt,
-			canceledAt,
+			cancelRequestedAt,
 			trialEnd
 		]
 	);
