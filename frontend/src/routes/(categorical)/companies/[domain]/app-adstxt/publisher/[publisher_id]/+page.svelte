@@ -3,13 +3,20 @@
 	import CompanyPubAppsTable from '$lib/CompanyPubAppsTable.svelte';
 	import WhiteCard from '$lib/WhiteCard.svelte';
 	let { data } = $props();
+	const tree = $derived(
+		(data as { companyTree?: { queried_company_name?: string; queried_company_domain?: string } })
+			.companyTree
+	);
+	let companyName = $derived(
+		tree?.queried_company_name || tree?.queried_company_domain || page.params.domain
+	);
 </script>
 
 <div class="space-y-4">
 	<h1 class="text-2xl font-bold text-primary-900-100">Publisher ID: {page.params.publisher_id}</h1>
 	<WhiteCard>
 		{#snippet title()}
-			Publisher Overview
+			{companyName}'s Publisher Overview
 		{/snippet}
 		<div class="p-2">
 			<p class="">
@@ -60,7 +67,7 @@
 				{#if publishersApps.apps.google.direct.length > 0}
 					<WhiteCard>
 						{#snippet title()}
-							Google Apps (Direct)
+							{companyName}'s Google Apps (Direct)
 						{/snippet}
 						<CompanyPubAppsTable entries_table={publishersApps.apps.google.direct} />
 					</WhiteCard>
@@ -68,7 +75,7 @@
 				{#if publishersApps.apps.apple.direct.length > 0}
 					<WhiteCard>
 						{#snippet title()}
-							Apple Apps (Direct)
+							{companyName}'s Apple Apps (Direct)
 						{/snippet}
 						<CompanyPubAppsTable entries_table={publishersApps.apps.apple.direct} />
 					</WhiteCard>
@@ -83,14 +90,14 @@
 				{:else if publishersApps.apps.google.reseller.length > 0}
 					<WhiteCard>
 						{#snippet title()}
-							Google Apps
+							{companyName}'s Google Apps
 						{/snippet}
 						<CompanyPubAppsTable entries_table={publishersApps.apps.google.reseller} />
 					</WhiteCard>
 				{:else if publishersApps.apps.apple.reseller.length > 0}
 					<WhiteCard>
 						{#snippet title()}
-							Apple Apps
+							{companyName}'s Apple Apps
 						{/snippet}
 						<CompanyPubAppsTable entries_table={publishersApps.apps.apple.reseller} />
 					</WhiteCard>
@@ -101,7 +108,7 @@
 	<hr class="my-4" />
 	<WhiteCard>
 		{#snippet title()}
-			Full List of Apps
+			{companyName}'s Full List of Apps
 		{/snippet}
 		<p class="p-2">
 			Full lists of apps, app-ads.txt, metrics and more are available. Please see <a href="/pricing"

@@ -13,7 +13,10 @@
 {#if data.companyDetails && data.companyDetails.mediation_adapters}
 	<WhiteCard>
 		{#snippet title()}
-			<span>Mediation Adapters</span>
+			<span
+				>{data.companyTree.queried_company_name || data.companyTree.queried_company_domain}'s
+				Mediation Adapters</span
+			>
 		{/snippet}
 		<MediationAdaptersTable adapters={data.companyDetails.mediation_adapters} />
 	</WhiteCard>

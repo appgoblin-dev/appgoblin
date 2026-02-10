@@ -3,14 +3,18 @@
 	import CompanyOverviewTable from './CompanyOverviewTable.svelte';
 	import { formatNumberLocale } from '$lib/utils/formatNumber';
 
-	let { detailsData, tableData, category, isSecondaryDomain = false } = $props();
+	let { detailsData, tableData, category, isSecondaryDomain = false, companyName = '' } = $props();
+	let androidTitle = $derived(
+		companyName ? `${companyName}'s Android Top Apps` : 'Android Top Apps'
+	);
+	let iosTitle = $derived(companyName ? `${companyName}'s iOS Top Apps` : 'iOS Top Apps');
 </script>
 
 <div class="grid grid-cols-1">
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 		<WhiteCard>
 			{#snippet title()}
-				Android Top Apps
+				{androidTitle}
 			{/snippet}
 			{#if tableData.android.apps && tableData.android.apps.length > 0}
 				<CompanyOverviewTable data={tableData.android.apps} isiOS={false} />
@@ -21,7 +25,7 @@
 		{#if !isSecondaryDomain}
 			<WhiteCard>
 				{#snippet title()}
-					iOS Top Apps
+					{iosTitle}
 				{/snippet}
 				{#if tableData.ios.apps && tableData.ios.apps.length > 0}
 					<CompanyOverviewTable data={tableData.ios.apps} isiOS={true} />

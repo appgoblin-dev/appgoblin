@@ -13,13 +13,16 @@
 	let { data }: Props = $props();
 
 	let company_category = $derived(page.params.category!);
+	let companyName = $derived(
+		data.companyTree.queried_company_name || data.companyTree.queried_company_domain
+	);
 </script>
 
 <CompaniesLayout>
 	{#snippet card1()}
 		<WhiteCard>
 			{#snippet title()}
-				Totals
+				{companyName}'s Totals
 			{/snippet}
 			{#if data.companyDetails.categories[company_category]}
 				<TotalsBox
@@ -43,4 +46,6 @@
 	tableData={data.companyCategoryApps}
 	detailsData={data.companyDetails}
 	category={company_category}
+	isSecondaryDomain={data.companyTree.is_secondary_domain}
+	{companyName}
 />

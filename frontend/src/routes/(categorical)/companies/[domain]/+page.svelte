@@ -15,6 +15,9 @@
 	}
 
 	let { data }: Props = $props();
+	let companyName = $derived(
+		data.companyTree.queried_company_name || data.companyTree.queried_company_domain
+	);
 </script>
 
 <CompaniesLayout>
@@ -26,7 +29,7 @@
 				{:else if data.companyParentCategories && data.companyParentCategories.length > 0}
 					<WhiteCard>
 						{#snippet title()}
-							<span>Company Apps</span>
+							<span>{companyName}'s Company Apps</span>
 						{/snippet}
 
 						<TotalsBox
@@ -49,7 +52,7 @@
 		{#if !data.companyTree.is_secondary_domain}
 			<WhiteCard>
 				{#snippet title()}
-					<span>Apps by Category</span>
+					<span>{companyName}'s Apps by Category</span>
 				{/snippet}
 				<div>
 					{#await data.companyParentCategories}
@@ -70,7 +73,7 @@
 	{#snippet card3()}
 		<WhiteCard>
 			{#snippet title()}
-				<span>Related Entities</span>
+				<span>{companyName}'s Related Entities</span>
 			{/snippet}
 			<div class="p-2">
 				{#if typeof data.companyTree == 'string'}
@@ -140,5 +143,6 @@
 		detailsData={data.companyDetails}
 		category="all"
 		isSecondaryDomain={data.companyTree.is_secondary_domain}
+		{companyName}
 	/>
 {/if}

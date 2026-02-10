@@ -13,7 +13,10 @@
 {#if !data.companyTree.is_secondary_domain}
 	<WhiteCard>
 		{#snippet title()}
-			<span>Company SDKs</span>
+			<span
+				>{data.companyTree.queried_company_name || data.companyTree.queried_company_domain}'s
+				Company SDKs</span
+			>
 		{/snippet}
 		{#if typeof data.companySdks == 'string'}
 			<p class="text-red-500 text-center">Failed to load company SDKs.</p>
