@@ -166,7 +166,7 @@
 			<div class="flex items-center justify-end space-x-2 py-4 gap-2">
 				<ExportAsCSV {table} filename="appgoblin_apps" />
 				<span class="text-xs md:text-sm text-gray-500">
-					For full client list see <a href="/about">about pricing page</a>.
+					For full client lists see <a href="/pricing">pricing page</a>.
 				</span>
 			</div>
 		</footer>
