@@ -32,13 +32,13 @@ export async function createCheckoutSession(
 		// Create or get customer
 		let stripeCustomerId: string | null = null;
 
-		const user = await db.queryOne<{ stripe_customer_id: string | null }>(
-			'SELECT stripe_customer_id FROM users WHERE id = $1',
+		const user = await db.queryOne<{ provider_customer_id: string | null }>(
+			'SELECT provider_customer_id FROM users WHERE id = $1',
 			[userId]
 		);
 
-		if (user?.stripe_customer_id) {
-			stripeCustomerId = user.stripe_customer_id;
+		if (user?.provider_customer_id) {
+			stripeCustomerId = user.provider_customer_id;
 		} else {
 			const customer = await stripe.customers.create({
 				email: email,
@@ -47,7 +47,7 @@ export async function createCheckoutSession(
 				}
 			});
 			stripeCustomerId = customer.id;
-			await db.execute('UPDATE users SET stripe_customer_id = $1 WHERE id = $2', [
+			await db.execute('UPDATE users SET provider_customer_id = $1 WHERE id = $2', [
 				stripeCustomerId,
 				userId
 			]);
@@ -82,17 +82,17 @@ export async function createCheckoutSession(
 
 export async function createPortalSession(userId: number) {
 	try {
-		const user = await db.queryOne<{ stripe_customer_id: string | null }>(
-			'SELECT stripe_customer_id FROM users WHERE id = $1',
+		const user = await db.queryOne<{ provider_customer_id: string | null }>(
+			'SELECT provider_customer_id FROM users WHERE id = $1',
 			[userId]
 		);
 
-		if (!user?.stripe_customer_id) {
+		if (!user?.provider_customer_id) {
 			throw error(400, 'User does not have a Stripe customer ID');
 		}
 
 		const session = await stripe.billingPortal.sessions.create({
-			customer: user.stripe_customer_id,
+			customer: user.provider_customer_id,
 			return_url: `http://localhost:5173/account`
 		});
 

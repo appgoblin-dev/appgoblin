@@ -133,11 +133,11 @@
 							</p>
 						</div>
 						<span
-							class="badge {data.subscription.status === 'active'
-								? 'preset-filled-success-500'
-								: 'preset-filled-warning-500'}"
+							class="badge text-white {data.subscription.status === 'active'
+								? 'preset-filled-success-100-900'
+								: 'preset-filled-warning-900-100'}"
 						>
-							{data.subscription.status}
+							{data.subscription.status.charAt(0).toUpperCase() + data.subscription.status.slice(1)}
 						</span>
 					</div>
 

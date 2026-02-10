@@ -58,10 +58,6 @@ async function handleCheckoutSessionCompleted(session: any) {
 	const customerId = session.customer;
 	const subscriptionId = session.subscription;
 
-	// session.metadata.userId might be present if we passed it
-	// But better to rely on customer lookup or ensure we linked them.
-	// In createCheckoutSession we updated the user with stripe_customer_id.
-
 	if (session.mode === 'subscription' && typeof subscriptionId === 'string') {
 		console.log('Retrieving subscription', subscriptionId);
 		const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -81,6 +77,11 @@ async function handleSubscriptionUpdated(subscription: any) {
 	const customerId = subscription.customer as string;
 	const status = subscription.status;
 	const priceId = subscription.items.data[0]?.price.id;
+	const productField = subscription.items.data[0]?.price?.product;
+	const productId =
+		typeof productField === 'string'
+			? productField
+			: ((productField as { id?: string })?.id ?? null);
 
 	const currentPeriodStartVal =
 		subscription.current_period_start ?? subscription.items.data[0]?.current_period_start;
@@ -100,19 +101,21 @@ async function handleSubscriptionUpdated(subscription: any) {
 	const currentPeriodEnd = currentPeriodEndVal ? new Date(currentPeriodEndVal * 1000) : new Date();
 
 	const cancelAt = subscription.cancel_at ? new Date(subscription.cancel_at * 1000) : null;
-	const canceledAt = subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null;
+	const canceledAt = subscription.cancel_requested_at
+		? new Date(subscription.canceled_requested_at * 1000)
+		: null;
 	const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
 
 	console.log('Looking up user for customer', customerId);
-	// Find user by stripe_customer_id
+	// Find user by provider_customer_id
 	let user = await db.queryOne<{ id: number }>(
-		'SELECT id FROM users WHERE stripe_customer_id = $1',
+		'SELECT id FROM users WHERE provider_customer_id = $1',
 		[customerId]
 	);
 
 	// Fallback: Check metadata or email
 	if (!user) {
-		console.log('User not found by stripe_customer_id, checking metadata/email');
+		console.log('User not found by provider_customer_id, checking metadata/email');
 
 		// Retrieve customer to get email if not in subscription (it usually is in subscription.customer_email but safer to check customer)
 		const customer = (await stripe.customers.retrieve(customerId)) as any;
@@ -132,9 +135,9 @@ async function handleSubscriptionUpdated(subscription: any) {
 		}
 
 		if (user) {
-			console.log('User found via fallback, linking stripe_customer_id', user.id);
+			console.log('User found via fallback, linking provider_customer_id', user.id);
 			// Link them now
-			await db.execute('UPDATE users SET stripe_customer_id = $1 WHERE id = $2', [
+			await db.execute('UPDATE users SET provider_customer_id = $1 WHERE id = $2', [
 				customerId,
 				user.id
 			]);
@@ -151,25 +154,28 @@ async function handleSubscriptionUpdated(subscription: any) {
 	await db.execute(
 		`
         INSERT INTO subscriptions (
-            user_id, stripe_subscription_id, stripe_customer_id, stripe_price_id, status,
-            current_period_start, current_period_end, cancel_at, canceled_at, trial_end,
-            seats_total, seats_used, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 1, 0, NOW())
-        ON CONFLICT (stripe_subscription_id) DO UPDATE SET
+            user_id, provider_name, provider_subscription_id, provider_customer_id, provider_price_id,
+            provider_product_id, status, current_period_start, current_period_end, cancel_at, cancel_requested_at,
+            trial_end, seats_total, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 1, NOW())
+        ON CONFLICT (provider_name, provider_subscription_id) DO UPDATE SET
             status = EXCLUDED.status,
-            stripe_price_id = EXCLUDED.stripe_price_id,
+            provider_price_id = EXCLUDED.provider_price_id,
+            provider_product_id = EXCLUDED.provider_product_id,
             current_period_start = EXCLUDED.current_period_start,
             current_period_end = EXCLUDED.current_period_end,
             cancel_at = EXCLUDED.cancel_at,
-            canceled_at = EXCLUDED.canceled_at,
+            cancel_requested_at = EXCLUDED.cancel_requested_at,
             trial_end = EXCLUDED.trial_end,
             updated_at = NOW();
     `,
 		[
 			user.id,
+			'stripe',
 			subscription.id,
 			customerId,
 			priceId,
+			productId,
 			status,
 			currentPeriodStart,
 			currentPeriodEnd,

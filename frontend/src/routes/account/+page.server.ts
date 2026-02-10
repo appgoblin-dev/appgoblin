@@ -14,11 +14,11 @@ export async function load(event: PageServerLoadEvent) {
 		status: string;
 		current_period_end: Date;
 		cancel_at: Date | null;
-		stripe_price_id: string;
+		provider_price_id: string;
 	}
 
 	const subscription = await db.queryOne<Subscription>(
-		`SELECT status, current_period_end, cancel_at, stripe_price_id
+		`SELECT status, current_period_end, cancel_at, provider_price_id
          FROM subscriptions 
          WHERE user_id = $1 
          ORDER BY created_at DESC LIMIT 1`,
@@ -36,8 +36,8 @@ export async function load(event: PageServerLoadEvent) {
 		user,
 		subscription,
 		subscriptionTier:
-			subscription?.stripe_price_id && priceIdToLabel[subscription.stripe_price_id]
-				? priceIdToLabel[subscription.stripe_price_id]
+			subscription?.provider_price_id && priceIdToLabel[subscription.provider_price_id]
+				? priceIdToLabel[subscription.provider_price_id]
 				: null
 	};
 }

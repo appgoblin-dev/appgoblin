@@ -36,9 +36,9 @@ export const actions: Actions = {
 		const existingSubscription = await db.queryOne<{
 			status: string;
 			cancel_at: Date | null;
-			canceled_at: Date | null;
+			cancel_requested_at: Date | null;
 		}>(
-			`SELECT status, cancel_at, canceled_at
+			`SELECT status, cancel_at, cancel_requested_at
              FROM subscriptions
              WHERE user_id = $1
              AND status IN ('active', 'trialing')
@@ -50,7 +50,7 @@ export const actions: Actions = {
 		if (
 			existingSubscription &&
 			!existingSubscription.cancel_at &&
-			!existingSubscription.canceled_at
+			!existingSubscription.cancel_requested_at
 		) {
 			return redirect(303, '/account');
 		}

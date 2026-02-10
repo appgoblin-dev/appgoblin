@@ -55,6 +55,12 @@ CREATE TABLE public.email_verification_requests (
     ) REFERENCES public.users (id)
 );
 
+CREATE TABLE public.providers (
+    id serial4 NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT providers_pkey PRIMARY KEY (id)
+);
+
 
 CREATE TABLE public.password_reset_sessions (
     id text NOT NULL,
@@ -86,14 +92,29 @@ ALTER TABLE public.user_requested_scan ADD CONSTRAINT user_requested_scan_user_i
 
 
 -- ============================================================================
--- STRIPE SUBSCRIPTION & ORGANIZATION SCHEMA
+-- PROVIDER SUBSCRIPTION & ORGANIZATION SCHEMA
 -- ============================================================================
 -- This migration adds support for:
 -- - Organizations (multi-user accounts)
--- - Stripe subscriptions with flexible feature tagging
+-- - Provider subscriptions with flexible feature tagging
 -- - Seat-based billing
 -- ============================================================================
 
+CREATE TABLE public.providers (
+    id serial4 NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT providers_pkey PRIMARY KEY (id),
+    CONSTRAINT providers_name_unique UNIQUE (name)
+);
+
+INSERT INTO public.providers (id, name) VALUES
+(1, 'stripe'),
+(2, 'paypal'),
+(3, 'manual');
+SELECT setval(
+    pg_get_serial_sequence('public.providers', 'id'),
+    (SELECT max(id) FROM public.providers)
+);
 -- ============================================================================
 -- 1. ORGANIZATIONS
 -- ============================================================================
@@ -105,15 +126,14 @@ CREATE TABLE public.organizations (
     created_at timestamptz DEFAULT now() NOT NULL,
     updated_at timestamptz DEFAULT now() NOT NULL,
 
-    -- Stripe identifiers
-    stripe_customer_id text NULL, -- Stripe customer ID
+    provider_customer_id text NULL,
 
     CONSTRAINT organizations_pkey PRIMARY KEY (id),
     CONSTRAINT organizations_slug_key UNIQUE (slug)
 );
 
-CREATE INDEX organizations_stripe_customer_id_idx ON public.organizations USING btree (
-    stripe_customer_id
+CREATE INDEX organizations_provider_customer_id_idx ON public.organizations USING btree (
+    provider_customer_id
 );
 
 -- ============================================================================
@@ -152,55 +172,79 @@ CREATE INDEX organization_members_organization_id_idx ON public.organization_mem
 -- ============================================================================
 -- 3. SUBSCRIPTIONS
 -- ============================================================================
--- Tracks Stripe subscriptions (can be for individual users OR organizations)
+-- Tracks subscriptions (can be for individual users OR organizations)
+
 CREATE TABLE public.subscriptions (
     id serial4 NOT NULL,
 
-    -- Owner (either user OR organization, not both)
-    user_id int4 NULL, -- For individual subscriptions
-    organization_id int4 NULL, -- For organization subscriptions
+    -- Owner (either user OR organization)
+    user_id int4 NULL,
+    organization_id int4 NULL,
 
-    -- Stripe data
-    stripe_subscription_id text NOT NULL,
-    stripe_customer_id text NOT NULL,
-    stripe_price_id text NOT NULL, -- The Stripe price being billed
+    -- Payment provider
+    provider_name text NOT NULL REFERENCES providers (name),
 
-    -- Subscription status
+    -- Provider identifiers
+    provider_subscription_id text NOT NULL,
+    provider_customer_id text NOT NULL,
+    provider_product_id text NOT NULL,
+    provider_price_id text NULL,
+
+    -- Subscription status (normalized)
     -- 'active', 'canceled', 'past_due', 'unpaid', 'trialing', 'incomplete'
     status text NOT NULL,
 
     -- Seat management
-    seats_total int4 DEFAULT 1 NOT NULL, -- Total seats purchased
-    seats_used int4 DEFAULT 0 NOT NULL, -- Seats currently in use
+    seats_total int4 DEFAULT 1 NOT NULL,
 
-    -- Timestamps
+    -- Billing period
     current_period_start timestamptz NOT NULL,
     current_period_end timestamptz NOT NULL,
-    cancel_at timestamptz NULL, -- When subscription will be canceled
-    canceled_at timestamptz NULL, -- When cancellation was requested
+
+    -- Cancellation / trial
+    cancel_at timestamptz NULL,
+    cancel_requested_at timestamptz NULL,
     trial_end timestamptz NULL,
 
     created_at timestamptz DEFAULT now() NOT NULL,
     updated_at timestamptz DEFAULT now() NOT NULL,
 
     CONSTRAINT subscriptions_pkey PRIMARY KEY (id),
-    CONSTRAINT subscriptions_stripe_subscription_id_key UNIQUE (
-        stripe_subscription_id
-    ),
-    CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id)
-    REFERENCES public.users (id) ON DELETE CASCADE,
-    CONSTRAINT subscriptions_organization_id_fkey FOREIGN KEY (organization_id)
-    REFERENCES public.organizations (id) ON DELETE CASCADE,
 
-    -- Ensure subscription belongs to either user OR organization, not both
+    CONSTRAINT subscriptions_user_id_fkey
+    FOREIGN KEY (user_id) REFERENCES public.users (id),
+
+    CONSTRAINT subscriptions_organization_id_fkey
+    FOREIGN KEY (organization_id) REFERENCES public.organizations (id),
+
     CONSTRAINT subscriptions_owner_check CHECK (
         (user_id IS NOT null AND organization_id IS null)
         OR (user_id IS null AND organization_id IS NOT null)
     ),
 
-    -- Ensure seats_used doesn't exceed seats_total
-    CONSTRAINT subscriptions_seats_check CHECK (seats_used <= seats_total)
+    CONSTRAINT subscriptions_status_check CHECK (
+        status IN (
+            'active',
+            'canceled',
+            'past_due',
+            'unpaid',
+            'trialing',
+            'incomplete'
+        )
+    )
 );
+
+CREATE UNIQUE INDEX subscriptions_one_active_user_per_product
+ON subscriptions (user_id, provider_product_id)
+WHERE user_id IS NOT null AND status = 'active';
+
+CREATE UNIQUE INDEX subscriptions_one_active_org_per_product
+ON subscriptions (organization_id, provider_product_id)
+WHERE organization_id IS NOT null AND status = 'active';
+
+CREATE UNIQUE INDEX subscriptions_provider_subscription_unique
+ON subscriptions (provider_name, provider_subscription_id);
+
 
 CREATE INDEX subscriptions_user_id_idx ON public.subscriptions USING btree (
     user_id
@@ -208,49 +252,32 @@ CREATE INDEX subscriptions_user_id_idx ON public.subscriptions USING btree (
 CREATE INDEX subscriptions_organization_id_idx ON public.subscriptions USING btree (
     organization_id
 );
-CREATE INDEX subscriptions_stripe_customer_id_idx ON public.subscriptions USING btree (
-    stripe_customer_id
+CREATE INDEX subscriptions_provider_customer_id_idx ON public.subscriptions USING btree (
+    provider_customer_id
 );
 CREATE INDEX subscriptions_status_idx ON public.subscriptions USING btree (
     status
 );
 
--- ============================================================================
--- 4. SUBSCRIPTION FEATURES (FLEXIBLE TAGGING)
--- ============================================================================
--- Maps subscriptions to feature tags for flexible access control
--- This allows you to grant different capabilities per subscription
-CREATE TABLE public.subscription_features (
-    id serial4 NOT NULL,
-    -- e.g., 'app-ads-txt', 'b2b-premium', 'aso-premium'
-    subscription_id int4 NOT NULL,
-    feature_tag text NOT NULL,
-    created_at timestamptz DEFAULT now() NOT NULL,
 
-    CONSTRAINT subscription_features_pkey PRIMARY KEY (id),
-    CONSTRAINT subscription_features_unique UNIQUE (
-        subscription_id, feature_tag
-    ),
-    CONSTRAINT subscription_features_subscription_id_fkey FOREIGN KEY (
-        subscription_id
-    )
-    REFERENCES public.subscriptions (id) ON DELETE CASCADE
+-- Add provider ID and customer ID to users table for individual subscriptions
+ALTER TABLE public.users ADD COLUMN provider_name text NULL;
+ALTER TABLE public.users ADD COLUMN provider_customer_id text NULL;
+
+ALTER TABLE public.users ADD CONSTRAINT users_provider_name_fkey
+FOREIGN KEY (provider_name) REFERENCES public.providers (name);
+
+
+CREATE INDEX users_provider_customer_id_idx ON public.users USING btree (
+    provider_customer_id
 );
 
-CREATE INDEX subscription_features_subscription_id_idx ON public.subscription_features USING btree (
-    subscription_id
-);
-CREATE INDEX subscription_features_feature_tag_idx ON public.subscription_features USING btree (
-    feature_tag
-);
+-- 1. Unique constraints to prevent duplicates
+ALTER TABLE users ADD CONSTRAINT users_provider_customer_unique
+UNIQUE (provider_customer_id);
 
--- Add Stripe customer ID to users table for individual subscriptions
-ALTER TABLE public.users
-ADD COLUMN stripe_customer_id text NULL;
-
-CREATE INDEX users_stripe_customer_id_idx ON public.users USING btree (
-    stripe_customer_id
-);
+ALTER TABLE organizations ADD CONSTRAINT orgs_provider_customer_unique
+UNIQUE (provider_customer_id);
 
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -266,9 +293,3 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_subscriptions_updated_at BEFORE UPDATE ON public.subscriptions
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- ============================================================================
--- 9. GRANT PERMISSIONS
--- ============================================================================
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO frontend;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO frontend;
