@@ -149,6 +149,57 @@
 	{/await}
 </div>
 
+<div class="flex flex-wrap gap-2 mb-4 border-b border-surface-200-800 pb-2">
+	<a
+		href={`/companies/${data.companyTree.queried_company_domain}`}
+		class="btn btn-sm {page.url.pathname === `/companies/${data.companyTree.queried_company_domain}`
+			? 'variant-filled-primary'
+			: 'variant-ghost-surface'}"
+	>
+		Overview
+	</a>
+	<a
+		href={`/companies/${data.companyTree.queried_company_domain}/mediation`}
+		class="btn btn-sm {page.url.pathname.includes('/mediation')
+			? 'variant-filled-primary'
+			: 'variant-ghost-surface'}"
+	>
+		Mediation
+	</a>
+	<a
+		href={`/companies/${data.companyTree.queried_company_domain}/creatives`}
+		class="btn btn-sm {page.url.pathname.includes('/creatives')
+			? 'variant-filled-primary'
+			: 'variant-ghost-surface'}"
+	>
+		Creatives
+	</a>
+	<a
+		href={`/companies/${data.companyTree.queried_company_domain}/sdks`}
+		class="btn btn-sm {page.url.pathname.includes('/sdks')
+			? 'variant-filled-primary'
+			: 'variant-ghost-surface'}"
+	>
+		SDKs
+	</a>
+	<a
+		href={`/companies/${data.companyTree.queried_company_domain}/app-adstxt`}
+		class="btn btn-sm {page.url.pathname.includes('/app-adstxt')
+			? 'variant-filled-primary'
+			: 'variant-ghost-surface'}"
+	>
+		App-ads.txt
+	</a>
+	<a
+		href={`/companies/${data.companyTree.queried_company_domain}/data-exports`}
+		class="btn btn-sm {page.url.pathname.includes('/data-exports')
+			? 'variant-filled-primary'
+			: 'variant-ghost-surface'}"
+	>
+		Data Exports
+	</a>
+</div>
+
 <div class="space-y-4 md:space-y-8">
 	{@render children?.()}
 </div>

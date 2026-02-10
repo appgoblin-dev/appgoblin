@@ -1,17 +1,12 @@
 <script lang="ts">
 	import type { CompanyFullDetails } from '../../../../types';
 
-	import AdsTxtPubIDsTable from '$lib/AdsTxtPubIDsTable.svelte';
-	import AdCard from '$lib/AdCard.svelte';
-
 	import TotalsBox from '$lib/TotalsBox.svelte';
 	import CompanyButton from '$lib/CompanyButton.svelte';
 	import CompanyCategoryPie from '$lib/CompanyCategoryPie.svelte';
 	import AdsTxtTotalsBox from '$lib/AdsTxtTotalsBox.svelte';
 	import CompanyTableGrid from '$lib/CompanyTableGrid.svelte';
-	import MediationAdaptersTable from '$lib/MediationAdaptersTable.svelte';
 	import CompanyTree from '$lib/CompanyTree.svelte';
-	import CompanySDKs from '$lib/CompanySDKs.svelte';
 	import WhiteCard from '$lib/WhiteCard.svelte';
 	import CompaniesLayout from '../../../../lib/CompaniesLayout.svelte';
 	import { countryCodeToEmoji } from '$lib/utils/countryCodeToEmoji';
@@ -137,30 +132,6 @@
 	{/snippet}
 </CompaniesLayout>
 
-{#if data.companyDetails && data.companyDetails.mediation_adapters}
-	<WhiteCard>
-		{#snippet title()}
-			<span>Mediation Adapters</span>
-		{/snippet}
-		<MediationAdaptersTable adapters={data.companyDetails.mediation_adapters} />
-	</WhiteCard>
-{/if}
-
-{#if data.companyCreatives && data.companyCreatives.length > 0}
-	<WhiteCard>
-		{#snippet title()}
-			<span>Recent Creatives from {data.companyTree.queried_company_name}</span>
-		{/snippet}
-		<div class="grid grid-cols-3 gap-2 p-2">
-			{#each data.companyCreatives as creative}
-				<card class="card bg-surface-100-900 p-2">
-					<AdCard {creative} />
-				</card>
-			{/each}
-		</div>
-	</WhiteCard>
-{/if}
-
 {#if typeof data.companyTopApps == 'string'}
 	Failed to load company's apps.
 {:else}
@@ -170,47 +141,4 @@
 		category="all"
 		isSecondaryDomain={data.companyTree.is_secondary_domain}
 	/>
-{/if}
-
-{#if data.companyDetails && data.companyDetails.adstxt_publishers_overview}
-	<div class="card preset-tonal p-2 md:p-8 mt-2 md:mt-4">
-		<div class="grid md:grid-cols-2 gap-4">
-			{#if data.companyDetails.adstxt_publishers_overview.google && data.companyDetails.adstxt_publishers_overview.google.direct}
-				<div>
-					<h2 class="text-lg font-semibold mb-4">ANDROID DIRECT PUBLISHER IDS</h2>
-					<AdsTxtPubIDsTable
-						entries_table={data.companyDetails.adstxt_publishers_overview.google.direct}
-					/>
-				</div>
-			{/if}
-			{#if data.companyDetails.adstxt_publishers_overview.apple && data.companyDetails.adstxt_publishers_overview.apple.direct}
-				<div>
-					<h2 class="text-lg font-semibold mb-4">IOS DIRECT PUBLISHER IDS</h2>
-					<AdsTxtPubIDsTable
-						entries_table={data.companyDetails.adstxt_publishers_overview.apple.direct}
-					/>
-				</div>
-			{/if}
-		</div>
-		<span class="text-xs md:text-sm text-gray-500">
-			Full app-ads.txt data updated daily is available. <a href="/about">See pricing page</a>.
-		</span>
-	</div>
-{/if}
-
-{#if !data.companyTree.is_secondary_domain}
-	<WhiteCard>
-		{#snippet title()}
-			<span>Company SDKs</span>
-		{/snippet}
-		{#await data.companySdks}
-			<span class="text-lg">Loading...</span>
-		{:then mySdks}
-			{#if typeof mySdks == 'string'}
-				<p class="text-red-500 text-center">Failed to load company SDKs.</p>
-			{:else if mySdks}
-				<CompanySDKs {mySdks} />
-			{/if}
-		{/await}
-	</WhiteCard>
 {/if}

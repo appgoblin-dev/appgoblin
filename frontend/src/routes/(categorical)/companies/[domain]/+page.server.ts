@@ -13,11 +13,6 @@ export const load: PageServerLoad = async ({ fetch, parent, params }) => {
 		'Company Parent Categories'
 	);
 	const companyTopApps = await api.get(`/companies/${companyDomain}/topapps`, 'Company Top Apps');
-	const companyCreatives = await api.get(
-		`/creatives/companies/${companyDomain}`,
-		'Company Creatives'
-	);
-	const companySdks = await api.get(`/companies/${companyDomain}/sdks`, 'Company SDKs');
 
 	const { companyDetails, companyTree } = await parent();
 
@@ -26,7 +21,7 @@ export const load: PageServerLoad = async ({ fetch, parent, params }) => {
 		companyTree,
 		companyParentCategories,
 		companyTopApps,
-		companySdks,
-		companyCreatives
+		companySdks: { companies: {} },
+		companyCreatives: []
 	};
 };
