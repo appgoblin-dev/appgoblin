@@ -46,7 +46,7 @@
 {#if typeof data.companiesOverview == 'string'}
 	<p class="text-red-500 text-center">Failed to load companies details.</p>
 {:else if data.companiesOverview && data.companiesOverview.categories}
-	<CompaniesLayout>
+	<!-- <CompaniesLayout>
 		{#snippet card1()}
 			<WhiteCard>
 				{#snippet title()}
@@ -76,7 +76,7 @@
 				<CompaniesBarChart plotData={data.companiesOverview.top.sdk_ios} />
 			</WhiteCard>
 		{/snippet}
-	</CompaniesLayout>
+	</CompaniesLayout> -->
 
 	<CompaniesTableGrid>
 		{#snippet mainTable()}

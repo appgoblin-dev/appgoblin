@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { createApiClient } from '$lib/server/api';
 
-import { getCachedData } from '../../../hooks.server';
+import { getCachedData } from '../../../../hooks.server';
 
 export const ssr: boolean = true;
 export const csr: boolean = true;
@@ -9,7 +9,6 @@ export const csr: boolean = true;
 export const load: PageServerLoad = async ({ fetch, parent, params }) => {
 	const api = createApiClient(fetch);
 	const companyDomain = params.domain;
-	const { appCats } = await getCachedData();
 	const companyParentCategories = await api.get(
 		`/companies/${companyDomain}/parentcategories`,
 		'Company Parent Categories'
@@ -24,7 +23,6 @@ export const load: PageServerLoad = async ({ fetch, parent, params }) => {
 		companyParentCategories,
 		companyTopApps,
 		companySdks: { companies: {} },
-		companyCreatives: [],
-		appCats
+		companyCreatives: []
 	};
 };

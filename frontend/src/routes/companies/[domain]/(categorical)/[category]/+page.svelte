@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CompanyCategoryDetails } from '../../../../types';
+	import type { CompanyCategoryDetails } from '../../../../../types';
 	import { page } from '$app/state';
 
 	import TotalsBox from '$lib/TotalsBox.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CompanyFullDetails } from '../../../types';
+	import type { CompanyFullDetails } from '../../../../types';
 	import { Dialog, Portal } from '@skeletonlabs/skeleton-svelte';
 
 	import SideBarCompanies from '$lib/SideBarCompanies.svelte';
@@ -11,7 +11,7 @@
 	import CompanyTableGrid from '$lib/CompanyTableGrid.svelte';
 	import CompanyTree from '$lib/CompanyTree.svelte';
 	import WhiteCard from '$lib/WhiteCard.svelte';
-	import CompaniesLayout from '../../../lib/CompaniesLayout.svelte';
+	import CompaniesLayout from '$lib/CompaniesLayout.svelte';
 	import { countryCodeToEmoji } from '$lib/utils/countryCodeToEmoji';
 	interface Props {
 		data: CompanyFullDetails;
@@ -21,6 +21,9 @@
 	let companyName = $derived(
 		data.companyTree.queried_company_name || data.companyTree.queried_company_domain
 	);
+	let associatedDomains = $derived(data.companyTree?.domains ?? []);
+	let hasManyAssociatedDomains = $derived(associatedDomains.length > 4);
+	let associatedDomainsPreview = $derived(associatedDomains.slice(0, 4));
 </script>
 
 <CompaniesLayout>
@@ -83,6 +86,10 @@
 					<p class="text-red-500 text-center">Failed to load company tree.</p>
 				{:else if data.companyTree && data.companyTree.children_companies.length > 0}
 					<!-- HAS CHILD COMPANY -->
+					<p class="text-sm text-gray-600 mb-2">
+						The companies shown below are actual companies that are owned or controlled by
+						{companyName}.
+					</p>
 					<CompanyTree myTree={data.companyTree} />
 				{:else if data.companyTree && data.companyTree.parent_company_domain}
 					<!-- HAS PARENT COMPANY -->
@@ -101,18 +108,23 @@
 				{:else}
 					<!-- REGULAR COMPANY (no child or parent companies) -->
 				{/if}
-				{#if data.companyTree && data.companyTree.domains && data.companyTree.domains.length > 1}
-					<h2 class="text-lg font-semibold mb-4">Associated Domains</h2>
+				{#if data.companyTree && associatedDomains.length > 1}
+					<h2 class="text-lg font-semibold mb-2">
+						Associated Domains
+						<span class="text-sm font-normal text-gray-600">
+							({associatedDomains.length} in total)
+						</span>
+					</h2>
 					<div class="flex flex-col gap-1">
-						{#each data.companyTree.domains as domain}
-							<div class="">
+						{#each associatedDomainsPreview as domain}
+							<div>
 								<!-- Domain URL -->
 								<div
 									class="font-semibold text-md"
 									title={`IP addresses for this domain commonly resolve to: ${domain.country.join(', ')}`}
 								>
-									<span
-										><a href="/companies/{domain.tld_url}">{domain.tld_url}</a>
+									<span>
+										<a href="/companies/{domain.tld_url}">{domain.tld_url}</a>
 										<!-- Countries as flags -->
 										{#if domain.country.length > 0}
 											<span class="gap-2 ml-2">
@@ -132,44 +144,80 @@
 							</div>
 						{/each}
 					</div>
+					{#if hasManyAssociatedDomains}
+						<p class="mt-2 text-xs text-gray-500">
+							Showing the first 4 associated domains here. The full list is available below the Top
+							Apps table.
+						</p>
+					{/if}
 				{/if}
 			</div>
 		</WhiteCard>
 	{/snippet}
 </CompaniesLayout>
 
-<div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
-	<aside class="hidden md:block">
-		<div>
-			<SideBarCompanies myCatData={data.appCats} />
-		</div>
-	</aside>
-
-	{#if typeof data.companyTopApps == 'string'}
-		Failed to load company's apps.
-	{:else}
-		<CompanyTableGrid
-			tableData={data.companyTopApps}
-			detailsData={data.companyDetails}
-			category="all"
-			isSecondaryDomain={data.companyTree.is_secondary_domain}
-			{companyName}
-		/>
-	{/if}
-
-	<div class="md:hidden sticky bottom-0 bg-surface-50-950 p-2">
-		<!-- Small screen version of the side bar -->
-		<Dialog>
-			<Dialog.Trigger class="btn preset-filled">APP FILTERS</Dialog.Trigger>
-			<Portal>
-				<Dialog.Positioner class="fixed inset-0 z-50 flex justify-start">
-					<Dialog.Content
-						class="h-screen card bg-surface-100-900 w-sm p-4 space-y-4 shadow-xl max-w-[320px]"
+{#if typeof data.companyTopApps == 'string'}
+	Failed to load company's apps.
+{:else}
+	<CompanyTableGrid
+		tableData={data.companyTopApps}
+		detailsData={data.companyDetails}
+		category="all"
+		isSecondaryDomain={data.companyTree.is_secondary_domain}
+		{companyName}
+	/>
+{/if}
+{#if data.companyTree && hasManyAssociatedDomains}
+	<section class="mt-6">
+		<h2 class="text-xl font-semibold mb-2">All Associated Domains</h2>
+		<p class="text-sm text-gray-600 mb-3">
+			This company is associated with the following domains. Click a domain to see its detailed apps
+			and company information.
+		</p>
+		<div class="flex flex-col gap-1">
+			{#each associatedDomains as domain}
+				<div>
+					<!-- Domain URL -->
+					<div
+						class="font-semibold text-md"
+						title={`IP addresses for this domain commonly resolve to: ${domain.country.join(', ')}`}
 					>
-						<SideBarCompanies myCatData={data.appCats} />
-					</Dialog.Content>
-				</Dialog.Positioner>
-			</Portal>
-		</Dialog>
-	</div>
+						<span>
+							<a href="/companies/{domain.tld_url}">{domain.tld_url}</a>
+							<!-- Countries as flags -->
+							{#if domain.country.length > 0}
+								<span class="gap-2 ml-2">
+									{#each domain.country as country}
+										<span class="text-lg">{countryCodeToEmoji(country)}</span>
+									{/each}
+								</span>
+							{/if}
+						</span>
+					</div>
+					<!-- Organizations -->
+					{#if domain.org.length > 0}
+						<div class="text-sm text-gray-600">
+							<span class="text-gray-500">{domain.org.join(', ')}</span>
+						</div>
+					{/if}
+				</div>
+			{/each}
+		</div>
+	</section>
+{/if}
+
+<div class="md:hidden sticky bottom-0 bg-surface-50-950 p-2">
+	<!-- Small screen version of the side bar -->
+	<Dialog>
+		<Dialog.Trigger class="btn preset-filled">APP FILTERS</Dialog.Trigger>
+		<Portal>
+			<Dialog.Positioner class="fixed inset-0 z-50 flex justify-start">
+				<Dialog.Content
+					class="h-screen card bg-surface-100-900 w-sm p-4 space-y-4 shadow-xl max-w-[320px]"
+				>
+					<SideBarCompanies myCatData={data.appCats} />
+				</Dialog.Content>
+			</Dialog.Positioner>
+		</Portal>
+	</Dialog>
 </div>

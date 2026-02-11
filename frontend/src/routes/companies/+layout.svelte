@@ -37,6 +37,6 @@
 {#if !page.url.pathname.includes('adstxt') && data.companyTypes && data.companyTypes.types.length > 0}
 	<CompanyTypesTabs companyTypes={data.companyTypes} />
 {/if}
-<div class="card-content p-1 md:p-6 shadow-md rounded-lg">
+<div class="p-1 md:p-6">
 	{@render children?.()}
 </div>
