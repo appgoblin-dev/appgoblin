@@ -57,10 +57,9 @@
 						<p class="text-xs opacity-70">Indie devs, researchers, casual users</p>
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
-						<li>Advanced per-SDK results</li>
+						<li>Advanced App SDK breakdowns</li>
 						<li>Keyword tools, comparisons, rankings</li>
 						<li>Ad intelligence, trending apps</li>
-						<li>Email alerts/saved searches</li>
 					</ul>
 					<p class="text-xs opacity-60">Included with every account</p>
 				</div>
@@ -73,7 +72,8 @@
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Everything in Free</li>
-						<li>App exports (CSV/Excel/JSON)</li>
+						<li>App CrossFilter dashboard</li>
+						<li>Feature requests and feedback</li>
 					</ul>
 					<form
 						method="POST"
@@ -91,14 +91,16 @@
 
 				<div class="card preset-filled-surface-50-950 p-4 flex flex-col gap-3">
 					<div>
-						<p class="text-xs uppercase tracking-wide opacity-60">Business SDK</p>
+						<p class="text-xs uppercase tracking-wide opacity-60">Business Intelligence</p>
 						<p class="text-2xl font-semibold">$299</p>
-						<p class="text-xs opacity-70">Ad tech, SDK vendors, competitive intel teams</p>
+						<p class="text-xs opacity-70">
+							Ad tech, SDK vendors, competitive intel teams, agencies
+						</p>
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Everything in Premium</li>
-						<li>SDK exports and usage lists</li>
-						<li>Bulk company reports</li>
+						<li>Export all apps for any company</li>
+						<li>Export all apps per SDK/API breakdowns</li>
 					</ul>
 					<form
 						method="POST"
@@ -118,12 +120,12 @@
 					<div>
 						<p class="text-xs uppercase tracking-wide opacity-60">App-Ads.txt</p>
 						<p class="text-2xl font-semibold">$299</p>
-						<p class="text-xs opacity-70">Ad networks, publishers, ad ops teams</p>
+						<p class="text-xs opacity-70">Ad networks, DSPs, stock traders</p>
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Everything in Premium</li>
-						<li>Daily app-ads.txt downloads</li>
-						<li>Historical snapshots</li>
+						<li>Daily app-ads.txt files per company / ad domain.</li>
+						<li>Daily bulk app-ads.txt dataset ~80GB</li>
 					</ul>
 					<form
 						method="POST"
@@ -147,11 +149,11 @@
 					<div>
 						<p class="text-xs uppercase tracking-wide opacity-60">Premium B2B</p>
 						<p class="text-2xl font-semibold">$499</p>
-						<p class="text-xs opacity-70">Agencies and larger companies</p>
+						<p class="text-xs opacity-70">Larger companies, ad networks, hedge funds</p>
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Business SDK + App-Ads.txt</li>
-						<li>Combined access + higher limits</li>
+						<li>Custom reporting and data requests</li>
 					</ul>
 					<form
 						method="POST"

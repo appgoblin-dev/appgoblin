@@ -137,7 +137,7 @@ def get_companies_category_tag_type_stats(
                 "app_category",
                 "type_url_slug",
             ]
-        )[["app_count", "installs_d30", "rating_count_d30"]]
+        )[["app_count", "installs_d30"]]
         .sum()
         .reset_index()
     )
@@ -359,7 +359,7 @@ def get_companies_parent_category_stats(
                         "app_category",
                         "tag_source",
                     ]
-                )[["app_count", "installs_d30", "rating_count_d30"]]
+                )[["app_count", "installs_d30"]]
                 .sum()
                 .reset_index()
             )
@@ -610,8 +610,37 @@ def get_company_categories_topn(
 
 
 @cache_by_params
+def get_category_tag_type_stats(
+    state: State, type_slug: str, category: str | None = None
+) -> pd.DataFrame:
+    """Get category tag type stats."""
+    df = pd.read_sql(sql.category_tag_type_stats, state.dbcon.engine)
+    df = df[df["type_url_slug"] == type_slug]
+    if category:
+        df = df[df["app_category"] == category]
+    else:
+        df["app_category"] = "all"
+    logger.info("Loading category tag type stats...")
+    df = df.rename(
+        columns={
+            "app_count": "cat_total_app_count",
+            "installs_d30": "cat_total_installs_d30",
+        }
+    )
+    df = (
+        df.groupby(["store", "tag_source", "app_category"])[
+            ["cat_total_app_count", "cat_total_installs_d30"]
+        ]
+        .sum()
+        .reset_index()
+    )
+    df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
+    return df
+
+
+@cache_by_params
 def get_tag_source_category_totals(
-    state: State, app_category: str | None = None
+    state: State, app_category: str | None = None, type_slug: str | None = None
 ) -> pd.DataFrame:
     """Get category totals."""
     if app_category:
@@ -627,7 +656,6 @@ def get_tag_source_category_totals(
                 df["app_category"].str.contains("game"),
                 "app_category",
             ] = "games"
-
     else:
         df = pd.read_sql(
             sql.category_totals,
@@ -641,9 +669,7 @@ def get_tag_source_category_totals(
             [
                 "app_count",
                 "installs_total",
-                "rating_count_total",
                 "installs_d30",
-                "rating_count_d30",
             ]
         ]
         .sum()
@@ -653,9 +679,7 @@ def get_tag_source_category_totals(
         columns={
             "app_count": "cat_total_app_count",
             "installs_total": "cat_total_installs",
-            "rating_count_total": "cat_total_rating_count",
             "installs_d30": "cat_total_installs_d30",
-            "rating_count_d30": "cat_total_rating_count_d30",
         }
     )
     df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})

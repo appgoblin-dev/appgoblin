@@ -112,25 +112,27 @@
 				{#if data.subscription}
 					<div class="flex justify-between items-center mb-4">
 						<div>
-							<p class="font-medium text-lg capitalize">
-								{#if data.subscription.status === 'active' && data.subscription.cancel_at}
+							{#if data.subscription.status === 'active' && data.subscription.cancel_at}
+								<p class="text-sm text-warning-500">
 									Active (Cancels {new Date(data.subscription.cancel_at).toLocaleDateString()})
-								{:else}
+								</p>
+							{:else}
+								<p class="font-medium text-lg capitalize">
 									{data.subscription.status}
-								{/if}
-							</p>
+								</p>
+							{/if}
 							{#if data.subscriptionTier}
 								<p class="text-sm text-surface-500">Plan: {data.subscriptionTier}</p>
 							{:else}
 								<p class="text-sm text-surface-500">Plan: Unknown</p>
 							{/if}
-							<p class="text-sm text-surface-500">
-								{#if data.subscription.cancel_at}
-									Access available until end of period
-								{:else}
+							{#if data.subscription.cancel_at}
+								<p class="text-sm text-warning-500">Access available until end of period</p>
+							{:else}
+								<p class="text-sm text-surface-500">
 									Renews on {new Date(data.subscription.current_period_end).toLocaleDateString()}
-								{/if}
-							</p>
+								</p>
+							{/if}
 						</div>
 						<span
 							class="badge text-white {data.subscription.status === 'active'
