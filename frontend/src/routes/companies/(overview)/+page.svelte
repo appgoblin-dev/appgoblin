@@ -38,10 +38,6 @@
 	<meta name="robots" content="index, follow" />
 </svelte:head>
 
-<div class="flex items-center mb-2">
-	<h1 class="h1 text-3xl font-bold text-primary-900-100">Companies Overview</h1>
-	<div class="h-8 w-px bg-gray-300 mx-2"></div>
-</div>
 
 {#if typeof data.companiesOverview == 'string'}
 	<p class="text-red-500 text-center">Failed to load companies details.</p>

@@ -18,6 +18,14 @@
 	import WhiteCard from './WhiteCard.svelte';
 </script>
 
+<div class="grid grid-cols-1 gap-8 mt-6">
+	<!-- MAIN TABLE -->
+	<div class="card preset-tonal">
+		<div class="card-content">
+			{@render mainTable()}
+		</div>
+	</div>
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
 	<!-- SDK Section -->
 	<WhiteCard>
@@ -87,11 +95,5 @@
 		</WhiteCard>
 	{/if}
 </div>
-<div class="grid grid-cols-1 gap-8 mt-6">
-	<!-- MAIN TABLE -->
-	<div class="card preset-tonal">
-		<div class="card-content">
-			{@render mainTable()}
-		</div>
-	</div>
+
 </div>
