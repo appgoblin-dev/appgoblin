@@ -1,7 +1,16 @@
 <script lang="ts">
 	import { formatNumber, formatNumberLocale } from '$lib/utils/formatNumber';
 
+	import { page } from '$app/state';
+
 	let { myTotals, myType, hideAdstxtApps = false, companyName } = $props();
+
+	let categoryTitle = $derived(
+		page.params.category
+			? (page.data?.appCats?.categories?.find((c: { id: string }) => c.id === page.params.category)
+					?.name ?? 'All')
+			: null
+	);
 
 	const titleFont = 'text-xl text-primary-900-100 tracking-wide';
 	const subTitleFont = 'text-large text-primary-800-200 tracking-wide';
@@ -10,7 +19,12 @@
 </script>
 
 <div class="table-container p-4">
-	<div class={titleFont}>Apps with {companyName} SDKs</div>
+	<div class={titleFont}>
+		{categoryTitle ? `${categoryTitle} Apps` : 'Apps'} with {companyName} SDKs
+		<p class="text-xs text-surface-500">
+			Verified SDK counts are based on apps decompiled by AppGoblin.
+		</p>
+	</div>
 	{#if myTotals.sdk_android_total_apps === 0 && myTotals.sdk_ios_total_apps === 0}
 		<p class={greyFont}>
 			No apps with {companyName} SDKs found. Please feel free to contact if you would like this mapped.
@@ -26,14 +40,16 @@
 			</thead>
 			<tbody>
 				<tr>
-					<td class="py-2 px-1 {rowTitleFont}">Apps</td>
+					<td class="py-2 px-1 {rowTitleFont}"
+						>{categoryTitle ? `${categoryTitle} Apps` : 'Apps'}</td
+					>
 					<td class="py-2 px-1">{formatNumberLocale(myTotals.sdk_android_total_apps)}</td>
 					<td class="py-2 px-1">{formatNumberLocale(myTotals.sdk_ios_total_apps)}</td>
 				</tr>
 				<tr>
 					<td class="py-2 px-1 {rowTitleFont}">Monthly Installs</td>
 					<td class="py-2 px-1">{formatNumber(myTotals.sdk_android_installs_d30)}</td>
-					<td class="py-2 px-1">{formatNumber(myTotals.sdk_ios_rating_count_d30 * 100)}</td>
+					<td class="py-2 px-1">{formatNumber(myTotals.sdk_ios_installs_d30)}</td>
 				</tr>
 			</tbody>
 		</table>

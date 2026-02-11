@@ -6,7 +6,9 @@
 	import ShieldCheck from 'lucide-svelte/icons/shield-check';
 	import LogOut from 'lucide-svelte/icons/log-out';
 
-	let { data } = $props();
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
@@ -102,9 +104,60 @@
 			</div>
 		</section>
 
+		<!-- Subscription Section -->
+		<section class="space-y-4">
+			<h2 class="text-lg font-semibold">Subscription</h2>
+
+			<div class="p-4 rounded-lg bg-surface-100-900 border border-surface-200-800">
+				{#if data.subscription}
+					<div class="flex justify-between items-center mb-4">
+						<div>
+							{#if data.subscription.status === 'active' && data.subscription.cancel_at}
+								<p class="text-sm text-warning-500">
+									Active (Cancels {new Date(data.subscription.cancel_at).toLocaleDateString()})
+								</p>
+							{:else}
+								<p class="font-medium text-lg capitalize">
+									{data.subscription.status}
+								</p>
+							{/if}
+							{#if data.subscriptionTier}
+								<p class="text-sm text-surface-500">Plan: {data.subscriptionTier}</p>
+							{:else}
+								<p class="text-sm text-surface-500">Plan: Unknown</p>
+							{/if}
+							{#if data.subscription.cancel_at}
+								<p class="text-sm text-warning-500">Access available until end of period</p>
+							{:else}
+								<p class="text-sm text-surface-500">
+									Renews on {new Date(data.subscription.current_period_end).toLocaleDateString()}
+								</p>
+							{/if}
+						</div>
+						<span
+							class="badge text-white {data.subscription.status === 'active'
+								? 'preset-filled-success-100-900'
+								: 'preset-filled-warning-900-100'}"
+						>
+							{data.subscription.status.charAt(0).toUpperCase() + data.subscription.status.slice(1)}
+						</span>
+					</div>
+
+					<form method="POST" action="?/portal" use:enhance>
+						<button type="submit" class="btn preset-tonal w-full">Manage Subscription</button>
+					</form>
+				{:else}
+					<div class="text-center py-4">
+						<p class="text-surface-600-400 mb-2">Plan: Free</p>
+						<a href="/pricing" class="btn preset-filled-primary-500">View Pricing</a>
+					</div>
+				{/if}
+			</div>
+		</section>
+
 		<!-- Sign Out -->
 		<section class="pt-4 border-t border-surface-300-700">
-			<form method="post" use:enhance>
+			<form method="post" action="?/logout" use:enhance>
 				<button class="btn preset-tonal w-full flex items-center justify-center gap-2">
 					<span class="flex items-center justify-center gap-2"> <LogOut size={18} /> Sign Out</span>
 				</button>

@@ -6,7 +6,6 @@ SELECT
     type_url_slug,
     app_count,
     installs_d30,
-    rating_count_d30,
     COALESCE(company_name, company_domain) AS company_name
 FROM
     frontend.companies_category_tag_type_stats
