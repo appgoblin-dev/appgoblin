@@ -17,41 +17,51 @@
 		<span>{data.companyName}'s Data Exports</span>
 	{/snippet}
 	<div class="p-4 flex flex-col gap-4">
-		<p>Raw data downloads for {data.companyName}.</p>
+		<p>
+			Raw data downloads for {data.companyName}. This data is for paid members. Please
+			<a href="/pricing" class="underline hover:text-primary-600-400">upgrade</a> to download or reach
+			out to us if you have any questions.
+		</p>
 
 		{#if data.canDownload && data.downloadUrls}
 			<div class="flex flex-wrap gap-4">
 				{#if data.downloadUrls.appAdsTxt}
 					<a
 						href={data.downloadUrls.appAdsTxt}
-						class="btn preset-filled-primary-500"
+						class="btn preset-filled-primary-100-900"
 						download
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						Download {data.companyName}'s app-ads.txt (iOS + Android)
+						<p class="text-white">
+							Download {data.companyName}'s app-ads.txt (iOS + Android)
+						</p>
 					</a>
 				{/if}
 				{#if data.downloadUrls.companyVerifiedAndroid}
 					<a
 						href={data.downloadUrls.companyVerifiedAndroid}
-						class="btn preset-filled-primary-500"
+						class="btn preset-filled-primary-100-900"
 						download
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						Download {data.companyName}'s SDK/API traffic (Android)
+						<p class="text-white">
+							Download {data.companyName}'s SDK/API traffic (Android)
+						</p>
 					</a>
 				{/if}
 				{#if data.downloadUrls.companyVerifiedIos}
 					<a
 						href={data.downloadUrls.companyVerifiedIos}
-						class="btn preset-filled-primary-500"
+						class="btn preset-filled-primary-100-900"
 						download
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						Download {data.companyName}'s SDK/API traffic (iOS)
+						<p class="text-white">
+							Download {data.companyName}'s SDK/API traffic (iOS)
+						</p>
 					</a>
 				{/if}
 			</div>

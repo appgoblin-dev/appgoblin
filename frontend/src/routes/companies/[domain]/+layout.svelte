@@ -156,7 +156,7 @@
 			? 'variant-filled-primary'
 			: 'variant-ghost-surface'}"
 	>
-		Overview
+		{data.companyTree.queried_company_name || data.companyTree.queried_company_domain} Apps Overview
 	</a>
 	<a
 		href={`/companies/${data.companyTree.queried_company_domain}/mediation`}
@@ -164,7 +164,7 @@
 			? 'variant-filled-primary'
 			: 'variant-ghost-surface'}"
 	>
-		Mediation
+		{data.companyTree.queried_company_name || data.companyTree.queried_company_domain} Mediation Adapters
 	</a>
 	<a
 		href={`/companies/${data.companyTree.queried_company_domain}/creatives`}
@@ -196,7 +196,7 @@
 			? 'variant-filled-primary'
 			: 'variant-ghost-surface'}"
 	>
-		Data Exports
+		{data.companyTree.queried_company_name || data.companyTree.queried_company_domain} Data Exports
 	</a>
 </div>
 

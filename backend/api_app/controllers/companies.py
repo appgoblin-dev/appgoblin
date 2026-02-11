@@ -39,6 +39,7 @@ from api_app.models import (
 )
 from config import get_logger
 from dbcon.queries import (
+    get_category_tag_type_stats,
     get_companies_category_tag_type_stats,
     get_companies_parent_category_stats,
     get_companies_tag_type_stats,
@@ -223,7 +224,7 @@ def prep_companies_overview_df(
         overview_df.groupby(
             ["company_name", "company_domain", "store", "tag_source"],
             dropna=False,
-        )[["app_count", "cat_total_app_count", "installs_d30", "rating_count_d30"]]
+        )[["app_count", "cat_total_app_count", "installs_d30"]]
         .sum()
         .reset_index()
     )
@@ -248,11 +249,6 @@ def prep_companies_overview_df(
     sdk_cols = [x for x in store_tag_source_cols if "sdk" in x]
     adstxt_cols = [x for x in store_tag_source_cols if "app_ads" in x]
     adstxt_direct_cols = [x for x in adstxt_cols if "direct" in x]
-
-    # NOTE: Hacky way to handle iOS with no installs
-    overview_df.loc[overview_df["installs_d30"] == 0, "installs_d30"] = (
-        overview_df.loc[overview_df["installs_d30"] == 0, "rating_count_d30"] * 50
-    )
 
     pivoted_df = overview_df.pivot(
         index=["company_name", "company_domain"],
@@ -312,38 +308,46 @@ def get_overviews(
 
     if type_slug:
         if category:
-            overview_df = get_companies_category_tag_type_stats(
+            companies_df = get_companies_category_tag_type_stats(
                 state=state, type_slug=type_slug, app_category=category
             )
         else:
-            overview_df = get_companies_tag_type_stats(state=state, type_slug=type_slug)
-
+            companies_df = get_companies_tag_type_stats(
+                state=state, type_slug=type_slug
+            )
     else:
-        overview_df = get_companies_parent_category_stats(
+        companies_df = get_companies_parent_category_stats(
             state=state, app_category=category
         )
 
-    tag_source_category_app_counts = get_tag_source_category_totals(
-        state=state, app_category=category
-    )
+    if type_slug:
+        tag_source_category_app_counts = get_category_tag_type_stats(
+            state, type_slug=type_slug, category=category
+        )
+    else:
+        tag_source_category_app_counts = get_tag_source_category_totals(
+            state=state, app_category=category
+        )
 
-    overview_df = overview_df.merge(
+    companies_df = companies_df.merge(
         tag_source_category_app_counts,
         on=["app_category", "store", "tag_source"],
         validate="m:1",
     )
 
-    category_overview = make_companies_stats(
-        df=overview_df.copy(),
+    category_overview_stats = make_companies_stats(
+        df=companies_df.copy(),
         tag_source_category_app_counts=tag_source_category_app_counts,
+        category=category,
+        type_slug=type_slug,
     )
 
-    overview_df = prep_companies_overview_df(state, overview_df)
+    companies_df = prep_companies_overview_df(state, companies_df)
 
     results = CompaniesOverview(
-        companies_overview=overview_df.to_dict(orient="records"),
+        companies_overview=companies_df.to_dict(orient="records"),
         top=top_companies_short,
-        categories=category_overview,
+        categories=category_overview_stats,
     )
 
     return results
@@ -384,17 +388,20 @@ def append_overall_categories(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def make_companies_stats(
-    df: pd.DataFrame, tag_source_category_app_counts: pd.DataFrame
+    df: pd.DataFrame,
+    tag_source_category_app_counts: pd.DataFrame,
+    category: str | None = None,
+    type_slug: str | None = None,
 ) -> CompaniesCategoryOverview:
     """Make category sums for overview."""
     overview = CompaniesCategoryOverview()
 
     # Precompute boolean masks
-    is_apple = df["store"].str.contains("Apple")
-    is_google = df["store"].str.contains("Google")
-    is_sdk = df["tag_source"] == "sdk"
-    is_app_ads_reseller = df["tag_source"] == "app_ads_reseller"
-    is_app_ads_direct = df["tag_source"] == "app_ads_direct"
+    df_is_apple = df["store"].str.contains("Apple")
+    df_is_google = df["store"].str.contains("Google")
+    df_is_sdk = df["tag_source"] == "sdk"
+    df_is_app_ads_reseller = df["tag_source"] == "app_ads_reseller"
+    df_is_app_ads_direct = df["tag_source"] == "app_ads_direct"
 
     # Function to calculate unique counts
     def get_unique_company_counts(mask: pd.Series) -> int:
@@ -403,73 +410,92 @@ def make_companies_stats(
     def get_installs_d30(mask: pd.Series) -> int:
         return df.loc[mask, "installs_d30"].sum()
 
-    def get_rating_count_d30(mask: pd.Series) -> int:
-        return df.loc[mask, "rating_count_d30"].sum()
-
     def get_app_count(mask: pd.Series) -> int:
         return int(df.loc[mask, "app_count"].sum())
 
     # Calculate overall stats
     overall_stats = {
         "total_companies": df["company_domain"].nunique(),
-        "sdk_ios_total_apps": get_app_count(is_apple & is_sdk),
-        "sdk_android_total_apps": get_app_count(is_google & is_sdk),
-        "sdk_ios_total_companies": get_unique_company_counts(is_apple & is_sdk),
-        "sdk_android_total_companies": get_unique_company_counts(is_google & is_sdk),
+        "sdk_ios_total_companies": get_unique_company_counts(df_is_apple & df_is_sdk),
+        "sdk_android_total_companies": get_unique_company_counts(
+            df_is_google & df_is_sdk
+        ),
         "adstxt_direct_ios_total_companies": get_unique_company_counts(
-            is_apple & is_app_ads_direct
+            df_is_apple & df_is_app_ads_direct
         ),
         "adstxt_direct_android_total_companies": get_unique_company_counts(
-            is_google & is_app_ads_direct,
+            df_is_google & df_is_app_ads_direct,
         ),
         "adstxt_reseller_ios_total_companies": get_unique_company_counts(
-            is_apple & is_app_ads_reseller,
+            df_is_apple & df_is_app_ads_reseller,
         ),
         "adstxt_reseller_android_total_companies": get_unique_company_counts(
-            is_google & is_app_ads_reseller,
-        ),
-        "sdk_android_installs_d30": get_installs_d30(is_google & is_sdk),
-        "sdk_ios_rating_count_d30": get_rating_count_d30(is_apple & is_sdk),
-        "adstxt_direct_android_installs_d30": get_installs_d30(
-            is_google & is_app_ads_direct
-        ),
-        "adstxt_direct_ios_rating_count_d30": get_rating_count_d30(
-            is_apple & is_app_ads_direct
-        ),
-        "adstxt_reseller_android_installs_d30": get_installs_d30(
-            is_google & is_app_ads_reseller
-        ),
-        "adstxt_reseller_ios_rating_count_d30": get_rating_count_d30(
-            is_apple & is_app_ads_reseller
+            df_is_google & df_is_app_ads_reseller,
         ),
     }
-    overview.update_stats("all", **overall_stats)
 
-    is_apple = tag_source_category_app_counts["store"].str.contains("Apple")
-    is_google = tag_source_category_app_counts["store"].str.contains("Google")
-    is_sdk = tag_source_category_app_counts["tag_source"] == "sdk"
-    is_app_ads_reseller = (
+    tag_source_category_app_counts_is_apple = tag_source_category_app_counts[
+        "store"
+    ].str.contains("Apple")
+    tag_source_category_app_counts_is_google = tag_source_category_app_counts[
+        "store"
+    ].str.contains("Google")
+    tag_source_category_app_counts_is_sdk = (
+        tag_source_category_app_counts["tag_source"] == "sdk"
+    )
+    tag_source_category_app_counts_is_app_ads_reseller = (
         tag_source_category_app_counts["tag_source"] == "app_ads_reseller"
     )
-    is_app_ads_direct = tag_source_category_app_counts["tag_source"] == "app_ads_direct"
+    tag_source_category_app_counts_is_app_ads_direct = (
+        tag_source_category_app_counts["tag_source"] == "app_ads_direct"
+    )
 
     sdk_app_counts = {
         "sdk_total_apps": int(
-            tag_source_category_app_counts[is_sdk]["cat_total_app_count"].sum()
+            tag_source_category_app_counts[tag_source_category_app_counts_is_sdk][
+                "cat_total_app_count"
+            ].sum()
         ),
-        # This gives the same sum regardless of copmany type
-        # "sdk_android_total_apps": int(
-        #     tag_source_category_app_counts[is_sdk & is_google][
-        #         "cat_total_app_count"
-        #     ].sum()
-        # ),
-        # "sdk_ios_total_apps": int(
-        #     tag_source_category_app_counts[is_sdk & is_apple][
-        #         "cat_total_app_count"
-        #     ].sum()
-        # ),
+        # This is the unique total across all company types
     }
+    sdk_app_counts.update(
+        {
+            "sdk_android_total_apps": int(
+                tag_source_category_app_counts[
+                    tag_source_category_app_counts_is_sdk
+                    & tag_source_category_app_counts_is_google
+                ]["cat_total_app_count"].sum()
+            ),
+            "sdk_ios_total_apps": int(
+                tag_source_category_app_counts[
+                    tag_source_category_app_counts_is_sdk
+                    & tag_source_category_app_counts_is_apple
+                ]["cat_total_app_count"].sum()
+            ),
+            "sdk_android_installs_d30": int(
+                tag_source_category_app_counts[
+                    tag_source_category_app_counts_is_sdk
+                    & tag_source_category_app_counts_is_google
+                ]["cat_total_installs_d30"].sum()
+            ),
+            "sdk_ios_installs_d30": int(
+                tag_source_category_app_counts[
+                    tag_source_category_app_counts_is_sdk
+                    & tag_source_category_app_counts_is_apple
+                ]["cat_total_installs_d30"].sum()
+            ),
+        }
+    )
+    # else:
+    #     overall_stats.update({
+    #     # On overview page, this is incorreclty added per company when there are overlapping apps
+    #     "sdk_ios_total_apps": get_app_count(df_is_apple & df_is_sdk),
+    #     "sdk_android_total_apps": get_app_count(df_is_google & df_is_sdk),
+    #     "sdk_android_installs_d30": get_installs_d30(df_is_google & df_is_sdk),
+    #     "sdk_ios_installs_d30": get_installs_d30(df_is_apple & df_is_sdk),
+    #     })
 
+    overview.update_stats("all", **overall_stats)
     overview.update_stats("all", **sdk_app_counts)
 
     return overview
@@ -505,11 +531,6 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
         for key, condition in conditions.items()
     }
 
-    res_rating_count_d30 = {
-        key: df.loc[condition, "rating_count_d30"].sum()
-        for key, condition in conditions.items()
-    }
-
     # Unpack results
     (
         sdk_ios_total_apps,
@@ -537,15 +558,15 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
         res_installs_d30["adstxt_reseller_android"],
     )
 
-    (
-        sdk_ios_rating_count_d30,
-        adstxt_direct_ios_rating_count_d30,
-        adstxt_reseller_ios_rating_count_d30,
-    ) = (
-        res_rating_count_d30["sdk_ios"],
-        res_rating_count_d30["adstxt_direct_ios"],
-        res_rating_count_d30["adstxt_reseller_ios"],
-    )
+    # (
+    # sdk_ios_rating_count_d30,
+    # adstxt_direct_ios_rating_count_d30,
+    # adstxt_reseller_ios_rating_count_d30,
+    # ) = (
+    #     res_rating_count_d30["sdk_ios"],
+    #     res_rating_count_d30["adstxt_direct_ios"],
+    #     res_rating_count_d30["adstxt_reseller_ios"],
+    # )
 
     sdk_total_apps = sdk_ios_total_apps + sdk_android_total_apps
     total_apps = (
@@ -569,9 +590,6 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
         sdk_android_installs_d30=int(sdk_android_installs_d30),
         adstxt_direct_android_installs_d30=int(adstxt_direct_android_installs_d30),
         adstxt_reseller_android_installs_d30=int(adstxt_reseller_android_installs_d30),
-        sdk_ios_rating_count_d30=int(sdk_ios_rating_count_d30),
-        adstxt_direct_ios_rating_count_d30=int(adstxt_direct_ios_rating_count_d30),
-        adstxt_reseller_ios_rating_count_d30=int(adstxt_reseller_ios_rating_count_d30),
     )
     cats = df.app_category.unique().tolist()
     for cat in cats:
@@ -605,10 +623,6 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
             key: df.loc[condition, "installs_d30"].sum()
             for key, condition in conditions.items()
         }
-        res_rating_count_d30 = {
-            key: df.loc[condition, "rating_count_d30"].sum()
-            for key, condition in conditions.items()
-        }
 
         # Unpack results
         (
@@ -637,16 +651,6 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
             res_installs_d30["adstxt_reseller_android"],
         )
 
-        (
-            sdk_ios_rating_count_d30,
-            adstxt_direct_ios_rating_count_d30,
-            adstxt_reseller_ios_rating_count_d30,
-        ) = (
-            res_rating_count_d30["sdk_ios"],
-            res_rating_count_d30["adstxt_direct_ios"],
-            res_rating_count_d30["adstxt_reseller_ios"],
-        )
-
         sdk_total_apps = sdk_ios_total_apps + sdk_android_total_apps
         total_apps = (
             sdk_total_apps
@@ -670,11 +674,6 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
             adstxt_direct_android_installs_d30=int(adstxt_direct_android_installs_d30),
             adstxt_reseller_android_installs_d30=int(
                 adstxt_reseller_android_installs_d30
-            ),
-            sdk_ios_rating_count_d30=int(sdk_ios_rating_count_d30),
-            adstxt_direct_ios_rating_count_d30=int(adstxt_direct_ios_rating_count_d30),
-            adstxt_reseller_ios_rating_count_d30=int(
-                adstxt_reseller_ios_rating_count_d30
             ),
         )
     return overview
