@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { createApiClient } from '$lib/server/api';
+import { db } from '$lib/server/auth/db';
 
 interface CompanyRaw {
 	company_name: string | null;
@@ -7,7 +8,20 @@ interface CompanyRaw {
 	total_apps: number;
 }
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, locals }) => {
+	const user = locals.user;
+	let hasPaidAccess = false;
+
+	if (user) {
+		const row = await db.queryOne<{ status: string }>(
+			`SELECT status FROM subscriptions
+			 WHERE user_id = $1 AND status IN ('active', 'trialing')
+			 ORDER BY created_at DESC LIMIT 1`,
+			[user.id]
+		);
+		hasPaidAccess = !!row;
+	}
+
 	const api = createApiClient(fetch);
 
 	// Load companies for the dropdown filters
@@ -30,7 +44,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	return {
 		companies,
-		categories
+		categories,
+		hasPaidAccess
 	};
 };
 

@@ -7,6 +7,7 @@
 	import { formatNumber } from '$lib/utils/formatNumber';
 	import { enhance } from '$app/forms';
 	import CrossfilterAppsTable from '$lib/CrossfilterAppsTable.svelte';
+	import WhiteCard from '$lib/WhiteCard.svelte';
 
 	// TanStack Table Imports
 	import { type SortingState } from '@tanstack/table-core';
@@ -37,6 +38,8 @@
 	}
 
 	let { data, form } = $props();
+
+	const hasPaidAccess = $derived(data.hasPaidAccess ?? false);
 
 	// Safely access companies with fallback to empty array
 	let companies = $derived<Company[]>(data.companies ?? []);
@@ -163,20 +166,124 @@
 </script>
 
 <svelte:head>
-	<title>Top Apps Analytics - AppGoblin</title>
+	<title>App Explorer - AppGoblin</title>
 	<meta
 		name="description"
-		content="Find top apps by SDK usage, monetization, and more. Filter by companies, IAP, ads, and SDK presence."
+		content="Powerful app discovery tool for sales teams. Find apps using specific SDKs, ad networks, and monetization strategies."
 	/>
 </svelte:head>
 
 <div class="container mx-auto px-2 md:px-4 py-4 md:py-8">
 	<div class="mb-6">
-		<h1 class="text-2xl md:text-3xl font-bold text-primary-900-100">Top Apps Analytics</h1>
+		<h1 class="text-2xl md:text-3xl font-bold text-primary-900-100">App Explorer</h1>
 		<p class="text-sm md:text-base text-surface-600-400 mt-2">
-			Find apps using specific SDKs, ad networks, and monetization strategies. Filter by company
-			presence, in-app purchases, and ad support.
+			Powerful app discovery and filtering tool for sales teams, market researchers, and app
+			developers.
 		</p>
+	</div>
+
+	{#if !hasPaidAccess}
+		<!-- Explanatory Content - Only shown to non-paid users -->
+		<WhiteCard>
+			{#snippet title()}
+				<span>About App Explorer / App CrossFilter / App Query</span>
+			{/snippet}
+			<div class="p-4 flex flex-col gap-4">
+				<div class="space-y-3">
+					<p>
+						The <strong>App Explorer</strong> (also known as <strong>App CrossFilter</strong> or
+						<strong>App Query</strong>) is a powerful tool that allows you to discover and filter
+						mobile apps based on multiple criteria simultaneously.
+					</p>
+
+					<div>
+						<h3 class="font-semibold text-lg mb-2">Key Features:</h3>
+						<ul class="list-disc list-inside space-y-2 text-sm">
+							<li>
+								<strong>SDK & Company Filtering:</strong> Find apps that use specific SDKs or companies
+								(include/exclude multiple companies)
+							</li>
+							<li>
+								<strong>Monetization Filters:</strong> Filter by in-app purchases, ad support, and SDK/API
+								detection requirements
+							</li>
+							<li>
+								<strong>Store & Category:</strong> Narrow down by app store (Google Play, Apple App Store)
+								and category
+							</li>
+							<li>
+								<strong>Metrics Filtering:</strong> Filter by install counts, rating counts, and monthly
+								installs with min/max ranges
+							</li>
+							<li>
+								<strong>Date Filtering:</strong> Find apps updated after a specific date
+							</li>
+							<li>
+								<strong>Export Results:</strong> Download filtered results as CSV for further analysis
+							</li>
+						</ul>
+					</div>
+
+					<div>
+						<h3 class="font-semibold text-lg mb-2">Use Cases:</h3>
+						<ul class="list-disc list-inside space-y-2 text-sm">
+							<li>
+								<strong>Sales Teams:</strong> Find potential customers by identifying apps using competitor
+								SDKs or specific technologies
+							</li>
+							<li>
+								<strong>Market Research:</strong> Analyze app ecosystems by filtering apps with specific
+								monetization strategies
+							</li>
+							<li>
+								<strong>Competitive Analysis:</strong> Discover apps in your category that use certain
+								SDKs or ad networks
+							</li>
+							<li>
+								<strong>Partnership Opportunities:</strong> Identify apps that could benefit from your
+								SDK or service
+							</li>
+						</ul>
+					</div>
+
+					<div class="mt-4 p-4 bg-surface-100-900 rounded-lg border border-surface-300-700">
+						<p class="text-sm mb-3">
+							<strong>Access Required:</strong> The App Explorer is available to paid subscribers at
+							any level. Please
+							<a href="/pricing" class="underline hover:text-primary-600-400"
+								>upgrade your account</a
+							> to use this tool.
+						</p>
+						<a href="/pricing" class="btn preset-filled-primary-500 inline-flex items-center gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+							</svg>
+							<span>View Pricing Plans</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</WhiteCard>
+	{/if}
+
+	<div class="mt-6">
+		{#if hasPaidAccess}
+			<h2 class="text-xl md:text-2xl font-bold text-primary-900-100 mb-4">Start Exploring</h2>
+		{:else}
+			<h2 class="text-xl md:text-2xl font-bold text-primary-900-100 mb-4">Preview</h2>
+		{/if}
 	</div>
 
 	<div class="grid grid-cols-2 lg:grid-cols-[320px_1fr] gap-4 md:gap-6">
@@ -187,41 +294,65 @@
 				<h2 class="text-lg font-semibold">Filters</h2>
 			</div>
 
+			{#if !hasPaidAccess}
+				<div class="mb-4 p-3 bg-warning-900-100/20 rounded-lg border border-warning-500">
+					<p class="text-xs text-warning-900-100 flex items-center gap-2">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+							<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+						</svg>
+						Filters are disabled. Upgrade to unlock.
+					</p>
+				</div>
+			{/if}
+
 			<form
 				method="POST"
 				action="?/search"
-				use:enhance={({ formData }) => {
-					// Manually append complex data structures
-					formData.append('include_domains', JSON.stringify(includeDomains));
-					formData.append('exclude_domains', JSON.stringify(excludeDomains));
-					formData.append('require_sdk_api', requireSdkApi.toString());
-					formData.append('require_iap', requireIap.toString());
-					formData.append('require_ads', requireAds.toString());
-					formData.append('mydate', myDate);
-					if (selectedCategory) formData.append('category', selectedCategory);
-					if (selectedStore) formData.append('store', selectedStore.toString());
+				use:enhance={hasPaidAccess
+					? ({ formData }) => {
+							// Manually append complex data structures
+							formData.append('include_domains', JSON.stringify(includeDomains));
+							formData.append('exclude_domains', JSON.stringify(excludeDomains));
+							formData.append('require_sdk_api', requireSdkApi.toString());
+							formData.append('require_iap', requireIap.toString());
+							formData.append('require_ads', requireAds.toString());
+							formData.append('mydate', myDate);
+							if (selectedCategory) formData.append('category', selectedCategory);
+							if (selectedStore) formData.append('store', selectedStore.toString());
 
-					// Metrics
-					if (minInstalls) formData.append('min_installs', minInstalls.toString());
-					if (maxInstalls) formData.append('max_installs', maxInstalls.toString());
-					if (minRatings) formData.append('min_rating_count', minRatings.toString());
-					if (maxRatings) formData.append('max_rating_count', maxRatings.toString());
-					if (minMonthlyInstalls)
-						formData.append('min_installs_d30', minMonthlyInstalls.toString());
-					if (maxMonthlyInstalls)
-						formData.append('max_installs_d30', maxMonthlyInstalls.toString());
+							// Metrics
+							if (minInstalls) formData.append('min_installs', minInstalls.toString());
+							if (maxInstalls) formData.append('max_installs', maxInstalls.toString());
+							if (minRatings) formData.append('min_rating_count', minRatings.toString());
+							if (maxRatings) formData.append('max_rating_count', maxRatings.toString());
+							if (minMonthlyInstalls)
+								formData.append('min_installs_d30', minMonthlyInstalls.toString());
+							if (maxMonthlyInstalls)
+								formData.append('max_installs_d30', maxMonthlyInstalls.toString());
 
-					// Sorting
-					formData.append('sort_col', sorting[0]?.id || 'installs');
-					formData.append('sort_order', sorting[0]?.desc ? 'desc' : 'asc');
+							// Sorting
+							formData.append('sort_col', sorting[0]?.id || 'installs');
+							formData.append('sort_order', sorting[0]?.desc ? 'desc' : 'asc');
 
-					isLoading = true;
+							isLoading = true;
 
-					return async ({ update }) => {
-						await update({ reset: false }); // Don't reset form fields
-						isLoading = false;
-					};
-				}}
+							return async ({ update }) => {
+								await update({ reset: false }); // Don't reset form fields
+								isLoading = false;
+							};
+						}
+					: undefined}
 				class="space-y-5"
 			>
 				<!-- Include Companies -->
@@ -234,10 +365,11 @@
 						<input
 							type="text"
 							id="include-search"
-							class="input text-sm"
+							class="input text-sm {!hasPaidAccess ? 'opacity-50 cursor-not-allowed' : ''}"
 							placeholder="Search companies..."
 							bind:value={includeSearch}
-							onfocus={() => (includeDropdownOpen = true)}
+							disabled={!hasPaidAccess}
+							onfocus={() => hasPaidAccess && (includeDropdownOpen = true)}
 							onblur={() => setTimeout(() => (includeDropdownOpen = false), 200)}
 						/>
 						{#if includeDropdownOpen && filteredIncludeCompanies().length > 0}
@@ -283,10 +415,11 @@
 						<input
 							type="text"
 							id="exclude-search"
-							class="input text-sm"
+							class="input text-sm {!hasPaidAccess ? 'opacity-50 cursor-not-allowed' : ''}"
 							placeholder="Search companies to exclude..."
 							bind:value={excludeSearch}
-							onfocus={() => (excludeDropdownOpen = true)}
+							disabled={!hasPaidAccess}
+							onfocus={() => hasPaidAccess && (excludeDropdownOpen = true)}
 							onblur={() => setTimeout(() => (excludeDropdownOpen = false), 200)}
 						/>
 						{#if excludeDropdownOpen && filteredExcludeCompanies().length > 0}
@@ -453,9 +586,25 @@
 					<button
 						type="submit"
 						class="btn preset-filled-primary-500 w-full flex items-center justify-center gap-2"
-						disabled={isLoading || includeDomains.length === 0}
+						disabled={!hasPaidAccess || isLoading || includeDomains.length === 0}
 					>
-						{#if isLoading}
+						{#if !hasPaidAccess}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+							</svg>
+							Locked - Upgrade Required
+						{:else if isLoading}
 							<Loader2 size={18} class="animate-spin" />
 							Searching...
 						{:else}
@@ -496,7 +645,53 @@
 
 		<!-- Results Table -->
 		<main class="card preset-tonal p-4 overflow-hidden">
-			{#if !hasSearched()}
+			{#if !hasPaidAccess}
+				<div class="text-center py-16 relative">
+					<div class="absolute inset-0 flex items-center justify-center opacity-10">
+						<Filter size={120} class="text-surface-500" />
+					</div>
+					<div class="relative z-10">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="64"
+							height="64"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							class="mx-auto mb-4 text-surface-500"
+						>
+							<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+							<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+						</svg>
+						<p class="text-lg font-medium mb-2">Results Area Locked</p>
+						<p class="text-sm text-surface-600-400 mb-4">
+							App search results will appear here once you upgrade. Configure filters on the left to
+							see what you can discover.
+						</p>
+						<a href="/pricing" class="btn preset-filled-primary-500 inline-flex items-center gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+							</svg>
+							<span>Upgrade to Unlock</span>
+						</a>
+					</div>
+				</div>
+			{:else if !hasSearched()}
 				<div class="text-center py-16 text-surface-500">
 					<Filter size={48} class="mx-auto mb-4 opacity-50" />
 					<p class="text-lg font-medium">Configure your filters</p>

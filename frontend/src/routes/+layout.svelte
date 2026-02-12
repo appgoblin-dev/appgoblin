@@ -111,6 +111,10 @@
 			<div class="mb-2">
 				<a href="/about" class="underline hover:text-primary-900-100">About AppGoblin</a>
 				&nbsp;|&nbsp;
+				<a href="/blog" class="underline hover:text-primary-900-100">Blog</a>
+				&nbsp;|&nbsp;
+				<a href="/reports" class="underline hover:text-primary-900-100">Reports</a>
+				&nbsp;|&nbsp;
 				<a href="/pricing" class="underline hover:text-primary-900-100">Pricing</a>
 				&nbsp;|&nbsp;
 				<a href="/privacy_policy.html" class="underline hover:text-primary-900-100"
