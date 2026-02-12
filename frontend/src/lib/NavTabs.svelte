@@ -46,6 +46,12 @@
 			</p>
 		</a>
 		<div class={myDivider}></div>
+		<a href="/app-explorer">
+			<p class={isHighlighted('/app-explorer') ? topBarHighlightedFont : topBarFont}>
+				APP EXPLORER
+			</p>
+		</a>
+		<div class={myDivider}></div>
 		<a href="/blog">
 			<p class={isHighlighted('/blog') ? topBarHighlightedFont : topBarFont}>BLOG</p>
 		</a>
