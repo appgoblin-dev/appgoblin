@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CompanyFullDetails } from '../../../../../types';
+	import type { CompanyFullDetails } from '../../../../types';
 	import MediationAdaptersTable from '$lib/MediationAdaptersTable.svelte';
 	import WhiteCard from '$lib/WhiteCard.svelte';
 

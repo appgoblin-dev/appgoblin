@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CompanyFullDetails } from '../../../../../types';
+	import type { CompanyFullDetails } from '../../../../types';
 	import AdCard from '$lib/AdCard.svelte';
 	import WhiteCard from '$lib/WhiteCard.svelte';
 

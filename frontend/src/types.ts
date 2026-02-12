@@ -480,6 +480,7 @@ export interface CompanyFullDetails {
 	error?: string;
 	companyDetails: CompanyCategoryOverview;
 	companyTopApps: CompanyOverviewSections;
+	appCats: CatData;
 
 	companyTree: ParentCompanyTree;
 	companySdks: CompanySDKsDict;
