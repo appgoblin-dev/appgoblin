@@ -11,11 +11,11 @@ from typing import Self
 
 import numpy as np
 import pandas as pd
-from adscrawler.app_stores import apple, google, scrape_stores
 from litestar import Controller, Response, get, post
 from litestar.background_tasks import BackgroundTask
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException
+from litestar.params import Parameter
 
 from api_app.models import (
     AdsTxtEntries,
@@ -46,6 +46,7 @@ from dbcon.queries import (
     get_single_app_keywords,
     get_single_apps_adstxt,
     insert_sdk_scan_request,
+    insert_search_query,
     query_apps_crossfilter,
     search_apps,
 )
@@ -71,25 +72,6 @@ def api_call_dfs(state: State, store_id: str) -> pd.DataFrame:
     return df
 
 
-def search_both_stores(state: State, search_term: str) -> None:
-    """Search both stores and return resulting AppGroup."""
-    try:
-        google_full_results = google.search_play_store(search_term)
-        if len(google_full_results) > 0:
-            process_search_results(state.dbconwrite, google_full_results, store=1)
-    except Exception as e:
-        logger.error(f"Error searching Google Play Store: {e}")
-    try:
-        apple_ids = apple.search_app_store_for_ids(search_term)
-        if len(apple_ids) > 0:
-            apple_full_results = [
-                {"store_id": store_id, "store": 2} for store_id in apple_ids
-            ]
-            process_search_results(state.dbconwrite, apple_full_results, store=2)
-    except Exception as e:
-        logger.error(f"Error searching both stores: {e}")
-
-
 def get_search_results(state: State, search_term: str) -> dict:
     """Parse search term and return resulting AppGroup."""
     decoded_input = urllib.parse.unquote(search_term)
@@ -112,18 +94,6 @@ def get_search_results(state: State, search_term: str) -> dict:
         f"{search_term=} returned rows: {len(apple_apps_dict)} {len(google_apps_dict)}"
     )
     return app_group
-
-
-def process_search_results(dbconwrite, results: list[dict], store: int) -> None:
-    """After having queried an external app store send results to db."""
-    logger.info(f"background:search results to be processed {len(results)} {store=}")
-    scrape_stores.process_scraped(
-        database_connection=dbconwrite,
-        ranked_dicts=results,
-        crawl_source="appgoblin_search",
-        store=store,
-    )
-    logger.info("background:search results done")
 
 
 def attach_rating_history(app_hist: pd.DataFrame, star_cols: list[str]) -> pd.DataFrame:
@@ -831,13 +801,19 @@ class AppController(Controller):
         return txts
 
     @get(path="/search/{search_term:str}", cache=3600)
-    async def search(self: Self, state: State, search_term: str) -> AppGroupByStore:
+    async def search(
+        self: Self,
+        state: State,
+        search_term: str,
+        user_id: int | None = Parameter(query="user_id", required=False),
+    ) -> AppGroupByStore:
         """Search apps and developers.
 
         Args:
         ----
             search_term: str the search term to search for.
                 Can search packages, developers and app names.
+            user_id: int | None the user id of the user searching.
 
         """
         start = time.perf_counter() * 1000
@@ -846,7 +822,12 @@ class AppController(Controller):
         logger.info(f"{self.path} took {duration}ms")
         return Response(
             apps_dict,
-            background=BackgroundTask(search_both_stores, state, search_term),
+            background=BackgroundTask(
+                insert_search_query,
+                state=state,
+                search_term=search_term,
+                user_id=user_id,
+            ),
         )
 
     @post(path="/{store_id:str}/requestSDKScan")

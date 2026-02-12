@@ -293,3 +293,16 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_subscriptions_updated_at BEFORE UPDATE ON public.subscriptions
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE users
+ADD COLUMN created_at timestamp with time zone DEFAULT now() NOT NULL;
+
+CREATE TABLE search_queries (
+    id bigserial PRIMARY KEY,
+    search_term text NOT NULL,
+    user_id int4 NULL REFERENCES users (id),
+    created_at timestamptz DEFAULT now() NOT NULL
+);
+
+CREATE INDEX idx_search_queries_created_at ON search_queries (created_at DESC);
+CREATE INDEX idx_search_queries_term ON search_queries (search_term);

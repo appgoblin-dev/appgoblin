@@ -18,14 +18,20 @@ export class ApiClient {
 			return { status: resp.status, error: `${name} Unexpected error (${resp.status})` };
 		}
 	}
-	async get(endpoint: string, name: string, timeoutMs: number = 30000) {
+	async get(endpoint: string, name: string, timeoutMs: number = 30000, userId?: number | string) {
 		console.log(`${API_BASE_URL}${endpoint} fetch ${name}`);
 
 		try {
 			const controller = new AbortController();
 			const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-			const resp = await this.fetch(`${API_BASE_URL}${endpoint}`, {
+			let url = `${API_BASE_URL}${endpoint}`;
+			if (userId) {
+				const separator = url.includes('?') ? '&' : '?';
+				url = `${url}${separator}user_id=${userId}`;
+			}
+
+			const resp = await this.fetch(url, {
 				signal: controller.signal
 			});
 
@@ -58,14 +64,26 @@ export class ApiClient {
 		}
 	}
 
-	async post(endpoint: string, body: any, name: string, timeoutMs: number = 30000) {
+	async post(
+		endpoint: string,
+		body: any,
+		name: string,
+		timeoutMs: number = 30000,
+		userId?: number | string
+	) {
 		console.log(`${API_BASE_URL}${endpoint} fetch (POST) ${name}`);
 
 		try {
 			const controller = new AbortController();
 			const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-			const resp = await this.fetch(`${API_BASE_URL}${endpoint}`, {
+			let url = `${API_BASE_URL}${endpoint}`;
+			if (userId) {
+				const separator = url.includes('?') ? '&' : '?';
+				url = `${url}${separator}user_id=${userId}`;
+			}
+
+			const resp = await this.fetch(url, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

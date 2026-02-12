@@ -8,7 +8,6 @@ import time
 from typing import Self
 
 import pandas as pd
-from adscrawler.app_stores import scrape_stores
 from litestar import Controller, Response, post
 from litestar.background_tasks import BackgroundTask
 from litestar.datastructures import State
@@ -75,13 +74,6 @@ def process_get_sdks(state: State, store_ids_dict: list[dict], ip: str | None) -
         add_store_ids(state, store_ids_dict)
     except Exception:
         logger.exception("Error adding store ids")
-
-
-def add_store_ids(state: State, store_ids_dict: list[dict]) -> None:
-    """After having queried an external app store send results to db."""
-    logger.info("background:search results to be processed")
-    scrape_stores.process_scraped(state.dbconwrite, store_ids_dict, "appgoblin_android")
-    logger.info("background:search results done")
 
 
 class ScryController(Controller):
