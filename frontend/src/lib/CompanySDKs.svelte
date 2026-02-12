@@ -8,14 +8,14 @@
 
 	let { mySdks }: Props = $props();
 
-	const uniquePaths = [
+	const uniquePaths = $derived([
 		...new Set(
 			Object.values(mySdks.companies || {})
 				.flatMap((c) => c.sdks || [])
 				.flatMap((c) => c.package_patterns || [])
 				.filter((path) => path != null)
 		)
-	];
+	]);
 
 	function truncateList(list: string[], maxItems = 3) {
 		return list.slice(0, maxItems);

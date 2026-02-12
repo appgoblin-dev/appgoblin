@@ -1,6 +1,9 @@
 """API endoipoints for sdks.
 
 /sdks/overview returns list of all sdks.
+/sdks/user_requested returns list of user requested sdks.
+/sdks/{value_pattern} returns list of sdks for a given pattern.
+/sdks/{value_pattern}/companies returns list of companies for a given pattern.
 """
 
 import time

@@ -24,7 +24,7 @@
 		searchResult?: any;
 	} = $props();
 
-	let isSearching = $state(!app);
+	let isSearching = $state(true);
 	let isLoading = $state(false);
 	let manuallyToggledSearch = $state(false);
 

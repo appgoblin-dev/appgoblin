@@ -19,17 +19,14 @@
 		routeId,
 		url,
 		crumbs = undefined,
-		routeModules = import.meta.glob('/src/routes/**/*.svelte', { eager: true }),
+		routeModules = undefined,
 		pageData,
 		children
 	}: Props = $props();
 
-	// If nothing is passed to routeModules, populate it
-	if (routeModules === undefined) {
-		routeModules = import.meta.glob('/src/routes/**/*.svelte', {
-			eager: true
-		});
-	}
+	const effectiveRouteModules = $derived(
+		routeModules ?? import.meta.glob('/src/routes/**/*.svelte', { eager: true })
+	);
 
 	// Given a module and a crumb, determine the page title
 	function getPageTitleFromModule(module: ModuleData | undefined) {
@@ -78,13 +75,13 @@
 				// routeModules type is technically undefined so we can detect when a value
 				// is passed in or not, but will always be generated in the onMount as a
 				// fallback.
-				const routeModule =
-					routeModules === undefined ? undefined : routeModules[`${completeRoute}+page.svelte`];
+				const routeModule = effectiveRouteModules[`${completeRoute}+page.svelte`];
 
 				tmpCrumbs.push({
 					// Last crumb gets no url as it is the current page
 					url: i == paths.length - 1 ? undefined : completeUrl,
-					title: getPageTitleFromModule(routeModule) || titleSanitizer(path)
+					title:
+						getPageTitleFromModule(routeModule as ModuleData | undefined) || titleSanitizer(path)
 				});
 			}
 		} else {
@@ -105,4 +102,4 @@
 	});
 </script>
 
-{@render children?.({ crumbs: _crumbs, routeModules })}
+{@render children?.({ crumbs: _crumbs, routeModules: effectiveRouteModules })}

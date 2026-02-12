@@ -28,11 +28,10 @@
 	// generate unique id for full star and gray star
 	const fullStarId: string = generateId();
 	const grayStarId: string = generateId();
-	let fullStars: number = Math.floor(rating);
-	let rateDiffence = rating - fullStars;
-	let percentRating = Math.round(rateDiffence * 100);
-	let grayStars: number = total - (fullStars + Math.ceil(rateDiffence));
-	// console.log(fullStars, grayStars, rateDiffence, percentRating)
+	const fullStars = $derived(Math.floor(rating));
+	const rateDiffence = $derived(rating - fullStars);
+	const percentRating = $derived(Math.round(rateDiffence * 100));
+	const grayStars = $derived(total - (fullStars + Math.ceil(rateDiffence)));
 </script>
 
 <div class="my-rating flex items-center">

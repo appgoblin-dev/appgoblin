@@ -3,12 +3,14 @@
 	import type { Row } from '@tanstack/table-core';
 	let { table, filename } = $props();
 
-	const csvConfig = mkConfig({
-		fieldSeparator: ',',
-		filename: filename, // export file name (without .csv)
-		decimalSeparator: '.',
-		useKeysAsHeaders: true
-	});
+	const csvConfig = $derived(
+		mkConfig({
+			fieldSeparator: ',',
+			filename,
+			decimalSeparator: '.',
+			useKeysAsHeaders: true
+		})
+	);
 
 	const exportDataCSV = (rows: Row<any>[]) => {
 		const rowData = rows.map((row) => row.original);

@@ -74,7 +74,14 @@
 	});
 
 	// Set default selected country
-	let selectedCountry = $state(isIOS ? 'US' : 'global');
+	let selectedCountry = $state('global');
+	let countryInitialized = $state(false);
+	$effect(() => {
+		if (!countryInitialized) {
+			selectedCountry = isIOS ? 'US' : 'global';
+			countryInitialized = true;
+		}
+	});
 
 	// Filter data by selected country
 	const filteredData = $derived.by(() => {
