@@ -154,8 +154,9 @@ def create_app_country_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
 
     def process_country_group(group):
         """Process a single country's data independently."""
+
         # Store the country value before resampling
-        country_value = group["country"].iloc[0]
+        country_value = group.name
 
         # Set date as index for resampling
         group = group.set_index(xaxis_col)
@@ -165,23 +166,15 @@ def create_app_country_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
 
         # Replace zeros with NaN for cumulative metrics (zeros are data holes, not valid values)
         cumulative_metrics = ["rating_count", "review_count", *star_cols]
-        for metric in cumulative_metrics:
-            if metric in group.columns:
-                # Replace 0 with NaN (these are data holes, not valid cumulative values)
-                group[metric] = group[metric].replace(0, np.nan)
-                # Linear interpolation
-                group[metric] = group[metric].interpolate(
-                    method="linear", limit_direction="forward"
-                )
 
-        # For rating (average), also replace zeros and interpolate
-        if "rating" in group.columns:
-            # Replace 0 with NaN (invalid rating)
-            group["rating"] = group["rating"].replace(0, np.nan)
-            # Interpolate
-            group["rating"] = group["rating"].interpolate(
-                method="linear", limit_direction="forward"
-            )
+        # Metrics to turn numeric / clean
+        nmetrics = [m for m in cumulative_metrics + ['rating'] if m in group.columns]
+        group[nmetrics] = (
+            group[nmetrics]
+              .apply(pd.to_numeric, errors="coerce")
+              .replace(0, np.nan)
+              .interpolate(method="linear", limit_direction="forward")
+        )
 
         group = group.reset_index()
 
@@ -210,10 +203,6 @@ def create_app_country_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
 
             # Avg per day (daily average of the change)
             group[avg_per_day_metric] = group[change_metric] / group["days_changed"]
-
-        # Drop the first row (no previous data to compare)
-        # if not group.empty:
-        # group = group.drop(group.index[0])
 
         return group
 
@@ -257,6 +246,8 @@ def create_app_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
     cumulative_metrics = ["installs", "rating_count", "review_count", *star_cols]
     for metric in cumulative_metrics:
         if metric in app_hist.columns:
+            app_hist[metric].head()
+            app_hist[metric].dtype
             # Replace 0 with NaN (these are data holes, not valid cumulative values)
             app_hist[metric] = app_hist[metric].replace(0, np.nan)
             # Linear interpolation
@@ -401,6 +392,7 @@ class AppController(Controller):
         if app_category == "overall":
             app_category = None
         df = get_growth_apps(state, store=store, app_category=app_category)
+        df = extend_app_icon_url(df)
         duration = round((time.perf_counter() * 1000 - start), 2)
         logger.info(f"{self.path}/growth took {duration}ms")
         return {"apps": df.to_dict(orient="records")}
