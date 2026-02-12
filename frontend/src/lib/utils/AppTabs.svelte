@@ -12,7 +12,7 @@
 
 	const textGreyedOutColor = 'text-surface-700-300';
 
-	let myTabs = {
+	const myTabs = $derived({
 		types: [
 			{
 				name: 'Overview',
@@ -70,7 +70,7 @@
 				icon: FileText
 			}
 		]
-	};
+	});
 
 	function typeTabClass(tab: string) {
 		const baseClass =

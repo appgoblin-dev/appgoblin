@@ -238,8 +238,6 @@
 		getPaginationRowModel: getPaginationRowModel(),
 		getFilteredRowModel: getFilteredRowModel()
 	});
-
-	let openState = $state(false);
 </script>
 
 <div class="table-container p-0 md:p-2">
@@ -357,8 +355,18 @@
 											style="cursor: pointer;"
 											class="text-xs md:text-sm font-medium text-blue-600 hover:text-blue-800"
 										>
-											<div class="inline-flex gap-2">
-												{row.original.app_name}
+											<div class="flex items-center gap-2">
+												<img
+													src={row.original.app_icon_url}
+													alt={row.original.app_name}
+													class="w-8 h-8 shrink-0 rounded"
+												/>
+												<div class="flex flex-col min-w-0">
+													<span class="text-xs md:text-sm truncate">{row.original.app_name}</span>
+													<span class="text-[10px] md:text-xs text-surface-500 truncate"
+														>{row.original.developer_name}</span
+													>
+												</div>
 											</div>
 										</a>
 									{:else if ['installs_z_score_2w', 'ratings_z_score_2w', 'installs_z_score_4w', 'ratings_z_score_4w'].includes(cell.column.id)}

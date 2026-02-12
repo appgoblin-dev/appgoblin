@@ -15,8 +15,8 @@
 
 	let { data }: { data: KeywordPageData } = $props();
 
-	const keywordRecords = Array.isArray(data.keywordDetails) ? data.keywordDetails : [];
-	const keywordApps = data.keywordApps ?? {};
+	const keywordRecords = $derived(Array.isArray(data.keywordDetails) ? data.keywordDetails : []);
+	const keywordApps = $derived(data.keywordApps ?? {});
 
 	const storeNames: Record<string | number, string> = {
 		1: 'Google Play',
@@ -82,58 +82,67 @@
 
 	const keywordDisplay = $derived(keywordRecords[0]?.keyword_text ?? page.params.keyword);
 
-	const opportunityScores = keywordRecords.map((record) => toNumber(record.opportunity_score));
-	const difficultyScores = keywordRecords.map((record) => toNumber(record.keyword_difficulty));
-	const competitivenessScores = keywordRecords.map((record) =>
-		toNumber(record.competitiveness_score)
+	const opportunityScores = $derived(
+		keywordRecords.map((record) => toNumber(record.opportunity_score))
 	);
-	const volumeScores = keywordRecords.map((record) => toNumber(record.volume_competition_score));
+	const difficultyScores = $derived(
+		keywordRecords.map((record) => toNumber(record.keyword_difficulty))
+	);
+	const competitivenessScores = $derived(
+		keywordRecords.map((record) => toNumber(record.competitiveness_score))
+	);
+	const volumeScores = $derived(
+		keywordRecords.map((record) => toNumber(record.volume_competition_score))
+	);
 
-	const opportunityAvg = average(opportunityScores);
-	const difficultyAvg = average(difficultyScores);
-	const competitivenessAvg = average(competitivenessScores);
-	const volumeAvg = average(volumeScores);
+	const opportunityAvg = $derived(average(opportunityScores));
+	const difficultyAvg = $derived(average(difficultyScores));
+	const competitivenessAvg = $derived(average(competitivenessScores));
+	const volumeAvg = $derived(average(volumeScores));
 
-	const appCountValue = pickFirstNumeric('app_count');
-	const totalAppsValue = pickFirstNumeric('total_apps');
-	const majorCompetitors = pickFirstNumeric('major_competitors');
-	const medianInstalls = pickFirstNumeric('median_competitor_installs');
-	const avgRating = pickFirstNumeric('avg_competitor_rating');
+	const appCountValue = $derived(pickFirstNumeric('app_count'));
+	const totalAppsValue = $derived(pickFirstNumeric('total_apps'));
+	const majorCompetitors = $derived(pickFirstNumeric('major_competitors'));
+	const medianInstalls = $derived(pickFirstNumeric('median_competitor_installs'));
+	const avgRating = $derived(pickFirstNumeric('avg_competitor_rating'));
 
-	const rankingRecords = keywordRecords
-		.map((record) => {
-			const latest = toNumber(record.latest_app_rank);
-			const best = toNumber(record.d30_best_rank);
-			const rank = latest ?? best;
-			if (rank === null) {
-				return null;
-			}
-			return {
-				store: record.store,
-				rank,
-				latest,
-				best
-			};
-		})
-		.filter(
-			(
-				record
-			): record is {
-				store: KeywordScore['store'];
-				rank: number;
-				latest: number | null;
-				best: number | null;
-			} => record !== null
-		)
-		.sort((a, b) => a.rank - b.rank);
+	const rankingRecords = $derived(
+		keywordRecords
+			.map((record) => {
+				const latest = toNumber(record.latest_app_rank);
+				const best = toNumber(record.d30_best_rank);
+				const rank = latest ?? best;
+				if (rank === null) {
+					return null;
+				}
+				return {
+					store: record.store,
+					rank,
+					latest,
+					best
+				};
+			})
+			.filter(
+				(
+					record
+				): record is {
+					store: KeywordScore['store'];
+					rank: number;
+					latest: number | null;
+					best: number | null;
+				} => record !== null
+			)
+			.sort((a, b) => a.rank - b.rank)
+	);
 
-	const topRankRecord = rankingRecords[0] ?? null;
-	const topRankStoreKey = topRankRecord?.store;
-	const topRankStore =
+	const topRankRecord = $derived(rankingRecords[0] ?? null);
+	const topRankStoreKey = $derived(topRankRecord?.store);
+	const topRankStore = $derived(
 		topRankStoreKey !== undefined && topRankStoreKey !== null
 			? (storeNames[topRankStoreKey] ?? 'the leading store')
-			: 'the leading store';
-	const topRankValue = topRankRecord?.rank ?? null;
+			: 'the leading store'
+	);
+	const topRankValue = $derived(topRankRecord?.rank ?? null);
 
 	const describeOpportunity = (score: number | null) => {
 		if (score === null) {
@@ -161,11 +170,11 @@
 		return 'demanding';
 	};
 
-	const opportunityDescriptor = describeOpportunity(opportunityAvg);
-	const difficultyDescriptor = describeDifficulty(difficultyAvg);
+	const opportunityDescriptor = $derived(describeOpportunity(opportunityAvg));
+	const difficultyDescriptor = $derived(describeDifficulty(difficultyAvg));
 
-	const googleCount = keywordApps.google?.ranks?.length ?? 0;
-	const appleCount = keywordApps.apple?.ranks?.length ?? 0;
+	const googleCount = $derived(keywordApps.google?.ranks?.length ?? 0);
+	const appleCount = $derived(keywordApps.apple?.ranks?.length ?? 0);
 
 	let summarySentences = $state<string[]>([]);
 	$effect(() => {

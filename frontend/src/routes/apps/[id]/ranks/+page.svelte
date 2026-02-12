@@ -13,14 +13,17 @@
 	let country = $state(page.url.searchParams.get('country') || 'US');
 	let countryTitle = $derived(data.countries[country as keyof typeof data.countries]);
 	let isLoadingRanks = $state(false);
-	let currentRanks = $state(data.myranks);
+	const dataMyranks = $derived(data.myranks);
+	let overrideRanks = $state<Promise<any> | null>(null);
+	const currentRanks = $derived(overrideRanks ?? dataMyranks);
 	let formElement = $state<HTMLFormElement | undefined>(undefined);
 
 	$effect(() => setDefaultCountry(data.myranksOverview));
 
-	// Update currentRanks when data.myranks changes (on navigation)
+	// Clear override when data changes (e.g. navigation to another app)
 	$effect(() => {
-		currentRanks = data.myranks;
+		data.myranks;
+		overrideRanks = null;
 	});
 
 	function setDefaultCountry(ranks: { countries: string[] }) {
@@ -42,7 +45,7 @@
 			isLoadingRanks = false;
 			if (result.type === 'success' && result.data) {
 				// Update the current ranks with the new data
-				currentRanks = Promise.resolve(result.data);
+				overrideRanks = Promise.resolve(result.data);
 				// Update URL without reload
 				const url = new URL(window.location.href);
 				url.searchParams.set('country', country);

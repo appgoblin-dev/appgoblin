@@ -7,7 +7,8 @@
 WITH apps AS (
     SELECT *
     FROM frontend.store_apps_overview
-    WHERE textsearchable @@ to_tsquery('simple', :searchinput)
+    WHERE
+        textsearchable @@ to_tsquery('simple', :searchinput) AND store IN (1, 2)
 ),
 ranked_apps AS (
     SELECT
@@ -15,12 +16,12 @@ ranked_apps AS (
         row_number() OVER (
             PARTITION BY a.store
             ORDER BY
-                coalesce(a.installs, a.rating_count, 0) DESC NULLS LAST
+                a.installs_sum_4w_est DESC NULLS LAST
         ) AS store_rank,
         row_number() OVER (
             ORDER BY
-                a.store,
-                coalesce(a.installs, a.rating_count, 0) DESC NULLS LAST
+                a.store ASC,
+                a.installs_sum_4w_est DESC NULLS LAST
         ) % (SELECT count(DISTINCT store) FROM apps) AS round_robin_rank
     FROM apps AS a
 )

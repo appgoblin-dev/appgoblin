@@ -8,9 +8,9 @@
 		'blog, appgoblin, aso, app store optimization, app marketing, app growth, monetization, reports, analysis, sdks, competitor analysis';
 
 	// Get the most recent post (first in the sorted array)
-	const featuredPost = data.posts[0];
+	const featuredPost = $derived(data.posts[0]);
 	// Get the remaining posts
-	const otherPosts = data.posts.slice(1);
+	const otherPosts = $derived(data.posts.slice(1));
 </script>
 
 <svelte:head>
