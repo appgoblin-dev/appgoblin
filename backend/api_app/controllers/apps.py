@@ -154,7 +154,6 @@ def create_app_country_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
 
     def process_country_group(group):
         """Process a single country's data independently."""
-
         # Store the country value before resampling
         country_value = group.name
 
@@ -168,12 +167,12 @@ def create_app_country_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
         cumulative_metrics = ["rating_count", "review_count", *star_cols]
 
         # Metrics to turn numeric / clean
-        nmetrics = [m for m in cumulative_metrics + ['rating'] if m in group.columns]
+        nmetrics = [m for m in cumulative_metrics + ["rating"] if m in group.columns]
         group[nmetrics] = (
             group[nmetrics]
-              .apply(pd.to_numeric, errors="coerce")
-              .replace(0, np.nan)
-              .interpolate(method="linear", limit_direction="forward")
+            .apply(pd.to_numeric, errors="coerce")
+            .replace(0, np.nan)
+            .interpolate(method="linear", limit_direction="forward")
         )
 
         group = group.reset_index()

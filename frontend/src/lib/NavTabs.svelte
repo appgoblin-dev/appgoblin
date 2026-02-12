@@ -36,7 +36,7 @@
 		<div class={myDivider}></div>
 		<a href="/fastest-growing-apps/google/overall">
 			<p class={isHighlighted('/fastest-growing-apps') ? topBarHighlightedFont : topBarFont}>
-				FASTEST GROWING APPS
+				TOP GROWTH APPS
 			</p>
 		</a>
 		<div class={myDivider}></div>
