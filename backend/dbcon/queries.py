@@ -1055,3 +1055,24 @@ def insert_sdk_scan_request(
 
     with state.dbconwrite.engine.connect() as connection, connection.begin():
         connection.execute(sql.insert_sdk_scan_request, data)
+
+
+def insert_search_query(state: State, search_term: str, user_id: int | None) -> None:
+    """Insert a new search query.
+
+    Args:
+        state (State): Database connection state.
+        search_term (str): The search term.
+        user_id (int | None): The user id of the user searching.
+
+    """
+    logger.info(f"Inserting new search query: {search_term=} by {user_id=}")
+
+    if state.dbconwrite is None:
+        logger.error("Write connection not available, cannot insert search query")
+        return
+
+    data = [{"search_term": search_term, "user_id": user_id}]
+
+    with state.dbconwrite.engine.connect() as connection, connection.begin():
+        connection.execute(sql.insert_search_query, data)
