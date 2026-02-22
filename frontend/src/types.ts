@@ -579,27 +579,30 @@ export interface AppCountryMetrics {
 }
 
 export interface AppGlobalMetrics {
-	snapshot_date: string;
-	installs: number;
+	week_start: string;
+	weekly_installs: number;
 	rating: number;
-	rating_count: number;
-	review_count: number;
+	weekly_ratings: number;
+	weekly_reviews: number;
+	weekly_active_users: number;
+	monthly_active_users: number;
+	weekly_ad_revenue: number;
+	weekly_iap_revenue: number;
+	cumulative_installs: number;
+	cumulative_ratings: number;
 	one_star: number;
 	two_star: number;
 	three_star: number;
 	four_star: number;
 	five_star: number;
-	new_installs: number;
-	installs_rate_of_change: number;
-	installs_avg_per_day: number;
+	weekly_installs_rate_of_change: number;
+	weekly_installs_avg_per_day: number;
 	new_rating: number;
 	rating_rate_of_change: number;
-	new_review_count: number;
-	review_count_rate_of_change: number;
-	review_count_avg_per_day: number;
-	new_rating_count: number;
-	rating_count_rate_of_change: number;
-	rating_count_avg_per_day: number;
+	weekly_reviews_rate_of_change: number;
+	weekly_reviews_avg_per_day: number;
+	weekly_ratings_rate_of_change: number;
+	weekly_ratings_avg_per_day: number;
 	new_one_star: number;
 	one_star_rate_of_change: number;
 	one_star_avg_per_day: number;

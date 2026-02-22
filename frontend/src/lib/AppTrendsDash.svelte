@@ -55,7 +55,7 @@
 	}
 	let { data, isIOS }: Props = $props();
 
-	const renderContext = 'svg';
+	const layer = 'svg';
 
 	// State for toggles
 	let starsExpanded = $state(false);
@@ -93,6 +93,18 @@
 		}
 		return (data as AppCountryMetrics[]).filter((d) => d.country === selectedCountry);
 	});
+
+	// Metric keys differ: AppGlobalMetrics uses week_start, cumulative_*, weekly_*; AppCountryMetrics uses snapshot_date, rating_count, new_*
+	const xAxisKey = $derived(isIOS ? 'snapshot_date' : 'week_start');
+	const getDate = (d: (AppGlobalMetrics | AppCountryMetrics) | undefined) =>
+		d ? ((d as AppGlobalMetrics).week_start ?? (d as AppCountryMetrics).snapshot_date ?? '') : '';
+	const ratingCountKey = $derived(isIOS ? 'rating_count' : 'cumulative_ratings');
+	const newRatingCountKey = $derived(isIOS ? 'new_rating_count' : 'weekly_ratings');
+	const newReviewCountKey = $derived(isIOS ? 'new_review_count' : 'weekly_reviews');
+	const getRatingCount = (d: (AppGlobalMetrics | AppCountryMetrics) | undefined) =>
+		(d ? Number((d as unknown as Record<string, unknown>)[ratingCountKey]) : 0) || 0;
+	const getReviewCount = (d: (AppGlobalMetrics | AppCountryMetrics) | undefined) =>
+		d && 'review_count' in d ? (d as AppCountryMetrics).review_count : 0;
 
 	// Generate series keys based on whether we're showing new or cumulative
 	let seriesKeysBar = $derived(
@@ -169,48 +181,48 @@
 		<div class="rounded-lg border p-5">
 			<div class="mb-2 text-sm font-medium opacity-70">Tracking Period</div>
 			<div class="mb-1 text-lg font-bold">
-				{format(earliestData?.snapshot_date ?? '', PeriodType.Day, { variant: 'short' })}
+				{format(getDate(earliestData), PeriodType.Day, { variant: 'short' })}
 			</div>
 			<div class="mb-2 text-center text-xs opacity-50">to</div>
 			<div class="text-lg font-bold">
-				{format(latestData?.snapshot_date ?? '', PeriodType.Day, { variant: 'short' })}
+				{format(getDate(latestData), PeriodType.Day, { variant: 'short' })}
 			</div>
 			<div class="mt-3 text-xs opacity-70">
 				{filteredData.length} data points
 			</div>
 		</div>
 
-		{#if !isIOS && 'installs' in (latestData ?? {})}
+		{#if !isIOS && 'cumulative_installs' in (latestData ?? {})}
 			<div class="rounded-lg border p-5 shadow-sm">
 				<div class="text-sm font-medium opacity-70">Total Installs</div>
 				<div class="my-3 text-3xl font-bold">
-					{formatNumber((latestData as AppGlobalMetrics)?.installs ?? 0)}
+					{formatNumber((latestData as AppGlobalMetrics)?.cumulative_installs ?? 0)}
 				</div>
 				<div class="flex items-center justify-between text-xs">
 					<div class="opacity-70">
 						From: <span class="font-semibold"
-							>{formatNumber((earliestData as AppGlobalMetrics)?.installs ?? 0)}</span
+							>{formatNumber((earliestData as AppGlobalMetrics)?.cumulative_installs ?? 0)}</span
 						>
 					</div>
 					<div
 						class="font-semibold {getTrendColor(
 							calculateOverallChange(
-								(latestData as AppGlobalMetrics)?.installs ?? 0,
-								(earliestData as AppGlobalMetrics)?.installs ?? 0
+								(latestData as AppGlobalMetrics)?.cumulative_installs ?? 0,
+								(earliestData as AppGlobalMetrics)?.cumulative_installs ?? 0
 							)
 						)}"
 					>
 						{getTrendIcon(
 							calculateOverallChange(
-								(latestData as AppGlobalMetrics)?.installs ?? 0,
-								(earliestData as AppGlobalMetrics)?.installs ?? 0
+								(latestData as AppGlobalMetrics)?.cumulative_installs ?? 0,
+								(earliestData as AppGlobalMetrics)?.cumulative_installs ?? 0
 							)
 						)}
 						{formatPercent(
 							Math.abs(
 								calculateOverallChange(
-									(latestData as AppGlobalMetrics)?.installs ?? 0,
-									(earliestData as AppGlobalMetrics)?.installs ?? 0
+									(latestData as AppGlobalMetrics)?.cumulative_installs ?? 0,
+									(earliestData as AppGlobalMetrics)?.cumulative_installs ?? 0
 								)
 							)
 						)}
@@ -241,22 +253,22 @@
 
 		<div class="rounded-lg border p-5 shadow-sm">
 			<div class="text-sm font-medium opacity-70">Total Ratings</div>
-			<div class="my-3 text-3xl font-bold">{formatNumber(latestData?.rating_count ?? 0)}</div>
+			<div class="my-3 text-3xl font-bold">{formatNumber(getRatingCount(latestData))}</div>
 			<div class="flex items-center justify-between text-xs">
 				<div class="opacity-70">
-					From: <span class="font-semibold">{formatNumber(earliestData?.rating_count ?? 0)}</span>
+					From: <span class="font-semibold">{formatNumber(getRatingCount(earliestData))}</span>
 				</div>
 				<div
 					class="font-semibold {getTrendColor(
-						calculateOverallChange(latestData?.rating_count ?? 0, earliestData?.rating_count ?? 0)
+						calculateOverallChange(getRatingCount(latestData), getRatingCount(earliestData))
 					)}"
 				>
 					{getTrendIcon(
-						calculateOverallChange(latestData?.rating_count ?? 0, earliestData?.rating_count ?? 0)
+						calculateOverallChange(getRatingCount(latestData), getRatingCount(earliestData))
 					)}
 					{formatPercent(
 						Math.abs(
-							calculateOverallChange(latestData?.rating_count ?? 0, earliestData?.rating_count ?? 0)
+							calculateOverallChange(getRatingCount(latestData), getRatingCount(earliestData))
 						)
 					)}
 				</div>
@@ -265,22 +277,22 @@
 
 		<div class="rounded-lg border p-5 shadow-sm">
 			<div class="text-sm font-medium opacity-70">Total Reviews</div>
-			<div class="my-3 text-3xl font-bold">{formatNumber(latestData?.review_count ?? 0)}</div>
+			<div class="my-3 text-3xl font-bold">{formatNumber(getReviewCount(latestData))}</div>
 			<div class="flex items-center justify-between text-xs">
 				<div class="opacity-70">
-					From: <span class="font-semibold">{formatNumber(earliestData?.review_count ?? 0)}</span>
+					From: <span class="font-semibold">{formatNumber(getReviewCount(earliestData))}</span>
 				</div>
 				<div
 					class="font-semibold {getTrendColor(
-						calculateOverallChange(latestData?.review_count ?? 0, earliestData?.review_count ?? 0)
+						calculateOverallChange(getReviewCount(latestData), getReviewCount(earliestData))
 					)}"
 				>
 					{getTrendIcon(
-						calculateOverallChange(latestData?.review_count ?? 0, earliestData?.review_count ?? 0)
+						calculateOverallChange(getReviewCount(latestData), getReviewCount(earliestData))
 					)}
 					{formatPercent(
 						Math.abs(
-							calculateOverallChange(latestData?.review_count ?? 0, earliestData?.review_count ?? 0)
+							calculateOverallChange(getReviewCount(latestData), getReviewCount(earliestData))
 						)
 					)}
 				</div>
@@ -329,9 +341,9 @@
 					<div class="h-[300px]">
 						<AreaChart
 							data={filteredData}
-							x="snapshot_date"
-							y="installs"
-							{renderContext}
+							x={xAxisKey}
+							y="cumulative_installs"
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -341,13 +353,13 @@
 				</div>
 
 				<div>
-					<h3 class="mb-3 text-sm font-semibold">New Installs (Period Change)</h3>
+					<h3 class="mb-3 text-sm font-semibold">Weekly Installs</h3>
 					<div class="h-[300px]">
 						<BarChart
 							data={filteredData}
-							x="snapshot_date"
-							y="new_installs"
-							{renderContext}
+							x={xAxisKey}
+							y="weekly_installs"
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -361,12 +373,66 @@
 					<div class="h-[300px]">
 						<LineChart
 							data={filteredData}
-							x="snapshot_date"
-							y="installs_rate_of_change"
-							{renderContext}
+							x={xAxisKey}
+							y="weekly_installs_rate_of_change"
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 								yAxis: { format: (d) => d.toFixed(2) + '%' }
+							}}
+						/>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Engagement & Revenue Section -->
+		<div class="rounded-lg border p-6">
+			<h2 class="mb-6 text-xl font-bold">Engagement & Revenue</h2>
+			<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+				<div>
+					<h3 class="mb-3 text-sm font-semibold">Weekly Active Users</h3>
+					<div class="h-[300px]">
+						<BarChart
+							data={filteredData}
+							x={xAxisKey}
+							y="weekly_active_users"
+							{layer}
+							props={{
+								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
+								yAxis: { format: (d) => formatNumber(d) }
+							}}
+						/>
+					</div>
+				</div>
+
+				<div>
+					<h3 class="mb-3 text-sm font-semibold">Weekly Ad Revenue</h3>
+					<div class="h-[300px]">
+						<BarChart
+							data={filteredData}
+							x={xAxisKey}
+							y="weekly_ad_revenue"
+							{layer}
+							props={{
+								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
+								yAxis: { format: (d) => formatNumber(d) }
+							}}
+						/>
+					</div>
+				</div>
+
+				<div>
+					<h3 class="mb-3 text-sm font-semibold">Weekly IAP Revenue</h3>
+					<div class="h-[300px]">
+						<BarChart
+							data={filteredData}
+							x={xAxisKey}
+							y="weekly_iap_revenue"
+							{layer}
+							props={{
+								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
+								yAxis: { format: (d) => formatNumber(d) }
 							}}
 						/>
 					</div>
@@ -384,9 +450,9 @@
 				<div class="h-[300px]">
 					<LineChart
 						data={filteredData}
-						x="snapshot_date"
+						x={xAxisKey}
 						y="rating"
-						{renderContext}
+						{layer}
 						props={{
 							xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 							yAxis: { format: (d) => d.toFixed(2) }
@@ -400,9 +466,9 @@
 				<div class="h-[300px]">
 					<AreaChart
 						data={filteredData}
-						x="snapshot_date"
-						y="rating_count"
-						{renderContext}
+						x={xAxisKey}
+						y={ratingCountKey}
+						{layer}
 						props={{
 							xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 							yAxis: { format: (d) => formatNumber(d) }
@@ -412,13 +478,13 @@
 			</div>
 
 			<div>
-				<h3 class="mb-3 text-sm font-semibold">New Ratings (Period Change)</h3>
+				<h3 class="mb-3 text-sm font-semibold">Weekly Ratings</h3>
 				<div class="h-[300px]">
 					<BarChart
 						data={filteredData}
-						x="snapshot_date"
-						y="new_rating_count"
-						{renderContext}
+						x={xAxisKey}
+						y={newRatingCountKey}
+						{layer}
 						props={{
 							xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 							yAxis: { format: (d) => formatNumber(d) }
@@ -439,9 +505,9 @@
 					<div class="h-[300px]">
 						<AreaChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="review_count"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -451,13 +517,13 @@
 				</div>
 
 				<div>
-					<h3 class="mb-3 text-sm font-semibold">New Reviews (Period Change)</h3>
+					<h3 class="mb-3 text-sm font-semibold">Weekly Reviews</h3>
 					<div class="h-[300px]">
 						<BarChart
 							data={filteredData}
-							x="snapshot_date"
-							y="new_review_count"
-							{renderContext}
+							x={xAxisKey}
+							y={newReviewCountKey}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -471,9 +537,9 @@
 					<div class="h-[300px]">
 						<LineChart
 							data={filteredData}
-							x="snapshot_date"
-							y="review_count_rate_of_change"
-							{renderContext}
+							x={xAxisKey}
+							y="weekly_reviews_rate_of_change"
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 								yAxis: { format: (d) => d.toFixed(2) + '%' }
@@ -526,10 +592,10 @@
 			<div class="h-[350px]">
 				<BarChart
 					data={filteredData}
-					x="snapshot_date"
+					x={xAxisKey}
 					series={seriesKeysBar}
 					seriesLayout={starsExpanded ? 'stackExpand' : 'stack'}
-					{renderContext}
+					{layer}
 					props={{
 						xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 5 },
 						yAxis: { format: (d) => (starsExpanded ? d.toFixed(0) + '%' : formatNumber(d)) }
@@ -596,9 +662,9 @@
 					<div class="h-[250px]">
 						<AreaChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="five_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -611,9 +677,9 @@
 					<div class="h-[250px]">
 						<BarChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="new_five_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -626,9 +692,9 @@
 					<div class="h-[250px]">
 						<LineChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="five_star_rate_of_change"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => d.toFixed(2) + '%' }
@@ -648,9 +714,9 @@
 					<div class="h-[250px]">
 						<AreaChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="four_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -663,9 +729,9 @@
 					<div class="h-[250px]">
 						<BarChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="new_four_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -678,9 +744,9 @@
 					<div class="h-[250px]">
 						<LineChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="four_star_rate_of_change"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => d.toFixed(2) + '%' }
@@ -700,9 +766,9 @@
 					<div class="h-[250px]">
 						<AreaChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="three_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -715,9 +781,9 @@
 					<div class="h-[250px]">
 						<BarChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="new_three_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -730,9 +796,9 @@
 					<div class="h-[250px]">
 						<LineChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="three_star_rate_of_change"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => d.toFixed(2) + '%' }
@@ -752,9 +818,9 @@
 					<div class="h-[250px]">
 						<AreaChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="two_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -767,9 +833,9 @@
 					<div class="h-[250px]">
 						<BarChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="new_two_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -782,9 +848,9 @@
 					<div class="h-[250px]">
 						<LineChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="two_star_rate_of_change"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => d.toFixed(2) + '%' }
@@ -804,9 +870,9 @@
 					<div class="h-[250px]">
 						<AreaChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="one_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -819,9 +885,9 @@
 					<div class="h-[250px]">
 						<BarChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="new_one_star"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => formatNumber(d) }
@@ -834,9 +900,9 @@
 					<div class="h-[250px]">
 						<LineChart
 							data={filteredData}
-							x="snapshot_date"
+							x={xAxisKey}
 							y="one_star_rate_of_change"
-							{renderContext}
+							{layer}
 							props={{
 								xAxis: { format: (d) => format(d, PeriodType.Day, { variant: 'short' }), ticks: 4 },
 								yAxis: { format: (d) => d.toFixed(2) + '%' }

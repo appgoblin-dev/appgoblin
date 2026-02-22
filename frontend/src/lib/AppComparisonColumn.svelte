@@ -22,7 +22,7 @@
 		return new Date(dateStr).toLocaleDateString();
 	};
 
-	const renderContext = 'svg';
+	const layer = 'svg';
 
 	// Star rating colors (1-star to 5-star)
 	const starColors = ['#E53935', '#FB8C00', '#FDD835', '#7CB342', '#2E7D32'];
@@ -133,7 +133,7 @@
 					x="label"
 					y="value"
 					c="color"
-					{renderContext}
+					{layer}
 					props={{
 						yAxis: { format: (d: number) => formatNumber(d) }
 					}}
@@ -153,9 +153,9 @@
 			{#if history && history.length > 0}
 				<AreaChart
 					data={history}
-					x="snapshot_date"
-					y="installs"
-					{renderContext}
+					x="week_start"
+					y="cumulative_installs"
+					{layer}
 					props={{
 						xAxis: {
 							format: (d: any) => format(d, PeriodType.Day, { variant: 'short' }),
@@ -176,12 +176,12 @@
 	<div class="rounded-lg border p-2 md:p-4">
 		<h3 class="mb-2 text-sm font-semibold opacity-70">Installs Growth Rate</h3>
 		<div class="h-[200px]">
-			{#if history && history.length > 0 && history.some((d: any) => d.installs_rate_of_change !== undefined)}
+			{#if history && history.length > 0 && history.some((d: any) => d.weekly_installs_rate_of_change !== undefined)}
 				<LineChart
 					data={history}
-					x="snapshot_date"
-					y="installs_rate_of_change"
-					{renderContext}
+					x="week_start"
+					y="weekly_installs_rate_of_change"
+					{layer}
 					props={{
 						xAxis: {
 							format: (d: any) => format(d, PeriodType.Day, { variant: 'short' }),
@@ -204,10 +204,10 @@
 			{#if history && history.length > 0 && history.some((d: any) => d.five_star_rate_of_change !== undefined)}
 				<LineChart
 					data={history}
-					x="snapshot_date"
+					x="week_start"
 					y="five_star_rate_of_change"
 					series={[{ key: 'five_star_rate_of_change', color: '#2E7D32' }]}
-					{renderContext}
+					{layer}
 					props={{
 						xAxis: {
 							format: (d: any) => format(d, PeriodType.Day, { variant: 'short' }),
@@ -230,10 +230,10 @@
 			{#if history && history.length > 0 && history.some((d: any) => d.one_star_rate_of_change !== undefined)}
 				<LineChart
 					data={history}
-					x="snapshot_date"
+					x="week_start"
 					y="one_star_rate_of_change"
 					series={[{ key: 'one_star_rate_of_change', color: '#E53935' }]}
-					{renderContext}
+					{layer}
 					props={{
 						xAxis: {
 							format: (d: any) => format(d, PeriodType.Day, { variant: 'short' }),
