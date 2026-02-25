@@ -316,9 +316,6 @@ class CategoryCompanyStats:
     sdk_android_installs_d30: int = 0
     adstxt_direct_android_installs_d30: int = 0
     adstxt_reseller_android_installs_d30: int = 0
-    # sdk_ios_rating_count_d30: int = 0
-    # adstxt_direct_ios_rating_count_d30: int = 0
-    # adstxt_reseller_ios_rating_count_d30: int = 0
 
 
 @dataclass

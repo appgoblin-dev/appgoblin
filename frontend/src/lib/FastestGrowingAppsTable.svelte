@@ -35,40 +35,12 @@
 	let columnFilters = $state<ColumnFiltersState>([]);
 	const ratingsHiddenDefaults = {
 		rating_count: false,
-		ratings_sum_1w: false,
-		ratings_z_score_2w: false,
-		ratings_z_score_4w: false
+		ratings_sum_1w: false
 	};
-
-	const installsHiddenDefaults = {
-		installs: false,
-		installs_sum_1w: false,
-		installs_avg_2w: false,
-		installs_z_score_2w: false,
-		installs_sum_4w: false,
-		installs_z_score_4w: false
-	};
-
-	function isGoogleStore(store: string) {
-		return store === 'google';
-	}
-
-	function getHiddenDefaults(store: string) {
-		if (isGoogleStore(store)) {
-			return ratingsHiddenDefaults;
-		} else {
-			return installsHiddenDefaults;
-		}
-	}
 
 	let globalFilter = $state<string>('');
 	let dataSource = $state<string>('both');
-	let columnVisibility = $state<Record<string, boolean>>(getHiddenDefaults(page.params.store!));
-
-	// Update column visibility when store changes
-	$effect(() => {
-		columnVisibility = getHiddenDefaults(page.params.store!);
-	});
+	let columnVisibility = $state<Record<string, boolean>>(ratingsHiddenDefaults);
 
 	let { data }: DataTableProps<CompaniesOverviewEntries, TValue> = $props();
 
@@ -106,18 +78,8 @@
 			isSortable: true
 		},
 		{
-			title: 'Ratings Avg (14d)',
-			accessorKey: 'ratings_avg_2w',
-			isSortable: true
-		},
-		{
 			title: 'Installs Growth Score (14d)',
 			accessorKey: 'installs_z_score_2w',
-			isSortable: true
-		},
-		{
-			title: 'Ratings Growth Score (14d)',
-			accessorKey: 'ratings_z_score_2w',
 			isSortable: true
 		},
 		// Monthly growth metrics
@@ -127,18 +89,8 @@
 			isSortable: true
 		},
 		{
-			title: 'Ratings (30d)',
-			accessorKey: 'ratings_sum_4w',
-			isSortable: true
-		},
-		{
 			title: 'Installs Growth Score (30d)',
 			accessorKey: 'installs_z_score_4w',
-			isSortable: true
-		},
-		{
-			title: 'Ratings Growth Score (30d)',
-			accessorKey: 'ratings_z_score_4w',
 			isSortable: true
 		},
 		// Monetization indicators
@@ -369,15 +321,15 @@
 												</div>
 											</div>
 										</a>
-									{:else if ['installs_z_score_2w', 'ratings_z_score_2w', 'installs_z_score_4w', 'ratings_z_score_4w'].includes(cell.column.id)}
+									{:else if ['installs_z_score_2w', 'installs_z_score_4w'].includes(cell.column.id)}
 										<ZScoreMeter
 											value={cell.getValue() as number}
-											min={isGoogleStore(page.params.store!) ? 0 : 0}
-											max={isGoogleStore(page.params.store!) ? 1000 : 500}
+											min={0}
+											max={1000}
 											size="sm"
 											showValue={false}
 										/>
-									{:else if ['installs', 'rating_count', 'installs_sum_1w', 'ratings_sum_1w', 'installs_avg_2w', 'installs_sum_4w', 'ratings_avg_2w', 'ratings_sum_4w'].includes(cell.column.id)}
+									{:else if ['installs', 'rating_count', 'installs_sum_1w', 'ratings_sum_1w', 'installs_avg_2w', 'installs_sum_4w'].includes(cell.column.id)}
 										<p class="text-xs md:text-sm">
 											{#if (cell.getValue() ?? 0) === 0}
 												-

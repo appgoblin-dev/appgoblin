@@ -54,17 +54,6 @@
 		return 'declining';
 	});
 
-	const ratingGrowth = $derived.by(() => {
-		if (!app.ratings_z_score_4w) return null;
-		const z = app.ratings_z_score_4w;
-		if (z > 2) return 'surging';
-		if (z > 1) return 'strong';
-		if (z > 0.5) return 'healthy';
-		if (z > -0.5) return 'stable';
-		if (z > -1) return 'slowing';
-		return 'declining';
-	});
-
 	// Monetization model
 	const monetization = $derived.by(() => {
 		const parts: string[] = [];
@@ -94,7 +83,6 @@
 	const weeklyInstalls = $derived(app.installs_sum_1w ? formatNumber(app.installs_sum_1w) : null);
 	const weeklyRatings = $derived(app.ratings_sum_1w ? formatNumber(app.ratings_sum_1w) : null);
 	const monthlyInstalls = $derived(app.installs_sum_4w ? formatNumber(app.installs_sum_4w) : null);
-	const monthlyRatings = $derived(app.ratings_sum_4w ? formatNumber(app.ratings_sum_4w) : null);
 
 	// Format date helper
 	const formatDate = (dateStr: string | undefined | null): string | null => {
@@ -159,8 +147,6 @@
 			{#if weeklyRatings}
 				{#if weeklyInstalls && isAndroid}, and{/if}
 				<span class="font-semibold">{weeklyRatings}</span> new ratings this week
-				{#if monthlyRatings}(<span class="font-semibold">{monthlyRatings}</span> over 4 weeks){/if}
-				{#if ratingGrowth}with <span class="font-medium">{ratingGrowth}</span> momentum{/if}.
 			{/if}
 			<a href="{appBasePath}/trends">View trends →</a>
 		</p>

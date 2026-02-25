@@ -11,21 +11,14 @@ SELECT
     installs_sum_1w,
     ratings_sum_1w,
     installs_avg_2w,
-    ratings_avg_2w,
     installs_z_score_2w,
-    ratings_z_score_2w,
     installs_sum_4w,
-    ratings_sum_4w,
     installs_avg_4w,
-    ratings_avg_4w,
-    installs_z_score_4w,
-    ratings_z_score_4w
+    installs_z_score_4w
 FROM frontend.z_scores_top_apps
 WHERE
     store = :store
     AND (app_category = :app_category OR :app_category IS NULL)
 ORDER BY
-    COALESCE(
-        COALESCE(installs_z_score_2w, 0), COALESCE(ratings_z_score_2w, 0)
-    ) DESC
+    COALESCE(installs_z_score_2w, 0) DESC
 LIMIT 100;

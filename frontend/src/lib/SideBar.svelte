@@ -53,7 +53,7 @@
 	<SideBarCollections {myCatData} baseUrl="/collections" {storeIDLookup} />
 {/if}
 
-{#if page.url.pathname == '/rankings' || page.url.pathname.startsWith('/rankings')}
+{#if page.url.pathname.startsWith('/rankings')}
 	<SideBarRankings {storeIDLookup} {collectionIDLookup} {categoryIDLookup} />
 {/if}
 
@@ -61,6 +61,6 @@
 	<SideBarCompanies {myCatData} />
 {/if}
 
-{#if page.url.pathname == '/fastest-growing-apps' || page.url.pathname.startsWith('/fastest-growing-apps')}
+{#if page.url.pathname.startsWith('/fastest-growing-apps')}
 	<SideBarFastestGrowingApps {myCatData} baseUrl="/fastest-growing-apps" {storeIDLookup} />
 {/if}

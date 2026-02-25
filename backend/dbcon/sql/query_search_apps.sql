@@ -16,12 +16,12 @@ ranked_apps AS (
         row_number() OVER (
             PARTITION BY a.store
             ORDER BY
-                a.installs_sum_4w_est DESC NULLS LAST
+                a.installs_sum_4w DESC NULLS LAST
         ) AS store_rank,
         row_number() OVER (
             ORDER BY
                 a.store ASC,
-                a.installs_sum_4w_est DESC NULLS LAST
+                a.installs_sum_4w DESC NULLS LAST
         ) % (SELECT count(DISTINCT store) FROM apps) AS round_robin_rank
     FROM apps AS a
 )

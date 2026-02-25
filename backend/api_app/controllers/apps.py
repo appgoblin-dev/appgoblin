@@ -201,45 +201,34 @@ def create_app_country_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
 def create_app_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
     """Create plot dicts for the app history with linear interpolation for missing weeks."""
     star_cols = ["one_star", "two_star", "three_star", "four_star", "five_star"]
-    metrics = ["installs", "rating", "review_count", "rating_count", *star_cols]
-    xaxis_col = "snapshot_date"
+    cumulative_metrics = ["rating", *star_cols]
+    weekly_metrics = [
+        "weekly_installs",
+        "weekly_ratings",
+        "weekly_reviews",
+        "weekly_active_users",
+        "monthly_active_users",
+        "weekly_ad_revenue",
+        "weekly_iap_revenue",
+    ]
+    xaxis_col = "week_start"
     # Convert to datetime and sort
     app_hist[xaxis_col] = pd.to_datetime(app_hist[xaxis_col])
     app_hist = app_hist.sort_values(xaxis_col)
-    app_hist = app_hist.set_index(xaxis_col)
-    # Resample to weekly frequency - this creates missing weeks with NaN
-    app_hist = app_hist.resample("W").last()
 
-    # Replace zeros with NaN for cumulative metrics (zeros are data holes, not valid values)
-    # Linear interpolation for cumulative metrics (installs, rating_count, review_count, star counts)
-    cumulative_metrics = ["installs", "rating_count", "review_count", *star_cols]
-    for metric in cumulative_metrics:
-        if metric in app_hist.columns:
-            app_hist[metric].head()
-            app_hist[metric].dtype
-            # Replace 0 with NaN (these are data holes, not valid cumulative values)
-            app_hist[metric] = app_hist[metric].replace(0, np.nan)
-            # Linear interpolation
-            app_hist[metric] = app_hist[metric].interpolate(
-                method="linear", limit_direction="forward"
-            )
-
-    # For rating (average), also replace zeros and interpolate
-    if "rating" in app_hist.columns:
-        # Replace 0 with NaN (invalid rating)
-        app_hist["rating"] = app_hist["rating"].replace(0, np.nan)
-        # Interpolate
-        app_hist["rating"] = app_hist["rating"].interpolate(
-            method="linear", limit_direction="forward"
-        )
-    app_hist = app_hist.reset_index()
-    # Calculate days between snapshots
-    app_hist["date_change"] = app_hist[xaxis_col] - app_hist[xaxis_col].shift(1)
-    app_hist["days_changed"] = app_hist["date_change"].apply(
-        lambda x: np.nan if pd.isna(x) else x.days,
-    )
     metrics_to_add = []
-    for metric in metrics:
+    for metric in weekly_metrics:
+        rate_of_change_metric = f"{metric}_rate_of_change"
+        avg_per_day_metric = f"{metric}_avg_per_day"
+        # Formula: ((new - old) / old) * 100
+        app_hist[rate_of_change_metric] = (
+            app_hist[metric] / app_hist[metric].shift(1)
+        ) * 100
+        app_hist[avg_per_day_metric] = app_hist[metric] / 7
+        metrics_to_add.append(rate_of_change_metric)
+        metrics_to_add.append(avg_per_day_metric)
+
+    for metric in cumulative_metrics:
         change_metric = f"new_{metric}"
         rate_of_change_metric = f"{metric}_rate_of_change"
         avg_per_day_metric = f"{metric}_avg_per_day"
@@ -250,14 +239,18 @@ def create_app_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
             (app_hist[metric] - app_hist[metric].shift(1)) / app_hist[metric].shift(1)
         ) * 100
         # Avg Per Day (daily average of the change)
-        app_hist[avg_per_day_metric] = (
-            app_hist[change_metric] / app_hist["days_changed"]
-        )
+        app_hist[avg_per_day_metric] = app_hist[change_metric] / 7
         metrics_to_add.append(change_metric)
         metrics_to_add.append(rate_of_change_metric)
         metrics_to_add.append(avg_per_day_metric)
+
+    # Include cumulative/base columns for charts (cumulative_installs, cumulative_ratings, rating, star_cols)
+    base_cols = ["cumulative_installs", "cumulative_ratings", "rating", *star_cols]
+    available_base = [c for c in base_cols if c in app_hist.columns]
     # Select final columns and drop the first row (no previous data to compare)
-    app_hist = app_hist[[xaxis_col, *metrics, *metrics_to_add]].drop(app_hist.index[0])
+    app_hist = app_hist[
+        [xaxis_col, *weekly_metrics, *available_base, *metrics_to_add]
+    ].drop(app_hist.index[0])
     # Replace infinite values with NaN
     app_hist = app_hist.replace([np.inf, -np.inf], np.nan)
     # Drop columns that are all NaN

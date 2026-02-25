@@ -20,13 +20,12 @@ SELECT
    a.icon_url_100,
    a.icon_url_512,
    a.featured_image_url,
-   agml.installs,
+   agml.total_installs AS installs,
    agml.rating,
-   agml.rating_count
+   agml.total_ratings AS rating_count
 FROM apps AS a
    LEFT JOIN app_global_metrics_latest AS agml ON a.id = agml.store_app
 ORDER BY
-    (
-        coalesce(agml.installs, 0) + coalesce(agml.rating_count, 0)
-    ) DESC NULLS LAST
+        coalesce(agml.total_installs, 0)
+     DESC NULLS LAST
 LIMIT :mylimit;

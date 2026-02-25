@@ -38,12 +38,6 @@
 			accessorKey: 'installs_d30',
 			isSortable: true
 		},
-
-		{
-			title: 'Monthly Ratings',
-			accessorKey: 'rating_count_d30',
-			isSortable: true
-		},
 		{
 			title: 'SDK',
 			accessorKey: 'sdk',
@@ -121,11 +115,7 @@
 						</td>
 
 						<td class="table-cell-fit">
-							{#if !isiOS}
-								{formatNumber(row.original.installs_d30)}
-							{:else}
-								{formatNumber(row.original.rating_count_d30)}
-							{/if}
+							{formatNumber(row.original.installs_d30)}
 						</td>
 						<td class="table-cell-fit">
 							{#if row.original.sdk == true}

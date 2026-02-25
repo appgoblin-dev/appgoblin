@@ -168,7 +168,6 @@ export interface RankedApps {
 	rating: number;
 	installs_sum_1w: number;
 	installs_sum_4w: number;
-	ratings_sum_4w: number;
 	app_icon_url: string;
 	phone_image_url_1?: string;
 	tablet_image_url_1?: string;
@@ -465,7 +464,6 @@ export interface CompanyCreative {
 	advertiser_store_app_id: string;
 	installs_sum_1w: number;
 	installs_sum_4w: number;
-	ratings_sum_4w: number;
 	installs: number;
 	rating_count: number;
 	rating: number;
@@ -579,27 +577,30 @@ export interface AppCountryMetrics {
 }
 
 export interface AppGlobalMetrics {
-	snapshot_date: string;
-	installs: number;
+	week_start: string;
+	weekly_installs: number;
 	rating: number;
-	rating_count: number;
-	review_count: number;
+	weekly_ratings: number;
+	weekly_reviews: number;
+	weekly_active_users: number;
+	monthly_active_users: number;
+	weekly_ad_revenue: number;
+	weekly_iap_revenue: number;
+	cumulative_installs: number;
+	cumulative_ratings: number;
 	one_star: number;
 	two_star: number;
 	three_star: number;
 	four_star: number;
 	five_star: number;
-	new_installs: number;
-	installs_rate_of_change: number;
-	installs_avg_per_day: number;
+	weekly_installs_rate_of_change: number;
+	weekly_installs_avg_per_day: number;
 	new_rating: number;
 	rating_rate_of_change: number;
-	new_review_count: number;
-	review_count_rate_of_change: number;
-	review_count_avg_per_day: number;
-	new_rating_count: number;
-	rating_count_rate_of_change: number;
-	rating_count_avg_per_day: number;
+	weekly_reviews_rate_of_change: number;
+	weekly_reviews_avg_per_day: number;
+	weekly_ratings_rate_of_change: number;
+	weekly_ratings_avg_per_day: number;
 	new_one_star: number;
 	one_star_rate_of_change: number;
 	one_star_avg_per_day: number;
@@ -704,11 +705,8 @@ export interface AppFullDetail {
 	installs_sum_1w: number;
 	installs_sum_4w: number;
 	ratings_sum_1w: number;
-	ratings_sum_4w: number;
 	installs_z_score_2w: number;
-	ratings_z_score_2w: number;
 	installs_z_score_4w: number;
-	ratings_z_score_4w: number;
 	category: string;
 	free: string;
 	price: string;
