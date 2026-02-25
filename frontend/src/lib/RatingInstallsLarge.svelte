@@ -55,11 +55,11 @@
 				<span class="text-primary-600-400 text-xs md:text-base">
 					+{formatNumber(app.installs_sum_1w)}
 					weekly installs
-					{#if app.installs_z_score_2w > 1 || (app.installs_z_score_2w == 0 && app.ratings_z_score_2w > 1)}
+					{#if app.installs_z_score_2w > 1}
 						<div class="flex items-center gap-1 text-success-900-100">
 							<TrendingUpIcon />
 						</div>
-					{:else if app.installs_z_score_2w < -1 || (app.installs_z_score_2w == 0 && app.ratings_z_score_2w < -1)}
+					{:else if app.installs_z_score_2w < -1}
 						<div class="flex items-center gap-1 text-danger-900-100">
 							<TrendingDownIcon />
 						</div>
@@ -77,11 +77,11 @@
 				<span class="text-primary-600-400 text-xs md:text-base">
 					+{formatNumber(app.installs_sum_4w)}
 					monthly installs
-					{#if app.installs_z_score_4w > 1 || (app.installs_z_score_4w == 0 && app.ratings_z_score_4w > 1)}
+					{#if app.installs_z_score_4w > 1}
 						<div class="flex items-center gap-1 text-success-900-100">
 							<TrendingUpIcon />
 						</div>
-					{:else if app.installs_z_score_4w < -1 || (app.installs_z_score_4w == 0 && app.ratings_z_score_4w < -1)}
+					{:else if app.installs_z_score_4w < -1}
 						<div class="flex items-center gap-1 text-danger-900-100">
 							<TrendingDownIcon />
 						</div>
@@ -92,49 +92,6 @@
 					{/if}
 				</span>
 			</div>
-		{/if}
-
-		<!-- ratings week trend -->
-		{#if !app.installs && app.rating_count}
-			{#if app.ratings_sum_1w > 0}
-				<div class="flex items-center gap-1 text-primary-800-200">
-					<span>~{formatNumber(app.ratings_sum_1w * 50)}</span>
-					<span class="text-primary-600-400 text-sm md:text-base">(installs week)</span>
-					{#if app.ratings_z_score_2w > 1}
-						<div class="flex items-center gap-1 text-success-900-100">
-							<TrendingUpIcon />
-						</div>
-					{:else if app.ratings_z_score_2w < -1}
-						<div class="flex items-center gap-1 text-danger-900-100">
-							<TrendingDownIcon />
-						</div>
-					{:else}
-						<div class="flex items-center gap-1 text-primary-600-400 text-xs">
-							<span>Trend Steady</span>
-						</div>
-					{/if}
-				</div>
-			{/if}
-			<!-- ratings month trend -->
-			{#if app.ratings_sum_4w > 0}
-				<div class="flex items-center gap-1 text-primary-800-200">
-					<span>~{formatNumber(app.ratings_sum_4w * 50)}</span>
-					<span class="text-primary-600-400 text-sm md:text-base">(installs month)</span>
-					{#if app.ratings_z_score_4w > 1}
-						<div class="flex items-center gap-1 text-success-900-100">
-							<TrendingUpIcon />
-						</div>
-					{:else if app.ratings_z_score_4w < -1}
-						<div class="flex items-center gap-1 text-danger-900-100">
-							<TrendingDownIcon />
-						</div>
-					{:else}
-						<div class="flex items-center gap-1 text-primary-600-400 text-xs">
-							<span>Trend Steady</span>
-						</div>
-					{/if}
-				</div>
-			{/if}
 		{/if}
 	</div>
 </div>

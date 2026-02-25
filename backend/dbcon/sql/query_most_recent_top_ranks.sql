@@ -10,7 +10,6 @@ SELECT
     installs_sum_1w,
     installs_sum_4w,
     ratings_sum_1w,
-    ratings_sum_4w,
     CONCAT(
         'https://media.appgoblin.info/app-icons/',
         store_id,

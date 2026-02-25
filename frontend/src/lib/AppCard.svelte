@@ -120,10 +120,6 @@
 									+{formatNumber(app.installs_sum_4w)}
 									monthly installs
 								{/if}
-								{#if !app.installs && app.ratings_sum_4w > 0}
-									~{formatNumber(app.ratings_sum_4w * 50)}
-									monthly installs
-								{/if}
 							</span>
 						</div>
 					</div>

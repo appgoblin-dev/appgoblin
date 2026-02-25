@@ -8,7 +8,7 @@ SELECT
     agmh.weekly_ad_revenue,
     agmh.weekly_iap_revenue,
     agmh.total_installs AS cumulative_installs,
-    agmh.total_ratings_count AS cumulative_ratings,
+    agmh.total_ratings AS cumulative_ratings,
     agmh.rating,
     agmh.one_star,
     agmh.two_star,

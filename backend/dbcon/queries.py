@@ -84,9 +84,7 @@ def get_growth_apps(
     )
     decimal_cols = [
         "installs_z_score_2w",
-        "ratings_z_score_2w",
         "installs_z_score_4w",
-        "ratings_z_score_4w",
     ]
     df[decimal_cols] = df[decimal_cols].round(2)
     return df
@@ -450,7 +448,6 @@ def get_company_stats(
                     "installs_total",
                     "installs_d30",
                     "rating_count_total",
-                    "rating_count_d30",
                 ]
             ]
             .sum()

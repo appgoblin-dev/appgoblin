@@ -168,7 +168,6 @@ export interface RankedApps {
 	rating: number;
 	installs_sum_1w: number;
 	installs_sum_4w: number;
-	ratings_sum_4w: number;
 	app_icon_url: string;
 	phone_image_url_1?: string;
 	tablet_image_url_1?: string;
@@ -465,7 +464,6 @@ export interface CompanyCreative {
 	advertiser_store_app_id: string;
 	installs_sum_1w: number;
 	installs_sum_4w: number;
-	ratings_sum_4w: number;
 	installs: number;
 	rating_count: number;
 	rating: number;
@@ -707,11 +705,8 @@ export interface AppFullDetail {
 	installs_sum_1w: number;
 	installs_sum_4w: number;
 	ratings_sum_1w: number;
-	ratings_sum_4w: number;
 	installs_z_score_2w: number;
-	ratings_z_score_2w: number;
 	installs_z_score_4w: number;
-	ratings_z_score_4w: number;
 	category: string;
 	free: string;
 	price: string;

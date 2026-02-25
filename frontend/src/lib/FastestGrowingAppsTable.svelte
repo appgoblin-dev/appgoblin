@@ -35,9 +35,7 @@
 	let columnFilters = $state<ColumnFiltersState>([]);
 	const ratingsHiddenDefaults = {
 		rating_count: false,
-		ratings_sum_1w: false,
-		ratings_z_score_2w: false,
-		ratings_z_score_4w: false
+		ratings_sum_1w: false
 	};
 
 	const installsHiddenDefaults = {
@@ -106,18 +104,8 @@
 			isSortable: true
 		},
 		{
-			title: 'Ratings Avg (14d)',
-			accessorKey: 'ratings_avg_2w',
-			isSortable: true
-		},
-		{
 			title: 'Installs Growth Score (14d)',
 			accessorKey: 'installs_z_score_2w',
-			isSortable: true
-		},
-		{
-			title: 'Ratings Growth Score (14d)',
-			accessorKey: 'ratings_z_score_2w',
 			isSortable: true
 		},
 		// Monthly growth metrics
@@ -127,18 +115,8 @@
 			isSortable: true
 		},
 		{
-			title: 'Ratings (30d)',
-			accessorKey: 'ratings_sum_4w',
-			isSortable: true
-		},
-		{
 			title: 'Installs Growth Score (30d)',
 			accessorKey: 'installs_z_score_4w',
-			isSortable: true
-		},
-		{
-			title: 'Ratings Growth Score (30d)',
-			accessorKey: 'ratings_z_score_4w',
 			isSortable: true
 		},
 		// Monetization indicators
@@ -369,7 +347,7 @@
 												</div>
 											</div>
 										</a>
-									{:else if ['installs_z_score_2w', 'ratings_z_score_2w', 'installs_z_score_4w', 'ratings_z_score_4w'].includes(cell.column.id)}
+									{:else if ['installs_z_score_2w', 'installs_z_score_4w'].includes(cell.column.id)}
 										<ZScoreMeter
 											value={cell.getValue() as number}
 											min={isGoogleStore(page.params.store!) ? 0 : 0}
@@ -377,7 +355,7 @@
 											size="sm"
 											showValue={false}
 										/>
-									{:else if ['installs', 'rating_count', 'installs_sum_1w', 'ratings_sum_1w', 'installs_avg_2w', 'installs_sum_4w', 'ratings_avg_2w', 'ratings_sum_4w'].includes(cell.column.id)}
+									{:else if ['installs', 'rating_count', 'installs_sum_1w', 'ratings_sum_1w', 'installs_avg_2w', 'installs_sum_4w'].includes(cell.column.id)}
 										<p class="text-xs md:text-sm">
 											{#if (cell.getValue() ?? 0) === 0}
 												-

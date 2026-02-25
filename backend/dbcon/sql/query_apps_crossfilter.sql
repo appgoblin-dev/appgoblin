@@ -30,10 +30,9 @@ SELECT
     sao.id,
     sao.store_id,
     sao.name,
-    sao.installs_est AS installs,
+    sao.installs,
     sao.rating_count,
-    sao.installs_sum_4w_est AS installs_d30,
-    sao.ratings_sum_4w AS ratings_d30,
+    sao.installs_sum_4w AS installs_d30,
     sao.in_app_purchases,
     sao.ad_supported,
     sao.store,
@@ -55,12 +54,12 @@ WHERE
 
         :min_installs ::bigint IS NULL
         OR :min_installs = 0
-        OR sao.installs_est >= :min_installs
+        OR sao.installs >= :min_installs
     )
     AND (
 
         :max_installs ::bigint IS NULL
-        OR sao.installs_est <= :max_installs
+        OR sao.installs <= :max_installs
     )
     AND (
 
@@ -75,12 +74,12 @@ WHERE
     AND (
 
         :min_installs_d30 ::bigint IS NULL
-        OR sao.installs_sum_4w_est >= :min_installs_d30
+        OR sao.installs_sum_4w >= :min_installs_d30
     )
     AND (
 
         :max_installs_d30 ::bigint IS NULL
-        OR sao.installs_sum_4w_est <= :max_installs_d30
+        OR sao.installs_sum_4w <= :max_installs_d30
     )
     -- Exclusion check
     AND NOT EXISTS (
@@ -88,5 +87,5 @@ WHERE
         WHERE ea.store_app = sao.id
     )
 ORDER BY
-    sao.installs_est DESC
+    sao.installs DESC
 LIMIT 100;

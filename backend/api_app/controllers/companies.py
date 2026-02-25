@@ -95,15 +95,21 @@ def make_company_api_domains_dict(
         .reset_index()
     )
 
-    df["country"] = df["country"].apply(
-        lambda x: x.tolist() if isinstance(x, np.ndarray) else x
-    )
+    # Pandas 3.0 defaulting to ArrowStringArray
     df["org"] = df["org"].apply(
-        lambda x: x.tolist() if isinstance(x, np.ndarray) else x
+        lambda x: (
+            x.tolist()
+            if isinstance(x, np.ndarray) or isinstance(x, pd.arrays.ArrowStringArray)
+            else x
+        )
     )
 
     df["country"] = df["country"].apply(
-        lambda x: x.tolist() if isinstance(x, np.ndarray) else x
+        lambda x: (
+            x.tolist()
+            if isinstance(x, np.ndarray) or isinstance(x, pd.arrays.ArrowStringArray)
+            else x
+        )
     )
 
     missing_domains = [
@@ -557,16 +563,6 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
         res_installs_d30["adstxt_direct_android"],
         res_installs_d30["adstxt_reseller_android"],
     )
-
-    # (
-    # sdk_ios_rating_count_d30,
-    # adstxt_direct_ios_rating_count_d30,
-    # adstxt_reseller_ios_rating_count_d30,
-    # ) = (
-    #     res_rating_count_d30["sdk_ios"],
-    #     res_rating_count_d30["adstxt_direct_ios"],
-    #     res_rating_count_d30["adstxt_reseller_ios"],
-    # )
 
     sdk_total_apps = sdk_ios_total_apps + sdk_android_total_apps
     total_apps = (
