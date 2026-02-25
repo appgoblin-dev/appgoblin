@@ -38,35 +38,9 @@
 		ratings_sum_1w: false
 	};
 
-	const installsHiddenDefaults = {
-		installs: false,
-		installs_sum_1w: false,
-		installs_avg_2w: false,
-		installs_z_score_2w: false,
-		installs_sum_4w: false,
-		installs_z_score_4w: false
-	};
-
-	function isGoogleStore(store: string) {
-		return store === 'google';
-	}
-
-	function getHiddenDefaults(store: string) {
-		if (isGoogleStore(store)) {
-			return ratingsHiddenDefaults;
-		} else {
-			return installsHiddenDefaults;
-		}
-	}
-
 	let globalFilter = $state<string>('');
 	let dataSource = $state<string>('both');
-	let columnVisibility = $state<Record<string, boolean>>(getHiddenDefaults(page.params.store!));
-
-	// Update column visibility when store changes
-	$effect(() => {
-		columnVisibility = getHiddenDefaults(page.params.store!);
-	});
+	let columnVisibility = $state<Record<string, boolean>>(ratingsHiddenDefaults);
 
 	let { data }: DataTableProps<CompaniesOverviewEntries, TValue> = $props();
 
@@ -350,8 +324,8 @@
 									{:else if ['installs_z_score_2w', 'installs_z_score_4w'].includes(cell.column.id)}
 										<ZScoreMeter
 											value={cell.getValue() as number}
-											min={isGoogleStore(page.params.store!) ? 0 : 0}
-											max={isGoogleStore(page.params.store!) ? 1000 : 500}
+											min={0}
+											max={1000}
 											size="sm"
 											showValue={false}
 										/>
