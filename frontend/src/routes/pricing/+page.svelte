@@ -45,7 +45,12 @@
 	<div class="card preset-filled-surface-100-900 {cardPadding}">
 		<h2 class="h2 {titlePadding}">Plans & Pricing</h2>
 		<div class={contentPadding}>
-			<p>Simple pricing for teams that need clear data access.</p>
+			<p>
+				Simple pricing for teams that need clear data access. For alternative payment options
+				(Invoice, PayPal, etc.), please reach out to us at <a href="mailto:contact@appgoblin.info"
+					>contact@appgoblin.info</a
+				>.
+			</p>
 
 			<br />
 
@@ -58,8 +63,11 @@
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Advanced App SDK breakdowns</li>
-						<li>Keyword tools, comparisons, rankings</li>
-						<li>Ad intelligence, trending apps</li>
+						<li>Request Apps for SDK and API scanning</li>
+						<li>App Comparisons</li>
+						<li>Keyword tools</li>
+						<li>App rankings</li>
+						<li>Ad intelligence, trending growth apps</li>
 					</ul>
 					<p class="text-xs opacity-60">Included with every account</p>
 				</div>
@@ -153,7 +161,8 @@
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Business SDK + App-Ads.txt</li>
-						<li>Custom reporting and data requests</li>
+						<li>Compliance</li>
+						<li>Custom reports</li>
 					</ul>
 					<form
 						method="POST"

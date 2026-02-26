@@ -18,8 +18,6 @@
 
 	import { genericColumns } from '$lib/components/data-table/generic-column';
 
-	import { page } from '$app/state';
-
 	import Check from 'lucide-svelte/icons/check';
 	import X from 'lucide-svelte/icons/x';
 

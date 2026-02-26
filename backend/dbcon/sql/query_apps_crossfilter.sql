@@ -87,5 +87,5 @@ WHERE
         WHERE ea.store_app = sao.id
     )
 ORDER BY
-    sao.installs DESC
+    sao.installs DESC NULLS LAST
 LIMIT 100;

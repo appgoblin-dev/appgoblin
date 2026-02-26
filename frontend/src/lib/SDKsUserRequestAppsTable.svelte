@@ -36,7 +36,7 @@
 							<a href="/apps/{row.store_id}" style="cursor: pointer;">
 								<div class="flex items-center gap-2">
 									<img src={row.app_icon_url} alt={row.name} class="w-8 h-8" />
-									{row.name}
+									{row.name ? row.name : 'requested store_id: ' + row.store_id}
 								</div>
 							</a>
 						</td>

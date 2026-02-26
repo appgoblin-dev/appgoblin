@@ -507,7 +507,7 @@
 					<!-- Monthly Installs -->
 					<div class="grid grid-cols-2 gap-2">
 						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="min-monthly">Min Monthly</label>
+							<label class="text-xs text-surface-500" for="min-monthly">Min Monthly Installs</label>
 							<input
 								type="number"
 								id="min-monthly"
@@ -517,7 +517,7 @@
 							/>
 						</div>
 						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="max-monthly">Max Monthly</label>
+							<label class="text-xs text-surface-500" for="max-monthly">Max Monthly Installs</label>
 							<input
 								type="number"
 								id="max-monthly"

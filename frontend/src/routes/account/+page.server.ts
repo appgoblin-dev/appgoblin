@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { deleteSessionTokenCookie, invalidateSession } from '$lib/server/auth/session';
-import { requireFullAuth } from '$lib/server/auth/auth';
+import { requireFullAuth, loginUrl } from '$lib/server/auth/auth';
 import { db } from '$lib/server/auth/db';
 import { createPortalSession, STRIPE_PRICES } from '$lib/server/stripe';
 
@@ -51,7 +51,7 @@ export const actions: Actions = {
 		}
 		invalidateSession(event.locals.session.id);
 		deleteSessionTokenCookie(event);
-		return redirect(302, '/auth/login');
+		return redirect(302, loginUrl('/account'));
 	},
 	portal: async (event: RequestEvent) => {
 		const { user } = requireFullAuth(event);
