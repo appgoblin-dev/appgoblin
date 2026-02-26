@@ -3,12 +3,25 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { db } from './db';
 
 /**
+ * Build login URL with optional redirectTo (current path by default).
+ * Caller should pass the path the user should return to after login.
+ */
+export function loginUrl(redirectTo?: string): string {
+	const base = '/auth/login';
+	if (redirectTo == null || redirectTo === '') return base;
+	const encoded = encodeURIComponent(redirectTo);
+	return `${base}?redirectTo=${encoded}`;
+}
+
+/**
  * Require authentication for a route
  * Returns the user and session if authenticated, otherwise redirects to login
+ * with redirectTo set to the current URL so the user returns here after login.
  */
 export function requireAuth(event: RequestEvent) {
 	if (event.locals.session === null || event.locals.user === null) {
-		throw redirect(302, '/auth/login');
+		const returnTo = event.url.pathname + event.url.search;
+		throw redirect(302, loginUrl(returnTo));
 	}
 	return {
 		session: event.locals.session,
@@ -78,17 +91,28 @@ export async function requirePaidSubscription(event: RequestEvent) {
 }
 
 /**
- * Redirect authenticated users away from auth pages (login, signup)
+ * Redirect authenticated users away from auth pages (login, signup).
+ * If redirectTo is in the URL and valid, redirect there; otherwise home.
  */
 export function redirectIfAuthenticated(event: RequestEvent) {
 	if (event.locals.session !== null && event.locals.user !== null) {
-		// If authenticated and email verified, go to home
 		if (event.locals.user.emailVerified) {
-			throw redirect(302, '/');
+			const redirectTo = event.url.searchParams.get('redirectTo');
+			const target = isSafeRedirect(redirectTo) ? redirectTo : '/';
+			throw redirect(302, target);
 		}
-		// Otherwise continue with auth flow
 		if (!event.locals.user.emailVerified) {
 			throw redirect(302, '/auth/verify-email');
 		}
 	}
+}
+
+/**
+ * Valid redirect target: same-origin path only, no auth pages (avoid loops).
+ */
+export function isSafeRedirect(value: string | null): value is string {
+	if (value == null || value === '') return false;
+	if (!value.startsWith('/') || value.startsWith('//')) return false;
+	if (value.startsWith('/auth')) return false;
+	return true;
 }

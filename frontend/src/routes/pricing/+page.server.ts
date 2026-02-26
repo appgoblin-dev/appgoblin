@@ -1,7 +1,7 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoadEvent } from './$types';
 import { createCheckoutSession, type StripePriceKey } from '$lib/server/stripe';
-import { requireFullAuth } from '$lib/server/auth/auth';
+import { requireFullAuth, loginUrl } from '$lib/server/auth/auth';
 import { db } from '$lib/server/auth/db';
 
 export const load = async (event: PageServerLoadEvent) => {
@@ -14,7 +14,7 @@ export const actions: Actions = {
 		const { user } = requireFullAuth(event);
 
 		if (!user) {
-			return redirect(302, '/auth/login?redirectTo=/pricing');
+			return redirect(302, loginUrl('/pricing'));
 		}
 
 		const formData = await event.request.formData();

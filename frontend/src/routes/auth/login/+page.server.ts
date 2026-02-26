@@ -9,7 +9,7 @@ import {
 	generateSessionToken,
 	setSessionTokenCookie
 } from '$lib/server/auth/session';
-import { redirectIfAuthenticated } from '$lib/server/auth/auth';
+import { redirectIfAuthenticated, isSafeRedirect } from '$lib/server/auth/auth';
 
 import type { SessionFlags } from '$lib/server/auth/session';
 import type { Actions, PageServerLoadEvent, RequestEvent } from './$types';
@@ -17,7 +17,8 @@ import type { Actions, PageServerLoadEvent, RequestEvent } from './$types';
 export function load(event: PageServerLoadEvent) {
 	// Redirect if already authenticated (public route)
 	redirectIfAuthenticated(event);
-	return {};
+	const redirectTo = event.url.searchParams.get('redirectTo') ?? '';
+	return { redirectTo: isSafeRedirect(redirectTo) ? redirectTo : '' };
 }
 
 const throttler = new Throttler<number>([0, 1, 2, 4, 8, 16, 30, 60, 180, 300]);
@@ -101,5 +102,8 @@ async function action(event: RequestEvent) {
 	if (!user.emailVerified) {
 		return redirect(302, '/auth/verify-email');
 	}
-	return redirect(302, '/');
+	const redirectTo = formData.get('redirectTo');
+	const destination =
+		typeof redirectTo === 'string' && isSafeRedirect(redirectTo) ? redirectTo : '/';
+	return redirect(302, destination);
 }
