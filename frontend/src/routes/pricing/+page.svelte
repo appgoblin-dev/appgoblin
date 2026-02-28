@@ -1,5 +1,9 @@
 <script>
 	import { enhance } from '$app/forms';
+
+	/** @type {import('./$types').PageData} */
+	export let data;
+
 	let titlePadding = 'p-2 md:p-4';
 	let contentPadding = 'p-2 md:p-4';
 	let cardPadding = 'p-2 md:p-4';
@@ -46,9 +50,8 @@
 		<h2 class="h2 {titlePadding}">Plans & Pricing</h2>
 		<div class={contentPadding}>
 			<p>
-				Simple pricing for teams that need clear data access. For alternative payment options
-				(Invoice, PayPal, etc.), please reach out to us at <a href="mailto:contact@appgoblin.info"
-					>contact@appgoblin.info</a
+				For alternative payment options (Invoice, PayPal, etc.), please reach out to us at <a
+					href="mailto:contact@appgoblin.info">contact@appgoblin.info</a
 				>.
 			</p>
 
@@ -70,17 +73,24 @@
 						<li>Ad intelligence, trending growth apps</li>
 					</ul>
 					<p class="text-xs opacity-60">Included with every account</p>
+					{#if !data?.user}
+						<a href="/auth/signup" class="btn preset-filled-primary-500 w-full mt-auto"
+							>Create Account</a
+						>
+					{/if}
 				</div>
 
 				<div class="card preset-filled-surface-50-950 p-4 flex flex-col gap-3">
 					<div>
 						<p class="text-xs uppercase tracking-wide opacity-60">Premium Supporter</p>
-						<p class="text-2xl font-semibold">$49</p>
+						<p class="text-2xl font-semibold">
+							$49<span class="text-xs opacity-60 ml-1">/mo</span>
+						</p>
 						<p class="text-xs opacity-70">Freelance ASO, small teams, power users</p>
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Everything in Free</li>
-						<li>App CrossFilter dashboard</li>
+						<li>App Explorer dashboard</li>
 						<li>Feature requests and feedback</li>
 					</ul>
 					<form
@@ -92,18 +102,22 @@
 					>
 						<input type="hidden" name="priceKey" value="app_dev" />
 						<button type="submit" disabled={loading} class="btn preset-filled-primary-500 w-full">
-							{loading && activePriceKey === 'app_dev' ? 'Redirecting to checkout...' : 'Subscribe'}
+							{loading && activePriceKey === 'app_dev'
+								? 'Redirecting to checkout...'
+								: 'Become Premium Supporter'}
 						</button>
 					</form>
 				</div>
 
 				<div class="card preset-filled-surface-50-950 p-4 flex flex-col gap-3">
 					<div>
-						<p class="text-xs uppercase tracking-wide opacity-60">Business Intelligence</p>
-						<p class="text-2xl font-semibold">$299</p>
-						<p class="text-xs opacity-70">
-							Ad tech, SDK vendors, competitive intel teams, agencies
+						<p class="text-xs uppercase tracking-wide opacity-60">
+							Business Intelligence (SDK data)
 						</p>
+						<p class="text-2xl font-semibold">
+							$299<span class="text-xs opacity-60 ml-1">/mo</span>
+						</p>
+						<p class="text-xs opacity-70">Sales teams, ad networks, agencies</p>
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Everything in Premium</li>
@@ -119,7 +133,9 @@
 					>
 						<input type="hidden" name="priceKey" value="b2b_sdk" />
 						<button type="submit" disabled={loading} class="btn preset-filled-primary-500 w-full">
-							{loading && activePriceKey === 'b2b_sdk' ? 'Redirecting to checkout...' : 'Subscribe'}
+							{loading && activePriceKey === 'b2b_sdk'
+								? 'Redirecting to checkout...'
+								: 'Get Business Intelligence'}
 						</button>
 					</form>
 				</div>
@@ -127,8 +143,10 @@
 				<div class="card preset-filled-surface-50-950 p-4 flex flex-col gap-3">
 					<div>
 						<p class="text-xs uppercase tracking-wide opacity-60">App-Ads.txt</p>
-						<p class="text-2xl font-semibold">$299</p>
-						<p class="text-xs opacity-70">Ad networks, DSPs, stock traders</p>
+						<p class="text-2xl font-semibold">
+							$299<span class="text-xs opacity-60 ml-1">/mo</span>
+						</p>
+						<p class="text-xs opacity-70">Ad networks, DSPs, SSPs</p>
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Everything in Premium</li>
@@ -146,7 +164,7 @@
 						<button type="submit" disabled={loading} class="btn preset-filled-primary-500 w-full">
 							{loading && activePriceKey === 'b2b_appads'
 								? 'Redirecting to checkout...'
-								: 'Subscribe'}
+								: 'Get App-Ads.txt'}
 						</button>
 					</form>
 				</div>
@@ -156,8 +174,12 @@
 				>
 					<div>
 						<p class="text-xs uppercase tracking-wide opacity-60">Premium B2B</p>
-						<p class="text-2xl font-semibold">$499</p>
-						<p class="text-xs opacity-70">Larger companies, ad networks, hedge funds</p>
+						<p class="text-2xl font-semibold">
+							$499<span class="text-xs opacity-60 ml-1">/mo</span>
+						</p>
+						<p class="text-xs opacity-70">
+							Larger companies, security teams, ad networks, hedge funds
+						</p>
 					</div>
 					<ul class="text-xs list-disc list-inside space-y-1 opacity-90">
 						<li>Business SDK + App-Ads.txt</li>
@@ -175,7 +197,7 @@
 						<button type="submit" disabled={loading} class="btn preset-filled-primary-500 w-full">
 							{loading && activePriceKey === 'b2b_premium'
 								? 'Redirecting to checkout...'
-								: 'Subscribe'}
+								: 'Get Premium B2B'}
 						</button>
 					</form>
 				</div>
