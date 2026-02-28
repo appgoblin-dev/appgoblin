@@ -16,7 +16,7 @@
 </script>
 
 {#if typeof myPackageInfo == 'string'}
-	<p>Permissions, SDKs and trackers info not yet available for this app.</p>
+	<p>Permissions, SDKs and trackers info not yet available for {myapp.name}.</p>
 {:else if myPackageInfo.company_categories && myapp.sdk_successful_last_crawled}
 	<div class="">
 		<p class="p-2 md:p-4">
@@ -41,6 +41,7 @@
 				<WhiteCard>
 					{#snippet title()}
 						<span class="text-sm font-semibold">
+							AppGoblin saw {myapp.name} uses
 							{myPackageInfo.company_categories[category].length}
 							{companyTypes.types.find((x: { url_slug: string }) => x.url_slug === category)
 								?.name || category}

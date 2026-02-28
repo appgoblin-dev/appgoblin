@@ -318,7 +318,7 @@
 										<a
 											href="/apps/{row.original.store_id}"
 											style="cursor: pointer;"
-											class="text-xs md:text-sm font-medium text-blue-600 hover:text-blue-800"
+											class="block max-w-[170px] md:max-w-[260px] text-xs md:text-sm font-medium text-blue-600 hover:text-blue-800"
 										>
 											<div class="flex items-center gap-2">
 												<img
@@ -326,10 +326,13 @@
 													alt={row.original.app_name}
 													class="w-8 h-8 shrink-0 rounded"
 												/>
-												<div class="flex flex-col min-w-0">
-													<span class="text-xs md:text-sm truncate">{row.original.app_name}</span>
-													<span class="text-[10px] md:text-xs text-surface-500 truncate"
-														>{row.original.developer_name}</span
+												<div class="flex flex-col min-w-0 max-w-[120px] md:max-w-[210px]">
+													<span class="text-xs md:text-sm truncate" title={row.original.app_name}
+														>{row.original.app_name}</span
+													>
+													<span
+														class="text-[10px] md:text-xs text-surface-500 truncate"
+														title={row.original.developer_name}>{row.original.developer_name}</span
 													>
 												</div>
 											</div>

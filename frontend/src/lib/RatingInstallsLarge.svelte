@@ -36,28 +36,28 @@
 			<!-- Installs -->
 			<div class="flex items-start sm:items-center gap-2">
 				{#if app.installs && app.installs != 0}
-					<div class="text-primary-600-400">
+					<div class="text-primary-900-100">
 						<IconDownload />
 					</div>
 					<div class="leading-tight">
 						<span class="font-semibold text-base md:text-lg">{formatNumber(app.installs)}</span>
-						<span class="text-primary-600-400 text-sm ml-1">installs</span>
+						<span class="text-sm ml-1">installs</span>
 					</div>
 				{:else if app.rating_count != 0}
-					<div class="text-primary-600-400">
+					<div class="text-primary-900-100">
 						<IconDownload />
 					</div>
 					<div class="leading-tight">
 						<span class="font-semibold text-base md:text-lg">
 							~{formatNumber(app_install_estimate_min)} - {formatNumber(app_install_estimate_max)}
 						</span>
-						<span class="text-primary-600-400 text-sm ml-1">est. installs</span>
+						<span class="text-sm ml-1">est. installs</span>
 					</div>
 				{:else}
-					<div class="text-primary-600-400">
+					<div class="text-primary-900-100">
 						<IconDownload />
 					</div>
-					<span class="text-primary-600-400 text-sm">Installs not yet available</span>
+					<span class="text-sm">Installs not yet available</span>
 				{/if}
 			</div>
 
@@ -67,11 +67,11 @@
 					<Star class="w-5 h-5" />
 					<div class="leading-tight">
 						<span class="font-semibold text-base md:text-lg">{formatNumber(app.rating_count)}</span>
-						<span class="text-primary-600-400 text-sm ml-1">ratings</span>
+						<span class="text-sm ml-1">ratings</span>
 					</div>
 				{:else}
-					<Star class="w-5 h-5 text-primary-600-400" />
-					<span class="text-primary-600-400 text-sm">Ratings not yet available</span>
+					<Star class="w-5 h-5 text-primary-900-100" />
+					<span class="text-sm">Ratings not yet available</span>
 				{/if}
 			</div>
 		</div>
@@ -81,16 +81,16 @@
 			<!-- Monthly Active Users -->
 			<div class="flex items-start sm:items-center gap-2">
 				{#if monthlyActiveUsers > 0}
-					<UsersIcon class="w-5 h-5 text-primary-600-400" />
+					<UsersIcon class="w-5 h-5" />
 					<div class="leading-tight">
 						<span class="font-semibold text-base md:text-lg"
 							>{formatNumber(monthlyActiveUsers)}</span
 						>
-						<span class="text-primary-600-400 text-sm ml-1">monthly active users</span>
+						<span class="text-sm ml-1">monthly active users</span>
 					</div>
 				{:else}
-					<UsersIcon class="w-5 h-5 text-primary-600-400" />
-					<span class="text-primary-600-400 text-sm">MAU not available</span>
+					<UsersIcon class="w-5 h-5 text-primary-900-100" />
+					<span class="text-primary-900-100 text-sm">MAU not available</span>
 				{/if}
 			</div>
 
@@ -103,7 +103,7 @@
 							<span class="font-semibold text-base md:text-lg text-success-900-100"
 								>{getRevenueBucket(monthlyTotalRevenue)}</span
 							>
-							<span class="text-primary-600-400 text-sm ml-1">monthly revenue est.</span>
+							<span class="text-sm ml-1">monthly revenue est.</span>
 						</div>
 						<!-- Revenue split visualization -->
 						<div class="flex items-center gap-2 mt-1">
@@ -125,7 +125,7 @@
 								<span class="w-2 h-2 rounded-full bg-success-800-200"></span>
 								<span class="text-success-800-200">IAP {monthlyIapRevenueShare}%</span>
 							</span>
-							<span class="text-primary-600-400">·</span>
+							<span class="text-primary-900-100">·</span>
 							<span class="flex items-center gap-1">
 								<span class="w-2 h-2 rounded-full bg-primary-800-200"></span>
 								<span class="text-primary-800-200">Ad {monthlyAdRevenueShare}%</span>
@@ -133,8 +133,8 @@
 						</div>
 					</div>
 				{:else}
-					<DollarSignIcon class="w-5 h-5 text-primary-600-400" />
-					<span class="text-primary-600-400 text-sm">Revenue not available</span>
+					<DollarSignIcon class="w-5 h-5 text-primary-900-100" />
+					<span class="text-primary-900-100 text-sm">Revenue not available</span>
 				{/if}
 			</div>
 		</div>
@@ -142,16 +142,14 @@
 		<!-- Install Trends -->
 		{#if app.installs_sum_1w > 0 || app.installs_sum_4w > 0}
 			<div class="col-span-1 md:col-span-2 border-t border-primary-200-800 pt-3 space-y-2">
-				<div class="text-xs font-medium text-primary-600-400 uppercase tracking-wide">
-					Install Trends
-				</div>
+				<div class="text-xs font-medium uppercase tracking-wide">Install Trends</div>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
 					{#if app.installs_sum_1w > 0}
 						<div
 							class="flex items-start sm:items-center justify-between gap-2 bg-primary-50-900/20 rounded px-3 py-2"
 						>
 							<div class="flex items-center gap-2 min-w-0">
-								<span class="text-sm text-primary-600-400">Weekly</span>
+								<span class="text-sm">Weekly</span>
 								<span class="font-medium text-sm">+{formatNumber(app.installs_sum_1w)}</span>
 							</div>
 							{#if app.installs_z_score_2w > 1}
@@ -160,12 +158,12 @@
 									<span class="text-xs font-medium">Trending</span>
 								</div>
 							{:else if app.installs_z_score_2w < -1}
-								<div class="flex items-center gap-1 text-danger-600">
+								<div class="flex items-center gap-1 text-danger-600-400">
 									<TrendingDownIcon class="w-4 h-4" />
 									<span class="text-xs font-medium">Declining</span>
 								</div>
 							{:else}
-								<span class="text-xs text-primary-600-400">Steady</span>
+								<span class="text-xs">Steady</span>
 							{/if}
 						</div>
 					{/if}
@@ -174,7 +172,7 @@
 							class="flex items-start sm:items-center justify-between gap-2 bg-primary-50-900/20 rounded px-3 py-2"
 						>
 							<div class="flex items-center gap-2 min-w-0">
-								<span class="text-sm text-primary-600-400">Monthly</span>
+								<span class="text-sm">Monthly</span>
 								<span class="font-medium text-sm">+{formatNumber(app.installs_sum_4w)}</span>
 							</div>
 							{#if app.installs_z_score_4w > 1}
@@ -183,12 +181,12 @@
 									<span class="text-xs font-medium">Trending</span>
 								</div>
 							{:else if app.installs_z_score_4w < -1}
-								<div class="flex items-center gap-1 text-danger-600">
+								<div class="flex items-center gap-1 text-danger-600-400">
 									<TrendingDownIcon class="w-4 h-4" />
 									<span class="text-xs font-medium">Declining</span>
 								</div>
 							{:else}
-								<span class="text-xs text-primary-600-400">Steady</span>
+								<span class="text-xs">Steady</span>
 							{/if}
 						</div>
 					{/if}

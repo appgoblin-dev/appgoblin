@@ -121,11 +121,11 @@
 								</span>
 							</div>
 							<div class="flex items-center gap-2">
-								<span class="font-medium">Store First Crawled:</span>
+								<span class="font-medium">AppGoblin First Crawled:</span>
 								<span class="text-primary-900-100">{data.myapp.created_at}</span>
 							</div>
 							<div class="flex items-center gap-2">
-								<span class="font-medium">Store Last Crawled:</span>
+								<span class="font-medium">AppGoblin Last Crawled:</span>
 								<span class="text-primary-900-100">{data.myapp.updated_at}</span>
 							</div>
 						</div>
@@ -163,7 +163,7 @@
 					</WhiteCard>
 					<WhiteCard>
 						{#snippet title()}
-							SDK Tracking Status
+							AppGoblin SDK Scans
 						{/snippet}
 						<div class="space-y-2 p-2">
 							{#if data.myapp.sdk_last_crawled}
