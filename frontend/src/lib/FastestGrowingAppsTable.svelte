@@ -21,7 +21,7 @@
 	import Check from 'lucide-svelte/icons/check';
 	import X from 'lucide-svelte/icons/x';
 
-	import { formatNumber } from '$lib/utils/formatNumber';
+	import { formatNumber, getRevenueBucket } from '$lib/utils/formatNumber';
 	import ZScoreMeter from '$lib/components/ZScoreMeter.svelte';
 
 	type DataTableProps<CompaniesOverviewEntries, TValue> = {
@@ -89,6 +89,21 @@
 		{
 			title: 'Installs Growth Score (30d)',
 			accessorKey: 'installs_z_score_4w',
+			isSortable: true
+		},
+		{
+			title: 'Monthly Active Users',
+			accessorKey: 'monthly_active_users',
+			isSortable: true
+		},
+		{
+			title: 'Monthly IAP Revenue',
+			accessorKey: 'monthly_iap_revenue',
+			isSortable: true
+		},
+		{
+			title: 'Monthly Ad Revenue',
+			accessorKey: 'monthly_ad_revenue',
 			isSortable: true
 		},
 		// Monetization indicators
@@ -303,7 +318,7 @@
 										<a
 											href="/apps/{row.original.store_id}"
 											style="cursor: pointer;"
-											class="text-xs md:text-sm font-medium text-blue-600 hover:text-blue-800"
+											class="block max-w-[170px] md:max-w-[260px] text-xs md:text-sm font-medium text-blue-600 hover:text-blue-800"
 										>
 											<div class="flex items-center gap-2">
 												<img
@@ -311,10 +326,13 @@
 													alt={row.original.app_name}
 													class="w-8 h-8 shrink-0 rounded"
 												/>
-												<div class="flex flex-col min-w-0">
-													<span class="text-xs md:text-sm truncate">{row.original.app_name}</span>
-													<span class="text-[10px] md:text-xs text-surface-500 truncate"
-														>{row.original.developer_name}</span
+												<div class="flex flex-col min-w-0 max-w-[120px] md:max-w-[210px]">
+													<span class="text-xs md:text-sm truncate" title={row.original.app_name}
+														>{row.original.app_name}</span
+													>
+													<span
+														class="text-[10px] md:text-xs text-surface-500 truncate"
+														title={row.original.developer_name}>{row.original.developer_name}</span
 													>
 												</div>
 											</div>
@@ -327,12 +345,20 @@
 											size="sm"
 											showValue={false}
 										/>
-									{:else if ['installs', 'rating_count', 'installs_sum_1w', 'ratings_sum_1w', 'installs_avg_2w', 'installs_sum_4w'].includes(cell.column.id)}
+									{:else if ['installs', 'rating_count', 'installs_sum_1w', 'ratings_sum_1w', 'installs_avg_2w', 'installs_sum_4w', 'monthly_active_users'].includes(cell.column.id)}
 										<p class="text-xs md:text-sm">
 											{#if (cell.getValue() ?? 0) === 0}
 												-
 											{:else}
 												{formatNumber(cell.getValue() as number)}
+											{/if}
+										</p>
+									{:else if ['monthly_iap_revenue', 'monthly_ad_revenue'].includes(cell.column.id)}
+										<p class="text-xs md:text-sm">
+											{#if Number(cell.getValue() ?? 0) <= 0}
+												-
+											{:else}
+												{getRevenueBucket(Number(cell.getValue()))}
 											{/if}
 										</p>
 									{:else if ['in_app_purchases', 'ad_supported'].includes(cell.column.id)}

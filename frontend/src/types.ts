@@ -707,6 +707,9 @@ export interface AppFullDetail {
 	ratings_sum_1w: number;
 	installs_z_score_2w: number;
 	installs_z_score_4w: number;
+	monthly_active_users: number;
+	monthly_ad_revenue: number;
+	monthly_iap_revenue: number;
 	category: string;
 	free: string;
 	price: string;

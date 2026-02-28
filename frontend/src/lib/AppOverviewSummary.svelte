@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { AppFullDetail } from '../types';
-	import { formatNumber } from '$lib/utils/formatNumber';
+	import { formatNumber, getRevenueBucket } from '$lib/utils/formatNumber';
 
 	interface Props {
 		app: AppFullDetail;
@@ -83,6 +83,31 @@
 	const weeklyInstalls = $derived(app.installs_sum_1w ? formatNumber(app.installs_sum_1w) : null);
 	const weeklyRatings = $derived(app.ratings_sum_1w ? formatNumber(app.ratings_sum_1w) : null);
 	const monthlyInstalls = $derived(app.installs_sum_4w ? formatNumber(app.installs_sum_4w) : null);
+	const monthlyActiveUsers = $derived(
+		app.monthly_active_users && app.monthly_active_users > 0
+			? formatNumber(app.monthly_active_users)
+			: null
+	);
+	const monthlyAdRevenue = $derived(Number(app.monthly_ad_revenue) || 0);
+	const monthlyIapRevenue = $derived(Number(app.monthly_iap_revenue) || 0);
+	const monthlyRevenueTotal = $derived(monthlyAdRevenue + monthlyIapRevenue);
+	const monthlyRevenueBucket = $derived(
+		monthlyRevenueTotal > 0 ? getRevenueBucket(monthlyRevenueTotal) : null
+	);
+	const monthlyAdRevenueShare = $derived(
+		monthlyRevenueTotal > 0 ? Math.round((monthlyAdRevenue / monthlyRevenueTotal) * 100) : 0
+	);
+	const monthlyIapRevenueShare = $derived(
+		monthlyRevenueTotal > 0 ? 100 - monthlyAdRevenueShare : 0
+	);
+	const releaseMonthYear = $derived(
+		app.release_date
+			? new Date(app.release_date).toLocaleDateString('en-US', {
+					month: 'short',
+					year: 'numeric'
+				})
+			: null
+	);
 
 	// Format date helper
 	const formatDate = (dateStr: string | undefined | null): string | null => {
@@ -100,7 +125,8 @@
 
 	// Ad and API tracking info
 	const adCreativeCount = $derived(app.ad_creative_count ?? 0);
-	const hasAdMonetization = $derived((app?.ad_monetized_creative_count ?? 0) > 0);
+	const adMonetizedCreativeCount = $derived(app.ad_monetized_creative_count ?? 0);
+	const hasAdMonetization = $derived(adMonetizedCreativeCount > 0);
 	const apiLastCrawled = $derived(formatDate(app.api_last_crawled));
 	const sdkLastCrawled = $derived(formatDate(app.sdk_last_crawled));
 
@@ -113,25 +139,43 @@
 	<h2 class="text-lg font-bold">{app.name} Summary</h2>
 	<p>
 		<strong>{app.name}</strong> is a
-		{#if monetization}{monetization}{/if}
+		{#if monetization}{monetization}{:else}mobile{/if}
 		{platformName} app
-		{#if categoryName}in the <span class="font-medium">{categoryName}</span> category{/if}{#if app.developer_name},
-			developed by <span class="font-medium">{app.developer_name}</span>{/if}.
-		{#if appAge}
-			First released {appAge} ago{#if app.release_date}
-				({new Date(app.release_date).toLocaleDateString('en-US', {
-					month: 'short',
-					year: 'numeric'
-				})}){/if},{/if}
+		{#if categoryName}in <span class="font-medium">{categoryName}</span>{/if}
+		{#if app.developer_name}
+			by <span class="font-medium">{app.developer_name}</span>{/if}.
+		{#if releaseMonthYear}
+			Released in <span class="font-semibold">{releaseMonthYear}</span>
+			{#if appAge}({appAge} ago){/if}.
+		{/if}
 		{#if installsFormatted && isAndroid}
-			the app has accumulated <span class="font-semibold">{installsFormatted}+</span> total installs
+			It has about <span class="font-semibold">{installsFormatted}+</span> installs
 		{/if}
 		{#if ratingsFormatted}
-			{#if installsFormatted && isAndroid}and{:else}the app has{/if}
+			{#if installsFormatted && isAndroid}and{:else}It has{/if}
 			<span class="font-semibold">{ratingsFormatted}</span> ratings
 			{#if app.rating}
 				with a <span class="font-semibold">{Number(app.rating).toFixed(2)}★</span> ({ratingQuality})
-				average rating{/if}.
+				average
+			{/if}.
+		{/if}
+		{#if monthlyActiveUsers || monthlyRevenueBucket}
+			Based on AppGoblin estimates,
+			{#if monthlyActiveUsers}
+				it reaches roughly <span class="font-semibold">{monthlyActiveUsers}</span> monthly active users
+			{/if}
+			{#if monthlyActiveUsers && monthlyRevenueBucket}and{/if}
+			{#if monthlyRevenueBucket}
+				generates around <span class="font-semibold">{monthlyRevenueBucket}</span> monthly revenue ({monthlyIapRevenueShare}%
+				IAP / {monthlyAdRevenueShare}% ads)
+			{/if}.
+		{/if}
+		{#if app.store_last_updated || app.version_code || app.content_rating}
+			Store metadata{#if app.store_last_updated}: updated <span class="font-semibold"
+					>{formatDate(app.store_last_updated)}</span
+				>{/if}{#if app.version_code}, version <span class="font-semibold">{app.version_code}</span
+				>{/if}{#if app.content_rating}, rated <span class="font-semibold">{app.content_rating}</span
+				>{/if}.
 		{/if}
 	</p>
 
@@ -157,14 +201,17 @@
 		<p>
 			<span class="font-medium text-primary-800-200">Advertising:</span>
 			{#if adCreativeCount > 0}
-				We've tracked <a href="{appBasePath}/ad-creatives" class="font-semibold"
+				AppGoblin has tracked <a href="{appBasePath}/ad-creatives" class="font-semibold"
 					>{formatNumber(adCreativeCount)} ad creatives</a
-				> where this app is running paid user acquisition campaigns.
+				> this app uses for paid user acquisition across ad networks.
 			{/if}
-			{#if hasAdMonetization}
-				{#if adCreativeCount > 0}Additionally, the{:else}The{/if} app has been identified as showing
-				<a href="{appBasePath}/monetized-ads">monetized advertisements</a> based on detected ad network
-				creatives.
+			{#if adMonetizedCreativeCount > 0}
+				{#if adCreativeCount > 0}AppGoblin also{/if}
+				{#if adCreativeCount === 0}AppGoblin{/if} detected
+				<a href="{appBasePath}/monetized-ads" class="font-semibold"
+					>{formatNumber(adMonetizedCreativeCount)} monetized ad creatives</a
+				>
+				shown inside the app.
 			{/if}
 		</p>
 	{/if}
