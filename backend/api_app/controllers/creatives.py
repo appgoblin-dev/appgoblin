@@ -136,7 +136,7 @@ class CreativesController(Controller):
         logger.info(f"{self.path}/companies/{company_domain} took {duration}ms")
         return df.to_dict(orient="records")
 
-    @get(path="/apps/{store_id: str}/monetized", cache=86400)
+    @get(path="/apps/{store_id: str}/monetized", cache=3600)
     async def monetized_creatives(self: Self, state: State, store_id: str) -> dict:
         """Handle GET request for a list of creatives used for monetization by an app.
 
@@ -197,7 +197,7 @@ class CreativesController(Controller):
             "by_creative": cdf.to_dict(orient="records"),
         }
 
-    @get(path="/apps/{store_id: str}/ads", cache=86400)
+    @get(path="/apps/{store_id: str}/ads", cache=3600)
     async def advertiser_creatives(self: Self, state: State, store_id: str) -> dict:
         """Handle GET request for a list of creatives for an app.
 
@@ -296,7 +296,7 @@ class CreativesController(Controller):
             "by_creative": cdf.to_dict(orient="records"),
         }
 
-    @get(path="/apps/{store_id: str}/ads/{vhash: str}", cache=86400)
+    @get(path="/apps/{store_id: str}/ads/{vhash: str}", cache=3600)
     async def get_advertiser_creative_records(
         self: Self, state: State, store_id: str, vhash: str
     ) -> dict:

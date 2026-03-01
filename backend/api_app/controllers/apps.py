@@ -833,7 +833,7 @@ class AppController(Controller):
         insert_sdk_scan_request(state, store_id, user_id)
         return {"status": "success"}
 
-    @get(path="/{store_id:str}/keywords", cache=86400)
+    @get(path="/{store_id:str}/keywords", cache=3600)
     async def get_app_keywords(self: Self, state: State, store_id: str) -> dict:
         """Handle GET request for a list of apps.
 
@@ -851,7 +851,7 @@ class AppController(Controller):
         logger.info(f"{self.path}/{store_id}/keywords took {duration}ms")
         return keywords_dict
 
-    @get(path="/{store_id:str}/apis", cache=86400)
+    @get(path="/{store_id:str}/apis", cache=3600)
     async def get_app_apis(self: Self, state: State, store_id: str) -> dict:
         """Handle GET request for a list of apps.
 
