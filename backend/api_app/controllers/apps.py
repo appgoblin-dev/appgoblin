@@ -337,7 +337,7 @@ class AppController(Controller):
     @get(path="/growth/{store:int}", cache=86400)
     async def get_growth_apps(
         self: Self, state: State, store: int, app_category: str | None = None
-    ) -> list[dict]:
+    ) -> list[dict[str:any]]:
         """Handle GET request for a list of fastest growing apps.
 
         Args:
