@@ -88,7 +88,7 @@
 		name: data.title,
 		headline: data.title,
 		description: data.description,
-		url: 'https://appgoblin.com/reports/ad-user-acquisition-2025-september',
+		url: 'https://appgoblin.info/reports/ad-user-acquisition-2025-september',
 		datePublished: '2025-10-01',
 		dateModified: new Date().toISOString().split('T')[0],
 		publisher: {
@@ -96,7 +96,7 @@
 			name: 'AppGoblin',
 			logo: {
 				'@type': 'ImageObject',
-				url: 'https://appgoblin.com/AppGoblin_Large_Logo.png'
+				url: 'https://appgoblin.info/AppGoblin_Large_Logo.png'
 			}
 		},
 		author: {
@@ -124,7 +124,7 @@
 		articleSection: 'Technology',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://appgoblin.com/appgoblin_screenshot.png'
+			url: 'https://appgoblin.info/appgoblin_screenshot.png'
 		},
 		mainEntity: {
 			'@type': 'DataSet',

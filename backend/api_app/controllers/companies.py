@@ -344,8 +344,6 @@ def get_overviews(
     category_overview_stats = make_companies_stats(
         df=companies_df.copy(),
         tag_source_category_app_counts=tag_source_category_app_counts,
-        category=category,
-        type_slug=type_slug,
     )
 
     companies_df = prep_companies_overview_df(state, companies_df)
@@ -396,8 +394,6 @@ def append_overall_categories(df: pd.DataFrame) -> pd.DataFrame:
 def make_companies_stats(
     df: pd.DataFrame,
     tag_source_category_app_counts: pd.DataFrame,
-    category: str | None = None,
-    type_slug: str | None = None,
 ) -> CompaniesCategoryOverview:
     """Make category sums for overview."""
     overview = CompaniesCategoryOverview()

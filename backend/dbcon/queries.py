@@ -918,6 +918,7 @@ def query_apps_crossfilter(
     require_sdk_api: bool = False,
     require_iap: bool = False,
     require_ads: bool = False,
+    ranking_country: str | None = None,
     mydate: str = "2024-01-01",
     category: str | None = None,
     store: int | None = None,
@@ -927,36 +928,20 @@ def query_apps_crossfilter(
     max_rating_count: int | None = None,
     min_installs_d30: int | None = None,
     max_installs_d30: int | None = None,
-    sort_col: str = "installs",
-    sort_order: str = "desc",
 ) -> pd.DataFrame:
     """Query apps for analytics dashboard."""
     # Ensure domains are lists, not None
     include_domains = include_domains or []
     exclude_domains = exclude_domains or []
 
-    # Return empty dataframe if no include domains specified
-    if not include_domains:
-        return pd.DataFrame()
+    if category == "games":
+        category = "game%"
 
     # Parse date with fallback
     try:
         parsed_date = datetime.datetime.strptime(mydate, "%Y-%m-%d").date()
     except (ValueError, TypeError):
         parsed_date = datetime.date(2024, 1, 1)
-
-    allowed_sort_cols = [
-        "installs",
-        "rating_count",
-        "installs_d30",
-        "review_count",
-        "rating",
-    ]
-    if sort_col not in allowed_sort_cols:
-        sort_col = "installs"
-
-    if sort_order not in ["asc", "desc"]:
-        sort_order = "desc"
 
     df = pd.read_sql(
         sql.apps_crossfilter,
@@ -967,6 +952,7 @@ def query_apps_crossfilter(
             "require_sdk_api": bool(require_sdk_api),
             "require_iap": bool(require_iap),
             "require_ads": bool(require_ads),
+            "ranking_country": ranking_country,
             "mydate": parsed_date,
             "category": category,
             "store": store,

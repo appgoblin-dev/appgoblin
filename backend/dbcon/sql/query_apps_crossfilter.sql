@@ -1,29 +1,27 @@
 --noqa: disable=LT01
-
 WITH
--- Only process if domains are specified
 include_apps AS (
     SELECT c.store_app
     FROM adtech.combined_store_apps_companies AS c
     WHERE
-        cardinality(:include_domains ::text []) > 0
-        AND c.ad_domain = any(:include_domains ::text [])
+        cardinality(c.:include_domains ::text []) > 0
+        AND c.ad_domain = any(c.:include_domains ::text [])
         AND (
-            NOT :require_sdk_api ::boolean
+            NOT c.:require_sdk_api ::boolean
             OR c.sdk = TRUE
             OR c.api_call = TRUE
         )
     GROUP BY c.store_app
     HAVING
-        count(DISTINCT c.ad_domain) = cardinality(:include_domains ::text [])
+        count(DISTINCT c.ad_domain) = cardinality(c.:include_domains ::text [])
 ),
 
 exclude_apps AS (
     SELECT DISTINCT c.store_app
     FROM adtech.combined_store_apps_companies AS c
     WHERE
-        cardinality(:exclude_domains ::text []) > 0
-        AND c.ad_domain = any(:exclude_domains ::text [])
+        cardinality(c.:exclude_domains ::text []) > 0
+        AND c.ad_domain = any(c.:exclude_domains ::text [])
 )
 
 SELECT
@@ -33,53 +31,79 @@ SELECT
     sao.installs,
     sao.rating_count,
     sao.installs_sum_4w AS installs_d30,
+    sao.monthly_active_users,
     sao.in_app_purchases,
     sao.ad_supported,
     sao.store,
-    sao.icon_url_100
+    sao.icon_url_100,
+    sao.monthly_ad_revenue
+    + sao.monthly_iap_revenue AS estimated_monthly_revenue
 FROM frontend.store_apps_overview AS sao
 WHERE
-    EXISTS (
-        SELECT 1
-        FROM include_apps AS ia
-        WHERE ia.store_app = sao.id
+    (
+        cardinality(sao.:include_domains ::text []) = 0
+        OR EXISTS (
+            SELECT 1
+            FROM include_apps AS ia
+            WHERE ia.store_app = sao.id
+        )
     )
     AND
-    sao.store_last_updated > :mydate ::date
-    AND (NOT :require_iap ::boolean OR sao.in_app_purchases = TRUE)
-    AND (NOT :require_ads ::boolean OR sao.ad_supported = TRUE)
-    AND (:category ::text IS NULL OR sao.category = :category)
-    AND (:store ::int IS NULL OR sao.store = :store)
+    sao.store_last_updated > sao.:mydate ::date
+    AND (NOT sao.:require_iap ::boolean OR sao.in_app_purchases = TRUE)
+    AND (NOT sao.:require_ads ::boolean OR sao.ad_supported = TRUE)
+    AND (sao.:category ::text IS NULL OR sao.category LIKE sao.:category)
+    AND (sao.:store ::int IS NULL OR sao.store = sao.:store)
     AND (
-
-        :min_installs ::bigint IS NULL
-        OR :min_installs = 0
-        OR sao.installs >= :min_installs
+        sao.:ranking_country ::text IS NULL
+        OR (
+            sao.:ranking_country = 'overall'
+            AND EXISTS (
+                SELECT 1
+                FROM frontend.store_app_ranks_latest AS sar
+                WHERE sar.store_id = sao.store_id
+            )
+        )
+        OR (
+            sao.:ranking_country <> 'overall'
+            AND EXISTS (
+                SELECT 1
+                FROM frontend.store_app_ranks_latest AS sar
+                WHERE
+                    sar.store_id = sao.store_id
+                    AND sar.country = :ranking_country
+            )
+        )
+    )
+    AND (
+        sao.:min_installs ::bigint IS NULL
+        OR sao.:min_installs = 0
+        OR sao.installs >= sao.:min_installs
     )
     AND (
 
-        :max_installs ::bigint IS NULL
-        OR sao.installs <= :max_installs
+        sao.:max_installs ::bigint IS NULL
+        OR sao.installs <= sao.:max_installs
     )
     AND (
 
-        :min_rating_count ::bigint IS NULL
-        OR sao.rating_count >= :min_rating_count
+        sao.:min_rating_count ::bigint IS NULL
+        OR sao.rating_count >= sao.:min_rating_count
     )
     AND (
 
-        :max_rating_count ::bigint IS NULL
-        OR sao.rating_count <= :max_rating_count
+        sao.:max_rating_count ::bigint IS NULL
+        OR sao.rating_count <= sao.:max_rating_count
     )
     AND (
 
-        :min_installs_d30 ::bigint IS NULL
-        OR sao.installs_sum_4w >= :min_installs_d30
+        sao.:min_installs_d30 ::bigint IS NULL
+        OR sao.installs_sum_4w >= sao.:min_installs_d30
     )
     AND (
 
-        :max_installs_d30 ::bigint IS NULL
-        OR sao.installs_sum_4w <= :max_installs_d30
+        sao.:max_installs_d30 ::bigint IS NULL
+        OR sao.installs_sum_4w <= sao.:max_installs_d30
     )
     -- Exclusion check
     AND NOT EXISTS (

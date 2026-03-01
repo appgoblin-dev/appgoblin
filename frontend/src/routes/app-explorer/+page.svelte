@@ -5,9 +5,12 @@
 	import Loader2 from 'lucide-svelte/icons/loader-2';
 	import RotateCcw from 'lucide-svelte/icons/rotate-ccw';
 	import { formatNumber } from '$lib/utils/formatNumber';
+	import { countryCodeToEmoji } from '$lib/utils/countryCodeToEmoji';
 	import { enhance } from '$app/forms';
 	import CrossfilterAppsTable from '$lib/CrossfilterAppsTable.svelte';
 	import WhiteCard from '$lib/WhiteCard.svelte';
+
+	import type { CatData, CrossfilterApp } from '../.././types';
 
 	// TanStack Table Imports
 	import { type SortingState } from '@tanstack/table-core';
@@ -18,32 +21,36 @@
 		total_apps: number;
 	}
 
-	interface Category {
-		id: string;
-		name: string;
-		total_apps: number;
-	}
-
-	interface App {
-		id: number;
-		store_id: string;
-		name: string;
-		installs: number;
-		rating_count: number;
-		installs_d30: number;
-		in_app_purchases: boolean;
-		ad_supported: boolean;
-		store: number;
-		app_icon_url?: string;
-	}
-
 	let { data, form } = $props();
 
 	const hasPaidAccess = $derived(data.hasPaidAccess ?? false);
+	const hasB2BSdkAccess = $derived(data.hasB2BSdkAccess ?? false);
 
 	// Safely access companies with fallback to empty array
 	let companies = $derived<Company[]>(data.companies ?? []);
-	let categories = $derived<Category[]>(data.categories ?? []);
+	let categories = $derived<CatData>(data.categories ?? []);
+	let rankingCountries = $derived<{ code: string; name: string }[]>(
+		(() => {
+			const countriesData = data.countries;
+
+			if (!countriesData) return [];
+
+			if (Array.isArray(countriesData)) {
+				return countriesData
+					.filter((country) => country?.code && country?.name)
+					.map((country) => ({ code: country.code, name: country.name }));
+			}
+
+			if (typeof countriesData === 'object') {
+				return Object.entries(countriesData as Record<string, string>).map(([code, name]) => ({
+					code,
+					name
+				}));
+			}
+
+			return [];
+		})()
+	);
 
 	// Filter state
 	let includeDomains = $state<string[]>([]);
@@ -54,6 +61,7 @@
 
 	let selectedCategory = $state<string>('');
 	let selectedStore = $state<number | ''>('');
+	let rankingFilter = $state<string>('');
 
 	// Metric Filters
 	let minInstalls = $state<number | null>(null);
@@ -79,7 +87,7 @@
 	let sorting = $state<SortingState>([{ id: 'installs', desc: true }]);
 
 	const exportFilename = `appgoblin-crossfilter-${new Date().toISOString().split('T')[0]}`;
-	const formApps = $derived(() => (form?.apps ?? []) as App[]);
+	const formApps = $derived(() => (form?.apps ?? []) as CrossfilterApp[]);
 	const formError = $derived(() => form?.error ?? '');
 	const hasSearched = $derived(() => !!form?.success || !!form?.error);
 
@@ -146,6 +154,7 @@
 		requireAds = false;
 		selectedCategory = '';
 		selectedStore = '';
+		rankingFilter = '';
 		minInstalls = null;
 		maxInstalls = null;
 		minRatings = null;
@@ -322,11 +331,18 @@
 				use:enhance={hasPaidAccess
 					? ({ formData }) => {
 							// Manually append complex data structures
-							formData.append('include_domains', JSON.stringify(includeDomains));
-							formData.append('exclude_domains', JSON.stringify(excludeDomains));
+							formData.append(
+								'include_domains',
+								JSON.stringify(hasB2BSdkAccess ? includeDomains : [])
+							);
+							formData.append(
+								'exclude_domains',
+								JSON.stringify(hasB2BSdkAccess ? excludeDomains : [])
+							);
 							formData.append('require_sdk_api', requireSdkApi.toString());
 							formData.append('require_iap', requireIap.toString());
 							formData.append('require_ads', requireAds.toString());
+							if (rankingFilter) formData.append('ranking_country', rankingFilter);
 							formData.append('mydate', myDate);
 							if (selectedCategory) formData.append('category', selectedCategory);
 							if (selectedStore) formData.append('store', selectedStore.toString());
@@ -341,10 +357,6 @@
 							if (maxMonthlyInstalls)
 								formData.append('max_installs_d30', maxMonthlyInstalls.toString());
 
-							// Sorting
-							formData.append('sort_col', sorting[0]?.id || 'installs');
-							formData.append('sort_order', sorting[0]?.desc ? 'desc' : 'asc');
-
 							isLoading = true;
 
 							return async ({ update }) => {
@@ -355,230 +367,279 @@
 					: undefined}
 				class="space-y-5"
 			>
-				<!-- Include Companies -->
-				<div class="space-y-2">
-					<label class="label font-medium text-sm" for="include-search"
-						>Include Companies (Required)</label
-					>
-					<p class="text-xs text-surface-500">Apps must use ALL selected SDKs/companies</p>
-					<div class="relative">
-						<input
-							type="text"
-							id="include-search"
-							class="input text-sm {!hasPaidAccess ? 'opacity-50 cursor-not-allowed' : ''}"
-							placeholder="Search companies..."
-							bind:value={includeSearch}
-							disabled={!hasPaidAccess}
-							onfocus={() => hasPaidAccess && (includeDropdownOpen = true)}
-							onblur={() => setTimeout(() => (includeDropdownOpen = false), 200)}
-						/>
-						{#if includeDropdownOpen && filteredIncludeCompanies().length > 0}
-							<div
-								class="absolute z-50 w-full mt-1 bg-surface-100-900 border border-surface-300-700 rounded-lg shadow-lg max-h-48 lg:max-h-92 overflow-y-auto"
-							>
-								{#each filteredIncludeCompanies() as company (company.company_domain)}
-									<button
-										type="button"
-										class="w-full px-3 py-2 text-left text-sm hover:bg-surface-200-800 flex justify-between items-center"
-										onmousedown={() => addIncludeDomain(company.company_domain)}
-									>
-										<span>{company.company_name}</span>
-										<span class="text-xs text-surface-500"
-											>{formatNumber(company.total_apps)} apps</span
+				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
+					<h3 class="font-semibold text-sm uppercase tracking-wide text-surface-700-300">
+						App Details & Metrics
+					</h3>
+
+					<!-- App Details -->
+					<div class="space-y-2">
+						<label class="label text-xs text-surface-500" for="store-select">Store</label>
+						<select class="select text-sm" id="store-select" bind:value={selectedStore}>
+							<option value="">Any Store</option>
+							<option value="1">Google Play</option>
+							<option value="2">Apple App Store</option>
+						</select>
+
+						<label class="label text-xs text-surface-500 mt-2" for="category-select">Category</label
+						>
+						<select class="select text-sm" id="category-select" bind:value={selectedCategory}>
+							<option value="">Any Category</option>
+							{#each categories.categories as cat}
+								<option value={cat.id}>{cat.name}</option>
+							{/each}
+						</select>
+					</div>
+
+					<!-- Metrics -->
+					<div class="space-y-3">
+						<span class="label font-medium text-sm">Metrics</span>
+
+						<!-- Installs -->
+						<div class="grid grid-cols-2 gap-2">
+							<div class="space-y-1">
+								<label class="text-xs text-surface-500" for="min-installs">Min Installs</label>
+								<input
+									type="number"
+									id="min-installs"
+									class="input text-sm px-2 py-1"
+									placeholder="0"
+									bind:value={minInstalls}
+								/>
+							</div>
+							<div class="space-y-1">
+								<label class="text-xs text-surface-500" for="max-installs">Max Installs</label>
+								<input
+									type="number"
+									id="max-installs"
+									class="input text-sm px-2 py-1"
+									placeholder="NO MAX"
+									bind:value={maxInstalls}
+								/>
+							</div>
+						</div>
+
+						<!-- Monthly Installs -->
+						<div class="grid grid-cols-2 gap-2">
+							<div class="space-y-1">
+								<label class="text-xs text-surface-500" for="min-monthly"
+									>Min Monthly Installs</label
+								>
+								<input
+									type="number"
+									id="min-monthly"
+									class="input text-sm px-2 py-1"
+									placeholder="0"
+									bind:value={minMonthlyInstalls}
+								/>
+							</div>
+							<div class="space-y-1">
+								<label class="text-xs text-surface-500" for="max-monthly"
+									>Max Monthly Installs</label
+								>
+								<input
+									type="number"
+									id="max-monthly"
+									class="input text-sm px-2 py-1"
+									placeholder="NO MAX"
+									bind:value={maxMonthlyInstalls}
+								/>
+							</div>
+						</div>
+
+						<!-- Ratings -->
+						<div class="grid grid-cols-2 gap-2">
+							<div class="space-y-1">
+								<label class="text-xs text-surface-500" for="min-ratings">Min Ratings</label>
+								<input
+									type="number"
+									id="min-ratings"
+									class="input text-sm px-2 py-1"
+									placeholder="0"
+									bind:value={minRatings}
+								/>
+							</div>
+							<div class="space-y-1">
+								<label class="text-xs text-surface-500" for="max-ratings">Max Ratings</label>
+								<input
+									type="number"
+									id="max-ratings"
+									class="input text-sm px-2 py-1"
+									placeholder="NO MAX"
+									bind:value={maxRatings}
+								/>
+							</div>
+						</div>
+					</div>
+
+					<!-- Monetization Filters -->
+					<div class="space-y-2">
+						<span class="label font-medium text-sm">Monetization</span>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input type="checkbox" class="checkbox" bind:checked={requireIap} />
+							<span class="text-sm">Has In-App Purchases</span>
+						</label>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input type="checkbox" class="checkbox" bind:checked={requireAds} />
+							<span class="text-sm">Has Ads</span>
+						</label>
+					</div>
+
+					<!-- Date Filter -->
+					<div class="space-y-2">
+						<label class="label font-medium text-sm" for="date-filter">Last Updated After</label>
+						<input type="date" id="date-filter" class="input text-sm" bind:value={myDate} />
+					</div>
+
+					<!-- Current Ranking Filter -->
+					<div class="space-y-2">
+						<label class="label font-medium text-sm" for="ranking-filter"
+							>Apps that Are Currently Ranking</label
+						>
+						<p class="text-xs text-surface-500">
+							Leave unset for all apps, choose overall for any ranking country, or choose one
+							specific country.
+						</p>
+						<select class="select text-sm" id="ranking-filter" bind:value={rankingFilter}>
+							<option value="">All apps (no ranking filter)</option>
+							<option value="overall">Overall (ranked in at least one country)</option>
+							{#each rankingCountries as country}
+								<option value={country.code}>
+									{countryCodeToEmoji(country.code)}
+									{country.name}
+								</option>
+							{/each}
+						</select>
+					</div>
+				</div>
+
+				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
+					<h3 class="font-semibold text-sm uppercase tracking-wide text-surface-700-300">
+						Company Filters
+					</h3>
+
+					{#if !hasB2BSdkAccess}
+						<div class="p-3 rounded-lg border border-warning-500 bg-warning-900-100/20">
+							<p class="text-xs text-warning-900-100">
+								Company include/exclude filters are available on the B2B SDK tier.
+								<a href="/pricing" class="underline hover:text-primary-600-400">Upgrade</a>
+								to unlock.
+							</p>
+						</div>
+					{/if}
+
+					<!-- Include Companies -->
+					<div class="space-y-2">
+						<label class="label font-medium text-sm" for="include-search">Include Companies</label>
+						<p class="text-xs text-surface-500">Apps must use ALL selected SDKs/companies</p>
+						<div class="relative">
+							<input
+								type="text"
+								id="include-search"
+								class="input text-sm {!hasPaidAccess || !hasB2BSdkAccess
+									? 'opacity-50 cursor-not-allowed'
+									: ''}"
+								placeholder="Search companies..."
+								bind:value={includeSearch}
+								disabled={!hasPaidAccess || !hasB2BSdkAccess}
+								onfocus={() => hasPaidAccess && hasB2BSdkAccess && (includeDropdownOpen = true)}
+								onblur={() => setTimeout(() => (includeDropdownOpen = false), 200)}
+							/>
+							{#if includeDropdownOpen && filteredIncludeCompanies().length > 0}
+								<div
+									class="absolute z-50 w-full mt-1 bg-surface-100-900 border border-surface-300-700 rounded-lg shadow-lg max-h-48 lg:max-h-92 overflow-y-auto"
+								>
+									{#each filteredIncludeCompanies() as company (company.company_domain)}
+										<button
+											type="button"
+											class="w-full px-3 py-2 text-left text-sm hover:bg-surface-200-800 flex justify-between items-center"
+											onmousedown={() => addIncludeDomain(company.company_domain)}
 										>
-									</button>
+											<span>{company.company_name}</span>
+											<span class="text-xs text-surface-500"
+												>{formatNumber(company.total_apps)} apps</span
+											>
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+
+						{#if includeDomains.length > 0}
+							<div class="flex flex-wrap gap-1 mt-2">
+								{#each includeDomains as domain}
+									<span
+										class="badge preset-filled-primary-500 text-xs flex items-center gap-1 px-2 py-1"
+									>
+										{getCompanyName(domain)}
+										<button type="button" onclick={() => removeIncludeDomain(domain)} class="ml-1">
+											<X size={12} />
+										</button>
+									</span>
 								{/each}
 							</div>
 						{/if}
 					</div>
-					{#if includeDomains.length > 0}
-						<div class="flex flex-wrap gap-1 mt-2">
-							{#each includeDomains as domain}
-								<span
-									class="badge preset-filled-primary-500 text-xs flex items-center gap-1 px-2 py-1"
-								>
-									{getCompanyName(domain)}
-									<button type="button" onclick={() => removeIncludeDomain(domain)} class="ml-1">
-										<X size={12} />
-									</button>
-								</span>
-							{/each}
-						</div>
-					{/if}
-				</div>
 
-				<!-- Exclude Companies -->
-				<div class="space-y-2">
-					<label class="label font-medium text-sm" for="exclude-search">Exclude Companies</label>
-					<p class="text-xs text-surface-500">Apps must NOT use any of these</p>
-					<div class="relative">
-						<input
-							type="text"
-							id="exclude-search"
-							class="input text-sm {!hasPaidAccess ? 'opacity-50 cursor-not-allowed' : ''}"
-							placeholder="Search companies to exclude..."
-							bind:value={excludeSearch}
-							disabled={!hasPaidAccess}
-							onfocus={() => hasPaidAccess && (excludeDropdownOpen = true)}
-							onblur={() => setTimeout(() => (excludeDropdownOpen = false), 200)}
-						/>
-						{#if excludeDropdownOpen && filteredExcludeCompanies().length > 0}
-							<div
-								class="absolute z-50 w-full mt-1 bg-surface-100-900 border border-surface-300-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
-							>
-								{#each filteredExcludeCompanies() as company (company.company_domain)}
-									<button
-										type="button"
-										class="w-full px-3 py-2 text-left text-sm hover:bg-surface-200-800 flex justify-between items-center"
-										onmousedown={() => addExcludeDomain(company.company_domain)}
-									>
-										<span>{company.company_name}</span>
-										<span class="text-xs text-surface-500"
-											>{formatNumber(company.total_apps)} apps</span
+					<!-- Exclude Companies -->
+					<div class="space-y-2">
+						<label class="label font-medium text-sm" for="exclude-search">Exclude Companies</label>
+						<p class="text-xs text-surface-500">Apps must NOT use any of these</p>
+						<div class="relative">
+							<input
+								type="text"
+								id="exclude-search"
+								class="input text-sm {!hasPaidAccess || !hasB2BSdkAccess
+									? 'opacity-50 cursor-not-allowed'
+									: ''}"
+								placeholder="Search companies to exclude..."
+								bind:value={excludeSearch}
+								disabled={!hasPaidAccess || !hasB2BSdkAccess}
+								onfocus={() => hasPaidAccess && hasB2BSdkAccess && (excludeDropdownOpen = true)}
+								onblur={() => setTimeout(() => (excludeDropdownOpen = false), 200)}
+							/>
+							{#if excludeDropdownOpen && filteredExcludeCompanies().length > 0}
+								<div
+									class="absolute z-50 w-full mt-1 bg-surface-100-900 border border-surface-300-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+								>
+									{#each filteredExcludeCompanies() as company (company.company_domain)}
+										<button
+											type="button"
+											class="w-full px-3 py-2 text-left text-sm hover:bg-surface-200-800 flex justify-between items-center"
+											onmousedown={() => addExcludeDomain(company.company_domain)}
 										>
-									</button>
+											<span>{company.company_name}</span>
+											<span class="text-xs text-surface-500"
+												>{formatNumber(company.total_apps)} apps</span
+											>
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+						{#if excludeDomains.length > 0}
+							<div class="flex flex-wrap gap-1 mt-2">
+								{#each excludeDomains as domain}
+									<span
+										class="badge preset-filled-error-900-100 text-xs flex items-center gap-1 px-2 py-1"
+									>
+										{getCompanyName(domain)}
+										<button type="button" onclick={() => removeExcludeDomain(domain)} class="ml-1">
+											<X size={12} />
+										</button>
+									</span>
 								{/each}
 							</div>
 						{/if}
 					</div>
-					{#if excludeDomains.length > 0}
-						<div class="flex flex-wrap gap-1 mt-2">
-							{#each excludeDomains as domain}
-								<span
-									class="badge preset-filled-error-900-100 text-xs flex items-center gap-1 px-2 py-1"
-								>
-									{getCompanyName(domain)}
-									<button type="button" onclick={() => removeExcludeDomain(domain)} class="ml-1">
-										<X size={12} />
-									</button>
-								</span>
-							{/each}
-						</div>
-					{/if}
-				</div>
-
-				<!-- App Details -->
-				<div class="space-y-2">
-					<span class="label font-medium text-sm">App Details</span>
-					<label class="label text-xs text-surface-500" for="store-select">Store</label>
-					<select class="select text-sm" id="store-select" bind:value={selectedStore}>
-						<option value="">Any Store</option>
-						<option value="1">Google Play</option>
-						<option value="2">Apple App Store</option>
-					</select>
-
-					<label class="label text-xs text-surface-500 mt-2" for="category-select">Category</label>
-					<select class="select text-sm" id="category-select" bind:value={selectedCategory}>
-						<option value="">Any Category</option>
-						{#each categories as cat}
-							<option value={cat.id}>{cat.name}</option>
-						{/each}
-					</select>
-				</div>
-
-				<!-- Metrics -->
-				<div class="space-y-3">
-					<span class="label font-medium text-sm">Metrics</span>
-
-					<!-- Installs -->
-					<div class="grid grid-cols-2 gap-2">
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="min-installs">Min Installs</label>
-							<input
-								type="number"
-								id="min-installs"
-								class="input text-sm px-2 py-1"
-								placeholder="0"
-								bind:value={minInstalls}
-							/>
-						</div>
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="max-installs">Max Installs</label>
-							<input
-								type="number"
-								id="max-installs"
-								class="input text-sm px-2 py-1"
-								placeholder="NO MAX"
-								bind:value={maxInstalls}
-							/>
-						</div>
+					<!-- Detection Type -->
+					<div class="space-y-2">
+						<span class="label font-medium text-sm">Detection Requirements</span>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input type="checkbox" class="checkbox" bind:checked={requireSdkApi} />
+							<span class="text-sm">Require SDK or API detection</span>
+						</label>
 					</div>
-
-					<!-- Monthly Installs -->
-					<div class="grid grid-cols-2 gap-2">
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="min-monthly">Min Monthly Installs</label>
-							<input
-								type="number"
-								id="min-monthly"
-								class="input text-sm px-2 py-1"
-								placeholder="0"
-								bind:value={minMonthlyInstalls}
-							/>
-						</div>
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="max-monthly">Max Monthly Installs</label>
-							<input
-								type="number"
-								id="max-monthly"
-								class="input text-sm px-2 py-1"
-								placeholder="NO MAX"
-								bind:value={maxMonthlyInstalls}
-							/>
-						</div>
-					</div>
-
-					<!-- Ratings -->
-					<div class="grid grid-cols-2 gap-2">
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="min-ratings">Min Ratings</label>
-							<input
-								type="number"
-								id="min-ratings"
-								class="input text-sm px-2 py-1"
-								placeholder="0"
-								bind:value={minRatings}
-							/>
-						</div>
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="max-ratings">Max Ratings</label>
-							<input
-								type="number"
-								id="max-ratings"
-								class="input text-sm px-2 py-1"
-								placeholder="NO MAX"
-								bind:value={maxRatings}
-							/>
-						</div>
-					</div>
-				</div>
-
-				<!-- Detection Type -->
-				<div class="space-y-2">
-					<span class="label font-medium text-sm">Detection Requirements</span>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input type="checkbox" class="checkbox" bind:checked={requireSdkApi} />
-						<span class="text-sm">Require SDK or API detection</span>
-					</label>
-				</div>
-
-				<!-- Monetization Filters -->
-				<div class="space-y-2">
-					<span class="label font-medium text-sm">Monetization</span>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input type="checkbox" class="checkbox" bind:checked={requireIap} />
-						<span class="text-sm">Has In-App Purchases</span>
-					</label>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input type="checkbox" class="checkbox" bind:checked={requireAds} />
-						<span class="text-sm">Has Ads</span>
-					</label>
-				</div>
-
-				<!-- Date Filter -->
-				<div class="space-y-2">
-					<label class="label font-medium text-sm" for="date-filter">Last Updated After</label>
-					<input type="date" id="date-filter" class="input text-sm" bind:value={myDate} />
 				</div>
 
 				<!-- Action Buttons -->
@@ -586,7 +647,7 @@
 					<button
 						type="submit"
 						class="btn preset-filled-primary-500 w-full flex items-center justify-center gap-2"
-						disabled={!hasPaidAccess || isLoading || includeDomains.length === 0}
+						disabled={!hasPaidAccess || isLoading}
 					>
 						{#if !hasPaidAccess}
 							<svg

@@ -767,3 +767,18 @@ export type AppStore = {
 export type StoreRankingsMap = {
 	stores_rankings: AppStore[];
 };
+
+export type CrossfilterApp = {
+	id: number;
+	store_id: string;
+	name: string;
+	installs: number;
+	rating_count: number;
+	installs_d30: number;
+	in_app_purchases: boolean;
+	estimated_monthly_revenue: number;
+	monthly_active_users: number;
+	ad_supported: boolean;
+	store: number;
+	app_icon_url?: string;
+};
