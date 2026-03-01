@@ -25,3 +25,35 @@ export function formatNumberLocale(num: number): string {
 		return '';
 	}
 }
+
+/**
+ * Formats revenue into nearest bucket with $ prefix
+ * @param value - The revenue value to bucket
+ * @returns Formatted string with bucket label (e.g., '$>1M') or empty string
+ */
+export function getRevenueBucket(value: number): string {
+	if (value <= 0) return '';
+
+	const buckets = [
+		{ value: 10000, label: '$<10K' },
+		{ value: 50000, label: '$>50K' },
+		{ value: 100000, label: '$>100K' },
+		{ value: 200000, label: '$>200K' },
+		{ value: 500000, label: '$>500K' },
+		{ value: 1000000, label: '$>1M' },
+		{ value: 10000000, label: '$>10M' }
+	];
+
+	let closest = buckets[0];
+	let minDiff = Math.abs(value - closest.value);
+
+	for (const bucket of buckets) {
+		const diff = Math.abs(value - bucket.value);
+		if (diff < minDiff) {
+			closest = bucket;
+			minDiff = diff;
+		}
+	}
+
+	return closest.label;
+}
