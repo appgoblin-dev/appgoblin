@@ -65,11 +65,11 @@
 			Free App Marketing Insights and Research
 		</h2>
 		<p class="text-lg md:text-xl max-w-3xl mb-6 text-primary-900-100 mx-auto">
-			Real time app intelligence • Live advertising data • Competitor insights • No signup required
+			Real time app intelligence • Live advertising data • Competitor insights
 		</p>
 		<div class="flex flex-wrap justify-center gap-4 text-sm text-primary-900-100 mb-6">
 			<span class="px-3 py-1 bg-primary-100-900/20 rounded-full">⚡ Real-time Data</span>
-			<span class="px-3 py-1 bg-warning-100-900/20 rounded-full">🚀 Free Data</span>
+			<span class="px-3 py-1 bg-warning-100-900/20 rounded-full">🚀 Free Reports</span>
 			<span class="px-3 py-1 bg-success-100-900/20 rounded-full">✨ Ad and Creative Insights</span>
 		</div>
 		<p class="text-base md:text-lg max-w-2xl mx-auto">

@@ -8,7 +8,6 @@
 	import { countryCodeToEmoji } from '$lib/utils/countryCodeToEmoji';
 	import { enhance } from '$app/forms';
 	import CrossfilterAppsTable from '$lib/CrossfilterAppsTable.svelte';
-	import WhiteCard from '$lib/WhiteCard.svelte';
 
 	import type { CatData, CrossfilterApp } from '../.././types';
 
@@ -185,112 +184,14 @@
 <div class="container mx-auto px-2 md:px-4 py-4 md:py-8">
 	<div class="mb-6">
 		<h1 class="text-2xl md:text-3xl font-bold text-primary-900-100">App Explorer</h1>
-		<p class="text-sm md:text-base text-surface-600-400 mt-2">
+		<p class="text-sm md:text-base text-primary-900-100 mt-2">
 			Powerful app discovery and filtering tool for sales teams, market researchers, and app
 			developers.
 		</p>
 	</div>
 
-	{#if !hasPaidAccess}
-		<!-- Explanatory Content - Only shown to non-paid users -->
-		<WhiteCard>
-			{#snippet title()}
-				<span>About App Explorer / App CrossFilter / App Query</span>
-			{/snippet}
-			<div class="p-4 flex flex-col gap-4">
-				<div class="space-y-3">
-					<p>
-						The <strong>App Explorer</strong> (also known as <strong>App CrossFilter</strong> or
-						<strong>App Query</strong>) is a powerful tool that allows you to discover and filter
-						mobile apps based on multiple criteria simultaneously.
-					</p>
-
-					<div>
-						<h3 class="font-semibold text-lg mb-2">Key Features:</h3>
-						<ul class="list-disc list-inside space-y-2 text-sm">
-							<li>
-								<strong>SDK & Company Filtering:</strong> Find apps that use specific SDKs or companies
-								(include/exclude multiple companies)
-							</li>
-							<li>
-								<strong>Monetization Filters:</strong> Filter by in-app purchases, ad support, and SDK/API
-								detection requirements
-							</li>
-							<li>
-								<strong>Store & Category:</strong> Narrow down by app store (Google Play, Apple App Store)
-								and category
-							</li>
-							<li>
-								<strong>Metrics Filtering:</strong> Filter by install counts, rating counts, and monthly
-								installs with min/max ranges
-							</li>
-							<li>
-								<strong>Date Filtering:</strong> Find apps updated after a specific date
-							</li>
-							<li>
-								<strong>Export Results:</strong> Download filtered results as CSV for further analysis
-							</li>
-						</ul>
-					</div>
-
-					<div>
-						<h3 class="font-semibold text-lg mb-2">Use Cases:</h3>
-						<ul class="list-disc list-inside space-y-2 text-sm">
-							<li>
-								<strong>Sales Teams:</strong> Find potential customers by identifying apps using competitor
-								SDKs or specific technologies
-							</li>
-							<li>
-								<strong>Market Research:</strong> Analyze app ecosystems by filtering apps with specific
-								monetization strategies
-							</li>
-							<li>
-								<strong>Competitive Analysis:</strong> Discover apps in your category that use certain
-								SDKs or ad networks
-							</li>
-							<li>
-								<strong>Partnership Opportunities:</strong> Identify apps that could benefit from your
-								SDK or service
-							</li>
-						</ul>
-					</div>
-
-					<div class="mt-4 p-4 bg-surface-100-900 rounded-lg border border-surface-300-700">
-						<p class="text-sm mb-3">
-							<strong>Access Required:</strong> The App Explorer is available to paid subscribers at
-							any level. Please
-							<a href="/pricing" class="underline hover:text-primary-600-400"
-								>upgrade your account</a
-							> to use this tool.
-						</p>
-						<a href="/pricing" class="btn preset-filled-primary-500 inline-flex items-center gap-2">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="18"
-								height="18"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
-							>
-								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
-							</svg>
-							<span>View Pricing Plans</span>
-						</a>
-					</div>
-				</div>
-			</div>
-		</WhiteCard>
-	{/if}
-
 	<div class="mt-6">
-		{#if hasPaidAccess}
-			<h2 class="text-xl md:text-2xl font-bold text-primary-900-100 mb-4">Start Exploring</h2>
-		{:else}
+		{#if !hasPaidAccess}
 			<h2 class="text-xl md:text-2xl font-bold text-primary-900-100 mb-4">Preview</h2>
 		{/if}
 	</div>
@@ -368,20 +269,21 @@
 				class="space-y-5"
 			>
 				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
-					<h3 class="font-semibold text-sm uppercase tracking-wide text-surface-700-300">
+					<h3 class="font-semibold text-sm uppercase tracking-wide text-primary-900-100">
 						App Details & Metrics
 					</h3>
 
 					<!-- App Details -->
 					<div class="space-y-2">
-						<label class="label text-xs text-surface-500" for="store-select">Store</label>
+						<label class="label text-xs text-primary-900-100" for="store-select">Store</label>
 						<select class="select text-sm" id="store-select" bind:value={selectedStore}>
 							<option value="">Any Store</option>
 							<option value="1">Google Play</option>
 							<option value="2">Apple App Store</option>
 						</select>
 
-						<label class="label text-xs text-surface-500 mt-2" for="category-select">Category</label
+						<label class="label text-xs text-primary-900-100 mt-2" for="category-select"
+							>Category</label
 						>
 						<select class="select text-sm" id="category-select" bind:value={selectedCategory}>
 							<option value="">Any Category</option>
@@ -398,7 +300,7 @@
 						<!-- Installs -->
 						<div class="grid grid-cols-2 gap-2">
 							<div class="space-y-1">
-								<label class="text-xs text-surface-500" for="min-installs">Min Installs</label>
+								<label class="text-xs text-primary-900-100" for="min-installs">Min Installs</label>
 								<input
 									type="number"
 									id="min-installs"
@@ -408,7 +310,7 @@
 								/>
 							</div>
 							<div class="space-y-1">
-								<label class="text-xs text-surface-500" for="max-installs">Max Installs</label>
+								<label class="text-xs text-primary-900-100" for="max-installs">Max Installs</label>
 								<input
 									type="number"
 									id="max-installs"
@@ -422,7 +324,7 @@
 						<!-- Monthly Installs -->
 						<div class="grid grid-cols-2 gap-2">
 							<div class="space-y-1">
-								<label class="text-xs text-surface-500" for="min-monthly"
+								<label class="text-xs text-primary-900-100" for="min-monthly"
 									>Min Monthly Installs</label
 								>
 								<input
@@ -434,7 +336,7 @@
 								/>
 							</div>
 							<div class="space-y-1">
-								<label class="text-xs text-surface-500" for="max-monthly"
+								<label class="text-xs text-primary-900-100" for="max-monthly"
 									>Max Monthly Installs</label
 								>
 								<input
@@ -450,7 +352,7 @@
 						<!-- Ratings -->
 						<div class="grid grid-cols-2 gap-2">
 							<div class="space-y-1">
-								<label class="text-xs text-surface-500" for="min-ratings">Min Ratings</label>
+								<label class="text-xs text-primary-900-100" for="min-ratings">Min Ratings</label>
 								<input
 									type="number"
 									id="min-ratings"
@@ -460,7 +362,7 @@
 								/>
 							</div>
 							<div class="space-y-1">
-								<label class="text-xs text-surface-500" for="max-ratings">Max Ratings</label>
+								<label class="text-xs text-primary-900-100" for="max-ratings">Max Ratings</label>
 								<input
 									type="number"
 									id="max-ratings"
@@ -490,13 +392,15 @@
 						<label class="label font-medium text-sm" for="date-filter">Last Updated After</label>
 						<input type="date" id="date-filter" class="input text-sm" bind:value={myDate} />
 					</div>
+				</div>
 
-					<!-- Current Ranking Filter -->
+				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
+					<h3 class="font-semibold text-sm uppercase tracking-wide text-primary-900-100">
+						App Store Ranks
+					</h3>
 					<div class="space-y-2">
-						<label class="label font-medium text-sm" for="ranking-filter"
-							>Apps that Are Currently Ranking</label
-						>
-						<p class="text-xs text-surface-500">
+						<label class="label font-medium text-sm" for="ranking-filter">Ranking Filter</label>
+						<p class="text-xs text-primary-900-100">
 							Leave unset for all apps, choose overall for any ranking country, or choose one
 							specific country.
 						</p>
@@ -514,7 +418,7 @@
 				</div>
 
 				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
-					<h3 class="font-semibold text-sm uppercase tracking-wide text-surface-700-300">
+					<h3 class="font-semibold text-sm uppercase tracking-wide text-primary-900-100">
 						Company Filters
 					</h3>
 
@@ -531,7 +435,7 @@
 					<!-- Include Companies -->
 					<div class="space-y-2">
 						<label class="label font-medium text-sm" for="include-search">Include Companies</label>
-						<p class="text-xs text-surface-500">Apps must use ALL selected SDKs/companies</p>
+						<p class="text-xs text-primary-900-100">Apps must use ALL selected SDKs/companies</p>
 						<div class="relative">
 							<input
 								type="text"
@@ -556,7 +460,7 @@
 											onmousedown={() => addIncludeDomain(company.company_domain)}
 										>
 											<span>{company.company_name}</span>
-											<span class="text-xs text-surface-500"
+											<span class="text-xs text-primary-900-100"
 												>{formatNumber(company.total_apps)} apps</span
 											>
 										</button>
@@ -584,7 +488,7 @@
 					<!-- Exclude Companies -->
 					<div class="space-y-2">
 						<label class="label font-medium text-sm" for="exclude-search">Exclude Companies</label>
-						<p class="text-xs text-surface-500">Apps must NOT use any of these</p>
+						<p class="text-xs text-primary-900-100">Apps must NOT use any of these</p>
 						<div class="relative">
 							<input
 								type="text"
@@ -609,7 +513,7 @@
 											onmousedown={() => addExcludeDomain(company.company_domain)}
 										>
 											<span>{company.company_name}</span>
-											<span class="text-xs text-surface-500"
+											<span class="text-xs text-primary-900-100"
 												>{formatNumber(company.total_apps)} apps</span
 											>
 										</button>
@@ -692,7 +596,7 @@
 
 			<!-- Filter Summary -->
 			{#if includeDomains.length > 0}
-				<div class="text-xs text-surface-500 pt-2 border-t border-surface-300-700">
+				<div class="text-xs text-primary-900-100 pt-2 border-t border-surface-300-700">
 					<p>
 						<strong>Query:</strong> Apps using {includeDomains.length} selected SDK{includeDomains.length >
 						1
@@ -707,11 +611,11 @@
 		<!-- Results Table -->
 		<main class="card preset-tonal p-4 overflow-hidden">
 			{#if !hasPaidAccess}
-				<div class="text-center py-16 relative">
-					<div class="absolute inset-0 flex items-center justify-center opacity-10">
+				<div class="py-10 relative">
+					<div class="absolute inset-0 flex items-start justify-center opacity-10 pt-8">
 						<Filter size={120} class="text-surface-500" />
 					</div>
-					<div class="relative z-10">
+					<div class="relative max-w-3xl mx-auto">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="64"
@@ -727,29 +631,71 @@
 							<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
 							<path d="M7 11V7a5 5 0 0 1 10 0v4" />
 						</svg>
-						<p class="text-lg font-medium mb-2">Results Area Locked</p>
-						<p class="text-sm text-surface-600-400 mb-4">
-							App search results will appear here once you upgrade. Configure filters on the left to
-							see what you can discover.
+						<p class="text-lg font-medium mb-3 text-center">Results Area Locked</p>
+						<p class="text-sm text-primary-900-100 mb-6 text-center">
+							The <strong>App Explorer</strong> (also known as <strong>App CrossFilter</strong> or
+							<strong>App Query</strong>) helps you discover and filter mobile apps with advanced
+							criteria.
 						</p>
-						<a href="/pricing" class="btn preset-filled-primary-500 inline-flex items-center gap-2">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="18"
-								height="18"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
+
+						<div class="space-y-6 text-primary-900-100">
+							<div>
+								<h3 class="font-semibold text-lg mb-2">Key Features</h3>
+								<ul class="list-disc list-inside space-y-2 text-sm">
+									<li>
+										<strong>SDK & Company Filtering:</strong> Find apps using specific SDKs and companies.
+									</li>
+									<li>
+										<strong>Monetization Filters:</strong> Filter by in-app purchases, ads, and detection
+										requirements.
+									</li>
+									<li>
+										<strong>Store & Category:</strong> Narrow down by Google Play / Apple App Store and
+										category.
+									</li>
+									<li>
+										<strong>Metrics Filtering:</strong> Filter installs, ratings, and monthly installs
+										ranges.
+									</li>
+									<li>
+										<strong>Date & Rankings:</strong> Filter by recent updates and current store ranking
+										status.
+									</li>
+								</ul>
+							</div>
+
+							<div>
+								<h3 class="font-semibold text-lg mb-2">Use Cases</h3>
+								<ul class="list-disc list-inside space-y-2 text-sm">
+									<li>
+										<strong>Sales Teams:</strong> Identify potential customers using competitor SDKs.
+									</li>
+									<li>
+										<strong>Market Research:</strong> Analyze ecosystems by monetization strategy.
+									</li>
+									<li>
+										<strong>Competitive Analysis:</strong> Discover peers in your category and store.
+									</li>
+									<li>
+										<strong>Partnership Discovery:</strong> Find apps likely to benefit from your SDK.
+									</li>
+								</ul>
+							</div>
+						</div>
+
+						<div
+							class="mt-6 p-4 bg-surface-100-900 rounded-lg border border-surface-300-700 text-center"
+						>
+							<p class="text-sm mb-3 text-primary-900-100">
+								<strong>Access Required:</strong> App Explorer is available to paid subscribers.
+							</p>
+							<a
+								href="/pricing"
+								class="btn preset-filled-primary-500 inline-flex items-center gap-2"
 							>
-								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
-							</svg>
-							<span>Upgrade to Unlock</span>
-						</a>
+								<span class="inline text-white"> View Pricing Plans</span>
+							</a>
+						</div>
 					</div>
 				</div>
 			{:else if !hasSearched()}
