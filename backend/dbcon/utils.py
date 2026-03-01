@@ -4,7 +4,7 @@ import pathlib
 from collections.abc import Callable
 from functools import wraps
 from threading import Lock
-from typing import ParamSpec, TypeVar
+from typing import Concatenate, Self
 
 import numpy as np
 import pandas as pd
@@ -15,18 +15,17 @@ from config import MODULE_DIR
 
 SQL_DIR = pathlib.Path(MODULE_DIR, "dbcon/sql/")
 
-P = ParamSpec("P")
-R = TypeVar("R")
-
 
 class SQLLoader:
     """Auto-load SQL files based on attribute access."""
 
-    def __init__(self, sql_dir: pathlib.Path):
+    def __init__(self: Self, sql_dir: pathlib.Path) -> None:
+        """Initialize with the directory containing SQL files."""
         self.sql_dir = sql_dir
-        self._cache = {}
+        self._cache: dict = {}
 
-    def __getattr__(self, name: str) -> text:
+    def __getattr__(self: Self, name: str) -> text:
+        """Load SQL from file on first access, then cache it."""
         if name.startswith("_"):
             msg = f"Attempt to access private attribute '{name}'"
             raise AttributeError(msg)
@@ -99,7 +98,9 @@ def clean_app_df(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def cache_by_params(func: Callable[P, R]) -> Callable[P, R]:
+def cache_by_params[**P, R](
+    func: Callable[Concatenate[State, P], R],
+) -> Callable[Concatenate[State, P], R]:
     """Cache function results based on parameters (excluding State).
 
     The State parameter is passed through but not used in the cache key.

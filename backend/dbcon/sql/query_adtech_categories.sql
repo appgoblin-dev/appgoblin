@@ -1,3 +1,6 @@
-SELECT id, name, url_slug
+SELECT
+    id,
+    name,
+    url_slug
 FROM
     adtech.categories;

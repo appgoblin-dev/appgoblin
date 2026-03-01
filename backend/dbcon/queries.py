@@ -637,7 +637,7 @@ def get_category_tag_type_stats(
 
 @cache_by_params
 def get_tag_source_category_totals(
-    state: State, app_category: str | None = None, type_slug: str | None = None
+    state: State, app_category: str | None = None
 ) -> pd.DataFrame:
     """Get category totals."""
     if app_category:
@@ -945,7 +945,6 @@ def query_apps_crossfilter(
     except (ValueError, TypeError):
         parsed_date = datetime.date(2024, 1, 1)
 
-    # Validate sort_col to prevent injection (though utilizing param binding in SQL for logic selection)
     allowed_sort_cols = [
         "installs",
         "rating_count",
@@ -977,8 +976,6 @@ def query_apps_crossfilter(
             "max_rating_count": max_rating_count,
             "min_installs_d30": min_installs_d30,
             "max_installs_d30": max_installs_d30,
-            # "sort_col": sort_col,
-            # "sort_order": sort_order,
         },
     )
     return df

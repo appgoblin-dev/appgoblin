@@ -104,8 +104,8 @@ def create_static_sitemap() -> str:
         "https://appgoblin.info/collections/new_yearly/google/overall",
         "https://appgoblin.info/collections/new_weekly/apple/overall",
         "https://appgoblin.info/sdks",
-        # "https://appgoblin.info/rankings/store/1/collection/1/category/1/US",
-        # "https://appgoblin.info/rankings/store/2/collection/4/category/120/US",
+        "https://appgoblin.info/rankings/store/1/collection/1/category/1/US",
+        "https://appgoblin.info/rankings/store/2/collection/4/category/120/US",
     ]
 
     static_df = pd.DataFrame({"url": static_urls})
@@ -182,10 +182,10 @@ MIN_APP_COUNT = 10000
 # Companies with URL slugs are more likely to be relevant
 # (ie not typos from app-ads.txt)
 
-is_ad_network = cdf["type_url_slug"].notnull() & cdf["type_url_slug"].isin(
+is_ad_network = cdf["type_url_slug"].notna() & cdf["type_url_slug"].isin(
     ["ad-networks"]
 )
-is_not_ad_network = ~(is_ad_network) & cdf["type_url_slug"].notnull()
+is_not_ad_network = ~(is_ad_network) & cdf["type_url_slug"].notna()
 cdf = cdf[((cdf["app_count"] > MIN_APP_COUNT) & is_ad_network) | is_not_ad_network]
 
 

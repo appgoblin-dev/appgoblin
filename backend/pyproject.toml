@@ -33,6 +33,7 @@ ignore = [
     "COM812", # ruff-format requested ignore to avoid conflict
     "D203",   # ruff-format requested ignore to avoid conflict
     "ISC001", # ruff-format requested ignore to avoid conflict
+    "DTZ007", # ignore naive datetime parsing rules, we stick to utc
 ]
 
 # Avoid trying to fix flake8-bugbear (`B`) violations.
