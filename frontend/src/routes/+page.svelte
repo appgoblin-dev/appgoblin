@@ -65,11 +65,11 @@
 			Free App Marketing Insights and Research
 		</h2>
 		<p class="text-lg md:text-xl max-w-3xl mb-6 text-primary-900-100 mx-auto">
-			Real time app intelligence • Live advertising data • Competitor insights • No signup required
+			Real time app intelligence • Live advertising data • Competitor insights
 		</p>
 		<div class="flex flex-wrap justify-center gap-4 text-sm text-primary-900-100 mb-6">
 			<span class="px-3 py-1 bg-primary-100-900/20 rounded-full">⚡ Real-time Data</span>
-			<span class="px-3 py-1 bg-warning-100-900/20 rounded-full">🚀 Free Data</span>
+			<span class="px-3 py-1 bg-warning-100-900/20 rounded-full">🚀 Free Reports</span>
 			<span class="px-3 py-1 bg-success-100-900/20 rounded-full">✨ Ad and Creative Insights</span>
 		</div>
 		<p class="text-base md:text-lg max-w-2xl mx-auto">
@@ -84,13 +84,21 @@
 
 		<div class="items-center">
 			<div class="flex flex-col gap-4 items-center">
-				<a
-					href="mailto:contact@appgoblin.info"
-					class="btn-primary inline-flex items-center gap-2 px-6 py-3 bg-white rounded-lg hover:scale-105 transition-transform duration-200 shadow-lg"
-				>
-					<span class="text-black font-bold">Get in Touch</span>
-					<span class="text-black font-bold">→</span>
-				</a>
+				<div class="flex flex-wrap items-center justify-center gap-3">
+					<a
+						href="/auth/signup"
+						class="btn-primary inline-flex items-center gap-2 px-6 py-3 bg-white rounded-lg hover:scale-105 transition-transform duration-200 shadow-lg"
+					>
+						<span class="text-black font-bold">Create Free Account</span>
+						<span class="text-black font-bold">→</span>
+					</a>
+					<a
+						href="mailto:contact@appgoblin.info"
+						class="btn preset-outlined-primary-100-900 inline-flex items-center gap-2 px-6 py-3 rounded-lg"
+					>
+						<span class="font-bold">Get in Touch</span>
+					</a>
+				</div>
 				<div class="text-white/80 text-sm pt-1">
 					Free demo & walkthroughs: <p>contact@appgoblin.info</p>
 				</div>

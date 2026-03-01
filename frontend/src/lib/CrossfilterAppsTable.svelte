@@ -15,21 +15,10 @@
 	import StoreIcon from '$lib/StoreIcon.svelte';
 	import { formatNumber } from '$lib/utils/formatNumber';
 
-	type App = {
-		id: number;
-		store_id: string;
-		name: string;
-		installs: number;
-		rating_count: number;
-		installs_d30: number;
-		in_app_purchases: boolean;
-		ad_supported: boolean;
-		store: number;
-		app_icon_url?: string;
-	};
+	import type { CrossfilterApp } from '../types.js';
 
 	type CrossfilterAppsTableProps = {
-		apps: App[];
+		apps: CrossfilterApp[];
 		filename: string;
 		sorting: SortingState;
 	};
@@ -60,8 +49,18 @@
 			isSortable: true
 		},
 		{
-			title: 'Monthly',
+			title: 'Monthly Installs',
 			accessorKey: 'installs_d30',
+			isSortable: true
+		},
+		{
+			title: 'Estimated Monthly Revenue',
+			accessorKey: 'estimated_monthly_revenue',
+			isSortable: true
+		},
+		{
+			title: 'Monthly Active Users',
+			accessorKey: 'monthly_active_users',
 			isSortable: true
 		},
 		{

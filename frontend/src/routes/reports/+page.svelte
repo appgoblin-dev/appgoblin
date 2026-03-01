@@ -88,7 +88,7 @@
 					headline: report.title,
 					description:
 						'Comprehensive analysis of advertising performance, network strategies, and creative trends for this reporting period. Includes growth metrics, publisher reach, and actionable insights.',
-					url: `https://appgoblin.com${report.url}`,
+					url: `https://appgoblin.info${report.url}`,
 					...(datePublished && { datePublished }),
 					keywords: 'mobile advertising, analytics, insights, data-driven'
 				}
@@ -158,7 +158,7 @@
 		name: 'Mobile Ad Intelligence Reports',
 		description:
 			'Deep dives into the mobile app advertising ecosystem. Trends, analyze performance, and understand the strategies driving app user acquisition.',
-		url: 'https://appgoblin.com/reports',
+		url: 'https://appgoblin.info/reports',
 		mainEntity: {
 			'@type': 'ItemList',
 			itemListElement: generateJsonLdArticles()
@@ -168,7 +168,7 @@
 			name: 'AppGoblin',
 			logo: {
 				'@type': 'ImageObject',
-				url: 'https://appgoblin.com/AppGoblin_Large_Logo.png'
+				url: 'https://appgoblin.info/AppGoblin_Large_Logo.png'
 			}
 		}
 	})}<\/script>`}

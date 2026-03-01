@@ -72,7 +72,7 @@ def api_call_dfs(state: State, store_id: str) -> pd.DataFrame:
     return df
 
 
-def get_search_results(state: State, search_term: str) -> dict:
+def get_search_results(state: State, search_term: str) -> AppGroupByStore:
     """Parse search term and return resulting AppGroup."""
     decoded_input = urllib.parse.unquote(search_term)
     decoded_input = decoded_input.strip()
@@ -81,10 +81,12 @@ def get_search_results(state: State, search_term: str) -> dict:
     df = search_apps(state, search_input=decoded_input, limit=60)
     df = extend_app_icon_url(df)
     logger.info(f"{decoded_input=} returned rows: {df.shape[0]}")
-    apple_apps_dict = df[df["store"].str.startswith("Apple")].to_dict(orient="records")
-    google_apps_dict = df[df["store"].str.startswith("Google")].to_dict(
+    apple_apps_dict: list[AppDetail] = df[df["store"].str.startswith("Apple")].to_dict(
         orient="records"
     )
+    google_apps_dict: list[AppDetail] = df[
+        df["store"].str.startswith("Google")
+    ].to_dict(orient="records")
     app_group = AppGroupByStore(
         key=f"Apps matching '{search_term}'",
         apple=AppGroup(title="Apple", apps=apple_apps_dict),
@@ -337,7 +339,7 @@ class AppController(Controller):
     @get(path="/growth/{store:int}", cache=86400)
     async def get_growth_apps(
         self: Self, state: State, store: int, app_category: str | None = None
-    ) -> list[dict]:
+    ) -> dict:
         """Handle GET request for a list of fastest growing apps.
 
         Args:
@@ -555,7 +557,7 @@ class AppController(Controller):
 
         cats = df.loc[df["category_slug"].notna(), "category_slug"].unique().tolist()
         company_sdk_dict = {}
-        found_sdk_tlds = []
+        found_sdk_tlds: list = []
         # example: {"ad-networks":
         # {"bytedance.com":
         # {"com.bytedance.sdk":
@@ -833,7 +835,7 @@ class AppController(Controller):
         insert_sdk_scan_request(state, store_id, user_id)
         return {"status": "success"}
 
-    @get(path="/{store_id:str}/keywords", cache=86400)
+    @get(path="/{store_id:str}/keywords", cache=3600)
     async def get_app_keywords(self: Self, state: State, store_id: str) -> dict:
         """Handle GET request for a list of apps.
 
@@ -851,7 +853,7 @@ class AppController(Controller):
         logger.info(f"{self.path}/{store_id}/keywords took {duration}ms")
         return keywords_dict
 
-    @get(path="/{store_id:str}/apis", cache=86400)
+    @get(path="/{store_id:str}/apis", cache=3600)
     async def get_app_apis(self: Self, state: State, store_id: str) -> dict:
         """Handle GET request for a list of apps.
 
@@ -885,6 +887,7 @@ class AppController(Controller):
         require_sdk_api = bool(data.get("require_sdk_api", False))
         require_iap = bool(data.get("require_iap", False))
         require_ads = bool(data.get("require_ads", False))
+        ranking_country = data.get("ranking_country")
         mydate = data.get("mydate", "2024-01-01")
         category = data.get("category")
         store = data.get("store")
@@ -894,8 +897,6 @@ class AppController(Controller):
         max_rating_count = data.get("max_rating_count")
         min_installs_d30 = data.get("min_installs_d30")
         max_installs_d30 = data.get("max_installs_d30")
-        sort_col = data.get("sort_col", "installs")
-        sort_order = data.get("sort_order", "desc")
 
         # Ensure domains are lists of strings
         if isinstance(include_domains, str):
@@ -906,12 +907,14 @@ class AppController(Controller):
         # Filter out empty strings
         include_domains = [d for d in include_domains if d and isinstance(d, str)]
         exclude_domains = [d for d in exclude_domains if d and isinstance(d, str)]
+        if ranking_country is not None:
+            ranking_country = str(ranking_country).strip() or None
 
         logger.info(
             f"Crossfilter query: include={len(include_domains)} domains, "
             f"exclude={len(exclude_domains)} domains, sdk_api={require_sdk_api}, "
-            f"iap={require_iap}, ads={require_ads}, date={mydate}, "
-            f"category={category}, store={store}, sort={sort_col} {sort_order}"
+            f"iap={require_iap}, ads={require_ads}, ranking_country={ranking_country}, date={mydate}, "
+            f"category={category}, store={store}"
         )
 
         try:
@@ -922,6 +925,7 @@ class AppController(Controller):
                 require_sdk_api=require_sdk_api,
                 require_iap=require_iap,
                 require_ads=require_ads,
+                ranking_country=ranking_country,
                 mydate=mydate,
                 category=category,
                 store=store,
@@ -931,8 +935,6 @@ class AppController(Controller):
                 max_rating_count=max_rating_count,
                 min_installs_d30=min_installs_d30,
                 max_installs_d30=max_installs_d30,
-                sort_col=sort_col,
-                sort_order=sort_order,
             )
             apps_df = extend_app_icon_url(apps_df)
             apps_list = apps_df.to_dict(orient="records")

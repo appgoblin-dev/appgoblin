@@ -44,9 +44,11 @@
 		<div class="mt-8 text-sm text-surface-500-400">
 			<p>Need help? Reach out on:</p>
 			<div class="flex gap-4 justify-center mt-2">
-				<a href="https://discord.gg/7jpWEhkXRW" class="link">Discord</a>
+				<a href="mailto:support@appgoblin.info" class="link">Email</a>
 				<span>•</span>
 				<a href="https://github.com/appgoblin-dev/appgoblin" class="link">GitHub</a>
+				<span>•</span>
+				<a href="https://discord.gg/7jpWEhkXRW" class="link">Discord</a>
 			</div>
 		</div>
 		<div class="mt-8 flex gap-4 justify-center">

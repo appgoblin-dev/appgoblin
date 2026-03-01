@@ -123,7 +123,7 @@
 		name: data.title,
 		headline: 'App SDK Growth Report 2025',
 		description: data.description,
-		url: 'https://appgoblin.com/reports/mobile-apps-growth-sdks-2025',
+		url: 'https://appgoblin.info/reports/mobile-apps-growth-sdks-2025',
 		datePublished: '2025-01-14',
 		dateModified: new Date().toISOString().split('T')[0],
 		publisher: {
@@ -131,7 +131,7 @@
 			name: 'AppGoblin',
 			logo: {
 				'@type': 'ImageObject',
-				url: 'https://appgoblin.com/AppGoblin_Large_Logo.png'
+				url: 'https://appgoblin.info/AppGoblin_Large_Logo.png'
 			}
 		},
 		author: {

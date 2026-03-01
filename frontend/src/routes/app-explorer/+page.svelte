@@ -5,9 +5,11 @@
 	import Loader2 from 'lucide-svelte/icons/loader-2';
 	import RotateCcw from 'lucide-svelte/icons/rotate-ccw';
 	import { formatNumber } from '$lib/utils/formatNumber';
+	import { countryCodeToEmoji } from '$lib/utils/countryCodeToEmoji';
 	import { enhance } from '$app/forms';
 	import CrossfilterAppsTable from '$lib/CrossfilterAppsTable.svelte';
-	import WhiteCard from '$lib/WhiteCard.svelte';
+
+	import type { CatData, CrossfilterApp } from '../.././types';
 
 	// TanStack Table Imports
 	import { type SortingState } from '@tanstack/table-core';
@@ -18,32 +20,36 @@
 		total_apps: number;
 	}
 
-	interface Category {
-		id: string;
-		name: string;
-		total_apps: number;
-	}
-
-	interface App {
-		id: number;
-		store_id: string;
-		name: string;
-		installs: number;
-		rating_count: number;
-		installs_d30: number;
-		in_app_purchases: boolean;
-		ad_supported: boolean;
-		store: number;
-		app_icon_url?: string;
-	}
-
 	let { data, form } = $props();
 
 	const hasPaidAccess = $derived(data.hasPaidAccess ?? false);
+	const hasB2BSdkAccess = $derived(data.hasB2BSdkAccess ?? false);
 
 	// Safely access companies with fallback to empty array
 	let companies = $derived<Company[]>(data.companies ?? []);
-	let categories = $derived<Category[]>(data.categories ?? []);
+	let categories = $derived<CatData>(data.categories ?? []);
+	let rankingCountries = $derived<{ code: string; name: string }[]>(
+		(() => {
+			const countriesData = data.countries;
+
+			if (!countriesData) return [];
+
+			if (Array.isArray(countriesData)) {
+				return countriesData
+					.filter((country) => country?.code && country?.name)
+					.map((country) => ({ code: country.code, name: country.name }));
+			}
+
+			if (typeof countriesData === 'object') {
+				return Object.entries(countriesData as Record<string, string>).map(([code, name]) => ({
+					code,
+					name
+				}));
+			}
+
+			return [];
+		})()
+	);
 
 	// Filter state
 	let includeDomains = $state<string[]>([]);
@@ -54,6 +60,7 @@
 
 	let selectedCategory = $state<string>('');
 	let selectedStore = $state<number | ''>('');
+	let rankingFilter = $state<string>('');
 
 	// Metric Filters
 	let minInstalls = $state<number | null>(null);
@@ -79,7 +86,7 @@
 	let sorting = $state<SortingState>([{ id: 'installs', desc: true }]);
 
 	const exportFilename = `appgoblin-crossfilter-${new Date().toISOString().split('T')[0]}`;
-	const formApps = $derived(() => (form?.apps ?? []) as App[]);
+	const formApps = $derived(() => (form?.apps ?? []) as CrossfilterApp[]);
 	const formError = $derived(() => form?.error ?? '');
 	const hasSearched = $derived(() => !!form?.success || !!form?.error);
 
@@ -146,6 +153,7 @@
 		requireAds = false;
 		selectedCategory = '';
 		selectedStore = '';
+		rankingFilter = '';
 		minInstalls = null;
 		maxInstalls = null;
 		minRatings = null;
@@ -176,112 +184,14 @@
 <div class="container mx-auto px-2 md:px-4 py-4 md:py-8">
 	<div class="mb-6">
 		<h1 class="text-2xl md:text-3xl font-bold text-primary-900-100">App Explorer</h1>
-		<p class="text-sm md:text-base text-surface-600-400 mt-2">
+		<p class="text-sm md:text-base text-primary-900-100 mt-2">
 			Powerful app discovery and filtering tool for sales teams, market researchers, and app
 			developers.
 		</p>
 	</div>
 
-	{#if !hasPaidAccess}
-		<!-- Explanatory Content - Only shown to non-paid users -->
-		<WhiteCard>
-			{#snippet title()}
-				<span>About App Explorer / App CrossFilter / App Query</span>
-			{/snippet}
-			<div class="p-4 flex flex-col gap-4">
-				<div class="space-y-3">
-					<p>
-						The <strong>App Explorer</strong> (also known as <strong>App CrossFilter</strong> or
-						<strong>App Query</strong>) is a powerful tool that allows you to discover and filter
-						mobile apps based on multiple criteria simultaneously.
-					</p>
-
-					<div>
-						<h3 class="font-semibold text-lg mb-2">Key Features:</h3>
-						<ul class="list-disc list-inside space-y-2 text-sm">
-							<li>
-								<strong>SDK & Company Filtering:</strong> Find apps that use specific SDKs or companies
-								(include/exclude multiple companies)
-							</li>
-							<li>
-								<strong>Monetization Filters:</strong> Filter by in-app purchases, ad support, and SDK/API
-								detection requirements
-							</li>
-							<li>
-								<strong>Store & Category:</strong> Narrow down by app store (Google Play, Apple App Store)
-								and category
-							</li>
-							<li>
-								<strong>Metrics Filtering:</strong> Filter by install counts, rating counts, and monthly
-								installs with min/max ranges
-							</li>
-							<li>
-								<strong>Date Filtering:</strong> Find apps updated after a specific date
-							</li>
-							<li>
-								<strong>Export Results:</strong> Download filtered results as CSV for further analysis
-							</li>
-						</ul>
-					</div>
-
-					<div>
-						<h3 class="font-semibold text-lg mb-2">Use Cases:</h3>
-						<ul class="list-disc list-inside space-y-2 text-sm">
-							<li>
-								<strong>Sales Teams:</strong> Find potential customers by identifying apps using competitor
-								SDKs or specific technologies
-							</li>
-							<li>
-								<strong>Market Research:</strong> Analyze app ecosystems by filtering apps with specific
-								monetization strategies
-							</li>
-							<li>
-								<strong>Competitive Analysis:</strong> Discover apps in your category that use certain
-								SDKs or ad networks
-							</li>
-							<li>
-								<strong>Partnership Opportunities:</strong> Identify apps that could benefit from your
-								SDK or service
-							</li>
-						</ul>
-					</div>
-
-					<div class="mt-4 p-4 bg-surface-100-900 rounded-lg border border-surface-300-700">
-						<p class="text-sm mb-3">
-							<strong>Access Required:</strong> The App Explorer is available to paid subscribers at
-							any level. Please
-							<a href="/pricing" class="underline hover:text-primary-600-400"
-								>upgrade your account</a
-							> to use this tool.
-						</p>
-						<a href="/pricing" class="btn preset-filled-primary-500 inline-flex items-center gap-2">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="18"
-								height="18"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
-							>
-								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
-							</svg>
-							<span>View Pricing Plans</span>
-						</a>
-					</div>
-				</div>
-			</div>
-		</WhiteCard>
-	{/if}
-
 	<div class="mt-6">
-		{#if hasPaidAccess}
-			<h2 class="text-xl md:text-2xl font-bold text-primary-900-100 mb-4">Start Exploring</h2>
-		{:else}
+		{#if !hasPaidAccess}
 			<h2 class="text-xl md:text-2xl font-bold text-primary-900-100 mb-4">Preview</h2>
 		{/if}
 	</div>
@@ -322,11 +232,18 @@
 				use:enhance={hasPaidAccess
 					? ({ formData }) => {
 							// Manually append complex data structures
-							formData.append('include_domains', JSON.stringify(includeDomains));
-							formData.append('exclude_domains', JSON.stringify(excludeDomains));
+							formData.append(
+								'include_domains',
+								JSON.stringify(hasB2BSdkAccess ? includeDomains : [])
+							);
+							formData.append(
+								'exclude_domains',
+								JSON.stringify(hasB2BSdkAccess ? excludeDomains : [])
+							);
 							formData.append('require_sdk_api', requireSdkApi.toString());
 							formData.append('require_iap', requireIap.toString());
 							formData.append('require_ads', requireAds.toString());
+							if (rankingFilter) formData.append('ranking_country', rankingFilter);
 							formData.append('mydate', myDate);
 							if (selectedCategory) formData.append('category', selectedCategory);
 							if (selectedStore) formData.append('store', selectedStore.toString());
@@ -341,10 +258,6 @@
 							if (maxMonthlyInstalls)
 								formData.append('max_installs_d30', maxMonthlyInstalls.toString());
 
-							// Sorting
-							formData.append('sort_col', sorting[0]?.id || 'installs');
-							formData.append('sort_order', sorting[0]?.desc ? 'desc' : 'asc');
-
 							isLoading = true;
 
 							return async ({ update }) => {
@@ -355,230 +268,282 @@
 					: undefined}
 				class="space-y-5"
 			>
-				<!-- Include Companies -->
-				<div class="space-y-2">
-					<label class="label font-medium text-sm" for="include-search"
-						>Include Companies (Required)</label
-					>
-					<p class="text-xs text-surface-500">Apps must use ALL selected SDKs/companies</p>
-					<div class="relative">
-						<input
-							type="text"
-							id="include-search"
-							class="input text-sm {!hasPaidAccess ? 'opacity-50 cursor-not-allowed' : ''}"
-							placeholder="Search companies..."
-							bind:value={includeSearch}
-							disabled={!hasPaidAccess}
-							onfocus={() => hasPaidAccess && (includeDropdownOpen = true)}
-							onblur={() => setTimeout(() => (includeDropdownOpen = false), 200)}
-						/>
-						{#if includeDropdownOpen && filteredIncludeCompanies().length > 0}
-							<div
-								class="absolute z-50 w-full mt-1 bg-surface-100-900 border border-surface-300-700 rounded-lg shadow-lg max-h-48 lg:max-h-92 overflow-y-auto"
-							>
-								{#each filteredIncludeCompanies() as company (company.company_domain)}
-									<button
-										type="button"
-										class="w-full px-3 py-2 text-left text-sm hover:bg-surface-200-800 flex justify-between items-center"
-										onmousedown={() => addIncludeDomain(company.company_domain)}
-									>
-										<span>{company.company_name}</span>
-										<span class="text-xs text-surface-500"
-											>{formatNumber(company.total_apps)} apps</span
+				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
+					<h3 class="font-semibold text-sm uppercase tracking-wide text-primary-900-100">
+						App Details & Metrics
+					</h3>
+
+					<!-- App Details -->
+					<div class="space-y-2">
+						<label class="label text-xs text-primary-900-100" for="store-select">Store</label>
+						<select class="select text-sm" id="store-select" bind:value={selectedStore}>
+							<option value="">Any Store</option>
+							<option value="1">Google Play</option>
+							<option value="2">Apple App Store</option>
+						</select>
+
+						<label class="label text-xs text-primary-900-100 mt-2" for="category-select"
+							>Category</label
+						>
+						<select class="select text-sm" id="category-select" bind:value={selectedCategory}>
+							<option value="">Any Category</option>
+							{#each categories.categories as cat}
+								<option value={cat.id}>{cat.name}</option>
+							{/each}
+						</select>
+					</div>
+
+					<!-- Metrics -->
+					<div class="space-y-3">
+						<span class="label font-medium text-sm">Metrics</span>
+
+						<!-- Installs -->
+						<div class="grid grid-cols-2 gap-2">
+							<div class="space-y-1">
+								<label class="text-xs text-primary-900-100" for="min-installs">Min Installs</label>
+								<input
+									type="number"
+									id="min-installs"
+									class="input text-sm px-2 py-1"
+									placeholder="0"
+									bind:value={minInstalls}
+								/>
+							</div>
+							<div class="space-y-1">
+								<label class="text-xs text-primary-900-100" for="max-installs">Max Installs</label>
+								<input
+									type="number"
+									id="max-installs"
+									class="input text-sm px-2 py-1"
+									placeholder="NO MAX"
+									bind:value={maxInstalls}
+								/>
+							</div>
+						</div>
+
+						<!-- Monthly Installs -->
+						<div class="grid grid-cols-2 gap-2">
+							<div class="space-y-1">
+								<label class="text-xs text-primary-900-100" for="min-monthly"
+									>Min Monthly Installs</label
+								>
+								<input
+									type="number"
+									id="min-monthly"
+									class="input text-sm px-2 py-1"
+									placeholder="0"
+									bind:value={minMonthlyInstalls}
+								/>
+							</div>
+							<div class="space-y-1">
+								<label class="text-xs text-primary-900-100" for="max-monthly"
+									>Max Monthly Installs</label
+								>
+								<input
+									type="number"
+									id="max-monthly"
+									class="input text-sm px-2 py-1"
+									placeholder="NO MAX"
+									bind:value={maxMonthlyInstalls}
+								/>
+							</div>
+						</div>
+
+						<!-- Ratings -->
+						<div class="grid grid-cols-2 gap-2">
+							<div class="space-y-1">
+								<label class="text-xs text-primary-900-100" for="min-ratings">Min Ratings</label>
+								<input
+									type="number"
+									id="min-ratings"
+									class="input text-sm px-2 py-1"
+									placeholder="0"
+									bind:value={minRatings}
+								/>
+							</div>
+							<div class="space-y-1">
+								<label class="text-xs text-primary-900-100" for="max-ratings">Max Ratings</label>
+								<input
+									type="number"
+									id="max-ratings"
+									class="input text-sm px-2 py-1"
+									placeholder="NO MAX"
+									bind:value={maxRatings}
+								/>
+							</div>
+						</div>
+					</div>
+
+					<!-- Monetization Filters -->
+					<div class="space-y-2">
+						<span class="label font-medium text-sm">Monetization</span>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input type="checkbox" class="checkbox" bind:checked={requireIap} />
+							<span class="text-sm">Has In-App Purchases</span>
+						</label>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input type="checkbox" class="checkbox" bind:checked={requireAds} />
+							<span class="text-sm">Has Ads</span>
+						</label>
+					</div>
+
+					<!-- Date Filter -->
+					<div class="space-y-2">
+						<label class="label font-medium text-sm" for="date-filter">Last Updated After</label>
+						<input type="date" id="date-filter" class="input text-sm" bind:value={myDate} />
+					</div>
+				</div>
+
+				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
+					<h3 class="font-semibold text-sm uppercase tracking-wide text-primary-900-100">
+						App Store Ranks
+					</h3>
+					<div class="space-y-2">
+						<label class="label font-medium text-sm" for="ranking-filter">Ranking Filter</label>
+						<p class="text-xs text-primary-900-100">
+							Leave unset for all apps, choose overall for any ranking country, or choose one
+							specific country.
+						</p>
+						<select class="select text-sm" id="ranking-filter" bind:value={rankingFilter}>
+							<option value="">All apps (no ranking filter)</option>
+							<option value="overall">Overall (ranked in at least one country)</option>
+							{#each rankingCountries as country}
+								<option value={country.code}>
+									{countryCodeToEmoji(country.code)}
+									{country.name}
+								</option>
+							{/each}
+						</select>
+					</div>
+				</div>
+
+				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
+					<h3 class="font-semibold text-sm uppercase tracking-wide text-primary-900-100">
+						Company Filters
+					</h3>
+
+					{#if !hasB2BSdkAccess}
+						<div class="p-3 rounded-lg border border-warning-500 bg-warning-900-100/20">
+							<p class="text-xs text-warning-900-100">
+								Company include/exclude filters are available on the B2B SDK tier.
+								<a href="/pricing" class="underline hover:text-primary-600-400">Upgrade</a>
+								to unlock.
+							</p>
+						</div>
+					{/if}
+
+					<!-- Include Companies -->
+					<div class="space-y-2">
+						<label class="label font-medium text-sm" for="include-search">Include Companies</label>
+						<p class="text-xs text-primary-900-100">Apps must use ALL selected SDKs/companies</p>
+						<div class="relative">
+							<input
+								type="text"
+								id="include-search"
+								class="input text-sm {!hasPaidAccess || !hasB2BSdkAccess
+									? 'opacity-50 cursor-not-allowed'
+									: ''}"
+								placeholder="Search companies..."
+								bind:value={includeSearch}
+								disabled={!hasPaidAccess || !hasB2BSdkAccess}
+								onfocus={() => hasPaidAccess && hasB2BSdkAccess && (includeDropdownOpen = true)}
+								onblur={() => setTimeout(() => (includeDropdownOpen = false), 200)}
+							/>
+							{#if includeDropdownOpen && filteredIncludeCompanies().length > 0}
+								<div
+									class="absolute z-50 w-full mt-1 bg-surface-100-900 border border-surface-300-700 rounded-lg shadow-lg max-h-48 lg:max-h-92 overflow-y-auto"
+								>
+									{#each filteredIncludeCompanies() as company (company.company_domain)}
+										<button
+											type="button"
+											class="w-full px-3 py-2 text-left text-sm hover:bg-surface-200-800 flex justify-between items-center"
+											onmousedown={() => addIncludeDomain(company.company_domain)}
 										>
-									</button>
+											<span>{company.company_name}</span>
+											<span class="text-xs text-primary-900-100"
+												>{formatNumber(company.total_apps)} apps</span
+											>
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+
+						{#if includeDomains.length > 0}
+							<div class="flex flex-wrap gap-1 mt-2">
+								{#each includeDomains as domain}
+									<span
+										class="badge preset-filled-primary-500 text-xs flex items-center gap-1 px-2 py-1"
+									>
+										{getCompanyName(domain)}
+										<button type="button" onclick={() => removeIncludeDomain(domain)} class="ml-1">
+											<X size={12} />
+										</button>
+									</span>
 								{/each}
 							</div>
 						{/if}
 					</div>
-					{#if includeDomains.length > 0}
-						<div class="flex flex-wrap gap-1 mt-2">
-							{#each includeDomains as domain}
-								<span
-									class="badge preset-filled-primary-500 text-xs flex items-center gap-1 px-2 py-1"
-								>
-									{getCompanyName(domain)}
-									<button type="button" onclick={() => removeIncludeDomain(domain)} class="ml-1">
-										<X size={12} />
-									</button>
-								</span>
-							{/each}
-						</div>
-					{/if}
-				</div>
 
-				<!-- Exclude Companies -->
-				<div class="space-y-2">
-					<label class="label font-medium text-sm" for="exclude-search">Exclude Companies</label>
-					<p class="text-xs text-surface-500">Apps must NOT use any of these</p>
-					<div class="relative">
-						<input
-							type="text"
-							id="exclude-search"
-							class="input text-sm {!hasPaidAccess ? 'opacity-50 cursor-not-allowed' : ''}"
-							placeholder="Search companies to exclude..."
-							bind:value={excludeSearch}
-							disabled={!hasPaidAccess}
-							onfocus={() => hasPaidAccess && (excludeDropdownOpen = true)}
-							onblur={() => setTimeout(() => (excludeDropdownOpen = false), 200)}
-						/>
-						{#if excludeDropdownOpen && filteredExcludeCompanies().length > 0}
-							<div
-								class="absolute z-50 w-full mt-1 bg-surface-100-900 border border-surface-300-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
-							>
-								{#each filteredExcludeCompanies() as company (company.company_domain)}
-									<button
-										type="button"
-										class="w-full px-3 py-2 text-left text-sm hover:bg-surface-200-800 flex justify-between items-center"
-										onmousedown={() => addExcludeDomain(company.company_domain)}
-									>
-										<span>{company.company_name}</span>
-										<span class="text-xs text-surface-500"
-											>{formatNumber(company.total_apps)} apps</span
+					<!-- Exclude Companies -->
+					<div class="space-y-2">
+						<label class="label font-medium text-sm" for="exclude-search">Exclude Companies</label>
+						<p class="text-xs text-primary-900-100">Apps must NOT use any of these</p>
+						<div class="relative">
+							<input
+								type="text"
+								id="exclude-search"
+								class="input text-sm {!hasPaidAccess || !hasB2BSdkAccess
+									? 'opacity-50 cursor-not-allowed'
+									: ''}"
+								placeholder="Search companies to exclude..."
+								bind:value={excludeSearch}
+								disabled={!hasPaidAccess || !hasB2BSdkAccess}
+								onfocus={() => hasPaidAccess && hasB2BSdkAccess && (excludeDropdownOpen = true)}
+								onblur={() => setTimeout(() => (excludeDropdownOpen = false), 200)}
+							/>
+							{#if excludeDropdownOpen && filteredExcludeCompanies().length > 0}
+								<div
+									class="absolute z-50 w-full mt-1 bg-surface-100-900 border border-surface-300-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+								>
+									{#each filteredExcludeCompanies() as company (company.company_domain)}
+										<button
+											type="button"
+											class="w-full px-3 py-2 text-left text-sm hover:bg-surface-200-800 flex justify-between items-center"
+											onmousedown={() => addExcludeDomain(company.company_domain)}
 										>
-									</button>
+											<span>{company.company_name}</span>
+											<span class="text-xs text-primary-900-100"
+												>{formatNumber(company.total_apps)} apps</span
+											>
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+						{#if excludeDomains.length > 0}
+							<div class="flex flex-wrap gap-1 mt-2">
+								{#each excludeDomains as domain}
+									<span
+										class="badge preset-filled-error-900-100 text-xs flex items-center gap-1 px-2 py-1"
+									>
+										{getCompanyName(domain)}
+										<button type="button" onclick={() => removeExcludeDomain(domain)} class="ml-1">
+											<X size={12} />
+										</button>
+									</span>
 								{/each}
 							</div>
 						{/if}
 					</div>
-					{#if excludeDomains.length > 0}
-						<div class="flex flex-wrap gap-1 mt-2">
-							{#each excludeDomains as domain}
-								<span
-									class="badge preset-filled-error-900-100 text-xs flex items-center gap-1 px-2 py-1"
-								>
-									{getCompanyName(domain)}
-									<button type="button" onclick={() => removeExcludeDomain(domain)} class="ml-1">
-										<X size={12} />
-									</button>
-								</span>
-							{/each}
-						</div>
-					{/if}
-				</div>
-
-				<!-- App Details -->
-				<div class="space-y-2">
-					<span class="label font-medium text-sm">App Details</span>
-					<label class="label text-xs text-surface-500" for="store-select">Store</label>
-					<select class="select text-sm" id="store-select" bind:value={selectedStore}>
-						<option value="">Any Store</option>
-						<option value="1">Google Play</option>
-						<option value="2">Apple App Store</option>
-					</select>
-
-					<label class="label text-xs text-surface-500 mt-2" for="category-select">Category</label>
-					<select class="select text-sm" id="category-select" bind:value={selectedCategory}>
-						<option value="">Any Category</option>
-						{#each categories as cat}
-							<option value={cat.id}>{cat.name}</option>
-						{/each}
-					</select>
-				</div>
-
-				<!-- Metrics -->
-				<div class="space-y-3">
-					<span class="label font-medium text-sm">Metrics</span>
-
-					<!-- Installs -->
-					<div class="grid grid-cols-2 gap-2">
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="min-installs">Min Installs</label>
-							<input
-								type="number"
-								id="min-installs"
-								class="input text-sm px-2 py-1"
-								placeholder="0"
-								bind:value={minInstalls}
-							/>
-						</div>
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="max-installs">Max Installs</label>
-							<input
-								type="number"
-								id="max-installs"
-								class="input text-sm px-2 py-1"
-								placeholder="NO MAX"
-								bind:value={maxInstalls}
-							/>
-						</div>
+					<!-- Detection Type -->
+					<div class="space-y-2">
+						<span class="label font-medium text-sm">Detection Requirements</span>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input type="checkbox" class="checkbox" bind:checked={requireSdkApi} />
+							<span class="text-sm">Require SDK or API detection</span>
+						</label>
 					</div>
-
-					<!-- Monthly Installs -->
-					<div class="grid grid-cols-2 gap-2">
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="min-monthly">Min Monthly Installs</label>
-							<input
-								type="number"
-								id="min-monthly"
-								class="input text-sm px-2 py-1"
-								placeholder="0"
-								bind:value={minMonthlyInstalls}
-							/>
-						</div>
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="max-monthly">Max Monthly Installs</label>
-							<input
-								type="number"
-								id="max-monthly"
-								class="input text-sm px-2 py-1"
-								placeholder="NO MAX"
-								bind:value={maxMonthlyInstalls}
-							/>
-						</div>
-					</div>
-
-					<!-- Ratings -->
-					<div class="grid grid-cols-2 gap-2">
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="min-ratings">Min Ratings</label>
-							<input
-								type="number"
-								id="min-ratings"
-								class="input text-sm px-2 py-1"
-								placeholder="0"
-								bind:value={minRatings}
-							/>
-						</div>
-						<div class="space-y-1">
-							<label class="text-xs text-surface-500" for="max-ratings">Max Ratings</label>
-							<input
-								type="number"
-								id="max-ratings"
-								class="input text-sm px-2 py-1"
-								placeholder="NO MAX"
-								bind:value={maxRatings}
-							/>
-						</div>
-					</div>
-				</div>
-
-				<!-- Detection Type -->
-				<div class="space-y-2">
-					<span class="label font-medium text-sm">Detection Requirements</span>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input type="checkbox" class="checkbox" bind:checked={requireSdkApi} />
-						<span class="text-sm">Require SDK or API detection</span>
-					</label>
-				</div>
-
-				<!-- Monetization Filters -->
-				<div class="space-y-2">
-					<span class="label font-medium text-sm">Monetization</span>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input type="checkbox" class="checkbox" bind:checked={requireIap} />
-						<span class="text-sm">Has In-App Purchases</span>
-					</label>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input type="checkbox" class="checkbox" bind:checked={requireAds} />
-						<span class="text-sm">Has Ads</span>
-					</label>
-				</div>
-
-				<!-- Date Filter -->
-				<div class="space-y-2">
-					<label class="label font-medium text-sm" for="date-filter">Last Updated After</label>
-					<input type="date" id="date-filter" class="input text-sm" bind:value={myDate} />
 				</div>
 
 				<!-- Action Buttons -->
@@ -586,7 +551,7 @@
 					<button
 						type="submit"
 						class="btn preset-filled-primary-500 w-full flex items-center justify-center gap-2"
-						disabled={!hasPaidAccess || isLoading || includeDomains.length === 0}
+						disabled={!hasPaidAccess || isLoading}
 					>
 						{#if !hasPaidAccess}
 							<svg
@@ -631,7 +596,7 @@
 
 			<!-- Filter Summary -->
 			{#if includeDomains.length > 0}
-				<div class="text-xs text-surface-500 pt-2 border-t border-surface-300-700">
+				<div class="text-xs text-primary-900-100 pt-2 border-t border-surface-300-700">
 					<p>
 						<strong>Query:</strong> Apps using {includeDomains.length} selected SDK{includeDomains.length >
 						1
@@ -646,11 +611,11 @@
 		<!-- Results Table -->
 		<main class="card preset-tonal p-4 overflow-hidden">
 			{#if !hasPaidAccess}
-				<div class="text-center py-16 relative">
-					<div class="absolute inset-0 flex items-center justify-center opacity-10">
+				<div class="py-10 relative">
+					<div class="absolute inset-0 flex items-start justify-center opacity-10 pt-8">
 						<Filter size={120} class="text-surface-500" />
 					</div>
-					<div class="relative z-10">
+					<div class="relative max-w-3xl mx-auto">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="64"
@@ -666,29 +631,71 @@
 							<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
 							<path d="M7 11V7a5 5 0 0 1 10 0v4" />
 						</svg>
-						<p class="text-lg font-medium mb-2">Results Area Locked</p>
-						<p class="text-sm text-surface-600-400 mb-4">
-							App search results will appear here once you upgrade. Configure filters on the left to
-							see what you can discover.
+						<p class="text-lg font-medium mb-3 text-center">Results Area Locked</p>
+						<p class="text-sm text-primary-900-100 mb-6 text-center">
+							The <strong>App Explorer</strong> (also known as <strong>App CrossFilter</strong> or
+							<strong>App Query</strong>) helps you discover and filter mobile apps with advanced
+							criteria.
 						</p>
-						<a href="/pricing" class="btn preset-filled-primary-500 inline-flex items-center gap-2">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="18"
-								height="18"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
+
+						<div class="space-y-6 text-primary-900-100">
+							<div>
+								<h3 class="font-semibold text-lg mb-2">Key Features</h3>
+								<ul class="list-disc list-inside space-y-2 text-sm">
+									<li>
+										<strong>SDK & Company Filtering:</strong> Find apps using specific SDKs and companies.
+									</li>
+									<li>
+										<strong>Monetization Filters:</strong> Filter by in-app purchases, ads, and detection
+										requirements.
+									</li>
+									<li>
+										<strong>Store & Category:</strong> Narrow down by Google Play / Apple App Store and
+										category.
+									</li>
+									<li>
+										<strong>Metrics Filtering:</strong> Filter installs, ratings, and monthly installs
+										ranges.
+									</li>
+									<li>
+										<strong>Date & Rankings:</strong> Filter by recent updates and current store ranking
+										status.
+									</li>
+								</ul>
+							</div>
+
+							<div>
+								<h3 class="font-semibold text-lg mb-2">Use Cases</h3>
+								<ul class="list-disc list-inside space-y-2 text-sm">
+									<li>
+										<strong>Sales Teams:</strong> Identify potential customers using competitor SDKs.
+									</li>
+									<li>
+										<strong>Market Research:</strong> Analyze ecosystems by monetization strategy.
+									</li>
+									<li>
+										<strong>Competitive Analysis:</strong> Discover peers in your category and store.
+									</li>
+									<li>
+										<strong>Partnership Discovery:</strong> Find apps likely to benefit from your SDK.
+									</li>
+								</ul>
+							</div>
+						</div>
+
+						<div
+							class="mt-6 p-4 bg-surface-100-900 rounded-lg border border-surface-300-700 text-center"
+						>
+							<p class="text-sm mb-3 text-primary-900-100">
+								<strong>Access Required:</strong> App Explorer is available to paid subscribers.
+							</p>
+							<a
+								href="/pricing"
+								class="btn preset-filled-primary-500 inline-flex items-center gap-2"
 							>
-								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
-							</svg>
-							<span>Upgrade to Unlock</span>
-						</a>
+								<span class="inline text-white"> View Pricing Plans</span>
+							</a>
+						</div>
 					</div>
 				</div>
 			{:else if !hasSearched()}

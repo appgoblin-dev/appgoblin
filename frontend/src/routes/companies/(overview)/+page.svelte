@@ -38,7 +38,6 @@
 	<meta name="robots" content="index, follow" />
 </svelte:head>
 
-
 {#if typeof data.companiesOverview == 'string'}
 	<p class="text-red-500 text-center">Failed to load companies details.</p>
 {:else if data.companiesOverview && data.companiesOverview.categories}

@@ -6,6 +6,7 @@ import pandas as pd
 from litestar.datastructures import State
 
 from config import get_logger
+from dbcon.connections import PostgresCon
 from dbcon.utils import sql
 
 logger = get_logger(__name__)
@@ -32,7 +33,7 @@ class StaticData:
     mediation_companies: pd.DataFrame
 
 
-def load_static_data(engine) -> StaticData:
+def load_static_data(engine: PostgresCon) -> StaticData:
     """Load all static data at startup."""
     logger.info("Loading static data...")
 
@@ -95,7 +96,9 @@ def load_static_data(engine) -> StaticData:
 
     logger.info("Loading mediation companies...")
     mediation_companies = pd.read_sql(
-        """SELECT ad.domain_name as company_domain, c.name as company_name, c.logo_url as company_logo_url 
+        """SELECT ad.domain_name AS company_domain, 
+        c.name as company_name, 
+        c.logo_url AS company_logo_url 
            FROM adtech.sdk_mediation_patterns as mc
            LEFT JOIN adtech.sdks s on mc.sdk_id = s.id
            LEFT JOIN adtech.companies as c ON s.company_id = c.id

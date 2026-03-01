@@ -29,8 +29,8 @@ class AppHistory:
 class AdsTxtEntries:
     """App ads txt entries."""
 
-    direct_entries: dict
-    reseller_entries: dict
+    direct_entries: list[dict]
+    reseller_entries: list[dict]
 
 
 @dataclass
@@ -82,7 +82,7 @@ class PlatformDeveloper:
     """Developer details for a specific platform."""
 
     developer_id: str
-    developer_name: str
+    developer_name: str | None
     developer_url: str
     pub_domain_url: str | None
     apps: AppGroup
@@ -193,7 +193,7 @@ class ParentCompanyTree:
     parent_company_domain: str | None
     queried_company_domain: str
     queried_company_name: str
-    domains: list[str]
+    domains: list[dict]
     children_companies: list[ChildrenCompanyTree]
     queried_company_logo_url: str | None = None
     parent_company_logo_url: str | None = None
@@ -442,7 +442,7 @@ class AppRankOverview:
     """
 
     countries: list[str]
-    best_ranks: dict
+    best_ranks: list[dict]
 
 
 @dataclass

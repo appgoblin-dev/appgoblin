@@ -29,7 +29,7 @@ def category_overview(state: State) -> CategoriesOverview:
     cats["name"] = cats["category"]
     cats["name"] = (
         cats["name"]
-        .str.replace("game_", "")
+        .str.replace("game_", "Games: ")
         .str.replace("_and_", " & ")
         .str.replace("_", " ")
         .str.title()
@@ -47,7 +47,20 @@ def category_overview(state: State) -> CategoriesOverview:
 
     cats = cats.sort_values("total_apps", ascending=False)
 
-    cats["type"] = np.where(cats.id.str.contains("_game|games"), "game", "app")
+    android_games_total = cats[cats.id.str.startswith("game")]["android"].sum()
+
+    cats.loc[cats["id"] == "games", "android"] = android_games_total
+
+    cats["type"] = np.where(
+        cats.id.str.contains("_game|games", regex=True), "game", "app"
+    )
+
+    cats["sort_priority"] = 2
+    cats.loc[cats["id"] == "overall", "sort_priority"] = 0
+    cats.loc[(cats["id"] == "games") | (cats["name"] == "Games"), "sort_priority"] = 1
+
+    cats = cats.sort_values(["sort_priority", "type", "name"])
+    cats = cats.drop(columns=["sort_priority"])
 
     category_dicts = cats.to_dict(orient="records")
 
