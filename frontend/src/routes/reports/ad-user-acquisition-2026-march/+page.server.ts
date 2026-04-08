@@ -1,6 +1,9 @@
-import { readFile } from 'node:fs/promises';
-
 import type { PageServerLoad } from '../../$types';
+
+const reportJsonModules = import.meta.glob('./*.json', {
+	eager: true,
+	import: 'default'
+}) as Record<string, unknown>;
 
 interface SummaryData {
 	apps_analyzed: number;
@@ -148,16 +151,10 @@ function parsePgArray(value: string | string[] | null | undefined): string[] {
 }
 
 async function readReportJson<T>(fileName: string, fallback: T): Promise<T> {
-	try {
-		const contents = await readFile(new URL(fileName, import.meta.url), 'utf-8');
-		return JSON.parse(contents) as T;
-	} catch (error) {
-		if ((error as { code?: string }).code === 'ENOENT') {
-			return fallback;
-		}
+	const moduleKey = `./${fileName}`;
+	const reportData = reportJsonModules[moduleKey];
 
-		throw error;
-	}
+	return (reportData as T | undefined) ?? fallback;
 }
 
 function processData(data: AppAdImpactGrowthData[]): ProcessedApp[] {
