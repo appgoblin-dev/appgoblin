@@ -216,7 +216,7 @@
 
 <div class="table-container p-0 md:p-2">
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-8 m-2">
-		<div class="card preset-tonal flex items-center flex-col p-0 md:p-2">
+		<div class="preset-outlined-surface-100-900 flex items-center flex-col p-0 md:p-2">
 			<input
 				placeholder="Filter companies..."
 				value={globalFilter}
@@ -227,7 +227,7 @@
 				class="max-w-sm p-1"
 			/>
 		</div>
-		<div class="card preset-tonal flex items-center p-2">
+		<div class="flex items-center p-2">
 			<label for="data-source" class="px-4 text-sm md:text-base">Metric: </label>
 			<form class="flex flex-row space-x-4">
 				<label class="flex flex-row items-center space-x-1">
@@ -241,7 +241,7 @@
 							dataMetric = 'installs';
 						}}
 					/>
-					<p class="text-xs md:text-sm text-primary-900-100">Installs Last 30 Days</p>
+					<p class="text-xs md:text-sm">Installs Last 30 Days</p>
 				</label>
 				<label class="flex flex-row items-center space-x-1">
 					<input
@@ -254,7 +254,7 @@
 							dataMetric = 'percent';
 						}}
 					/>
-					<p class="text-xs md:text-sm text-primary-900-100">Percent</p>
+					<p class="text-xs md:text-sm">Percent</p>
 				</label>
 			</form>
 		</div>

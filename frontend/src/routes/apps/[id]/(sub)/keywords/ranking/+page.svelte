@@ -56,21 +56,21 @@
 
 		<section class={`${cardBase} p-6`}>
 			<h1 class="h4 md:h3 mb-2">Top / Ranking Keywords</h1>
-			<p class="text-sm text-primary-800-200">
+			<p class="text-sm -200">
 				Keywords with current-month ranking signals for {myapp.name}.
 			</p>
-			<p class="mt-2 text-sm text-primary-800-200">
+			<p class="mt-2 text-sm -200">
 				Use this view to protect high-performing terms, identify drops quickly, and open app-level
 				comparison for terms you want to investigate.
 			</p>
-			<p class="mt-3 text-xs text-primary-800-200">
+			<p class="mt-3 text-xs -200">
 				{rankingKeywords.length.toLocaleString()} ranking keywords
 			</p>
 		</section>
 
 		<section class={`${cardBase} p-6`}>
 			<h2 class="h6 md:h5 mb-2">Mobile Workflow Tip</h2>
-			<p class="text-sm text-primary-800-200">
+			<p class="text-sm -200">
 				On small screens, start with the table action button to jump directly into compare for a
 				single keyword, then add related terms in compare view.
 			</p>
@@ -80,7 +80,7 @@
 			{#if rankingKeywords.length > 0}
 				<AppKeywordsTable data={rankingKeywords} storeId={myapp.store_id} linkMode="app" />
 			{:else}
-				<p class="text-sm text-primary-800-200">No ranking keywords available yet.</p>
+				<p class="text-sm -200">No ranking keywords available yet.</p>
 			{/if}
 		</section>
 	</div>

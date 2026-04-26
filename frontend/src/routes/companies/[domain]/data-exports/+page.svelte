@@ -53,61 +53,51 @@
 	});
 </script>
 
-<WhiteCard>
-	{#snippet title()}
-		<span>{data.companyName}'s Data Exports</span>
-	{/snippet}
-	<div class="p-4 flex flex-col gap-4">
-		<p class="text-sm text-surface-600-400">
-			Exports provide raw, analysis-ready datasets tied to this company so teams can run custom
-			modeling, compliance checks, and longitudinal market tracking outside the dashboard.
-		</p>
+<h1 class="h1 mx-2 md:mx-auto md:max-w-4xl">Data Exports</h1>
 
-		{#if exportRows.length === 0}
-			<p class="text-sm text-surface-600-400">
-				No exports are currently available for this domain.
+<div class="p-4 grid gap-4 mx-2 md:mx-auto md:max-w-4xl">
+	<p class="text-base">
+		Exports provide raw, analysis-ready datasets tied to this company so teams can run custom
+		modeling, compliance checks, and longitudinal market tracking outside the dashboard.
+	</p>
+
+	{#if exportRows.length === 0}
+		<p class="text-base">No exports are currently available for this domain.</p>
+	{:else}
+		<div class="rounded-md border border-surface-200-800">
+			<ul class="divide-y divide-surface-200-800">
+				{#each exportRows as row}
+					<li class="p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div class="min-w-0">
+							<p class="text-base font-medium leading-snug">{row.name}</p>
+							<p class="text-xs opacity-70">CSV export</p>
+						</div>
+						<div class="shrink-0">
+							{#if data.canDownload && row.url}
+								<a
+									href={row.url}
+									class="btn btn-sm preset-outlined-primary-100-900"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									Download CSV
+								</a>
+							{:else}
+								<a href="/pricing" class="btn btn-sm preset-filled-primary-50-950">
+									Get Premium Data
+								</a>
+							{/if}
+						</div>
+					</li>
+				{/each}
+			</ul>
+		</div>
+
+		{#if !data.canDownload}
+			<p class=" text-sm">
+				Data exports are included with a paid subscription.
+				<a href="/pricing" class="underline hover:text-primary-600-400">View pricing</a> to unlock.
 			</p>
-		{:else}
-			<div class="overflow-x-auto border border-surface-200-800 rounded-md">
-				<table class="table w-full">
-					<thead>
-						<tr>
-							<th class="text-left">Export</th>
-							<th class="text-left">Download</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each exportRows as row}
-							<tr>
-								<td>{row.name}</td>
-								<td>
-									{#if data.canDownload && row.url}
-										<a
-											href={row.url}
-											class="btn btn-sm preset-outlined-primary-100-900 p-0"
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											Download CSV
-										</a>
-									{:else}
-										<a href="/pricing" class="btn btn-sm preset-outlined-primary-100-900 p-0">
-											Unlock CSV
-										</a>
-									{/if}
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-
-			{#if !data.canDownload}
-				<p class="text-surface-600-400 text-sm">
-					Data exports are included with a paid subscription.
-					<a href="/pricing" class="underline hover:text-primary-600-400">View pricing</a> to unlock.
-				</p>
-			{/if}
 		{/if}
-	</div>
-</WhiteCard>
+	{/if}
+</div>

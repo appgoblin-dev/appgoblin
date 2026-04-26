@@ -21,7 +21,7 @@
 
 <button
 	type="button"
-	class="btn btn-sm preset-outlined-primary-100-900 p-0"
+	class="btn btn-sm preset-outlined-primary-300-700 p-0"
 	onclick={() => exportDataCSV(table.getFilteredRowModel().rows)}
 >
 	Download CSV

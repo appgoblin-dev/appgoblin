@@ -65,7 +65,7 @@
 <div class="space-y-1">
 	<button
 		type="button"
-		class={`btn ${following ? 'preset-filled-primary-500' : 'preset-tonal'} ${compact ? 'btn-sm' : ''} ${fullWidth ? 'w-full justify-center' : ''}`}
+		class={`btn ${following ? 'preset-tonal-secondary-outlined' : 'preset-tonal-secondary'} ${compact ? 'btn-sm' : ''} ${fullWidth ? 'w-full justify-center' : ''}`}
 		onclick={toggleFollow}
 		disabled={isLoading}
 	>

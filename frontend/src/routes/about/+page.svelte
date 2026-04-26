@@ -35,15 +35,14 @@
 </svelte:head>
 
 <div class="p-2 px-2 md:px-16 xl:px-32 grid grid-cols-1 gap-4 md:gap-8">
-	<h1 class="text-3xl font-bold text-primary-900-100">Welcome to AppGoblin</h1>
+	<h1 class="text-3xl font-bold">Welcome to AppGoblin</h1>
 	<p>
 		AppGoblin has marketing and advertising tools to help illuminate the world of in app advertising
-		and marketing. AppGoblin has many <strong class="text-primary-900-100"
-			>free mobile app marketing resources</strong
-		> as well as some paid datasets like competitor analysis and SDK client lists. The goal is to provide
-		as much free and reproducible open source app analytics for the community as possible.
+		and marketing. AppGoblin has many <strong class="">free mobile app marketing resources</strong> as
+		well as some paid datasets like competitor analysis and SDK client lists. The goal is to provide as
+		much free and reproducible open source app analytics for the community as possible.
 	</p>
-	<p class="text-sm text-surface-600-400">
+	<p>
 		See the <a
 			href="/pricing"
 			class="underline decoration-primary-500/60 hover:decoration-primary-500">pricing page</a
@@ -51,7 +50,7 @@
 		for plan details. We offer Free access for exploration, Premium Access for exports, and B2B tiers
 		for SDK intelligence, app-ads.txt datasets, and combined access.
 	</p>
-	<p class="text-sm text-surface-600-400">
+	<p>
 		Looking for open app data? Browse our
 		<a
 			href="/free-app-datasets"
@@ -66,25 +65,25 @@
 			<div class="flex flex-wrap gap-3 justify-center">
 				<a
 					href="/account"
-					class="btn-primary inline-flex items-center gap-2 px-6 py-3 bg-white rounded-lg hover:scale-105 transition-transform duration-200 shadow-lg"
+					class="btn preset-filled-primary-500 inline-flex items-center gap-2 px-6 py-3"
 				>
 					<span class="text-black font-bold">Create Free Account</span>
 				</a>
 				<a
 					href="/pricing"
-					class="btn preset-outlined-primary-100-900 inline-flex items-center gap-2 px-6 py-3 rounded-lg"
+					class="btn preset-filled-primary-100-900 inline-flex items-center gap-2 px-6 py-3 rounded-lg"
 				>
 					Get premium data access →
 				</a>
 			</div>
 			<a
 				href="mailto:contact@appgoblin.info"
-				class="btn-primary inline-flex items-center gap-2 px-6 py-3 bg-white rounded-lg hover:scale-105 transition-transform duration-200 shadow-lg"
+				class="btn preset-outlined inline-flex items-center gap-2 px-6 py-3"
 			>
-				<span class="text-black font-bold">Get in Touch</span>
+				<span>Get in Touch</span>
 			</a>
 
-			<div class="text-white/80 text-sm pt-1">
+			<div class="text-primary-900-100 text-sm pt-1">
 				<p>contact@appgoblin.info</p>
 			</div>
 		</div>

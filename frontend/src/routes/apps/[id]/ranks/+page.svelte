@@ -69,7 +69,7 @@
 	}
 </script>
 
-<div class="card preset-tonal p-2 md:p-8 mt-2 md:mt-4">
+<div class="p-2 md:p-8 mt-2 md:mt-4">
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 		<div>
 			<h4 class="h4 md:h3 p-2">Best App Store Ranks This Month</h4>
@@ -151,7 +151,7 @@
 							200 apps for it's categories.
 						</p>
 					{:else if ranks.history && ranks.history.length > 0}
-						<div class="card preset-tonal mt-2 md:mt-4">
+						<div class="mt-2 md:mt-4">
 							<RankChart plotData={ranks.history} narrowBool={true} />
 						</div>
 					{:else}

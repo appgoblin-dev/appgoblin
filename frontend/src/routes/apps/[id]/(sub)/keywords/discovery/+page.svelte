@@ -60,14 +60,14 @@
 
 		<section class={`${cardBase} p-6`}>
 			<h1 class="h4 md:h3 mb-2">Keywords Found In Description</h1>
-			<p class="text-sm text-primary-800-200">
+			<p class="text-sm -200">
 				These are suggestion keywords extracted from metadata and may not rank for this app.
 			</p>
-			<p class="mt-2 text-sm text-primary-800-200">
+			<p class="mt-2 text-sm -200">
 				Treat these as expansion ideas: validate opportunity and difficulty before adding terms to
 				your tracked list.
 			</p>
-			<p class="mt-3 text-xs text-primary-800-200">
+			<p class="mt-3 text-xs -200">
 				Use the action button to open the global keyword page outside this app dashboard.
 			</p>
 		</section>
@@ -75,7 +75,7 @@
 			{#if discoveryKeywords.length > 0}
 				<AppKeywordsTable data={discoveryKeywords} linkMode="global" />
 			{:else}
-				<p class="text-sm text-primary-800-200">No discovery keywords available yet.</p>
+				<p class="text-sm -200">No discovery keywords available yet.</p>
 			{/if}
 		</section>
 	</div>

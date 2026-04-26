@@ -12,25 +12,23 @@
 	<title>Settings - AppGoblin</title>
 </svelte:head>
 
-<div class="card preset-tonal p-6 md:p-8 space-y-8">
+<div class="p-6 md:p-8 space-y-8">
 	<div>
 		<h1 class="text-2xl font-bold">Settings</h1>
-		<p class="text-sm text-surface-600-400">Manage your profile and account preferences</p>
+		<p class="text-sm">Manage your profile and account preferences</p>
 	</div>
 
 	<!-- Account Info -->
 	<section class="space-y-4">
 		<h2 class="text-lg font-semibold">Account Information</h2>
-		<div
-			class="flex items-center gap-3 p-4 rounded-lg bg-surface-100-900 border border-surface-200-800"
-		>
+		<div class="flex items-center gap-3 p-4 rounded-lg border border-surface-100-900">
 			<Mail size={20} class="text-surface-500" />
 			<div>
 				<p class="text-xs text-surface-500 uppercase tracking-wide">Email</p>
 				<p class="font-medium">{data.user.email}</p>
 			</div>
 			{#if data.user.emailVerified}
-				<span class="ml-auto badge preset-filled-success-900-100 text-xs text-white">Verified</span>
+				<span class="ml-auto badge preset-filled-success-300-700 text-xs">Verified</span>
 			{:else}
 				<a
 					href="/auth/verify-email"
@@ -46,7 +44,7 @@
 		<h2 class="text-lg font-semibold">Change Details</h2>
 		<a
 			href="/auth/settings"
-			class="flex items-center gap-3 p-4 rounded-lg bg-surface-100-900 border border-surface-200-800 hover:bg-surface-200-800 transition-colors"
+			class="flex items-center gap-3 p-4 rounded-lg border border-surface-100-900 hover:bg-surface-200-800 transition-colors"
 		>
 			<KeyRound size={20} class="text-surface-500" />
 			<div class="flex-1">

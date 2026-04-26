@@ -20,7 +20,7 @@
 </script>
 
 <div class="space-y-4">
-	<h1 class="text-2xl font-bold text-primary-900-100">Publisher ID: {page.params.publisher_id}</h1>
+	<h1 class="text-2xl font-bold">Publisher ID: {page.params.publisher_id}</h1>
 	<WhiteCard>
 		{#snippet title()}
 			{companyName}'s Publisher Overview
@@ -69,7 +69,7 @@
 		{#await data.publishersApps}
 			<loading class="text-center">Loading...</loading>
 		{:then publishersApps}
-			<h2 class="text-2xl font-bold text-primary-900-100">Apps DIRECT</h2>
+			<h2 class="text-2xl font-bold">Apps DIRECT</h2>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
 				{#if publishersApps.apps.google.direct.length > 0}
 					<WhiteCard>
@@ -90,7 +90,7 @@
 			</div>
 			<hr class="my-4" />
 
-			<h2 class="text-2xl font-bold text-primary-900-100">Apps RESELLER</h2>
+			<h2 class="text-2xl font-bold">Apps RESELLER</h2>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
 				{#if publishersApps.apps.google.reseller.length == 0 && publishersApps.apps.apple.reseller.length == 0}
 					<p>No RESLLER apps found for this publisher ID.</p>

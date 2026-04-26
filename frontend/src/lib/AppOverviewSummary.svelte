@@ -182,7 +182,7 @@
 	<!-- Growth & Activity -->
 	{#if (weeklyInstalls && isAndroid) || weeklyRatings}
 		<p>
-			<span class="font-medium text-primary-800-200">Recent activity:</span>
+			<span class="font-medium -200">Recent activity:</span>
 			{#if weeklyInstalls && isAndroid}
 				<span class="font-semibold">{weeklyInstalls}</span> installs this week
 				{#if monthlyInstalls}(<span class="font-semibold">{monthlyInstalls}</span> over 4 weeks){/if}
@@ -199,9 +199,9 @@
 	<!-- Advertising Intelligence -->
 	{#if adCreativeCount > 0 || hasAdMonetization}
 		<p>
-			<span class="font-medium text-primary-800-200">Advertising:</span>
+			<span class="font-medium -200">Advertising:</span>
 			{#if adCreativeCount > 0}
-				AppGoblin has tracked <a href="{appBasePath}/ad-creatives" class="font-semibold"
+				AppGoblin has tracked <a href="{appBasePath}/top-mobile-advertisers" class="font-semibold"
 					>{formatNumber(adCreativeCount)} ad creatives</a
 				> this app uses for paid user acquisition across ad networks.
 			{/if}
@@ -219,7 +219,7 @@
 	<!-- SDK & API Tracking -->
 	{#if sdkLastCrawled || apiLastCrawled}
 		<p>
-			<span class="font-medium text-primary-800-200">Data tracking:</span>
+			<span class="font-medium -200">Data tracking:</span>
 			{#if sdkLastCrawled}
 				<a href="{appBasePath}/sdks">SDKs and third-party integrations</a> were last analyzed on
 				<span class="font-semibold">{sdkLastCrawled}</span>.
@@ -236,7 +236,7 @@
 	<!-- Store metadata -->
 	{#if app.store_last_updated || app.version_code}
 		<p>
-			<span class="font-medium text-primary-800-200">Store info:</span>
+			<span class="font-medium -200">Store info:</span>
 			{#if app.store_last_updated}
 				Last updated on {storeName} on
 				<span class="font-semibold">{formatDate(app.store_last_updated)}</span>

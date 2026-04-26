@@ -48,7 +48,7 @@
 			<p class="text-sm text-surface-500">No apps in your watchlist yet.</p>
 		{:else}
 			{#each apps as app (app.id)}
-				<div class="rounded-lg bg-surface-100-900 p-3">
+				<div class="rounded-lg border border-surface-100-900 p-3">
 					{#if editingId === app.id}
 						<form
 							method="POST"

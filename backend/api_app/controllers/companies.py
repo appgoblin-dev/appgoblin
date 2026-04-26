@@ -71,6 +71,7 @@ from dbcon.queries import (
 )
 from dbcon.static import (
     get_adtech_categories,
+    get_company_categories,
     get_company_api_call_countrys,
     get_company_countries,
     get_company_logos_df,
@@ -696,6 +697,30 @@ def get_count(df: pd.DataFrame, condition: pd.Series, column: str) -> int:
     return int(filtered.iloc[0]) if not filtered.empty else 0
 
 
+def get_company_types_for_domain(state: State, company_domain: str) -> list[str]:
+    """Get company category slugs for a domain, resolving secondary domains."""
+    company_categories = get_company_categories(state)
+    matching_rows = company_categories[
+        company_categories["company_domain"] == company_domain
+    ]
+
+    if matching_rows.empty:
+        tree_df = get_company_tree_base(state=state, queried_domain=company_domain)
+        if not tree_df.empty and pd.notna(tree_df.iloc[0]["company_domain"]):
+            canonical_domain = str(tree_df.iloc[0]["company_domain"])
+            matching_rows = company_categories[
+                company_categories["company_domain"] == canonical_domain
+            ]
+
+    if matching_rows.empty:
+        return []
+
+    company_types = (
+        matching_rows["company_type_slug"].dropna().astype(str).unique().tolist()
+    )
+    return sorted(company_types)
+
+
 class CompaniesController(Controller):
     """API EndPoint return for all ad tech companies."""
 
@@ -835,6 +860,9 @@ class CompaniesController(Controller):
 
         overview = make_company_stats(df=df)
 
+        overview.company_types = get_company_types_for_domain(
+            state=state, company_domain=company_domain
+        )
         overview.adstxt_ad_domain_overview = final_ad_domain_overview
         overview.adstxt_publishers_overview = final_publishers_overview
         overview.mediation_adapters = mediation_adapters

@@ -10,7 +10,7 @@
 	let { data }: Props = $props();
 </script>
 
-<p class="text-sm text-surface-600-400 mb-3">
+<p class="text-sm mb-3">
 	This SDK section shows which mobile libraries are linked to this company across real apps, helping
 	you compare adtech, analytics, and tooling distribution at app level.
 </p>

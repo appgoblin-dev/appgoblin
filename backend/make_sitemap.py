@@ -18,6 +18,7 @@ STATIC_URLS = [
     "https://appgoblin.info",
     "https://appgoblin.info/about",
     "https://appgoblin.info/ad-creatives",
+    "https://appgoblin.info/top-mobile-advertisers",
     "https://appgoblin.info/app-explorer",
     "https://appgoblin.info/blog",
     "https://appgoblin.info/companies",

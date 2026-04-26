@@ -102,7 +102,7 @@
 		'border-b border-surface-200 dark:border-surface-700 hover:bg-surface-100-900 transition-colors';
 	const cardTableWrapperClass = 'card overflow-hidden';
 	const tableWrapperClass = 'table-container overflow-x-auto';
-	const tableHeaderText = 'text-lg font-bold text-primary-900-100';
+	const tableHeaderText = 'text-lg font-bold ';
 	const tableHeaderLeftClass = `px-4 py-3 text-left ${tableHeaderText}`;
 	const tableHeaderRightClass = `px-4 py-3 text-right ${tableHeaderText}`;
 	const rankPillBaseClass =
@@ -198,12 +198,12 @@
 					d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
 				/>
 			</svg>
-			<span class="font-semibold text-primary-800-200">Download AppGoblin SDK Report (CSV)</span>
+			<span class="font-semibold -200">Download AppGoblin SDK Report (CSV)</span>
 		</button>
 	</div>
 
-	<div class="card preset-tonal p-4 mb-6">
-		<h2 class="text-2xl font-bold text-primary-900-100 mb-4">Methodology</h2>
+	<div class="preset-filled-surface-100-900 p-4 mb-6">
+		<h2 class="text-2xl font-bold mb-4">Methodology</h2>
 		<p class="text-base">
 			The AppGoblin SDK Growth Report is based on a 50k app subset of AppGoblin's 200k apps that
 			analyzed for SDKs in 2025. This smaller group of apps were selected for this report because
@@ -225,7 +225,7 @@
 				Mobile SDK providers with the highest growth in app integrations from H1 to H2 2025 based on
 				AppGoblin free SDK analytics.
 			</p>
-			<h3 class="text-lg font-bold text-primary-900-100 mt-4">What Stands Out:</h3>
+			<h3 class="text-lg font-bold mt-4">What Stands Out:</h3>
 			<ul class="list-disc list-inside space-y-1 px-8">
 				<li>
 					Verve Holdings, which also owns <a href="/companies/pubnative.com">PubNative</a> and
@@ -325,7 +325,7 @@
 			<p class={sectionHeaderSubtitleClass}>
 				SDK providers with the largest decline in app integrations from H1 to H2 2025
 			</p>
-			<h3 class="text-lg font-bold text-primary-900-100 mt-4">What Stands Out:</h3>
+			<h3 class="text-lg font-bold mt-4">What Stands Out:</h3>
 			<ul class="list-disc list-inside space-y-1 px-8">
 				<li>
 					Don't be fooled, though LiftOff saw shrinking trends, it's partnership/parent <a
@@ -423,7 +423,7 @@
 		</div>
 
 		<!-- Category Filter -->
-		<div class="card preset-tonal p-4 mb-6">
+		<div class="preset-filled-surface-100-900 p-4 mb-6">
 			<div class="flex flex-wrap items-center gap-4">
 				<span class="font-semibold text-surface-700 dark:text-surface-300">Filter by Category:</span
 				>
@@ -459,7 +459,7 @@
 		</div>
 
 		<!-- Search Filter -->
-		<div class="card preset-tonal p-4 mb-6">
+		<div class="preset-filled-surface-100-900 p-4 mb-6">
 			<div class="flex items-center gap-4">
 				<span class="font-semibold text-surface-700 dark:text-surface-300">Search:</span>
 				<input

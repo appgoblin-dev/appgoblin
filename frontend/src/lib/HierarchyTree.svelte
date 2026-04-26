@@ -53,7 +53,7 @@
 				/>
 			{/if}
 			<a
-				class="font-semibold text-primary-900-100"
+				class="font-semibold"
 				href="/companies/{companyTree.company_domain || companyTree.queried_domain}"
 				>{companyTree.company_name || companyTree.company_domain || companyTree.queried_domain}</a
 			>
@@ -62,9 +62,8 @@
 		{#if associatedDomains.length > 0}
 			{#each getDomainSlice(associatedDomains) as relatedDomain}
 				<div class="ml-8 text-gray-500">
-					└─ <a
-						class="font-semibold text-primary-900-100"
-						href="/companies/{relatedDomain.domain_name}">{relatedDomain.domain_name}</a
+					└─ <a class="font-semibold" href="/companies/{relatedDomain.domain_name}"
+						>{relatedDomain.domain_name}</a
 					>{#if relatedDomain.is_primary}
 						<span class="text-xs">(Primary)</span>{/if}
 				</div>
@@ -100,16 +99,15 @@
 							loading="lazy"
 						/>
 					{/if}
-					<a class="font-semibold text-primary-900-100" href="/companies/{child.company_domain}"
+					<a class="font-semibold" href="/companies/{child.company_domain}"
 						>{child.company_name || child.company_domain}</a
 					>
 				</div>
 				{#if child.domains.length > 0}
 					{#each getChildDomainsSlice(child.domains) as childDomain}
 						<div class="ml-12 text-gray-500">
-							└─ <a
-								class="font-semibold text-primary-900-100"
-								href="/companies/{childDomain.domain_name}">{childDomain.domain_name}</a
+							└─ <a class="font-semibold" href="/companies/{childDomain.domain_name}"
+								>{childDomain.domain_name}</a
 							>
 							{#if childDomain.is_primary}
 								<span class="text-xs">(Primary)</span>
@@ -145,9 +143,8 @@
 		{/if}
 		{#if !queriedIsMappedCompany}
 			<div class="ml-8 text-gray-500">
-				└─ <a
-					class="font-semibold text-primary-900-100"
-					href="/companies/{companyTree.queried_domain}">{companyTree.queried_domain}</a
+				└─ <a class="font-semibold" href="/companies/{companyTree.queried_domain}"
+					>{companyTree.queried_domain}</a
 				> <span class="text-xs">Queried Domain</span>
 			</div>
 		{/if}
@@ -172,9 +169,8 @@
 		{#if associatedDomains.length > 0}
 			{#each getDomainSlice(associatedDomains) as relatedDomain}
 				<div class="ml-4 text-gray-500">
-					└─ <a
-						class="font-semibold text-primary-900-100"
-						href="/companies/{relatedDomain.domain_name}">{relatedDomain.domain_name}</a
+					└─ <a class="font-semibold" href="/companies/{relatedDomain.domain_name}"
+						>{relatedDomain.domain_name}</a
 					>{#if relatedDomain.is_primary}
 						<span class="text-xs">(Primary)</span>{/if}
 				</div>
@@ -210,16 +206,15 @@
 							loading="lazy"
 						/>
 					{/if}
-					<a class="font-semibold text-primary-900-100" href="/companies/{child.company_domain}"
+					<a class="font-semibold" href="/companies/{child.company_domain}"
 						>{child.company_name || child.company_domain}</a
 					>
 				</div>
 				{#if child.domains.length > 0}
 					{#each getChildDomainsSlice(child.domains) as childDomain}
 						<div class="ml-8 text-gray-500">
-							└─ <a
-								class="font-semibold text-primary-900-100"
-								href="/companies/{childDomain.domain_name}">{childDomain.domain_name}</a
+							└─ <a class="font-semibold" href="/companies/{childDomain.domain_name}"
+								>{childDomain.domain_name}</a
 							>
 							{#if childDomain.is_primary}
 								<span class="text-xs">(Primary)</span>
@@ -255,9 +250,8 @@
 		{/if}
 		{#if !queriedIsMappedCompany}
 			<div class="ml-4 text-gray-500">
-				└─ <a
-					class="font-semibold text-primary-900-100"
-					href="/companies/{companyTree.queried_domain}">{companyTree.queried_domain}</a
+				└─ <a class="font-semibold" href="/companies/{companyTree.queried_domain}"
+					>{companyTree.queried_domain}</a
 				> <span class="text-xs">Queried Domain</span>
 			</div>
 		{/if}

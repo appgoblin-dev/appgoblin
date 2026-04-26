@@ -1,8 +1,5 @@
-import { get_raw_cdn_url } from '$lib/utils/getUrls';
-
 /**
  * Reusable state management for CreativeModal component
- * Provides open/close functionality and URL generation for ad creatives
  *
  * @example
  * ```svelte
@@ -11,7 +8,7 @@ import { get_raw_cdn_url } from '$lib/utils/getUrls';
  *   const creativeModal = createCreativeModal();
  * </script>
  *
- * <button onclick={() => creativeModal.open(md5Hash, 'mp4', 'My Creative')}>
+ * <button onclick={() => creativeModal.open(rawUrl, 'My Creative')}>
  *   View Creative
  * </button>
  *
@@ -43,12 +40,11 @@ export function createCreativeModal() {
 
 		/**
 		 * Open modal with a creative
-		 * @param md5Hash - The MD5 hash of the creative file
-		 * @param fileExtension - File extension (mp4, jpg, png, webm, etc)
+		 * @param rawUrl - Pre-built CDN URL for the raw creative file
 		 * @param creativeTitle - Display title for the modal
 		 */
-		open(md5Hash: string, fileExtension: string, creativeTitle: string) {
-			creativeUrl = get_raw_cdn_url(md5Hash, fileExtension);
+		open(rawUrl: string, creativeTitle: string) {
+			creativeUrl = rawUrl;
 			title = `${creativeTitle} - Ad Creative`;
 			isOpen = true;
 		},

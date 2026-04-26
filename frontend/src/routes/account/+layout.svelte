@@ -27,14 +27,14 @@
 	<div class="flex flex-col md:flex-row gap-8">
 		<!-- Sidebar Navigation -->
 		<aside class="w-full md:w-64 shrink-0">
-			<div class="card preset-tonal p-4 md:sticky md:top-24">
+			<div class="p-4 md:sticky md:top-24">
 				<div class="flex items-center gap-3 mb-6 p-2">
 					<div class="p-2 rounded-full bg-primary-500/20">
 						<UserRound size={24} class="text-primary-500" />
 					</div>
 					<div class="overflow-hidden">
 						<p class="font-bold truncate">{data.user.username}</p>
-						<p class="text-xs text-surface-600-400 truncate">{data.user.email}</p>
+						<p class="text-xs truncate">{data.user.email}</p>
 					</div>
 				</div>
 
@@ -44,7 +44,7 @@
 						<a
 							{href}
 							class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {isActive
-								? 'bg-primary-500/10 text-primary-900-100 font-medium'
+								? 'bg-primary-500/10  font-medium'
 								: 'hover:bg-surface-200-800 text-surface-700-300'}"
 						>
 							<Icon size={18} class={isActive ? 'text-primary-500' : 'text-surface-500'} />

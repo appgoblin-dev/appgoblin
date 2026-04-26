@@ -14,12 +14,17 @@
 			}
 		} else if (page.url.pathname.startsWith(`/companies/types/${tab}`)) {
 			return true;
-		} else return false;
+		} else if (page.params.domain) {
+			const companyTypes = (page.data.companyDetails as { company_types?: string[] } | undefined)
+				?.company_types;
+			return companyTypes?.[0] === tab;
+		}
+		return false;
 	}
 
 	function textColorClass(tab: string) {
 		if (isCurrentTab(tab)) {
-			return 'text-primary-900-100';
+			return '';
 		} else {
 			return '';
 		}
@@ -27,9 +32,8 @@
 
 	function typeTabClass(tab: string) {
 		const selectedClass =
-			'px-2 md:px-4 py-2 border-t-2 border-r-2 border-l-2 border-primary-100-900 rounded-t-md relative top-[1px] text-primary-900-100';
-		const unselectedClass =
-			'px-2 md:px-4 py-2 border-b-2 border-surface-800-200 hover:border-primary-300-700 hover:border-b-2 hover:underline';
+			'px-2 md:px-4 py-2 border-t-1 border-r-1 border-l-1 bg-secondary-100-900 border-secondary-100-900 rounded-t-md relative';
+		const unselectedClass = 'px-2 md:px-4 py-2 border-b-1 border-surface-800-200 ';
 		if (isCurrentTab(tab)) {
 			return selectedClass;
 		} else return unselectedClass;
@@ -54,7 +58,7 @@
 	}
 </script>
 
-<div class="flex flex-row flex-wrap text-sm md:text-base">
+<div class="flex flex-row flex-wrap text-sm md:text-base mb-2 md:mb-4">
 	<a
 		href={getCategoryUrlPart(page.url.pathname.toString(), '', page.params.category!)}
 		class={typeTabClass('all')}

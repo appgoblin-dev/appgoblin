@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { formatNumberLocale } from '$lib/utils/formatNumber';
 
-	const titleFont = 'text-xl text-primary-900-100 tracking-wide';
+	const titleFont = 'text-xl  tracking-wide';
 
-	const rowTitleFont = 'text-sm text-primary-800-200 tracking-wide';
+	const rowTitleFont = 'text-sm -200 tracking-wide';
 
 	const greyFont = 'text-xs text-surface-500';
 

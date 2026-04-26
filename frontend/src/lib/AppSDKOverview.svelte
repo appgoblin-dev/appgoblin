@@ -20,8 +20,8 @@
 {:else if myPackageInfo.company_categories && myapp.sdk_successful_last_crawled}
 	<div class="">
 		<p class="p-2 md:p-4">
-			<span class="text-primary-900-100">{myapp.name}</span> was last scanned for SDKs
-			<span class="text-primary-900-100">{myapp.sdk_last_crawled}</span>.
+			<span class="">{myapp.name}</span> was last scanned for SDKs
+			<span class="">{myapp.sdk_last_crawled}</span>.
 			{#if Object.keys(myPackageInfo.company_categories).length == 0}
 				No known SDKs were detected, so check the <a href="/apps/{page.params.id}/sdks"
 					>raw list of SDK parts detected here</a

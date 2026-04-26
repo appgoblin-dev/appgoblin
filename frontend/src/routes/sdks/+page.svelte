@@ -9,7 +9,7 @@
 </script>
 
 <div class="mx-2 md:mx-16">
-	<h1 class="text-2xl font-bold text-primary-900-100">Free Mobile App SDK Scanning</h1>
+	<h1 class="text-2xl font-bold">Free Mobile App SDK Scanning</h1>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
 		<WhiteCard>
@@ -40,7 +40,7 @@
 			</Tabs.List>
 
 			<Tabs.Content value="user_requested">
-				<h2 class="text-2xl font-bold text-primary-900-100">User Requested App Scans</h2>
+				<h2 class="text-2xl font-bold">User Requested App Scans</h2>
 				<p class="text-sm md:text-base p-2 md:p-4">
 					Users can request apps to be SDK and API scanned for free on AppGoblin. User requested app
 					SDK scans are automated and usually happen quickly (~1hr). The results will aggregate to
@@ -64,7 +64,7 @@
 				{/await}
 			</Tabs.Content>
 			<Tabs.Content value="latest_success">
-				<h2 class="text-2xl font-bold text-primary-900-100">Latest Successfully Crawled Apps</h2>
+				<h2 class="text-2xl font-bold">Latest Successfully Crawled Apps</h2>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
 					{#await data.sdksOverview}
@@ -93,7 +93,7 @@
 				</div></Tabs.Content
 			>
 			<Tabs.Content value="latest_failed">
-				<h2 class="text-2xl font-bold text-primary-900-100">Latest Failed to Crawled Apps</h2>
+				<h2 class="text-2xl font-bold">Latest Failed to Crawled Apps</h2>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
 					{#await data.sdksOverview}

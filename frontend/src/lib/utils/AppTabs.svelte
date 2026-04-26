@@ -75,11 +75,8 @@
 	function typeTabClass(tab: string) {
 		const baseClass =
 			'flex items-center gap-1 md:gap-2 px-4 py-1 md:py-3 font-medium transition-colors duration-200';
-		const selectedClass = 'text-primary-500 bg-surface-100-900 hover:bg-primary-500/5';
-		const unselectedClass =
-			'border-transparent hover:text-primary-400 hover:border-primary-400/30 hover:bg-primary-900-100/50';
-		const unselectedGreyClass =
-			'border-transparent hover:text-surface-700-200-token hover:border-surface-700-200-token/30 hover:bg-surface-100-900/50';
+		const selectedClass = 'bg-secondary-100-900 hover:bg-secondary-100-900/50';
+		const unselectedClass = 'hover:bg-secondary-100-900';
 		if (tab === '') {
 			if (page.url.pathname === `/apps/${page.params.id}`) {
 				return `${baseClass} ${selectedClass}`;
@@ -91,11 +88,7 @@
 		if (page.url.pathname.startsWith(`/apps/${page.params.id}${tab}`)) {
 			return `${baseClass} ${selectedClass}`;
 		} else {
-			if (tab === '/sdks') {
-				return `${baseClass} ${unselectedGreyClass}`;
-			} else {
-				return `${baseClass} ${unselectedClass}`;
-			}
+			return `${baseClass} ${unselectedClass}`;
 		}
 	}
 

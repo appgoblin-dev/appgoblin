@@ -33,7 +33,7 @@
 	}
 </script>
 
-<div class="card preset-tonal p-2 md:p-16 mt-2 md:mt-4">
+<div class="p-2 md:p-16 mt-2 md:mt-4">
 	<h1 class="h1 md:h3 p-2">SDKs, Trackers & Permissions for {data.myapp.name || ''}</h1>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -45,11 +45,11 @@
 				{#if data.myapp.sdk_last_crawled}
 					<div class="flex items-center gap-2">
 						<span class="font-medium">Last Successful SDK Scan:</span>
-						<span class="text-primary-900-100">{data.myapp.sdk_successful_last_crawled}</span>
+						<span class="">{data.myapp.sdk_successful_last_crawled}</span>
 					</div>
 					<div class="flex items-center gap-2">
 						<span class="font-medium">Lastest Attempt:</span>
-						<span class="text-primary-900-100">{data.myapp.sdk_last_crawled}</span>
+						<span class="">{data.myapp.sdk_last_crawled}</span>
 					</div>
 					<div class="flex items-center gap-2">
 						<span class="font-medium">Last Attempt Status:</span>

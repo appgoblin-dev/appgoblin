@@ -54,7 +54,7 @@
 
 <div class="p-1 md:p-2">
 	{#if plotTitle}
-		<h3 class="mb-1 text-sm font-semibold text-primary-900-100">{plotTitle}</h3>
+		<h3 class="mb-1 text-sm font-semibold">{plotTitle}</h3>
 	{/if}
 
 	<BarChart

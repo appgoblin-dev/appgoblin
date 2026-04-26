@@ -85,7 +85,7 @@
 	const advertisersTextColor = 'text-sm md:text-xl text-bold text-purple-400';
 	const simpleMetricColor = 'text-sm md:text-xl text-bold text-surface-800-200';
 	const sectionBodyClass = 'max-w-none mb-6';
-	const paragraphClass = 'text-base md:text-lg leading-relaxed text-primary-900-100';
+	const paragraphClass = 'text-base md:text-lg leading-relaxed ';
 	const textMutedXsClass = 'text-xs text-surface-500 dark:text-surface-400';
 	const textMutedXsCapClass = `${textMutedXsClass} capitalize`;
 	const storeIdClass = `${textMutedXsClass} truncate max-w-[10rem] md:max-w-[16rem]`;
@@ -97,7 +97,7 @@
 		'w-9 h-9 sm:w-11 sm:h-11 lg:w-14 lg:h-14 rounded-lg shadow-sm flex-shrink-0';
 	const cardTableWrapperClass = 'card overflow-hidden';
 	const tableWrapperClass = 'report-table-shell report-table-scroll';
-	const tableHeaderText = 'text-xs md:text-sm font-bold text-primary-900-100';
+	const tableHeaderText = 'text-xs md:text-sm font-bold ';
 	const tableHeaderLeftClass = `px-1 md:px-2 py-2 text-left ${tableHeaderText}`;
 	const tableHeaderCenterClass = `px-1 md:px-2 py-2 text-center ${tableHeaderText}`;
 	const tableHeaderRightClass = `px-1 md:px-2 py-2 text-right ${tableHeaderText}`;
@@ -369,9 +369,7 @@
 		class="mb-12 rounded-2xl border border-surface-200 dark:border-surface-700 bg-gradient-to-br from-surface-50 to-white dark:from-surface-900 dark:to-surface-800 p-5 md:p-7 shadow-md"
 	>
 		<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-3 mb-5">
-			<h2 class="text-2xl md:text-3xl font-bold text-primary-900-100">
-				App advertising overview - Feb 2026
-			</h2>
+			<h2 class="text-2xl md:text-3xl font-bold">App advertising overview - Feb 2026</h2>
 			<div class="text-sm md:text-base text-surface-600 dark:text-surface-300">
 				What stood out this month
 			</div>
@@ -388,9 +386,7 @@
 				<div
 					class="rounded-xl border border-surface-200 dark:border-surface-700 p-4 md:p-5 bg-white/80 dark:bg-surface-900/80"
 				>
-					<div class="text-base md:text-lg font-semibold mb-3 text-primary-900-100">
-						Top Advertising Apps
-					</div>
+					<div class="text-base md:text-lg font-semibold mb-3">Top Advertising Apps</div>
 					<div class="grid grid-cols-5 sm:grid-cols-10 xl:grid-cols-5 gap-2 md:gap-3 mb-4">
 						{#each data.apps.slice(0, 10) as app}
 							<a href="/apps/{app.store_id}" class="group" title={app.app_name}>
@@ -405,9 +401,7 @@
 						{/each}
 					</div>
 
-					<div class="text-base md:text-lg font-semibold mb-3 text-primary-900-100">
-						Ad Networks
-					</div>
+					<div class="text-base md:text-lg font-semibold mb-3">Ad Networks</div>
 					<div class="flex flex-wrap gap-2 md:gap-3">
 						{#each data.adNetworks.slice(0, 6) as network}
 							<CompanyButton
@@ -453,8 +447,7 @@
 								badgeLabel="Popular Creative"
 								compact={true}
 								dense={true}
-								onOpen={(md5Hash, fileExtension, title) =>
-									creativeModal.open(md5Hash, fileExtension, title)}
+								onOpen={(rawUrl, title) => creativeModal.open(rawUrl, title)}
 							/>
 						</div>
 					{/each}
@@ -490,17 +483,17 @@
 							{formatNumber(data.summary.totalApps)} mobile apps
 						</strong>
 						and captured
-						<strong class="text-primary-900-100">
+						<strong class="">
 							{formatNumber(data.summary.httpsTracked)} HTTPS events
 						</strong>
 						across
-						<strong class="text-primary-900-100">
+						<strong class="">
 							{formatNumber(data.summary.apiDomains)} unique API domains
 						</strong>, providing a comprehensive view of acquisition activity.
 					</p>
 					<p class={`${paragraphClass} mt-4`}>
 						This activity spanned
-						<strong class="text-primary-900-100">
+						<strong class="">
 							{formatNumber(data.summary.adtechCompanies)} AdTech platforms
 						</strong>
 						supporting
@@ -512,9 +505,7 @@
 							{formatNumber(data.summary.totalCreatives)} creative assets
 						</strong>
 						driving some ad campaigns to
-						<strong class="text-primary-900-100"
-							>{data.summary.avgGrowth}% week on week installs growth
-						</strong>.
+						<strong class="">{data.summary.avgGrowth}% week on week installs growth </strong>.
 					</p>
 
 					<div class="mt-6 p-4 rounded-lg border border-surface-200">
@@ -545,7 +536,7 @@
 								different advertising platforms and services
 							</li>
 							<li>
-								<strong class="text-primary-900-100 text-lg font-bold"
+								<strong class=" text-lg font-bold"
 									>How the whole system works — over
 									{formatNumber(data.summary.httpsTracked)}</strong
 								>
@@ -682,8 +673,7 @@
 											<button
 												onclick={() =>
 													creativeModal.open(
-														creative.md5_hash,
-														creative.file_extension,
+														`https://media.appgoblin.info/creatives/raw/${creative.md5_hash.substring(0, 3)}/${creative.md5_hash}.${creative.file_extension}`,
 														app.app_name
 													)}
 												class="relative group cursor-pointer hover:scale-110 transition-transform duration-200"
@@ -797,8 +787,7 @@
 					titlePrefix="Popular Creative"
 					badgeLabel="Most Popular"
 					dense={true}
-					onOpen={(md5Hash, fileExtension, title) =>
-						creativeModal.open(md5Hash, fileExtension, title)}
+					onOpen={(rawUrl, title) => creativeModal.open(rawUrl, title)}
 				/>
 			{/each}
 		</div>

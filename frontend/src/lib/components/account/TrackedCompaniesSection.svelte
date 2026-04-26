@@ -49,7 +49,7 @@
 			<p class="text-sm text-surface-500">No companies in your watchlist yet.</p>
 		{:else}
 			{#each companies as company (company.id)}
-				<div class="rounded-lg bg-surface-100-900 p-3">
+				<div class="rounded-lg border border-surface-100-900 p-3">
 					{#if editingId === company.id}
 						<form
 							method="POST"

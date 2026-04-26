@@ -15,24 +15,20 @@
 	<div class="grid md:grid-cols-2 gap-6 md:gap-12 lg:gap-16 items-start">
 		<!-- Dynamic Sign Up CTA / SEO Callouts -->
 		<div
-			class="card preset-filled-surface-100-900 border border-surface-200-800 p-6 md:p-8 flex flex-col justify-center space-y-4"
+			class="card border border-surface-100-900 p-6 md:p-8 flex flex-col justify-center space-y-4"
 		>
 			{#if data.redirectTo?.includes('/sdks/')}
-				<h3 class="text-xl md:text-2xl font-bold text-primary-900-100">
-					Unlock Mobile SDK Data for Free
-				</h3>
-				<p class="text-sm md:text-base leading-relaxed text-surface-600-400">
+				<h3 class="text-xl md:text-2xl font-bold">Unlock Mobile SDK Data for Free</h3>
+				<p class="text-sm md:text-base leading-relaxed">
 					You've requested access to deep technical SDK tracking data. Good news—it's <strong
 						>completely free</strong
 					>! Simply create an account to start analyzing app architecture, performing critical
 					competitor research, and tracking the latest mobile trends with AppGoblin's high-quality
 					technical intelligence.
 				</p>
-				<div class="pt-4 mt-4 border-t border-surface-200-800">
-					<p class="text-sm text-surface-600-400">
-						<span class="font-semibold text-primary-900-100"
-							>Looking for business intelligence?</span
-						>
+				<div class="pt-4 mt-4 border-t border-surface-100-900">
+					<p class="text-sm">
+						<span class="font-semibold">Looking for business intelligence?</span>
 						Our paid
 						<a href="/pricing" class="underline font-medium hover:text-primary-500"
 							>Business SDK subscription</a
@@ -41,18 +37,16 @@
 					</p>
 				</div>
 			{:else if data.redirectTo?.includes('/app-adstxt')}
-				<h3 class="text-xl md:text-2xl font-bold text-primary-900-100">
-					Access Technical App-Ads.txt Data
-				</h3>
-				<p class="text-sm md:text-base leading-relaxed text-surface-600-400">
+				<h3 class="text-xl md:text-2xl font-bold">Access Technical App-Ads.txt Data</h3>
+				<p class="text-sm md:text-base leading-relaxed">
 					You're trying to view publisher App-Ads.txt details. Good news—it's <strong
 						>completely free</strong
 					>! Create an account to browse AppGoblin's high-quality technical data. Use our tools to
 					map programmatic supply chains, fight ad fraud, and conduct rigorous ad network research.
 				</p>
-				<div class="pt-4 mt-4 border-t border-surface-200-800">
-					<p class="text-sm text-surface-600-400">
-						<span class="font-semibold text-primary-900-100">Need bulk ad-tech data?</span>
+				<div class="pt-4 mt-4 border-t border-surface-100-900">
+					<p class="text-sm">
+						<span class="font-semibold">Need bulk ad-tech data?</span>
 						Our paid
 						<a href="/pricing" class="underline font-medium hover:text-primary-500"
 							>B2B App-Ads.txt subscription</a
@@ -61,11 +55,11 @@
 				</div>
 			{:else}
 				<h2 class="text-xl md:text-2xl font-bold">Create a free account</h2>
-				<p class="text-surface-600-400 text-sm md:text-base leading-relaxed">
+				<p class=" text-sm md:text-base leading-relaxed">
 					New to AppGoblin? Create a free account to get started and unlock deeper technical
 					insights.
 				</p>
-				<ul class="text-sm md:text-base list-disc list-inside space-y-1 text-surface-600-400 mb-4">
+				<ul class="text-sm md:text-base list-disc list-inside space-y-1 mb-4">
 					<li>Advanced App SDK breakdowns</li>
 					<li>App Comparisons & Trending Growth Apps</li>
 					<li>Keyword tracking and rankings</li>
@@ -78,10 +72,10 @@
 		</div>
 
 		<!-- Sign In Form -->
-		<div class="card preset-tonal p-6 md:p-8 space-y-6">
+		<div class="border border-surface-100-900 rounded-lg p-6 md:p-8 space-y-6">
 			<div>
 				<h2 class="text-2xl font-bold">Sign In</h2>
-				<p class="text-surface-600-400 text-sm mt-1">Welcome back to AppGoblin</p>
+				<p class=" text-sm mt-1">Welcome back to AppGoblin</p>
 			</div>
 
 			<form class="space-y-4" method="post" use:enhance>

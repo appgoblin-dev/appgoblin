@@ -35,7 +35,7 @@
 			<p class="text-sm text-surface-500">No keywords in your watchlist yet.</p>
 		{:else}
 			{#each keywords as keyword (keyword.id)}
-				<div class="rounded-lg bg-surface-100-900 p-3">
+				<div class="rounded-lg border border-surface-100-900 p-3">
 					<div class="flex items-center justify-between gap-3">
 						<div>
 							<p class="font-medium">{keyword.keyword_text}</p>

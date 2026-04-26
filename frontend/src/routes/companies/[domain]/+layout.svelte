@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import type { CompanyLayoutDetails } from '../../../types';
+	import type { CompanyLayoutDetails, CompanyTypes } from '../../../types';
 
 	import ExternalLink from '$lib/ExternalLink.svelte';
 	import CompanyButton from '$lib/CompanyButton.svelte';
 	import FollowToggleButton from '$lib/components/follows/FollowToggleButton.svelte';
+	import CompanyTypesTabs from '$lib/utils/CompanyTypesTabs.svelte';
 
 	let { children, data }: { children: any; data: CompanyLayoutDetails } = $props();
 	const domain = page.params.domain ?? '';
+
+	let companyTypesData = $derived((page.data as { companyTypes?: CompanyTypes }).companyTypes);
 
 	let categoryName = $derived(getAppCategory(page.params.category || ''));
 
@@ -32,9 +35,29 @@
 		return 'overview';
 	}
 
+	function isSectionTabActive(tabSlug: string): boolean {
+		if (tabSlug === 'app-adstxt') {
+			return sectionSlug === 'app-adstxt' || sectionSlug === 'app-adstxt-publisher';
+		}
+		return sectionSlug === tabSlug;
+	}
+
+	function sectionTabClass(tabSlug: string): string {
+		const selectedClass =
+			'px-2 md:px-4 py-2 border-t-1 border-r-1 border-l-1 bg-secondary-100-900 border-secondary-100-900 rounded-t-md relative';
+		const unselectedClass = 'px-2 md:px-4 py-2 border-b-1 border-surface-800-200 ';
+		return isSectionTabActive(tabSlug) ? selectedClass : unselectedClass;
+	}
+
 	let sectionSlug = $derived(getSectionSlug(page.url.pathname));
 	let companyDomain = $derived(
 		data.companyTree?.queried_domain || data.companyTree?.company_domain || domain
+	);
+	let showMediationTab = $derived(Boolean(data.companyDetails?.mediation_adapters));
+	let showCreativesTab = $derived(
+		Boolean(
+			data.companyDetails?.company_types?.some((companyType) => companyType === 'ad-networks')
+		)
 	);
 	let companyDisplayName = $derived(
 		data.companyTree?.company_name ||
@@ -160,8 +183,8 @@
 		};
 	});
 
-	let titleClass = 'h1 text-2xl md:text-3xl font-bold text-primary-900-100';
-	let titleSecondaryClass = 'text-xl font-bold text-primary-900-100 mr-2';
+	let titleClass = 'h1 text-2xl md:text-3xl font-bold ';
+	let titleSecondaryClass = 'text-xl font-bold  mr-2';
 	let titleDividerClass = 'md:h-8 w-px bg-gray-300 mx-2';
 </script>
 
@@ -186,6 +209,35 @@
 	<meta name="robots" content="index, follow" />
 	{@html `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`}
 </svelte:head>
+
+{#if !page.url.pathname.includes('adstxt') && companyTypesData && companyTypesData.types.length > 0}
+	<CompanyTypesTabs companyTypes={companyTypesData} />
+{/if}
+
+<div class="flex flex-wrap gap-2 mb-4 border-b border-surface-200-800 pb-2">
+	<a href={`/companies/${companyDomain}`} class={sectionTabClass('overview')}>
+		{companyDisplayName} Apps Overview
+	</a>
+	{#if showMediationTab}
+		<a href={`/companies/${companyDomain}/mediation`} class={sectionTabClass('mediation')}>
+			{companyDisplayName} Mediation Adapters
+		</a>
+	{/if}
+	{#if showCreativesTab}
+		<a href={`/companies/${companyDomain}/creatives`} class={sectionTabClass('creatives')}
+			>{companyDisplayName} Creatives
+		</a>
+	{/if}
+	<a href={`/companies/${companyDomain}/sdks`} class={sectionTabClass('sdks')}>
+		{companyDisplayName} SDKs
+	</a>
+	<a href={`/companies/${companyDomain}/app-adstxt`} class={sectionTabClass('app-adstxt')}
+		>{companyDisplayName} App-ads.txt
+	</a>
+	<a href={`/companies/${companyDomain}/data-exports`} class={sectionTabClass('data-exports')}>
+		{companyDisplayName} Data Exports
+	</a>
+</div>
 
 <div class="flex items-center mb-2">
 	{#await data.companyTree}
@@ -226,7 +278,8 @@
 					{#if !myTree.parent && !myTree.is_secondary_domain && !myTree.is_orphan}
 						<!-- IS PARENT COMPANY -->
 						<h1 class={titleClass}>
-							{myTree.company_name || myTree.company_domain || myTree.queried_domain} / Category: {categoryName}
+							{myTree.company_name || myTree.company_domain || myTree.queried_domain}, App Category:
+							{categoryName}
 						</h1>
 						<div class={titleDividerClass}></div>
 						<ExternalLink domain={myTree.company_domain || myTree.queried_domain} />
@@ -291,57 +344,6 @@
 	{:catch error}
 		<p class="text-red-500">{error.message}</p>
 	{/await}
-</div>
-
-<div class="flex flex-wrap gap-2 mb-4 border-b border-surface-200-800 pb-2">
-	<a
-		href={`/companies/${companyDomain}`}
-		class="btn btn-sm {page.url.pathname === `/companies/${companyDomain}`
-			? 'variant-filled-primary'
-			: 'variant-ghost-surface'}"
-	>
-		{companyDisplayName} Apps Overview
-	</a>
-	<a
-		href={`/companies/${companyDomain}/mediation`}
-		class="btn btn-sm {page.url.pathname.includes('/mediation')
-			? 'variant-filled-primary'
-			: 'variant-ghost-surface'}"
-	>
-		{companyDisplayName} Mediation Adapters
-	</a>
-	<a
-		href={`/companies/${companyDomain}/creatives`}
-		class="btn btn-sm {page.url.pathname.includes('/creatives')
-			? 'variant-filled-primary'
-			: 'variant-ghost-surface'}"
-	>
-		Creatives
-	</a>
-	<a
-		href={`/companies/${companyDomain}/sdks`}
-		class="btn btn-sm {page.url.pathname.includes('/sdks')
-			? 'variant-filled-primary'
-			: 'variant-ghost-surface'}"
-	>
-		SDKs
-	</a>
-	<a
-		href={`/companies/${companyDomain}/app-adstxt`}
-		class="btn btn-sm {page.url.pathname.includes('/app-adstxt')
-			? 'variant-filled-primary'
-			: 'variant-ghost-surface'}"
-	>
-		App-ads.txt
-	</a>
-	<a
-		href={`/companies/${companyDomain}/data-exports`}
-		class="btn btn-sm {page.url.pathname.includes('/data-exports')
-			? 'variant-filled-primary'
-			: 'variant-ghost-surface'}"
-	>
-		{companyDisplayName} Data Exports
-	</a>
 </div>
 
 <div class="space-y-4 md:space-y-8">

@@ -77,12 +77,12 @@
 			<div
 				class="h-10 w-10 animate-spin rounded-full border-4 border-surface-200 border-t-primary-500"
 			></div>
-			<p class="mt-4 text-surface-600-400 font-medium">Loading app...</p>
+			<p class="mt-4 font-medium">Loading app...</p>
 		</div>
 	{:else if app && !isSearching && !hasSearchQuery}
 		<div class="mb-4 flex justify-end">
 			<button
-				class="text-xs font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 underline"
+				class="text-xs font-semibold text-primary-600 hover: dark:text-primary-400 dark:hover:text-primary-300 underline"
 				onclick={toggleSearch}
 			>
 				Change App

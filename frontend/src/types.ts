@@ -296,7 +296,7 @@ export interface SDKAppsOverview {
 	developer_domain_crawled_at: string;
 }
 
-export interface CompanyOverviewAppsNEW {
+export interface CompanyOverviewApps {
 	name: string;
 	store_id: string;
 	store: number;
@@ -461,6 +461,7 @@ export interface AdsTxtPublishersOverview {
 }
 
 export interface CompanyCategoryOverview {
+	company_types: string[];
 	adstxt_ad_domain_overview: AdsTxtAdDomainOverview;
 	adstxt_publishers_overview: AdsTxtPublishersOverview;
 	mediation_adapters:

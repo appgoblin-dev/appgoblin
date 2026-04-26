@@ -51,7 +51,7 @@
 
 <div>
 	<h1 class="h2 p-2">
-		Developer: <p class="text-primary-900-100">{page.params.developer}</p>
+		Developer: <p class="">{page.params.developer}</p>
 	</h1>
 	<Tabs defaultValue="apps">
 		<Tabs.List>

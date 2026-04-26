@@ -49,7 +49,7 @@
 			{:else}
 				<p>
 					No apps found for
-					<span class="text-primary-900-100 font-bold">{company_category}</span>
+					<span class=" font-bold">{company_category}</span>
 					category
 				</p>
 			{/if}
@@ -62,8 +62,8 @@
 					<span>{companyName}'s Related Entities</span>
 				{/snippet}
 				<div class="p-2">
-					<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Hierarchy</p>
-					<div class="rounded-md border border-surface-200-800 bg-surface-100-900 p-3">
+					<p class="text-xs font-semibold uppercase tracking-wide mb-2">Hierarchy</p>
+					<div class="rounded-md border border-surface-200-800 p-3">
 						<HierarchyTree
 							companyTree={data.companyTree}
 							{hasHigherLevelParent}
@@ -86,7 +86,7 @@
 		<p class="text-sm text-gray-600 mb-3">
 			Complete company ownership structure and all associated domains.
 		</p>
-		<div class="p-4 rounded-md border border-surface-200-800 bg-surface-100-900">
+		<div class="p-4 rounded-md border border-surface-200-800">
 			<HierarchyTree
 				companyTree={data.companyTree}
 				{hasHigherLevelParent}

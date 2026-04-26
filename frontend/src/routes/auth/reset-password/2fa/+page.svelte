@@ -6,7 +6,7 @@
 	export let form: ActionData;
 </script>
 
-<div class="card preset-tonal">
+<div>
 	<h2 class="text-2xl font-bold">Two-factor authentication</h2>
 	<p class="text-sm text-surface-500">Enter the code from your authenticator app.</p>
 	<form method="post" use:enhance action="?/totp">

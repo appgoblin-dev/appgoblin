@@ -1,0 +1,112 @@
+[
+  {
+    "phash": "fd8f0f3d4ff7",
+    "md5_hash": "22f28042f44ad8dc545921a9509722f1",
+    "file_extension": "mp4",
+    "advertiser_count": 1,
+    "publisher_count": 42,
+    "first_seen": "2026-03-04T23:36:59.250",
+    "last_seen": "2026-03-12T06:57:36.314",
+    "advertiser_store_id": "com.playbest.sgs",
+    "advertiser_icon_url_100": "ce5a2fc03ba45aa9.png"
+  },
+  {
+    "phash": "666f376ef4dd",
+    "md5_hash": "c303876682e65908a59cf69f20009a04",
+    "file_extension": "mp4",
+    "advertiser_count": 1,
+    "publisher_count": 19,
+    "first_seen": "2026-03-04T23:02:35.765",
+    "last_seen": "2026-03-12T06:57:36.314",
+    "advertiser_store_id": "com.playbest.sgs",
+    "advertiser_icon_url_100": "ce5a2fc03ba45aa9.png"
+  },
+  {
+    "phash": "67499ec1fcf3",
+    "md5_hash": "6a372b2d1f5cbf751e553f5f4ee5d21d",
+    "file_extension": "mp4",
+    "advertiser_count": 1,
+    "publisher_count": 15,
+    "first_seen": "2026-03-14T17:07:23.631",
+    "last_seen": "2026-03-31T10:40:22.747",
+    "advertiser_store_id": "net.mbc.shahid",
+    "advertiser_icon_url_100": "d4a96b964b6994c3.png"
+  },
+  {
+    "phash": "27246646725a",
+    "md5_hash": "224b1b1f93c52251b64a364b74a8c572",
+    "file_extension": "mp4",
+    "advertiser_count": 1,
+    "publisher_count": 7,
+    "first_seen": "2026-03-01T17:30:33.552",
+    "last_seen": "2026-03-16T22:28:33.001",
+    "advertiser_store_id": "com.zhiliaoapp.musically",
+    "advertiser_icon_url_100": "d93b2ee16686303e.png"
+  },
+  {
+    "phash": "87e2cd737e7a",
+    "md5_hash": "72864c731970641c6a13df3f1ced8544",
+    "file_extension": "mp4",
+    "advertiser_count": 1,
+    "publisher_count": 6,
+    "first_seen": "2026-03-03T09:21:10.957",
+    "last_seen": "2026-03-16T02:57:30.457",
+    "advertiser_store_id": "com.zhiliaoapp.musically",
+    "advertiser_icon_url_100": "d93b2ee16686303e.png"
+  },
+  {
+    "phash": "85af9fababf9",
+    "md5_hash": "c4c2566d5aa93a5c9032ea2f1957df84",
+    "file_extension": "mp4",
+    "advertiser_count": 1,
+    "publisher_count": 4,
+    "first_seen": "2026-03-02T03:52:18.602",
+    "last_seen": "2026-03-07T17:40:45.547",
+    "advertiser_store_id": "com.grandegames.slots.dafu.casino",
+    "advertiser_icon_url_100": "c1c81b3f36e1f8c2.png"
+  },
+  {
+    "phash": "d81667adbc71",
+    "md5_hash": "a5b5b808de6b8e7cb1de3540a7729f4a",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 3,
+    "first_seen": "2026-03-02T10:12:36.022",
+    "last_seen": "2026-03-09T01:11:33.630",
+    "advertiser_store_id": "com.diamondlife.slots.vegas.free",
+    "advertiser_icon_url_100": "d1b8685b23c10f7e.png"
+  },
+  {
+    "phash": "7b649ca63366",
+    "md5_hash": "af94ab921e045a9799bd9fcb89e93005",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 3,
+    "first_seen": "2026-03-02T21:32:49.313",
+    "last_seen": "2026-03-04T16:39:09.352",
+    "advertiser_store_id": "com.dinoapp.chat",
+    "advertiser_icon_url_100": "ec7bc58f04f244a5.png"
+  },
+  {
+    "phash": "ade3e4e9decd",
+    "md5_hash": "4e5963967267d74c777b52fa34268ff0",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 3,
+    "first_seen": "2026-03-07T00:29:47.018",
+    "last_seen": "2026-03-07T19:38:49.343",
+    "advertiser_store_id": "com.covve.businesscardscanner",
+    "advertiser_icon_url_100": "838a38f1cfcef031.png"
+  },
+  {
+    "phash": "6fb4a5abcdf8",
+    "md5_hash": "362dc1a91bca1a54ab24d14580319760",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 2,
+    "first_seen": "2026-03-10T07:09:06.361",
+    "last_seen": "2026-03-10T08:28:57.655",
+    "advertiser_store_id": "com.godgame.mj.android",
+    "advertiser_icon_url_100": "d369266285ec5cd5.png"
+  }
+]

@@ -18,9 +18,9 @@
 			: null
 	);
 
-	const titleFont = 'text-xl text-primary-900-100 tracking-wide';
-	const subTitleFont = 'text-large text-primary-800-200 tracking-wide';
-	const rowTitleFont = 'text-sm text-primary-800-200 tracking-wide';
+	const titleFont = 'text-xl  tracking-wide';
+	const subTitleFont = 'text-large -200 tracking-wide';
+	const rowTitleFont = 'text-sm -200 tracking-wide';
 	const greyFont = 'text-xs text-surface-500';
 </script>
 
@@ -69,7 +69,7 @@
 		<div class="grid p-4">
 			<div class={titleFont}>Advertising Domains Tracked</div>
 			<div class="stat-container">
-				<div class="text-2xl font-bold text-primary-900">
+				<div class="text-2xl font-bold">
 					{formatNumberLocale(myTotals.total_companies)}
 				</div>
 			</div>
@@ -80,13 +80,13 @@
 		<div class="grid grid-cols-2 gap-4 p-4">
 			<div class="stat-container">
 				<div class={subTitleFont}>Android Adstxt apps</div>
-				<div class="text-2xl font-bold text-primary-900">
+				<div class="text-2xl font-bold">
 					{formatNumberLocale(myTotals.adstxt_direct_android_total_apps)}
 				</div>
 			</div>
 			<div class="stat-container">
 				<div class={subTitleFont}>iOS Adstxt apps</div>
-				<div class="text-2xl font-bold text-primary-900">
+				<div class="text-2xl font-bold">
 					{formatNumberLocale(myTotals.adstxt_direct_ios_total_apps)}
 				</div>
 			</div>

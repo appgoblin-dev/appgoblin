@@ -34,10 +34,11 @@
 	</aside>
 	<div>
 		<div class="flex items-center mb-2">
-			<h1 class="h1 text-3xl font-bold text-primary-900-100">
-				<span class="text-primary-700-300">{currentType ? currentType.name : ''}</span>
+			<h1 class="h1 text-3xl font-bold">
+				<span class="text-secondary-700-300">{currentType ? currentType.name : ''}</span>
 				for
-				<span class="text-primary-700-300">{currentCategoryName ? currentCategoryName : 'All'}</span
+				<span class="text-secondary-700-300"
+					>{currentCategoryName ? currentCategoryName : 'All'}</span
 				>
 				Apps
 			</h1>
@@ -90,9 +91,7 @@
 			<Dialog.Trigger class="btn preset-filled">APP FILTERS</Dialog.Trigger>
 			<Portal>
 				<Dialog.Positioner class="fixed inset-0 z-50 flex justify-start">
-					<Dialog.Content
-						class="h-screen card bg-surface-100-900 w-sm p-4 space-y-4 shadow-xl max-w-[320px]"
-					>
+					<Dialog.Content class="h-screen card w-sm p-4 space-y-4 shadow-xl max-w-[320px]">
 						<SideBarCompanies myCatData={data.appCats} />
 					</Dialog.Content>
 				</Dialog.Positioner>

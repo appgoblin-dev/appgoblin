@@ -10,7 +10,11 @@
 
 <button
 	class="text-xs text-blue-600 hover:text-blue-800 underline cursor-pointer relative group"
-	onclick={() => creativeModal.open(md5_hash, file_extension, `Creative: ${md5_hash}`)}
+	onclick={() =>
+		creativeModal.open(
+			`https://media.appgoblin.info/creatives/raw/${md5_hash.substring(0, 3)}/${md5_hash}.${file_extension}`,
+			`Creative: ${md5_hash}`
+		)}
 >
 	<div class="relative">
 		<img

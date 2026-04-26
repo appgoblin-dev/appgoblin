@@ -50,23 +50,23 @@
 <div class="space-y-6 p-4 md:px-32">
 	<!-- Header -->
 	<div class="card p-4 md:p-6">
-		<h1 class="text-2xl md:text-3xl text-primary-900-100 mb-4">
+		<h1 class="text-2xl md:text-3xl mb-4">
 			Search Results for: <span class="font-bold">'{searchTerm}'</span>
 		</h1>
 
 		<!-- Summary Stats -->
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-			<div class="card preset-tonal p-3">
-				<div class="text-sm text-surface-600-400">Apps Found</div>
-				<div class="text-2xl font-bold text-primary-900-100">{totalAppCount}</div>
-				<div class="text-xs text-surface-600-400 mt-1">
+			<div class="preset-filled-surface-100-900 p-3">
+				<div class="text-sm">Apps Found</div>
+				<div class="text-2xl font-bold">{totalAppCount}</div>
+				<div class="text-xs mt-1">
 					{appleAppCount} Apple • {googleAppCount} Google Play
 				</div>
 			</div>
-			<div class="card preset-tonal p-3">
-				<div class="text-sm text-surface-600-400">Companies Found</div>
-				<div class="text-2xl font-bold text-primary-900-100">{companiesCount}</div>
-				<div class="text-xs text-surface-600-400 mt-1">Adtech/Business/Development Tools</div>
+			<div class="preset-filled-surface-100-900 p-3">
+				<div class="text-sm">Companies Found</div>
+				<div class="text-2xl font-bold">{companiesCount}</div>
+				<div class="text-xs mt-1">Adtech/Business/Development Tools</div>
 			</div>
 		</div>
 	</div>
@@ -104,20 +104,18 @@
 
 			<Tabs.Content value="apps">
 				{#if typeof data.appGroupByStore === 'string'}
-					<div class="card preset-tonal p-4">
+					<div class="preset-filled-surface-100-900 p-4">
 						<p class="text-error-500">Search failed. Please try again.</p>
 					</div>
 				{:else if totalAppCount === 0}
-					<div class="card preset-tonal p-6 text-center">
+					<div class="preset-filled-surface-100-900 p-6 text-center">
 						<h2 class="h3 mb-4">No Apps Found</h2>
-						<p class="text-surface-600-400 mb-4">
+						<p class=" mb-4">
 							No apps found for <span class="font-semibold">'{searchTerm}'</span>, but a search has
 							been queued. Full data from app stores, if it exists, should be available in the
 							coming days.
 						</p>
-						<p class="text-sm text-surface-600-400">
-							Reach out on Discord or GitHub if you have any questions.
-						</p>
+						<p class="text-sm">Reach out on Discord or GitHub if you have any questions.</p>
 					</div>
 				{:else}
 					<!-- Store Filter (Apple vs Google) -->
@@ -127,7 +125,7 @@
 								type="button"
 								class="px-4 py-2 rounded-md font-medium transition-colors {selectedStore === 'apple'
 									? 'bg-primary-900-100 text-surface-50-950'
-									: 'bg-surface-200-800 text-surface-600-400 hover:bg-surface-300-700'}"
+									: 'bg-surface-200-800  hover:bg-surface-300-700'}"
 								onclick={() => {
 									selectedStore = 'apple';
 								}}
@@ -139,7 +137,7 @@
 								class="px-4 py-2 rounded-md font-medium transition-colors {selectedStore ===
 								'google'
 									? 'bg-primary-900-100 text-surface-50-950'
-									: 'bg-surface-200-800 text-surface-600-400 hover:bg-surface-300-700'}"
+									: 'bg-surface-200-800  hover:bg-surface-300-700'}"
 								onclick={() => {
 									selectedStore = 'google';
 								}}
@@ -155,17 +153,17 @@
 					{:else if selectedStore === 'google' && googleAppCount > 0}
 						<AppGroupCard apps={data.appGroupByStore.google} />
 					{:else}
-						<div class="card preset-tonal p-4">
-							<p class="text-surface-600-400">
+						<div class="preset-filled-surface-100-900 p-4">
+							<p class="">
 								No apps found for {selectedStore === 'apple' ? 'App Store' : 'Google Play'}.
 							</p>
 						</div>
 					{/if}
 
 					<!-- Help Text -->
-					<div class="card preset-tonal p-4 mt-6">
+					<div class="preset-filled-surface-100-900 p-4 mt-6">
 						<h3 class="h4 mb-2">Didn't see the app you're looking for?</h3>
-						<p class="text-sm text-surface-600-400">
+						<p class="text-sm">
 							This search checks both Google Play and App Store. If an app exists but isn't showing
 							up, it may be queued for indexing and should appear within the next day. Reach out on
 							Discord or GitHub if you have questions or need support.
@@ -176,17 +174,17 @@
 
 			<Tabs.Content value="companies">
 				{#if typeof data.companiesResults === 'string'}
-					<div class="card preset-tonal p-4">
+					<div class="preset-filled-surface-100-900 p-4">
 						<p class="text-error-500">Search failed. Please try again.</p>
 					</div>
 				{:else if companiesCount === 0}
-					<div class="card preset-tonal p-6 text-center">
+					<div class="preset-filled-surface-100-900 p-6 text-center">
 						<h2 class="h3 mb-4">No Companies Found</h2>
-						<p class="text-surface-600-400 mb-4">
+						<p class=" mb-4">
 							No adtech/business/development tool companies found matching
 							<span class="font-semibold"> '{searchTerm}'</span>.
 						</p>
-						<p class="text-sm text-surface-600-400">
+						<p class="text-sm">
 							If you expected to see something, please let us know by sending a note on Discord or
 							GitHub and we can add it.
 						</p>

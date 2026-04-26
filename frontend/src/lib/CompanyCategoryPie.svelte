@@ -8,7 +8,7 @@
 		value?: number;
 	};
 
-	let { plotData, plotHeightPx = 300 } = $props();
+	let { plotData, plotHeightPx = 250 } = $props();
 
 	const palette = ['#6929C4', '#1192E8', '#005D5D', '#9F1853', '#FA4D56', '#FF832B', '#198038'];
 
@@ -65,8 +65,12 @@
 		innerRadius={-22}
 		cornerRadius={4}
 		padAngle={0.03}
+		padding={{ left: 80 }}
 		height={plotHeightPx}
-		legend
+		legend={{
+			orientation: 'vertical',
+			placement: 'left'
+		}}
 	>
 		{#snippet aboveMarks()}
 			<Text
@@ -98,7 +102,7 @@
 		{/snippet}
 	</PieChart>
 
-	<div class="mt-2 grid grid-cols-1 gap-1 text-xs md:grid-cols-2">
+	<!-- <div class="mt-2 grid grid-cols-1 gap-1 text-xs md:grid-cols-2">
 		{#each labeledPlotData as item}
 			<div
 				class="flex items-center justify-between gap-3 rounded-md bg-surface-100-900/60 px-2 py-1"
@@ -106,10 +110,10 @@
 				<div class="flex min-w-0 items-center gap-2">
 					<span class="h-2.5 w-2.5 shrink-0 rounded-full" style={`background-color: ${item.color};`}
 					></span>
-					<span class="truncate text-surface-50">{item.label}</span>
+					<span class="truncate">{item.label}</span>
 				</div>
-				<span class="shrink-0 font-medium text-surface-300">{formatPercent(item.percentage)}</span>
+				<span class="shrink-0 font-medium">{formatPercent(item.percentage)}</span>
 			</div>
 		{/each}
-	</div>
+	</div> -->
 </div>

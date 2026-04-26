@@ -14,7 +14,7 @@
 	export let badgeLabel = 'Most Popular';
 	export let compact = false;
 	export let dense = false;
-	export let onOpen: (md5Hash: string, fileExtension: string, title: string) => void;
+	export let onOpen: (rawUrl: string, title: string) => void;
 
 	const mediaFill = dense && compact;
 	const mediaAspectClass = mediaFill
@@ -54,7 +54,10 @@
 
 	<button
 		onclick={() =>
-			onOpen(creative.md5_hash, creative.file_extension, `${titlePrefix} #${index + 1}`)}
+			onOpen(
+				`https://media.appgoblin.info/creatives/raw/${creative.md5_hash.substring(0, 3)}/${creative.md5_hash}.${creative.file_extension}`,
+				`${titlePrefix} #${index + 1}`
+			)}
 		class={`relative w-full bg-gradient-to-br from-purple-200 to-pink-200 dark:from-purple-900 dark:to-pink-900 cursor-pointer group overflow-hidden ${mediaAspectClass}`}
 		title="Click to play video"
 	>

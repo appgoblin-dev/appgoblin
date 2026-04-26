@@ -9,7 +9,7 @@
 	let { data }: Props = $props();
 </script>
 
-<h2 class="text-2xl font-bold text-primary-900-100">SDKs by Company</h2>
+<h2 class="text-2xl font-bold">SDKs by Company</h2>
 <p class="text-sm md:text-base p-2 md:p-4">Developers SDKS</p>
 
 <div>
@@ -21,7 +21,7 @@
 		{#if typeof sdks == 'string'}
 			Failed to load sdks
 		{:else}
-			<div class="card preset-tonal p-2 md:p-8 mt-2 md:mt-4">
+			<div class="preset-filled-surface-100-900 p-2 md:p-8 mt-2 md:mt-4">
 				<DeveloperSDKOverview myPackageInfo={sdks} companyTypes={data.companyTypes} />
 			</div>
 		{/if}

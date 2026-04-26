@@ -1,58 +1,25 @@
-<script>
-	import AdvertiserCreativeRankingsTable from '$lib/AdvertiserCreativeRankingsTable.svelte';
-	import WhiteCard from '$lib/WhiteCard.svelte';
-	let { data } = $props();
+<script lang="ts">
+	import AdCreativesReport from '$lib/AdCreativesReport.svelte';
+	import type { PageData } from './$types';
 
-	let pageTitle = 'Top Mobile Advertisers and Creatives';
-	let pageDescription =
-		'See the top mobile ad buyers this month and their creative strategies based on live android ad campaigns.';
+	let { data = {} as PageData }: { data?: PageData } = $props();
+	let pageTitle = $derived(data.pageTitle || 'Ad Creative Explorer | AppGoblin');
+	let pageDescription = $derived(
+		data.pageDescription ||
+			'Browse top mobile advertising videos and images for inspiration and competitor analysis.'
+	);
+	let canonicalUrl = $derived(data.canonicalUrl || 'https://appgoblin.info/ad-creatives');
 </script>
 
 <svelte:head>
 	<title>{pageTitle}</title>
-
-	<!-- Standard meta tags -->
 	<meta name="description" content={pageDescription} />
-	<meta
-		name="keywords"
-		content="ad buyers, mobile advertisers, ad creatives, mobile advertising, app marketing, advertising insights, AppGoblin, ad campaigns, ad creatives, ad networks, ad tracking, ad analytics"
-	/>
-
-	<!-- Open Graph meta tags -->
 	<meta property="og:title" content={pageTitle} />
 	<meta property="og:description" content={pageDescription} />
-	<meta property="og:image" content="https://appgoblin.info/goblin_purple_hat_250.png" />
-	<meta property="og:url" content="https://appgoblin.info/ad-creatives" />
+	<meta property="og:url" content={canonicalUrl} />
 	<meta property="og:type" content="website" />
-
-	<!-- Twitter Card meta tags -->
-	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content={pageTitle} />
-	<meta name="twitter:description" content={pageDescription} />
-	<meta name="twitter:image" content="https://appgoblin.info/goblin_purple_hat_250.png" />
-
-	<!-- Additional meta tags -->
 	<meta name="robots" content="index, follow" />
-	<link rel="canonical" href="https://appgoblin.info/ad-creatives" />
+	<link rel="canonical" href={canonicalUrl} />
 </svelte:head>
 
-<div class="p-2 px-2 md:px-16 lg:px-32">
-	<h1 class="text-3xl font-bold text-primary-900-100">Top Mobile Ad Buyers & Their Ad Creatives</h1>
-
-	<br />
-
-	<div class="p-4">
-		<p>
-			These are top mobile ad buyers (advertisers) from this month. The top advertisers and their
-			creatives are based on actual ads seen in publishing apps in the past month.
-		</p>
-	</div>
-
-	<WhiteCard>
-		{#if data.creatives && data.creatives.length > 0}
-			<AdvertiserCreativeRankingsTable data={data.creatives} />
-		{:else}
-			<p>No apps found</p>
-		{/if}
-	</WhiteCard>
-</div>
+<AdCreativesReport {data} />

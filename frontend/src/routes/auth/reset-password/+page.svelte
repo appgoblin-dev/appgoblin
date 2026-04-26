@@ -6,7 +6,7 @@
 	export let form: ActionData;
 </script>
 
-<div class="card preset-tonal">
+<div>
 	<h2 class="text-2xl font-bold">Enter your new password</h2>
 	<form method="post" use:enhance>
 		<label class="label" for="form-reset.password">Password</label>

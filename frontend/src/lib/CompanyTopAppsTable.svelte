@@ -10,22 +10,26 @@
 	import X from 'lucide-svelte/icons/x';
 
 	import ExportAsCSV from '$lib/components/data-table/ExportAsCSV.svelte';
-	import type { Company, CompanyOverviewAppsNEW } from '../types';
+	import type { CompanyOverviewApps } from '../types';
 	import { formatNumber } from '$lib/utils/formatNumber';
 	import { createSvelteTable } from '$lib/components/data-table/index.js';
 
 	import { genericColumns } from '$lib/components/data-table/generic-column';
 
 	type DataTableProps<RankedApps, TValue> = {
-		data: CompanyOverviewAppsNEW[];
+		data: CompanyOverviewApps[];
 		isiOS: boolean;
+		companyName?: string;
 	};
 
-	function tableHasAdsTxt(table: CompanyOverviewAppsNEW[]) {
+	function tableHasAdsTxt(table: CompanyOverviewApps[]) {
 		return !table.every((row) => row.app_ads_direct == false);
 	}
 
-	let { data, isiOS }: DataTableProps<CompanyOverviewAppsNEW, TValue> = $props();
+	const checkIconClass = 'w-4 h-4 text-success-700-300';
+	const xIconClass = 'w-4 h-4 text-error-200';
+
+	let { data, isiOS, companyName = '' }: DataTableProps<CompanyOverviewApps, TValue> = $props();
 
 	const columns = genericColumns([
 		{
@@ -108,7 +112,7 @@
 									/>
 									<div class="flex flex-col">
 										{row.original.name}
-										<p class="text-xs text-surface-500">{row.original.developer_name}</p>
+										<p class="text-xs text-surface-900-100">{row.original.developer_name}</p>
 									</div>
 								</div>
 							</a>
@@ -119,9 +123,9 @@
 						</td>
 						<td class="table-cell-fit">
 							{#if row.original.sdk == true}
-								<Check class="w-4 h-4 text-green-400" />
+								<Check class={checkIconClass} />
 							{:else if row.original.sdk == false}
-								<X class="w-4 h-4 text-red-400" />
+								<X class={xIconClass} />
 							{:else}
 								-
 							{/if}
@@ -129,9 +133,9 @@
 						{#if !isiOS}
 							<td class="table-cell-fit">
 								{#if row.original.api_call == true}
-									<Check class="w-4 h-4 text-green-400" />
+									<Check class={checkIconClass} />
 								{:else if row.original.api_call == false}
-									<X class="w-4 h-4 text-red-400" />
+									<X class={xIconClass} />
 								{:else}
 									-
 								{/if}
@@ -140,9 +144,9 @@
 						{#if tableHasAdsTxt(data)}
 							<td class="table-cell-fit">
 								{#if row.original.app_ads_direct == true}
-									<Check class="w-4 h-4 text-green-400" />
+									<Check class={checkIconClass} />
 								{:else if row.original.app_ads_direct == false}
-									<X class="w-4 h-4 text-red-400" />
+									<X class={xIconClass} />
 								{:else}
 									-
 								{/if}
@@ -156,7 +160,10 @@
 			<div class="flex items-center justify-end space-x-2 py-4 gap-2">
 				<ExportAsCSV {table} filename="appgoblin_apps" />
 				<span class="text-xs md:text-sm text-gray-500">
-					For full client lists see <a href="/pricing">pricing page</a>.
+					Sample only. For a full list of {companyName ? `${companyName}'s` : "your company's"} client
+					apps, see
+					<a href="/pricing">pricing page</a>. AppGoblin B2B users can download the full app exports
+					in the Data Exports tab above.
 				</span>
 			</div>
 		</footer>

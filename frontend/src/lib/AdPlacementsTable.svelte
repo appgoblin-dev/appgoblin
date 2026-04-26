@@ -155,7 +155,7 @@
 									md5_hash={row.original.md5_hash}
 									file_extension={row.original.file_extension}
 								/>
-								<span class="text-xs text-surface-600-400">{row.original.file_extension}</span>
+								<span class="text-xs">{row.original.file_extension}</span>
 							</div>
 						</td>
 

@@ -1,29 +1,29 @@
---noqa: disable=LT01
---noqa: disable=all
--- Trouble related to issue:https://github.com/sqlfluff/sqlfluff/issues/7570
 WITH
 include_apps AS (
     SELECT c.store_app
     FROM adtech.combined_store_apps_companies AS c
     WHERE
-        cardinality(:include_domains ::text []) > 0
-        AND c.ad_domain = any(:include_domains ::text [])
+        cardinality(cast(:include_domains AS text [])) > 0
+        AND c.ad_domain = any(cast(:include_domains AS text []))
         AND (
-            NOT :require_sdk_api ::boolean
+            NOT cast(:require_sdk_api AS boolean)
             OR c.sdk = TRUE
             OR c.api_call = TRUE
         )
     GROUP BY c.store_app
     HAVING
-        count(DISTINCT c.ad_domain) = cardinality(:include_domains ::text [])
+        count(DISTINCT c.ad_domain)
+        = cardinality(cast(:include_domains AS text []))
 ),
+
 exclude_apps AS (
     SELECT DISTINCT c.store_app
     FROM adtech.combined_store_apps_companies AS c
     WHERE
-        cardinality(:exclude_domains ::text []) > 0
-        AND c.ad_domain = any(:exclude_domains ::text [])
+        cardinality(cast(:exclude_domains AS text [])) > 0
+        AND c.ad_domain = any(cast(:exclude_domains AS text []))
 )
+
 SELECT
     sao.id,
     sao.store_id,
@@ -41,7 +41,7 @@ SELECT
 FROM frontend.store_apps_overview AS sao
 WHERE
     (
-        cardinality(:include_domains ::text []) = 0
+        cardinality(cast(:include_domains AS text [])) = 0
         OR EXISTS (
             SELECT 1
             FROM include_apps AS ia
@@ -49,13 +49,13 @@ WHERE
         )
     )
     AND
-    sao.store_last_updated > :mydate ::date
-    AND (NOT :require_iap ::boolean OR sao.in_app_purchases = TRUE)
-    AND (NOT :require_ads ::boolean OR sao.ad_supported = TRUE)
-    AND (:category ::text IS NULL OR sao.category LIKE :category)
-    AND (:store ::int IS NULL OR sao.store = :store)
+    sao.store_last_updated > cast(:mydate AS date)
+    AND (NOT cast(:require_iap AS boolean) OR sao.in_app_purchases = TRUE)
+    AND (NOT cast(:require_ads AS boolean) OR sao.ad_supported = TRUE)
+    AND (cast(:category AS text) IS NULL OR sao.category LIKE :category)
+    AND (cast(:store AS int) IS NULL OR sao.store = :store)
     AND (
-        :ranking_country ::text IS NULL
+        cast(:ranking_country AS text) IS NULL
         OR (
             :ranking_country = 'overall'
             AND EXISTS (
@@ -76,33 +76,33 @@ WHERE
         )
     )
     AND (
-        :min_installs ::bigint IS NULL
+        cast(:min_installs AS bigint) IS NULL
         OR :min_installs = 0
         OR sao.installs >= :min_installs
     )
     AND (
 
-        :max_installs ::bigint IS NULL
+        cast(:max_installs AS bigint) IS NULL
         OR sao.installs <= :max_installs
     )
     AND (
 
-        :min_rating_count ::bigint IS NULL
+        cast(:min_rating_count AS bigint) IS NULL
         OR sao.rating_count >= :min_rating_count
     )
     AND (
 
-        :max_rating_count ::bigint IS NULL
+        cast(:max_rating_count AS bigint) IS NULL
         OR sao.rating_count <= :max_rating_count
     )
     AND (
 
-        :min_installs_d30 ::bigint IS NULL
+        cast(:min_installs_d30 AS bigint) IS NULL
         OR sao.installs_sum_4w >= :min_installs_d30
     )
     AND (
 
-        :max_installs_d30 ::bigint IS NULL
+        cast(:max_installs_d30 AS bigint) IS NULL
         OR sao.installs_sum_4w <= :max_installs_d30
     )
     -- Exclusion check

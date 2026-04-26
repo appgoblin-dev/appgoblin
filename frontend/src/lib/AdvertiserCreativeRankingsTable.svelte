@@ -122,7 +122,7 @@
 				const value = e.currentTarget.value;
 				table.setGlobalFilter(value);
 			}}
-			class="max-w-sm p-1"
+			class="bg-surface-50-950 max-w-sm p-1"
 		/>
 	</div>
 	<div class="overflow-x-auto pl-0">

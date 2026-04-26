@@ -10,7 +10,7 @@
 	<h1 class="h1">AppGoblin Data Review</h1>
 
 	<div class="space-y-2">
-		<div class="card preset-tonal p-2 md:p-8 space-y-4">
+		<div class="preset-filled-surface-100-900 p-2 md:p-8 space-y-4">
 			<p>
 				Live stats for AppGoblin's current app ecosystem and the live crawling. Green number
 				represent success and grey is the total.

@@ -4,8 +4,8 @@
 	import { prettyName } from '$lib/utils/prettyNames';
 	import type { StoreIDLookup, CollectionRanks, CategoryRanks } from '../types';
 
-	const buttonSelectedClass = 'btn preset-outlined-primary-900-100 relative text-primary-900-100';
-	const buttonDeselectedClass = 'p-1 md:p-2 hover:text-primary-900-100';
+	const buttonSelectedClass = 'btn preset-filled-secondary-100-900 relative ';
+	const buttonDeselectedClass = 'p-1 md:p-2 hover:';
 
 	interface Props {
 		storeIDLookup: StoreIDLookup;

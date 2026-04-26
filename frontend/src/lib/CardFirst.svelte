@@ -9,7 +9,7 @@
 	let { header, footer, children }: Props = $props();
 </script>
 
-<div class="card p-2 preset-tonal">
+<div class="p-2 border border-surface-100-900 rounded-lg">
 	{#if header}
 		<header>
 			{@render header()}

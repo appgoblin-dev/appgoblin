@@ -24,8 +24,8 @@ jobs:
           set -euo pipefail
 
           BASE_URL="${PRODUCTION_BASE_URL:-https://appgoblin.info}"
-          BASE_API_URL="${PRODUCTION_BASE_URL:-https://appgoblin.info}"
-          BASE_API_URL="${BASE_API_URL%/}/api/public"
+          PUBLIC_API_BASE_URL="${PRODUCTION_BASE_URL:-https://appgoblin.info}"
+          PUBLIC_API_BASE_URL="${PUBLIC_API_BASE_URL%/}/api/public"
           BASE_URL="${BASE_URL%/}"
           MAX_ATTEMPTS=2
           FAILURES=0
@@ -100,8 +100,8 @@ jobs:
           }
 
           probe_endpoint "frontend /check" "${BASE_URL}/check" "1"
-          probe_endpoint "backend /api/check" "${BASE_API_URL}/check" "1"
-          probe_endpoint "backend /api/checkdb" "${BASE_API_URL}/checkdb" "1"
+          probe_endpoint "backend /api/public/health/check" "${PUBLIC_API_BASE_URL}/health/check" "1"
+          probe_endpoint "backend /api/public/health/db" "${PUBLIC_API_BASE_URL}/health/db" "1"
           probe_endpoint "frontend /companies/google.com" "${BASE_URL}/companies/google.com" "0"
           probe_endpoint "frontend /search/appgoblin" "${BASE_URL}/search/appgoblin" "0"
 
@@ -123,7 +123,7 @@ jobs:
     if: (github.event.repository.fork == false) && (github.event_name == 'workflow_dispatch' || github.event.schedule == '7 */6 * * *')
     runs-on: ubuntu-latest
     steps:
-      - name: Probe freshness endpoint
+      - name: Probe freshness endpoints
         shell: bash
         env:
           PRODUCTION_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}
@@ -131,8 +131,8 @@ jobs:
           set -euo pipefail
 
           BASE_URL="${PRODUCTION_BASE_URL:-https://appgoblin.info}"
-          BASE_API_URL="${PRODUCTION_BASE_URL:-https://appgoblin.info}"
-          BASE_API_URL="${BASE_API_URL%/}/api/public"
+          PUBLIC_API_BASE_URL="${PRODUCTION_BASE_URL:-https://appgoblin.info}"
+          PUBLIC_API_BASE_URL="${PUBLIC_API_BASE_URL%/}/api/public"
           BASE_URL="${BASE_URL%/}"
           MAX_ATTEMPTS=2
           FAILURES=0
@@ -257,8 +257,13 @@ jobs:
           }
 
           probe_endpoint \
-            "backend /api/checkdb?include_apps_freshness=1" \
-            "${BASE_API_URL}/checkdb?include_apps_freshness=1" \
+            "backend /api/public/health/ranks" \
+            "${PUBLIC_API_BASE_URL}/health/ranks" \
+            "1"
+
+          probe_endpoint \
+            "backend /api/public/health/apps" \
+            "${PUBLIC_API_BASE_URL}/health/apps" \
             "1"
 
           {

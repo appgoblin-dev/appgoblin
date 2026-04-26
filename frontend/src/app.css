@@ -1,19 +1,21 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/forms';
 
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton-svelte';
-@import '@skeletonlabs/skeleton/themes/catppuccin';
+/* @import '@skeletonlabs/skeleton/themes/wintry'; */
 
 @import 'layerchart/skeleton-3.css';
+@import '../appgoblin-theme.css';
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where([data-mode=dark], [data-mode=dark] *));
 
 a:not(.btn) {
-	color: var(--color-tertiary-900-100);
+	color: var(--color-tertiary-950-50);
 }
 
 a:not(.btn):hover {
-	color: var(--color-tertiary-900-200);
+	color: var(--color-tertiary-700-300);
 	text-decoration: underline;
 }
 

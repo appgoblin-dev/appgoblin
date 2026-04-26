@@ -43,7 +43,7 @@
 		</div>
 	</div>
 
-	<div class="card preset-filled-surface-100-900 p-0 lg:p-8">
+	<div class="p-0 lg:p-8">
 		<div class="card-footer md:flex">
 			<!-- SDKs, Trackers & Permissions Overview -->
 			<div class="grid grid-cols-1 gap-2 md:gap-4">
@@ -66,25 +66,23 @@
 						<div class="space-y-2 p-2">
 							<div class="flex items-center gap-2">
 								<span class="font-medium">Store ID:</span>
-								<span class="text-primary-900-100">{data.myapp.store_id}</span>
+								<span class="">{data.myapp.store_id}</span>
 							</div>
 							<div class="flex items-center gap-2">
 								<span class="font-medium">First Released:</span>
-								<span class="text-primary-900-100">{data.myapp.release_date}</span>
+								<span class="">{data.myapp.release_date}</span>
 							</div>
 							<div class="flex items-center gap-2">
 								<span class="font-medium">Store Last Updated:</span>
-								<span class="text-primary-900-100">{data.myapp.store_last_updated}</span>
+								<span class="">{data.myapp.store_last_updated}</span>
 							</div>
 							<div class="flex items-center gap-2">
 								<span class="font-medium">In-App Purchases:</span>
-								<span class="text-primary-900-100"
-									>{data.myapp.in_app_purchases ? 'Yes' : 'No'}</span
-								>
+								<span class="">{data.myapp.in_app_purchases ? 'Yes' : 'No'}</span>
 							</div>
 							<div class="flex items-center gap-2">
 								<span class="font-medium">Ads:</span>
-								<span class="text-primary-900-100">{data.myapp.ad_supported ? 'Yes' : 'No'}</span>
+								<span class="">{data.myapp.ad_supported ? 'Yes' : 'No'}</span>
 							</div>
 
 							{#if data.myapp.developer_url}
@@ -122,11 +120,11 @@
 							</div>
 							<div class="flex items-center gap-2">
 								<span class="font-medium">AppGoblin First Crawled:</span>
-								<span class="text-primary-900-100">{data.myapp.created_at}</span>
+								<span class="">{data.myapp.created_at}</span>
 							</div>
 							<div class="flex items-center gap-2">
 								<span class="font-medium">AppGoblin Last Crawled:</span>
-								<span class="text-primary-900-100">{data.myapp.updated_at}</span>
+								<span class="">{data.myapp.updated_at}</span>
 							</div>
 						</div>
 					</WhiteCard>
@@ -141,7 +139,7 @@
 								<div class="space-y-2 p-2">
 									<div class="flex items-center gap-2">
 										<span class="font-medium">Ads.txt Last Crawled:</span>
-										<span class="text-primary-900-100">{data.myapp.adstxt_last_crawled}</span>
+										<span class="">{data.myapp.adstxt_last_crawled}</span>
 									</div>
 									<div class="flex items-center gap-2">
 										<span class="font-medium">Ads.txt Crawl Status:</span>
@@ -169,11 +167,11 @@
 							{#if data.myapp.sdk_last_crawled}
 								<div class="flex items-center gap-2">
 									<span class="font-medium">Successful Last Crawled:</span>
-									<span class="text-primary-900-100">{data.myapp.sdk_successful_last_crawled}</span>
+									<span class="">{data.myapp.sdk_successful_last_crawled}</span>
 								</div>
 								<div class="flex items-center gap-2">
 									<span class="font-medium">Last Crawled:</span>
-									<span class="text-primary-900-100">{data.myapp.sdk_last_crawled}</span>
+									<span class="">{data.myapp.sdk_last_crawled}</span>
 								</div>
 								<div class="flex items-center gap-2">
 									<span class="font-medium">Last Crawl Status:</span>
@@ -197,8 +195,8 @@
 		<br />
 		<div class="p-2 md:flex">
 			<div class="self-center text-center">
-				<p class="text-4xl p-2 text-primary-800-200">{data.myapp.rating}★</p>
-				<p class="text-primary-900-100">Ratings: {formatNumber(data.myapp.rating_count)}</p>
+				<p class="text-4xl p-2 -200">{data.myapp.rating}★</p>
+				<p class="">Ratings: {formatNumber(data.myapp.rating_count)}</p>
 			</div>
 			<div class="flex-1">
 				{#await data.myhistory}
@@ -240,51 +238,49 @@
 	</div>
 
 	<!-- Column2: App Pictures -->
-	<div class="card preset-filled-surface-100-900 p-2 md:p-8">
-		<div class="card preset-tonal p-2 md:p-8 mt-2 md:mt-4">
-			<h4 class="h4 md:h3 p-2">Screenshots</h4>
-			{#if data.myapp.featured_image_url}
-				<div>
-					<img
-						class="h-auto max-w-full rounded-lg p-4 mx-auto"
-						src={data.myapp.featured_image_url}
-						alt="App screenshot"
-						loading="lazy"
-					/>
-				</div>
-			{/if}
-			<section class="grid grid-cols-2 md:grid-cols-3 gap-4">
-				{#each [data.myapp.phone_image_url_1, data.myapp.phone_image_url_2, data.myapp.phone_image_url_3, data.myapp.tablet_image_url_1, data.myapp.tablet_image_url_2, data.myapp.tablet_image_url_3] as imageUrl}
-					{#if imageUrl && imageUrl != 'null'}
-						<div>
-							<img
-								class="h-auto max-w-full rounded-lg"
-								src={imageUrl}
-								alt="App screenshot"
-								loading="lazy"
-							/>
-						</div>
+	<div class="p-2 md:p-8 mt-2 md:mt-4">
+		<h4 class="h4 md:h3 p-2">Screenshots</h4>
+		{#if data.myapp.featured_image_url}
+			<div>
+				<img
+					class="h-auto max-w-full rounded-lg p-4 mx-auto"
+					src={data.myapp.featured_image_url}
+					alt="App screenshot"
+					loading="lazy"
+				/>
+			</div>
+		{/if}
+		<section class="grid grid-cols-2 md:grid-cols-3 gap-4">
+			{#each [data.myapp.phone_image_url_1, data.myapp.phone_image_url_2, data.myapp.phone_image_url_3, data.myapp.tablet_image_url_1, data.myapp.tablet_image_url_2, data.myapp.tablet_image_url_3] as imageUrl}
+				{#if imageUrl && imageUrl != 'null'}
+					<div>
+						<img
+							class="h-auto max-w-full rounded-lg"
+							src={imageUrl}
+							alt="App screenshot"
+							loading="lazy"
+						/>
+					</div>
+				{/if}
+			{/each}
+		</section>
+		<section class="">
+			<h4 class="h4 md:h3 p-2">App Description</h4>
+			<div>
+				<p class="text-strong">{data.myapp.description_short}</p>
+			</div>
+			<div>
+				{#if data.myapp.description}
+					{#if isProbablyValidHTML(data.myapp.description)}
+						<p>
+							{@html data.myapp.description?.replace(/\r?\n/g, '<br>')}
+						</p>
+					{:else}
+						{data.myapp.description}
 					{/if}
-				{/each}
-			</section>
-			<section class="">
-				<h4 class="h4 md:h3 p-2">App Description</h4>
-				<div>
-					<p class="text-strong">{data.myapp.description_short}</p>
-				</div>
-				<div>
-					{#if data.myapp.description}
-						{#if isProbablyValidHTML(data.myapp.description)}
-							<p>
-								{@html data.myapp.description?.replace(/\r?\n/g, '<br>')}
-							</p>
-						{:else}
-							{data.myapp.description}
-						{/if}
-					{/if}
-				</div>
-			</section>
-		</div>
+				{/if}
+			</div>
+		</section>
 	</div>
 </section>
 

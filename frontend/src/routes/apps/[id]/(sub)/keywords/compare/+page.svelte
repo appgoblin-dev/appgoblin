@@ -157,7 +157,7 @@
 	// ── Styles ─────────────────────────────────────────────────────────────────
 	const cardBase = 'rounded-xl border border-surface-300-700 bg-surface-100-900 shadow-sm';
 	const cardPadding = `${cardBase} p-6`;
-	const textMuted = 'text-sm text-primary-800-200';
+	const textMuted = 'text-sm -200';
 </script>
 
 <div class="space-y-6">
@@ -168,11 +168,11 @@
 		<a href={`/apps/${data.myapp.store_id}`} class="text-primary-500 hover:underline">
 			{data.myapp.name}
 		</a>
-		<span class="text-primary-800-200">/</span>
+		<span class="-200">/</span>
 		<a href={`/apps/${data.myapp.store_id}/keywords`} class="text-primary-500 hover:underline">
 			Keywords
 		</a>
-		<span class="text-primary-800-200">/</span>
+		<span class="-200">/</span>
 		<span class="font-medium">Compare</span>
 	</nav>
 
@@ -182,11 +182,11 @@
 		<p class={textMuted}>
 			Compare rank history for <strong>{data.myapp.name}</strong> across multiple keywords.
 		</p>
-		<p class="mt-2 text-sm text-primary-800-200">
+		<p class="mt-2 text-sm -200">
 			This view helps you measure momentum, spot ranking drops, and evaluate whether tracked terms
 			are improving after metadata changes.
 		</p>
-		<p class="mt-2 text-xs text-primary-800-200">Tip: Add more keywords for comparison.</p>
+		<p class="mt-2 text-xs -200">Tip: Add more keywords for comparison.</p>
 	</section>
 
 	<!-- Keyword Picker ───────────────────────────────────────────────────────── -->
@@ -196,7 +196,7 @@
 		<!-- Active keyword chips -->
 		<div class="mb-4 flex min-h-[2.5rem] flex-wrap gap-2">
 			{#if activeKeywords.length === 0}
-				<p class="text-sm text-primary-800-200 italic">No keywords selected yet.</p>
+				<p class="text-sm -200 italic">No keywords selected yet.</p>
 			{/if}
 			{#each activeKeywords as kw, i (kw)}
 				<span
@@ -265,7 +265,7 @@
 						class="absolute z-50 mt-1 w-full rounded-lg border border-surface-300-700 bg-surface-50-950 shadow-xl"
 					>
 						{#if filteredCandidates.length === 0}
-							<p class="px-4 py-3 text-sm text-primary-800-200">No matching keywords found.</p>
+							<p class="px-4 py-3 text-sm -200">No matching keywords found.</p>
 						{:else}
 							<!-- Tracked section header (if any tracked appear) -->
 							{@const trackedVisible = filteredCandidates.filter((c) => c.isTracked)}
@@ -312,7 +312,7 @@
 				{/if}
 			</div>
 
-			<p class="mt-2 text-xs text-primary-800-200">
+			<p class="mt-2 text-xs -200">
 				{activeKeywords.length}/10 keywords selected
 				{#if data.trackedKeywords.length > 0}
 					• ⭐ = your personally tracked keywords
@@ -330,7 +330,7 @@
 		<section class={cardPadding}>
 			<div class="mb-4 flex flex-wrap items-center gap-3">
 				<h2 class="h5 md:h4">Rank History (Last 90 Days)</h2>
-				<p class="text-xs text-primary-800-200">Lower = better position</p>
+				<p class="text-xs -200">Lower = better position</p>
 			</div>
 
 			{#if data.requestedKeywords.length > data.resolvedKeywords.length}

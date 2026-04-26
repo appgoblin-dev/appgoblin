@@ -86,7 +86,7 @@
 <div class="card p-2 md:p-8">
 	<div class="md:mx-16">
 		<h1 class="text-2xl p-2">
-			<p class="text-primary-900-100">
+			<p class="">
 				The {collectionName}
 				{categoryName} Apps on
 				{data.storeIDLookup[store].store_name}
@@ -94,9 +94,9 @@
 				{country}
 			</p>
 		</h1>
-		<div class="card preset-tonal p-1 md:p-2">
+		<div class="p-1 md:p-2">
 			<div class="max-w-sm mb-2 md:mb-8">
-				<p class=" p-1 md:p-2 text-primary-900-100">Select Country</p>
+				<p class=" p-1 md:p-2">Select Country</p>
 				<select
 					class="select p-1 md:p-2 m-2"
 					bind:value={country}
@@ -110,32 +110,13 @@
 					{/each}
 				</select>
 			</div>
-			<table class="table table-compact">
-				<thead>
-					<tr>
-						<th>App Store</th>
-						<th>Collection</th>
-						<th>Category</th>
-						<th>Country</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>{data.storeIDLookup[store].store_name}</td>
-						<td>{collectionName}</td>
-						<td>{categoryName}</td>
-						<td>{country}</td>
-					</tr>
-				</tbody>
-			</table>
-			<div class="card">
-				{#await data.history then history}
-					<RankChart plotData={history.history} maxValue={10.5} />
-				{/await}
-			</div>
+
+			{#await data.history then history}
+				<RankChart plotData={history.history} maxValue={10.5} />
+			{/await}
 		</div>
 		<br />
-		<div class="card preset-tonal p-1 md:p-2">
+		<div class="p-1 md:p-2">
 			{#await data.ranks}
 				Loading App Ranks...
 			{:then ranks}

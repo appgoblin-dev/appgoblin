@@ -34,7 +34,7 @@
 		'group block h-full rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 hover:border-purple-400 dark:hover:border-purple-500';
 	const reportTitleClass =
 		'text-2xl font-bold text-surface-900 dark:text-surface-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition';
-	const reportPeriodClass = 'text-xl font-semibold text-primary-900-100 mt-2';
+	const reportPeriodClass = 'text-xl font-semibold  mt-2';
 	const ctaLinkClass =
 		'flex items-center gap-2 text-sm font-semibold text-purple-600 dark:text-purple-400 group-hover:gap-3 transition-all';
 

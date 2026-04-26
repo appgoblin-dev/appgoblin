@@ -774,6 +774,32 @@ def get_topapps_for_company_secondary(
     return df
 
 
+def get_creative_clusters(
+    state: State,
+    app_category: str | None = None,
+    file_format: str | None = None,
+    company: str | None = None,
+    limit: int = 100,
+) -> pd.DataFrame:
+    """Get creative clusters."""
+    if app_category == "games":
+        app_category = "game%"
+    if company:
+        company = f"%{company}%"
+
+    df = pd.read_sql(
+        sql.creative_clusters,
+        con=state.dbcon.engine,
+        params={
+            "mylimit": limit,
+            "app_category": app_category,
+            "file_format": file_format,
+            "company": company,
+        },
+    )
+    return df
+
+
 def get_topapps_for_company_parent(
     state: State,
     company_domain: str,

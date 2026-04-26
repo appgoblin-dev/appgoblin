@@ -5,7 +5,7 @@
 </script>
 
 <div class="p-2 px-2 md:px-16 lg:px-32">
-	<h1 class="text-3xl font-bold text-primary-900-100">Ad Placements for {data.myapp.name}</h1>
+	<h1 class="text-3xl font-bold">Ad Placements for {data.myapp.name}</h1>
 	<p>
 		These are ad spots that were bought by {data.myapp.name}. The publishing apps are the apps that
 		where the creatives for {data.myapp.name} were found.
@@ -16,7 +16,7 @@
 	{#await data.creatives}
 		loading...
 	{:then creatives}
-		<div class="card preset-tonal p-2 md:p-8 mt-2 md:mt-4">
+		<div class="p-2 md:p-8 mt-2 md:mt-4">
 			<WhiteCard>
 				{#if creatives && creatives.by_vhash.length > 0}
 					<AdPlacementsTable data={creatives.by_vhash} />

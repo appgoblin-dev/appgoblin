@@ -183,29 +183,18 @@
 
 <div class="container mx-auto px-2 md:px-4 py-4 md:py-8">
 	<div class="mb-6">
-		<h1 class="text-2xl md:text-3xl font-bold text-primary-900-100">App Explorer</h1>
-		<p class="text-sm md:text-base text-primary-900-100 mt-2">
+		<h1 class="text-2xl md:text-3xl font-bold">App Explorer</h1>
+		<p class="text-sm md:text-base mt-2">
 			Powerful app discovery and filtering tool for sales teams, market researchers, and app
 			developers.
 		</p>
 	</div>
 
-	<div class="mt-6">
-		{#if !hasPaidAccess}
-			<h2 class="text-xl md:text-2xl font-bold text-primary-900-100 mb-4">Preview</h2>
-		{/if}
-	</div>
-
 	<div class="grid grid-cols-2 lg:grid-cols-[320px_1fr] gap-4 md:gap-6">
 		<!-- Sidebar Filters -->
-		<aside class="card preset-tonal p-4 space-y-5 lg:sticky lg:top-20 overflow-y-auto">
-			<div class="flex items-center gap-2 pb-3 border-b border-surface-300-700">
-				<Filter size={20} class="text-primary-500" />
-				<h2 class="text-lg font-semibold">Filters</h2>
-			</div>
-
+		<aside class="p-4 space-y-5 lg:sticky lg:top-20 overflow-y-auto">
 			{#if !hasPaidAccess}
-				<div class="mb-4 p-3 bg-warning-900-100/20 rounded-lg border border-warning-500">
+				<div class="mb-4 p-3 bg-warning-50-950/20 rounded-lg border border-warning-500">
 					<p class="text-xs text-warning-900-100 flex items-center gap-2">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -225,6 +214,11 @@
 					</p>
 				</div>
 			{/if}
+
+			<div class="flex items-center gap-2 pb-3 border-b border-surface-300-700">
+				<Filter size={20} class="text-primary-500" />
+				<h2 class="text-lg font-semibold">Filters</h2>
+			</div>
 
 			<form
 				method="POST"
@@ -268,23 +262,19 @@
 					: undefined}
 				class="space-y-5"
 			>
-				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
-					<h3 class="font-semibold text-sm uppercase tracking-wide text-primary-900-100">
-						App Details & Metrics
-					</h3>
+				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700">
+					<h3 class="font-semibold text-sm uppercase tracking-wide">App Details & Metrics</h3>
 
 					<!-- App Details -->
 					<div class="space-y-2">
-						<label class="label text-xs text-primary-900-100" for="store-select">Store</label>
+						<label class="label text-xs" for="store-select">Store</label>
 						<select class="select text-sm" id="store-select" bind:value={selectedStore}>
 							<option value="">Any Store</option>
 							<option value="1">Google Play</option>
 							<option value="2">Apple App Store</option>
 						</select>
 
-						<label class="label text-xs text-primary-900-100 mt-2" for="category-select"
-							>Category</label
-						>
+						<label class="label text-xs mt-2" for="category-select">Category</label>
 						<select class="select text-sm" id="category-select" bind:value={selectedCategory}>
 							<option value="">Any Category</option>
 							{#each categories.categories as cat}
@@ -300,7 +290,7 @@
 						<!-- Installs -->
 						<div class="grid grid-cols-2 gap-2">
 							<div class="space-y-1">
-								<label class="text-xs text-primary-900-100" for="min-installs">Min Installs</label>
+								<label class="text-xs" for="min-installs">Min Installs</label>
 								<input
 									type="number"
 									id="min-installs"
@@ -310,7 +300,7 @@
 								/>
 							</div>
 							<div class="space-y-1">
-								<label class="text-xs text-primary-900-100" for="max-installs">Max Installs</label>
+								<label class="text-xs" for="max-installs">Max Installs</label>
 								<input
 									type="number"
 									id="max-installs"
@@ -324,9 +314,7 @@
 						<!-- Monthly Installs -->
 						<div class="grid grid-cols-2 gap-2">
 							<div class="space-y-1">
-								<label class="text-xs text-primary-900-100" for="min-monthly"
-									>Min Monthly Installs</label
-								>
+								<label class="text-xs" for="min-monthly">Min Monthly Installs</label>
 								<input
 									type="number"
 									id="min-monthly"
@@ -336,9 +324,7 @@
 								/>
 							</div>
 							<div class="space-y-1">
-								<label class="text-xs text-primary-900-100" for="max-monthly"
-									>Max Monthly Installs</label
-								>
+								<label class="text-xs" for="max-monthly">Max Monthly Installs</label>
 								<input
 									type="number"
 									id="max-monthly"
@@ -352,7 +338,7 @@
 						<!-- Ratings -->
 						<div class="grid grid-cols-2 gap-2">
 							<div class="space-y-1">
-								<label class="text-xs text-primary-900-100" for="min-ratings">Min Ratings</label>
+								<label class="text-xs" for="min-ratings">Min Ratings</label>
 								<input
 									type="number"
 									id="min-ratings"
@@ -362,7 +348,7 @@
 								/>
 							</div>
 							<div class="space-y-1">
-								<label class="text-xs text-primary-900-100" for="max-ratings">Max Ratings</label>
+								<label class="text-xs" for="max-ratings">Max Ratings</label>
 								<input
 									type="number"
 									id="max-ratings"
@@ -394,13 +380,11 @@
 					</div>
 				</div>
 
-				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
-					<h3 class="font-semibold text-sm uppercase tracking-wide text-primary-900-100">
-						App Store Ranks
-					</h3>
+				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700">
+					<h3 class="font-semibold text-sm uppercase tracking-wide">App Store Ranks</h3>
 					<div class="space-y-2">
 						<label class="label font-medium text-sm" for="ranking-filter">Ranking Filter</label>
-						<p class="text-xs text-primary-900-100">
+						<p class="text-xs">
 							Leave unset for all apps, choose overall for any ranking country, or choose one
 							specific country.
 						</p>
@@ -417,13 +401,11 @@
 					</div>
 				</div>
 
-				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700 bg-surface-100-900/40">
-					<h3 class="font-semibold text-sm uppercase tracking-wide text-primary-900-100">
-						Company Filters
-					</h3>
+				<div class="space-y-4 p-3 rounded-lg border border-surface-300-700">
+					<h3 class="font-semibold text-sm uppercase tracking-wide">Company Filters</h3>
 
 					{#if !hasB2BSdkAccess}
-						<div class="p-3 rounded-lg border border-warning-500 bg-warning-900-100/20">
+						<div class="p-3 rounded-lg border border-warning-500 bg-warning-50-950/20">
 							<p class="text-xs text-warning-900-100">
 								Company include/exclude filters are available on the B2B SDK tier.
 								<a href="/pricing" class="underline hover:text-primary-600-400">Upgrade</a>
@@ -435,7 +417,7 @@
 					<!-- Include Companies -->
 					<div class="space-y-2">
 						<label class="label font-medium text-sm" for="include-search">Include Companies</label>
-						<p class="text-xs text-primary-900-100">Apps must use ALL selected SDKs/companies</p>
+						<p class="text-xs">Apps must use ALL selected SDKs/companies</p>
 						<div class="relative">
 							<input
 								type="text"
@@ -451,7 +433,7 @@
 							/>
 							{#if includeDropdownOpen && filteredIncludeCompanies().length > 0}
 								<div
-									class="absolute z-50 w-full mt-1 bg-surface-100-900 border border-surface-300-700 rounded-lg shadow-lg max-h-48 lg:max-h-92 overflow-y-auto"
+									class="absolute z-50 w-full mt-1 border border-surface-300-700 rounded-lg shadow-lg max-h-48 lg:max-h-92 overflow-y-auto"
 								>
 									{#each filteredIncludeCompanies() as company (company.company_domain)}
 										<button
@@ -460,9 +442,7 @@
 											onmousedown={() => addIncludeDomain(company.company_domain)}
 										>
 											<span>{company.company_name}</span>
-											<span class="text-xs text-primary-900-100"
-												>{formatNumber(company.total_apps)} apps</span
-											>
+											<span class="text-xs">{formatNumber(company.total_apps)} apps</span>
 										</button>
 									{/each}
 								</div>
@@ -488,7 +468,7 @@
 					<!-- Exclude Companies -->
 					<div class="space-y-2">
 						<label class="label font-medium text-sm" for="exclude-search">Exclude Companies</label>
-						<p class="text-xs text-primary-900-100">Apps must NOT use any of these</p>
+						<p class="text-xs">Apps must NOT use any of these</p>
 						<div class="relative">
 							<input
 								type="text"
@@ -513,9 +493,7 @@
 											onmousedown={() => addExcludeDomain(company.company_domain)}
 										>
 											<span>{company.company_name}</span>
-											<span class="text-xs text-primary-900-100"
-												>{formatNumber(company.total_apps)} apps</span
-											>
+											<span class="text-xs">{formatNumber(company.total_apps)} apps</span>
 										</button>
 									{/each}
 								</div>
@@ -596,7 +574,7 @@
 
 			<!-- Filter Summary -->
 			{#if includeDomains.length > 0}
-				<div class="text-xs text-primary-900-100 pt-2 border-t border-surface-300-700">
+				<div class="text-xs pt-2 border-t border-surface-300-700">
 					<p>
 						<strong>Query:</strong> Apps using {includeDomains.length} selected SDK{includeDomains.length >
 						1
@@ -609,7 +587,7 @@
 		</aside>
 
 		<!-- Results Table -->
-		<main class="card preset-tonal p-4 overflow-hidden">
+		<main class="p-4 overflow-hidden">
 			{#if !hasPaidAccess}
 				<div class="py-10 relative">
 					<div class="absolute inset-0 flex items-start justify-center opacity-10 pt-8">
@@ -632,13 +610,12 @@
 							<path d="M7 11V7a5 5 0 0 1 10 0v4" />
 						</svg>
 						<p class="text-lg font-medium mb-3 text-center">Results Area Locked</p>
-						<p class="text-sm text-primary-900-100 mb-6 text-center">
-							The <strong>App Explorer</strong> (also known as <strong>App CrossFilter</strong> or
-							<strong>App Query</strong>) helps you discover and filter mobile apps with advanced
-							criteria.
+						<p class="text-sm mb-6 text-center">
+							Explore all apps. Discover and filter mobile apps with advanced filters and
+							dimensions.
 						</p>
 
-						<div class="space-y-6 text-primary-900-100">
+						<div class="space-y-6">
 							<div>
 								<h3 class="font-semibold text-lg mb-2">Key Features</h3>
 								<ul class="list-disc list-inside space-y-2 text-sm">
@@ -683,17 +660,15 @@
 							</div>
 						</div>
 
-						<div
-							class="mt-6 p-4 bg-surface-100-900 rounded-lg border border-surface-300-700 text-center"
-						>
-							<p class="text-sm mb-3 text-primary-900-100">
+						<div class="mt-6 p-4 rounded-lg border border-surface-300-700 text-center">
+							<p class="text-sm mb-3">
 								<strong>Access Required:</strong> App Explorer is available to paid subscribers.
 							</p>
 							<a
 								href="/pricing"
 								class="btn preset-filled-primary-500 inline-flex items-center gap-2"
 							>
-								<span class="inline text-white"> View Pricing Plans</span>
+								<span class="inline"> View Pricing Plans</span>
 							</a>
 						</div>
 					</div>
@@ -719,7 +694,7 @@
 				</div>
 			{:else}
 				<div class="mb-4 flex items-center justify-between flex-wrap gap-2">
-					<p class="text-sm text-surface-600-400">
+					<p class="text-sm">
 						Found <strong>{formApps().length}</strong> apps matching your criteria
 					</p>
 				</div>

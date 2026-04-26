@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import * as echarts from 'echarts';
 	import { plotColors } from '$lib/constants';
+	import { resolvedThemeMode } from '$lib/stores/theme.svelte';
 
 	interface Props {
 		plotData: any[];
@@ -14,6 +15,9 @@
 	let myChartDiv: HTMLDivElement;
 	let myChart: echarts.ECharts | null = null;
 	let resizeHandler: () => void;
+	let unsubscribeResolvedThemeMode: (() => void) | null = null;
+	let initializeTimeout: ReturnType<typeof setTimeout> | null = null;
+	let chartTheme: 'dark' | undefined = undefined;
 	let mounted = false;
 
 	// Reactive derivations
@@ -70,7 +74,7 @@
 
 		const option: echarts.EChartsOption = {
 			color: plotColors,
-			backgroundColor: 'rgba(0, 0, 0, 0.3)',
+			// backgroundColor: 'rgba(0, 0, 0, 0.3)',
 			dataset: { source: plotData },
 			dimensions: dimensions,
 			grid: {
@@ -114,6 +118,17 @@
 		return option;
 	}
 
+	function scheduleInitializeChart() {
+		if (initializeTimeout) {
+			clearTimeout(initializeTimeout);
+		}
+
+		initializeTimeout = setTimeout(() => {
+			initializeChart();
+			initializeTimeout = null;
+		}, 10);
+	}
+
 	function initializeChart() {
 		if (!myChartDiv || !plotData || plotData.length === 0) {
 			return;
@@ -126,7 +141,7 @@
 		}
 
 		try {
-			myChart = echarts.init(myChartDiv, 'dark');
+			myChart = echarts.init(myChartDiv, chartTheme);
 			const option = createChartOption();
 
 			if (option) {
@@ -151,24 +166,35 @@
 	}
 
 	onMount(() => {
+		unsubscribeResolvedThemeMode = resolvedThemeMode.subscribe((themeMode) => {
+			chartTheme = themeMode === 'dark' ? 'dark' : undefined;
+
+			if (mounted) {
+				scheduleInitializeChart();
+			}
+		});
+
 		mounted = true;
-		// Small delay to ensure DOM is fully ready
-		setTimeout(() => {
-			initializeChart();
-		}, 10);
+		scheduleInitializeChart();
 	});
 
 	$effect(() => {
 		if (mounted && plotData) {
-			// Small delay to prevent rapid updates
-			setTimeout(() => {
-				initializeChart();
-			}, 10);
+			chartTheme;
+			maxValue;
+			narrowBool;
+			scheduleInitializeChart();
 		}
 	});
 
 	onDestroy(() => {
 		mounted = false;
+		if (initializeTimeout) {
+			clearTimeout(initializeTimeout);
+		}
+		if (unsubscribeResolvedThemeMode) {
+			unsubscribeResolvedThemeMode();
+		}
 		if (resizeHandler) {
 			window.removeEventListener('resize', resizeHandler);
 		}

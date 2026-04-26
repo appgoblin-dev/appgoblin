@@ -21,6 +21,7 @@ class StaticData:
     parent_companies: list[str]
     company_secondary_domains: list[str]
     company_countries: pd.DataFrame
+    company_categories: pd.DataFrame
     company_logos_df: pd.DataFrame
     child_companies: list[str]
     adtech_categories: pd.DataFrame
@@ -100,6 +101,8 @@ def load_static_data(engine: PostgresCon) -> StaticData:
     )
     logger.info("Loading company countries...")
     company_countries = pd.read_sql(sql.company_countries, engine)
+    logger.info("Loading company categories...")
+    company_categories = pd.read_sql(sql.company_categories, engine)
     logger.info("Loading total counts...")
     total_counts = pd.read_sql(sql.total_counts, engine)
     logger.info("Loading advertiser creative rankings...")
@@ -158,6 +161,7 @@ def load_static_data(engine: PostgresCon) -> StaticData:
         parent_companies=parent_companies,
         company_secondary_domains=company_secondary_domains,
         company_countries=company_countries,
+        company_categories=company_categories,
         company_logos_df=company_logos_df,
         child_companies=child_companies,
         adtech_categories=adtech_categories,
@@ -196,6 +200,11 @@ def get_company_secondary_domains(state: State) -> list[str]:
 def get_company_countries(state: State) -> pd.DataFrame:
     """Get company countries (preloaded at startup)."""
     return state.static_data.company_countries
+
+
+def get_company_categories(state: State) -> pd.DataFrame:
+    """Get company categories (preloaded at startup)."""
+    return state.static_data.company_categories
 
 
 def get_company_logos_df(state: State) -> pd.DataFrame:

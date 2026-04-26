@@ -158,10 +158,10 @@
 
 		<section class={`${cardBase} p-6`}>
 			<h1 class="h4 md:h3">ASO Keywords Overview</h1>
-			<p class="mt-2 text-sm text-primary-800-200">
+			<p class="mt-2 text-sm -200">
 				{myapp.name} has {keywordScores.length.toLocaleString()} unique keywords in this dashboard.
 			</p>
-			<p class="mt-2 text-sm text-primary-800-200">
+			<p class="mt-2 text-sm -200">
 				Use this page as your mobile ASO command center: monitor ranking traction, review discovery
 				suggestions, and maintain your personal keyword watchlist.
 			</p>
@@ -169,73 +169,71 @@
 
 		<section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 			<div class={cardBase + ' p-4'}>
-				<p class="text-xs uppercase tracking-wide text-primary-900-100">Ranking keywords</p>
-				<p class="text-3xl font-semibold text-primary-900-100 mt-1">
+				<p class="text-xs uppercase tracking-wide">Ranking keywords</p>
+				<p class="text-3xl font-semibold mt-1">
 					{rankingKeywords.length.toLocaleString()}
 				</p>
-				<p class="mt-2 text-xs text-primary-800-200">Keywords with current app ranking signals</p>
+				<p class="mt-2 text-xs -200">Keywords with current app ranking signals</p>
 			</div>
 			<div class={cardBase + ' p-4'}>
-				<p class="text-xs uppercase tracking-wide text-primary-900-100">Discovery keywords</p>
-				<p class="text-3xl font-semibold text-primary-900-100 mt-1">
+				<p class="text-xs uppercase tracking-wide">Discovery keywords</p>
+				<p class="text-3xl font-semibold mt-1">
 					{discoveryKeywords.length.toLocaleString()}
 				</p>
-				<p class="mt-2 text-xs text-primary-800-200">Suggestions extracted from app metadata</p>
+				<p class="mt-2 text-xs -200">Suggestions extracted from app metadata</p>
 			</div>
 			<div class={cardBase + ' p-4'}>
-				<p class="text-xs uppercase tracking-wide text-primary-900-100">My keywords</p>
-				<p class="text-3xl font-semibold text-primary-900-100 mt-1">
+				<p class="text-xs uppercase tracking-wide">My keywords</p>
+				<p class="text-3xl font-semibold mt-1">
 					{trackedRows.length.toLocaleString()}
 				</p>
-				<p class="mt-2 text-xs text-primary-800-200">Personal watchlist maintained by your team</p>
+				<p class="mt-2 text-xs -200">Personal watchlist maintained by your team</p>
 			</div>
 			<div class={cardBase + ' p-4'}>
-				<p class="text-xs uppercase tracking-wide text-primary-900-100">Top-10 coverage</p>
-				<p class="text-3xl font-semibold text-primary-900-100 mt-1">
+				<p class="text-xs uppercase tracking-wide">Top-10 coverage</p>
+				<p class="text-3xl font-semibold mt-1">
 					{formatPercent(top10Coverage)}
 				</p>
-				<p class="mt-2 text-xs text-primary-800-200">Share of ranking keywords in positions 1-10</p>
+				<p class="mt-2 text-xs -200">Share of ranking keywords in positions 1-10</p>
 			</div>
 		</section>
 
 		<section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 			<a class={`${actionCard} p-4 md:p-5`} href={`/apps/${myapp.store_id}/keywords/ranking`}>
 				<h3 class="h6 md:h5">Ranking View</h3>
-				<p class="mt-2 text-sm text-primary-800-200">Monitor app-specific ranking keywords.</p>
+				<p class="mt-2 text-sm -200">Monitor app-specific ranking keywords.</p>
 			</a>
 			<a class={`${actionCard} p-4 md:p-5`} href={`/apps/${myapp.store_id}/keywords/discovery`}>
 				<h3 class="h6 md:h5">Discovery View</h3>
-				<p class="mt-2 text-sm text-primary-800-200">
+				<p class="mt-2 text-sm -200">
 					Review metadata-derived suggestions and jump to global keyword pages.
 				</p>
 			</a>
 			<a class={`${actionCard} p-4 md:p-5`} href={`/apps/${myapp.store_id}/keywords/tracked`}>
 				<h3 class="h6 md:h5">My Keywords</h3>
-				<p class="mt-2 text-sm text-primary-800-200">
-					Manage your personal watchlist for this app.
-				</p>
+				<p class="mt-2 text-sm -200">Manage your personal watchlist for this app.</p>
 			</a>
 			<a class={`${actionCard} p-4 md:p-5`} href={`/apps/${myapp.store_id}/keywords/compare`}>
 				<h3 class="h6 md:h5">Compare</h3>
-				<p class="mt-2 text-sm text-primary-800-200">Compare rank history for selected keywords.</p>
+				<p class="mt-2 text-sm -200">Compare rank history for selected keywords.</p>
 			</a>
 		</section>
 		<section class={`${cardBase} p-6`}>
 			<h2 class="h5 md:h4 mb-3">Snapshot Metrics</h2>
 			<div class="grid gap-4 md:grid-cols-3">
 				<div>
-					<p class="text-xs uppercase tracking-wide text-primary-900-100">Best observed rank</p>
-					<p class="text-xl font-semibold text-primary-900-100 mt-1">{formatRank(bestRank)}</p>
+					<p class="text-xs uppercase tracking-wide">Best observed rank</p>
+					<p class="text-xl font-semibold mt-1">{formatRank(bestRank)}</p>
 				</div>
 				<div>
-					<p class="text-xs uppercase tracking-wide text-primary-900-100">Average opportunity</p>
-					<p class="text-xl font-semibold text-primary-900-100 mt-1">
+					<p class="text-xs uppercase tracking-wide">Average opportunity</p>
+					<p class="text-xl font-semibold mt-1">
 						{formatNumeric(averageOpportunity, 1)}
 					</p>
 				</div>
 				<div>
-					<p class="text-xs uppercase tracking-wide text-primary-900-100">Average difficulty</p>
-					<p class="text-xl font-semibold text-primary-900-100 mt-1">
+					<p class="text-xs uppercase tracking-wide">Average difficulty</p>
+					<p class="text-xl font-semibold mt-1">
 						{formatNumeric(averageDifficulty, 1)}
 					</p>
 				</div>

@@ -37,7 +37,7 @@
 	const cardClass = 'p-4 bg-surface-100-900 rounded-md';
 </script>
 
-<div class="card preset-tonal p-2 md:p-16 mt-2 md:mt-4">
+<div class="p-2 md:p-16 mt-2 md:mt-4">
 	<h4 class="h4 md:h3 p-2">Data calls made by {data.myapp.name}</h4>
 
 	{#await data.apis}
@@ -55,7 +55,7 @@
 
 			<div class={cardClass}>
 				<p class="text-base leading-relaxed">
-					<strong class="text-primary-900-100">{data.myapp.name}</strong> contacted
+					<strong class="">{data.myapp.name}</strong> contacted
 					<strong>{stats.uniqueTldUrls} different domains</strong>
 					within the first minute of opening. This data was collected from
 					<strong>{stats.uniqueRunIds} independent scan{stats.uniqueRunIds !== 1 ? 's' : ''}</strong

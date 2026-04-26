@@ -160,7 +160,7 @@ class RankingsController(Controller):
             category_id=category,
             country=country,
             limit=10,
-            days=30,
+            days=32,
         )
         df["crawled_date"] = pd.to_datetime(df["crawled_date"])
         last_crawled_date = df["crawled_date"].max()

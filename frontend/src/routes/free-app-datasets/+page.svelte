@@ -228,29 +228,25 @@
 <div class="px-2 md:px-8 xl:px-24 grid grid-cols-1 gap-6 md:gap-10 py-4 md:py-8">
 	<!-- Hero -->
 	<div class="grid gap-2">
-		<h1 class="text-3xl md:text-4xl font-black text-primary-900-100">
+		<h1 class="text-3xl md:text-4xl font-black">
 			Free App Data Exports for Researchers & Data Scientists
 		</h1>
-		<p class="text-lg text-gray-400 max-w-2xl">
+		<p class="text-lg max-w-2xl">
 			High-quality, regularly updated app store datasets from Google Play and Apple App Store for
 			researchers, data scientists, and marketers. Downloads are free with a free AppGoblin account.
 		</p>
 	</div>
 
 	<!-- Format callout -->
-	<div
-		class="card preset-filled-surface-100-900 p-4 flex flex-col md:flex-row gap-3 items-start md:items-center"
-	>
-		<div class="text-sm text-gray-400">
-			<strong class="text-primary-900-100">File format:</strong> All files are
-			<code class="font-mono text-primary-400">.tsv.xz</code> tab-separated values compressed with XZ.
-			Files uncompressed are a few gigabytes. Use appropriate tools when opening.
-		</div>
+	<div class="text-base">
+		<strong class="">File format:</strong> All files are
+		<code class="font-mono text-primary-800-200">.tsv.xz</code> tab-separated values compressed with XZ.
+		Files uncompressed are a few gigabytes. Use appropriate tools when opening.
 	</div>
 
 	<!-- Dataset cards -->
 	{#if datasets.length === 0}
-		<div class="card preset-filled-surface-100-900 p-8 text-center text-gray-400">
+		<div class="preset-filled-surface-100-900 p-8 text-center">
 			No datasets available at this time. Please check back soon.
 		</div>
 	{:else}
@@ -259,28 +255,28 @@
 				{@const meta = getMetaForKey(dataset.key)}
 				{@const Icon = meta.icon}
 				{@const isCopied = copiedKey === dataset.key}
-				<div class="card preset-filled-surface-100-900 p-5 flex flex-col gap-4">
+				<div class="preset-outlined-surface-100-900 p-5 flex flex-col gap-4">
 					<!-- Card header -->
 					<div class="flex items-start gap-3">
 						<div class="p-2 rounded-lg bg-primary-500/10 shrink-0">
 							<Icon class="h-6 w-6 text-primary-500" />
 						</div>
 						<div class="flex-1 min-w-0">
-							<h2 class="text-xl font-bold text-primary-900-100">{meta.name}</h2>
+							<h2 class="text-xl font-bold">{meta.name}</h2>
 							{#if meta.rows}
-								<p class="text-xs text-gray-500 mt-0.5">{meta.rows}</p>
+								<p class="text-xs mt-0.5">{meta.rows}</p>
 							{/if}
 						</div>
 					</div>
 
 					<!-- Description -->
-					<p class="text-sm text-gray-400">{meta.description}</p>
+					<p class="text-sm">{meta.description}</p>
 
 					<!-- Column definitions -->
 					{#if meta.columns.length > 0}
 						<details class="group">
 							<summary
-								class="cursor-pointer text-xs font-semibold text-primary-400 hover:text-primary-300 select-none list-none flex items-center gap-1"
+								class="cursor-pointer text-xs font-semibold select-none list-none flex items-center gap-1"
 							>
 								<span class="transition-transform group-open:rotate-90 inline-block">▶</span>
 								Column definitions ({meta.columns.length})
@@ -289,17 +285,17 @@
 								<table class="w-full text-xs border-collapse">
 									<thead>
 										<tr class="border-b border-surface-300-700">
-											<th class="text-left py-1 pr-4 font-semibold text-gray-300 w-40">Column</th>
-											<th class="text-left py-1 font-semibold text-gray-300">Description</th>
+											<th class="text-left py-1 pr-4 font-semibold w-40">Column</th>
+											<th class="text-left py-1 font-semibold">Description</th>
 										</tr>
 									</thead>
 									<tbody>
 										{#each meta.columns as col}
 											<tr class="border-b border-surface-200-800 last:border-0">
 												<td class="py-1.5 pr-4 align-top">
-													<code class="font-mono text-primary-400">{col.name}</code>
+													<code class="font-mono">{col.name}</code>
 												</td>
-												<td class="py-1.5 text-gray-400 align-top">{col.description}</td>
+												<td class="py-1.5 text-align-top">{col.description}</td>
 											</tr>
 										{/each}
 									</tbody>
@@ -372,24 +368,22 @@
 		</div>
 	{/if}
 
-	<div class="card preset-filled-surface-100-900 p-5 md:p-6">
-		<h2 class="text-xl md:text-2xl font-bold text-primary-900-100 mb-3">
-			Premium Datasets Available Now
-		</h2>
-		<p class="text-sm md:text-base text-gray-400 mb-3 max-w-3xl">
+	<div class="preset-outlined-surface-100-900 p-5 md:p-6">
+		<h2 class="text-xl md:text-2xl font-bold mb-3">Premium Datasets Available</h2>
+		<p class="text-sm md:text-base mb-3 max-w-3xl">
 			Beyond the free exports on this page, AppGoblin already provides premium datasets for teams
 			who need deeper app monetization and company relationship data.
 		</p>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-300">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
 			<div class="rounded-lg border border-surface-300-700 p-3">
-				<p class="font-semibold text-primary-300 mb-1">App-ads.txt Datasets</p>
+				<p class="font-semibold mb-1">App-ads.txt Datasets</p>
 				<p>
 					Comprehensive app-ads.txt coverage for supply path analysis, fraud checks, and inventory
 					quality workflows.
 				</p>
 			</div>
 			<div class="rounded-lg border border-surface-300-700 p-3">
-				<p class="font-semibold text-primary-300 mb-1">Company SDK & App Lists</p>
+				<p class="font-semibold mb-1">Company SDK & App Lists</p>
 				<p>
 					Relationship datasets mapping companies to the apps that use their SDKs, built for market
 					mapping, prospecting, and competitive analysis.
@@ -406,9 +400,7 @@
 	<!-- Footer note -->
 	<p class="text-xs text-gray-500 max-w-2xl">
 		These datasets are updated periodically. For high-frequency data needs, bulk exports, or custom
-		dataset requests, see the <a href="/pricing" class="underline hover:text-primary-400"
-			>pricing page</a
-		>
-		or <a href="/contact" class="underline hover:text-primary-400">contact us</a>.
+		dataset requests, see the <a href="/pricing" class="underline">pricing page</a>
+		or <a href="/contact" class="underline">contact us</a>.
 	</p>
 </div>

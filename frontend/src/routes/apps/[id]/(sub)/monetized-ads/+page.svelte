@@ -5,7 +5,7 @@
 </script>
 
 <div class="p-2 px-2 md:px-8 lg:px-16">
-	<h1 class="text-3xl font-bold text-primary-900-100">
+	<h1 class="text-3xl font-bold">
 		Monetized Ad Creatives shown by {data.myapp.name}
 	</h1>
 	<p>
@@ -18,7 +18,7 @@
 	{#await data.creatives}
 		loading...
 	{:then creatives}
-		<div class="card preset-tonal p-2 md:p-8 mt-2 md:mt-4">
+		<div class="p-2 md:p-8 mt-2 md:mt-4">
 			<WhiteCard>
 				{#if creatives && creatives.by_publisher.length > 0}
 					<CreativesMonetizedTable data={creatives.by_publisher} />

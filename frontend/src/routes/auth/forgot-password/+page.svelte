@@ -6,7 +6,7 @@
 	export let form: ActionData;
 </script>
 
-<div class="card preset-tonal p-6 md:p-8 space-y-6">
+<div class="p-6 md:p-8 space-y-6">
 	<h2 class="text-2xl font-bold">Forgot your password?</h2>
 	<p class="text-sm text-surface-500">
 		Please enter your email address and we will send you a link to reset your password. If you

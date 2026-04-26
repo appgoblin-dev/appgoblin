@@ -31,9 +31,7 @@
 						<span class="text-sm font-semibold">{companyName} - {sdkName}</span>
 					{/snippet}
 					<div class="p-4 text-xs">
-						<h4 class="font-medium text-primary-900-100 uppercase tracking-wider mb-1">
-							Package Patterns
-						</h4>
+						<h4 class="font-medium uppercase tracking-wider mb-1">Package Patterns</h4>
 						<ul class="list-disc list-inside space-y-0.5">
 							{#if patterns && patterns.package_patterns.length > 0}
 								{#each truncateList(patterns.package_patterns) as pattern}
@@ -53,7 +51,7 @@
 	{#if uniquePaths.length > 0}
 		<WhiteCard>
 			{#snippet title()}
-				<h3 class="text-sm font-semibold text-primary-900-100">Unique Path Patterns</h3>
+				<h3 class="text-sm font-semibold">Unique Path Patterns</h3>
 			{/snippet}
 			<div class="p-4 text-xs">
 				<ul class="list-disc list-inside space-y-0.5">

@@ -323,21 +323,20 @@
 	const cardPaddingLg = `${cardBaseClass} p-6`;
 	const cardPaddingTight = `${cardBaseTightClass} p-4`;
 
-	const textMutedSmClass = 'text-sm text-primary-800-200';
-	const textMutedXsClass = 'text-xs text-primary-800-200';
-	const metricLabelClass = 'text-xs uppercase tracking-wide text-primary-900-100';
-	const metricValueClass = 'text-3xl font-semibold text-primary-900-100';
-	const summaryParagraphClass = 'mt-4 text-sm text-primary-900-100';
-	const sectionSubtitleClass = 'text-xs text-primary-800-200';
-	const tagPillClass =
-		'rounded-full bg-primary-900-100/10 px-3 py-1 text-xs font-medium text-primary-900-100';
+	const textMutedSmClass = 'text-sm -200';
+	const textMutedXsClass = 'text-xs -200';
+	const metricLabelClass = 'text-xs uppercase tracking-wide ';
+	const metricValueClass = 'text-3xl font-semibold ';
+	const summaryParagraphClass = 'mt-4 text-sm ';
+	const sectionSubtitleClass = 'text-xs -200';
+	const tagPillClass = 'rounded-full bg-primary-900-100/10 px-3 py-1 text-xs font-medium ';
 </script>
 
 <div class="space-y-6">
 	<section class={cardPaddingLg}>
 		<div class="flex flex-col gap-2">
 			<h1 class="h4 md:h3">
-				Keyword Overview: <span class="text-primary-900-100">“{keywordDisplay}”</span>
+				Keyword Overview: <span class="">“{keywordDisplay}”</span>
 			</h1>
 			<p class={sectionSubtitleClass}>
 				ASO & SEO signals consolidated from keyword scores and store coverage.
@@ -375,7 +374,7 @@
 			{/each}
 		</div>
 		<div class="mt-6 flex flex-col gap-1">
-			<h3 class="text-sm font-semibold text-primary-900-100">Competitive Benchmarks</h3>
+			<h3 class="text-sm font-semibold">Competitive Benchmarks</h3>
 			<p class={sectionSubtitleClass}>
 				Gauge the strength of incumbent apps before committing to this keyword.
 			</p>
@@ -405,9 +404,9 @@
 				{#each storeSnapshots as snapshot}
 					<div class={cardPaddingTight}>
 						<div class="flex items-center justify-between">
-							<p class="text-lg font-semibold text-primary-900-100">{snapshot.title}</p>
+							<p class="text-lg font-semibold">{snapshot.title}</p>
 						</div>
-						<dl class="mt-4 space-y-2 text-xs text-primary-800-200">
+						<dl class="mt-4 space-y-2 text-xs -200">
 							<div class="flex justify-between">
 								<dt class="font-medium">Competitiveness</dt>
 								<dd>{snapshot.competitiveness}</dd>
@@ -433,7 +432,7 @@
 		<div class="grid gap-4 md:grid-cols-2">
 			<div class={cardPaddingTight}>
 				<div class="mb-3 flex items-center justify-between">
-					<h3 class="text-lg font-semibold text-primary-900-100">Google Play</h3>
+					<h3 class="text-lg font-semibold">Google Play</h3>
 					<span class={sectionSubtitleClass}>{googleCount} apps tracked</span>
 				</div>
 				{#if googleCount}
@@ -444,7 +443,7 @@
 			</div>
 			<div class={cardPaddingTight}>
 				<div class="mb-3 flex items-center justify-between">
-					<h3 class="text-lg font-semibold text-primary-900-100">Apple App Store</h3>
+					<h3 class="text-lg font-semibold">Apple App Store</h3>
 					<span class={sectionSubtitleClass}>{appleCount} apps tracked</span>
 				</div>
 				{#if appleCount}

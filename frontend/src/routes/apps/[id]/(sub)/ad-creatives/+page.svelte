@@ -4,7 +4,7 @@
 </script>
 
 <div class="p-2 px-2 md:p-8">
-	<h1 class="text-3xl font-bold text-primary-900-100">{data.myapp.name}: Ad Creatives</h1>
+	<h1 class="text-3xl font-bold">{data.myapp.name}: Ad Creatives</h1>
 	<p>
 		This is an overview of the creatives that are used to advertise for {data.myapp.name}. Below are
 		the thumbnails of the images and videos found.

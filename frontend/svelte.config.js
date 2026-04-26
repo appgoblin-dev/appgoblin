@@ -17,13 +17,8 @@ const config = {
 			entries: [
 				'/',
 				'/about',
-				'/ad-creatives',
-				'/app-explorer',
 				'/blog',
 				'/contact',
-				'/free-app-datasets',
-				'/keywords',
-				'/pricing',
 				'/reports',
 				'/reports/ad-user-acquisition-2025-august',
 				'/reports/ad-user-acquisition-2025-september',

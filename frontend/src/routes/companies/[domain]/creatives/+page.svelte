@@ -10,7 +10,7 @@
 	let { data }: Props = $props();
 </script>
 
-<p class="text-sm text-surface-600-400 mb-3">
+<p class="text-sm mb-3">
 	Creative monitoring helps identify active campaigns, ad formats, and publisher reach connected to
 	this company in near real-time market activity.
 </p>
@@ -26,7 +26,7 @@
 		{/snippet}
 		<div class="grid grid-cols-3 gap-2 p-2">
 			{#each data.companyCreatives as creative}
-				<div class="card bg-surface-100-900 p-2">
+				<div class="card p-2">
 					<AdCard {creative} />
 				</div>
 			{/each}

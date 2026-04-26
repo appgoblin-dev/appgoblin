@@ -9,19 +9,19 @@
 	<title>Subscription - AppGoblin</title>
 </svelte:head>
 
-<div class="card preset-tonal p-6 md:p-8 space-y-8">
+<div class="p-6 md:p-8 space-y-8">
 	<div>
 		<h1 class="text-2xl font-bold">Subscription</h1>
-		<p class="text-sm text-surface-600-400">Manage your billing and subscription plan</p>
+		<p class="text-sm">Manage your billing and subscription plan</p>
 	</div>
 
 	<section class="space-y-4">
-		<div class="p-6 rounded-lg bg-surface-100-900 border border-surface-200-800">
+		<div class="p-6 rounded-lg border border-surface-100-900">
 			{#if data.subscription}
 				<div class="flex justify-between items-start mb-6">
 					<div>
 						{#if data.subscription.status === 'active' && data.subscription.cancel_at}
-							<p class="text-sm text-warning-500 font-medium mb-1">
+							<p class="text-sm text-warning-700-300 font-medium mb-1">
 								Active (Cancels {new Date(data.subscription.cancel_at).toLocaleDateString()})
 							</p>
 						{:else}
@@ -38,7 +38,7 @@
 
 						<div class="mt-2">
 							{#if data.subscription.cancel_at}
-								<p class="text-sm text-warning-500">Access available until end of period</p>
+								<p class="text-sm text-warning-700-300">Access available until end of period</p>
 							{:else}
 								<p class="text-sm text-surface-500">
 									Renews on {new Date(data.subscription.current_period_end).toLocaleDateString()}
@@ -47,7 +47,7 @@
 						</div>
 					</div>
 					<span
-						class="badge px-3 py-1 font-medium text-white {data.subscription.status === 'active'
+						class="badge px-3 py-1 font-medium {data.subscription.status === 'active'
 							? 'preset-filled-success-500'
 							: 'preset-filled-warning-500'}"
 					>
@@ -64,7 +64,7 @@
 				<div class="text-center py-8">
 					<div class="mb-4">
 						<h3 class="text-lg font-bold">Free Plan</h3>
-						<p class="text-surface-600-400 mt-2">You are currently on the free plan.</p>
+						<p class=" mt-2">You are currently on the free plan.</p>
 					</div>
 					<a href="/pricing" class="btn preset-filled-primary-500">View Pricing & Upgrade</a>
 				</div>

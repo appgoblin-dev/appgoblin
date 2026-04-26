@@ -145,7 +145,7 @@ const cacheAndRoutingHandle: Handle = async ({ event, resolve }) => {
 	// --- Cache control for specific paths ---
 	// Only cache when unauthenticated: layout data includes user, so cached HTML would show
 	// "logged out" on direct navigation even when the user has a valid session.
-	const cacheablePaths = ['/companies', '/about', '/apps', '/ad-creatives'];
+	const cacheablePaths = ['/companies', '/about', '/apps', '/top-mobile-advertisers'];
 	const pathIsCacheable = cacheablePaths.some((path) => event.url.pathname.startsWith(path));
 	const isAuthenticated = event.locals.user !== null;
 

@@ -2,10 +2,8 @@
 	import IconiOS from './svg/IconiOS.svelte';
 	import IconGoogle from './svg/IconGoogle.svelte';
 
-	const buttonSelectedColor =
-		'preset-filled-primary text-primary-900-100 border-2 border-primary-100 rounded-t-md relative top-[1px]';
-
-	const buttonDeselectedColor = '';
+	const buttonSelectedColor = 'p-1 preset-filled-secondary-100-900';
+	const buttonDeselectedColor = 'p-1';
 
 	interface Props {
 		values: any;

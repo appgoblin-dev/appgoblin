@@ -2,18 +2,17 @@
 	import { page } from '$app/state';
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 
-	const topBarFont = 'text-xs md:text-base hover:text-primary-900-100';
-	const topBarHighlightedFont = 'text-xs md:text-base text-primary-900-100';
+	const topBarFont = 'text-xs md:text-base hover:';
+	const topBarHighlightedFont = 'text-xs md:text-base ';
 	const myDivider = 'h-px w-[50%] md:h-12 md:w-px bg-secondary-100-900';
 	const topDivider =
 		'w-full border-t-[1px] md:border-t-0 md:border-b-[1px] border-secondary-100-900 p-1 xxl:p-2';
 	const dropdownItem =
-		'block px-4 py-2 text-xs md:text-base hover:text-primary-900-100 hover:preset-tonal w-full text-left whitespace-nowrap';
+		'block px-4 py-2 text-xs md:text-base hover: hover:preset-tonal w-full text-left whitespace-nowrap';
 	const dropdownHighlightedItem =
-		'block px-4 py-2 text-xs md:text-base text-primary-900-100 preset-tonal w-full text-left whitespace-nowrap';
-	const sectionLabel = 'text-xs font-semibold text-surface-400-600 uppercase tracking-widest pt-1';
-	const dropdownSectionLabel =
-		'px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-widest text-surface-400-600';
+		'block px-4 py-2 text-xs md:text-base  preset-tonal w-full text-left whitespace-nowrap';
+	const sectionLabel = 'text-xs font-semibold uppercase tracking-widest pt-1';
+	const dropdownSectionLabel = 'px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-widest';
 	const dropdownSectionDivider = 'mx-4 my-1 border-t border-secondary-100-900';
 
 	function isHighlighted(...paths: string[]) {
@@ -25,7 +24,7 @@
 
 {#if flat || hideLinks}
 	<!-- Flat list used inside the mobile hamburger menu -->
-	<div class="flex flex-col gap-1 text-center items-center {topDivider} mx-2">
+	<div class="flex flex-col gap-1 {topDivider} mx-2">
 		{#if !hideLinks}
 			<!-- RANKINGS group -->
 			<p class={sectionLabel}>Rankings</p>
@@ -56,7 +55,7 @@
 			<p class={sectionLabel}>Intelligence</p>
 			<p class={sectionLabel}>Company Rankings</p>
 			<a href="/companies" class={isHighlighted('/companies') ? topBarHighlightedFont : topBarFont}
-				>ALL COMPANY RANKS</a
+				>COMPANY RANKS</a
 			>
 			<div class={myDivider}></div>
 			<a
@@ -102,7 +101,11 @@
 			<p class={sectionLabel}>Apps</p>
 			<a
 				href="/ad-creatives"
-				class={isHighlighted('/ad-creatives') ? topBarHighlightedFont : topBarFont}
+				class={isHighlighted('/ad-creatives') ? topBarHighlightedFont : topBarFont}>AD CREATIVES</a
+			>
+			<a
+				href="/top-mobile-advertisers"
+				class={isHighlighted('/top-mobile-advertisers') ? topBarHighlightedFont : topBarFont}
 				>TOP ADVERTISERS</a
 			>
 			<div class={myDivider}></div>
@@ -185,6 +188,7 @@
 				class="flex items-center gap-0.5 {isHighlighted(
 					'/companies',
 					'/ad-creatives',
+					'/top-mobile-advertisers',
 					'/app-explorer',
 					'/sdks'
 				)
@@ -194,55 +198,63 @@
 				INTELLIGENCE <ChevronDown class="h-3 w-3 transition-transform group-hover:rotate-180" />
 			</button>
 			<div class="absolute left-0 top-full pt-1 hidden group-hover:block z-50 min-w-max">
-				<div class="card bg-surface-50-950 shadow-xl rounded-md py-1">
+				<div class="bg-surface-50-950 shadow-xl py-1">
 					<p class={dropdownSectionLabel}>Company Rankings</p>
 					<a
 						href="/companies"
 						class={isHighlighted('/companies') ? dropdownHighlightedItem : dropdownItem}
-						>All Company Ranks</a
+						>All Companies</a
 					>
-					<a
-						href="/companies/types/ad-networks"
-						class={isHighlighted('/companies/types/ad-networks')
-							? dropdownHighlightedItem
-							: dropdownItem}>Ad Networks</a
-					>
-					<a
-						href="/companies/types/ad-attribution"
-						class={isHighlighted('/companies/types/ad-attribution')
-							? dropdownHighlightedItem
-							: dropdownItem}>Analytics: Attribution</a
-					>
-					<a
-						href="/companies/types/product-analytics"
-						class={isHighlighted('/companies/types/product-analytics')
-							? dropdownHighlightedItem
-							: dropdownItem}>Analytics</a
-					>
-					<a
-						href="/companies/types/development-tools"
-						class={isHighlighted('/companies/types/development-tools')
-							? dropdownHighlightedItem
-							: dropdownItem}>Development Tools</a
-					>
-					<a
-						href="/companies/types/mediation"
-						class={isHighlighted('/companies/types/mediation')
-							? dropdownHighlightedItem
-							: dropdownItem}>Mediation Platforms</a
-					>
-					<a
-						href="/companies/types/business-tools"
-						class={isHighlighted('/companies/types/business-tools')
-							? dropdownHighlightedItem
-							: dropdownItem}>Business Tools</a
-					>
+					<div class="ml-2">
+						<a
+							href="/companies/types/ad-networks"
+							class={isHighlighted('/companies/types/ad-networks')
+								? dropdownHighlightedItem
+								: dropdownItem}>Ad Networks</a
+						>
+						<a
+							href="/companies/types/ad-attribution"
+							class={isHighlighted('/companies/types/ad-attribution')
+								? dropdownHighlightedItem
+								: dropdownItem}>Analytics: Attribution</a
+						>
+						<a
+							href="/companies/types/product-analytics"
+							class={isHighlighted('/companies/types/product-analytics')
+								? dropdownHighlightedItem
+								: dropdownItem}>Analytics</a
+						>
+						<a
+							href="/companies/types/development-tools"
+							class={isHighlighted('/companies/types/development-tools')
+								? dropdownHighlightedItem
+								: dropdownItem}>Development Tools</a
+						>
+						<a
+							href="/companies/types/mediation"
+							class={isHighlighted('/companies/types/mediation')
+								? dropdownHighlightedItem
+								: dropdownItem}>Mediation Platforms</a
+						>
+						<a
+							href="/companies/types/business-tools"
+							class={isHighlighted('/companies/types/business-tools')
+								? dropdownHighlightedItem
+								: dropdownItem}>Business Tools</a
+						>
+					</div>
 					<div class={dropdownSectionDivider}></div>
 					<p class={dropdownSectionLabel}>Apps</p>
 					<a
 						href="/ad-creatives"
 						class={isHighlighted('/ad-creatives') ? dropdownHighlightedItem : dropdownItem}
-						>Top Advertisers</a
+						>Ad Creatives</a
+					>
+					<a
+						href="/top-mobile-advertisers"
+						class={isHighlighted('/top-mobile-advertisers')
+							? dropdownHighlightedItem
+							: dropdownItem}>Top Mobile Advertisers</a
 					>
 					<a
 						href="/app-explorer"

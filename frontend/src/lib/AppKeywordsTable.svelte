@@ -140,8 +140,8 @@
 
 <div class="space-y-4">
 	<div class="overflow-x-auto rounded-lg border border-surface-300-700">
-		<table class="w-full min-w-[720px] text-xs md:text-lg text-primary-900-100">
-			<thead class="bg-surface-200-800 text-primary-900-100">
+		<table class="w-full min-w-[720px] text-xs md:text-lg">
+			<thead class="bg-surface-200-800">
 				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 					<tr>
 						{#each headerGroup.headers as header (header.id)}
@@ -171,7 +171,7 @@
 								>
 									View Keyword Global Page
 								</a>
-								<p class="mt-1 text-xs text-primary-800-200">Leaves this app dashboard</p>
+								<p class="mt-1 text-xs -200">Leaves this app dashboard</p>
 							{:else if storeId}
 								<div class="grid grid-cols-1 space-y-1">
 									<a
@@ -200,16 +200,16 @@
 						</td>
 						<td class="px-4 py-3 align-top text-sm md:text-lg">
 							{formatScore(row.original.competitiveness_score)}
-							<p class="text-xs text-primary-800-200 mt-1">
+							<p class="text-xs -200 mt-1">
 								{row.original.app_count?.toLocaleString()} competing apps
 							</p>
 							{#if row.original.median_competitor_installs}
-								<p class="mt-1 text-xs text-primary-800-200">
+								<p class="mt-1 text-xs -200">
 									Median installs: {formatScore(row.original.median_competitor_installs, 0)}
 								</p>
 							{/if}
 							{#if row.original.avg_competitor_rating}
-								<p class="text-xs text-primary-800-200">
+								<p class="text-xs -200">
 									Avg rating: {formatScore(row.original.avg_competitor_rating, 1)}
 								</p>
 							{/if}
@@ -223,7 +223,7 @@
 						<td class="px-4 py-3 align-top">
 							<div class="space-y-1">
 								<p class="font-medium">{formatScore(row.original.major_competitors, 0)}</p>
-								<p class="text-xs text-primary-800-200">major competitor apps</p>
+								<p class="text-xs -200">major competitor apps</p>
 							</div>
 						</td>
 					</tr>

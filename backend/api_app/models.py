@@ -375,6 +375,7 @@ class CompanyCategoryOverview:
     """Contains a dictionary of categories, each with their associated statistics."""
 
     categories: dict[str, CategoryCompanyStats] = field(default_factory=dict)
+    company_types: list[str] = field(default_factory=list)
     adstxt_ad_domain_overview: dict | None = None
     adstxt_publishers_overview: dict | None = None
     mediation_adapters: dict | None = None

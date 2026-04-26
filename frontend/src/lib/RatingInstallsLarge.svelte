@@ -30,13 +30,13 @@
 </script>
 
 <div class="inline-block w-full">
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 p-3 md:p-4 text-primary-900-100">
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 p-3 md:p-4">
 		<!-- Primary Metrics -->
 		<div class="space-y-3">
 			<!-- Installs -->
 			<div class="flex items-start sm:items-center gap-2">
 				{#if app.installs && app.installs != 0}
-					<div class="text-primary-900-100">
+					<div class="">
 						<IconDownload />
 					</div>
 					<div class="leading-tight">
@@ -44,7 +44,7 @@
 						<span class="text-sm ml-1">installs</span>
 					</div>
 				{:else if app.rating_count != 0}
-					<div class="text-primary-900-100">
+					<div class="">
 						<IconDownload />
 					</div>
 					<div class="leading-tight">
@@ -54,7 +54,7 @@
 						<span class="text-sm ml-1">est. installs</span>
 					</div>
 				{:else}
-					<div class="text-primary-900-100">
+					<div class="">
 						<IconDownload />
 					</div>
 					<span class="text-sm">Installs not yet available</span>
@@ -70,7 +70,7 @@
 						<span class="text-sm ml-1">ratings</span>
 					</div>
 				{:else}
-					<Star class="w-5 h-5 text-primary-900-100" />
+					<Star class="w-5 h-5 " />
 					<span class="text-sm">Ratings not yet available</span>
 				{/if}
 			</div>
@@ -89,8 +89,8 @@
 						<span class="text-sm ml-1">monthly active users</span>
 					</div>
 				{:else}
-					<UsersIcon class="w-5 h-5 text-primary-900-100" />
-					<span class="text-primary-900-100 text-sm">MAU not available</span>
+					<UsersIcon class="w-5 h-5 " />
+					<span class=" text-sm">MAU not available</span>
 				{/if}
 			</div>
 
@@ -125,16 +125,16 @@
 								<span class="w-2 h-2 rounded-full bg-success-800-200"></span>
 								<span class="text-success-800-200">IAP {monthlyIapRevenueShare}%</span>
 							</span>
-							<span class="text-primary-900-100">·</span>
+							<span class="">·</span>
 							<span class="flex items-center gap-1">
 								<span class="w-2 h-2 rounded-full bg-primary-800-200"></span>
-								<span class="text-primary-800-200">Ad {monthlyAdRevenueShare}%</span>
+								<span class="-200">Ad {monthlyAdRevenueShare}%</span>
 							</span>
 						</div>
 					</div>
 				{:else}
-					<DollarSignIcon class="w-5 h-5 text-primary-900-100" />
-					<span class="text-primary-900-100 text-sm">Revenue not available</span>
+					<DollarSignIcon class="w-5 h-5 " />
+					<span class=" text-sm">Revenue not available</span>
 				{/if}
 			</div>
 		</div>

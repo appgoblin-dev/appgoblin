@@ -2,7 +2,6 @@
 	import type { CompaniesOverview } from '../../../types';
 	import CompaniesOverviewTable from '$lib/CompaniesOverviewTable.svelte';
 	import CompaniesTableGrid from '$lib/CompaniesTableGrid.svelte';
-	import { formatNumber } from '$lib/utils/formatNumber';
 	interface Props {
 		data: CompaniesOverview;
 	}
@@ -72,7 +71,7 @@
 {#if typeof data.companiesOverview == 'string'}
 	<p class="text-red-500 text-center">Failed to load companies details.</p>
 {:else if data.companiesOverview && data.companiesOverview.categories}
-	<p class="text-sm text-surface-600-400 mb-4">
+	<p class="text-sm mb-4">
 		Explore verified ad networks, analytics platforms, mediation providers, and developer tooling
 		across millions of mobile apps. This view is updated with SDK, API, and app-ads.txt intelligence
 		to help researchers, growth teams, and fraud analysts compare market presence and technical
@@ -83,27 +82,6 @@
 			{#if data.companiesOverview && data.companiesOverview.companies_overview.length > 0}
 				<CompaniesOverviewTable data={data.companiesOverview.companies_overview} />
 			{/if}
-		{/snippet}
-
-		{#snippet sdkAndroidTotalApps()}
-			Android Companies: {formatNumber(
-				data.companiesOverview.categories.categories.all.sdk_android_total_companies
-			)}
-		{/snippet}
-		{#snippet sdkIosTotalApps()}
-			iOS Companies: {formatNumber(
-				data.companiesOverview.categories.categories.all.sdk_ios_total_companies
-			)}
-		{/snippet}
-		{#snippet adstxtAndroidTotalApps()}
-			Android Companies: {formatNumber(
-				data.companiesOverview.categories.categories.all.adstxt_direct_android_total_companies
-			)}
-		{/snippet}
-		{#snippet adstxtIosTotalApps()}
-			iOS Companies: {formatNumber(
-				data.companiesOverview.categories.categories.all.adstxt_direct_ios_total_companies
-			)}
 		{/snippet}
 	</CompaniesTableGrid>
 {/if}

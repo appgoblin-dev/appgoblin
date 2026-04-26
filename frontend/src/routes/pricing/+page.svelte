@@ -7,7 +7,6 @@
 
 	let titlePadding = 'p-2 md:p-4';
 	let contentPadding = 'p-2 md:p-4';
-	let cardPadding = 'p-2 md:p-4';
 
 	let loading = false;
 	let activePriceKey: string | null = null;
@@ -189,155 +188,145 @@
 </svelte:head>
 
 <div class="px-2 lg:px-4 xl:px-16 grid grid-cols-1 gap-4 md:gap-4 lg:gap-8">
-	<h1 class="text-3xl font-bold text-primary-900-100">Pricing</h1>
+	<h1 class="h1 {titlePadding}">Plans & Pricing</h1>
+	<div class={contentPadding}>
+		<p>
+			For alternative payment options (Invoice, PayPal, etc.), please reach out to us at <a
+				href="mailto:contact@appgoblin.info">contact@appgoblin.info</a
+			>.
+		</p>
 
-	<div class="card preset-filled-surface-100-900 {cardPadding}">
-		<h2 class="h2 {titlePadding}">Plans & Pricing</h2>
-		<div class={contentPadding}>
-			<p>
-				For alternative payment options (Invoice, PayPal, etc.), please reach out to us at <a
-					href="mailto:contact@appgoblin.info">contact@appgoblin.info</a
-				>.
-			</p>
+		<br />
 
-			<br />
+		<!-- Features Table -->
+		<div class="overflow-x-auto">
+			<div
+				class="grid gap-px border border-surface-500/20"
+				style="grid-template-columns: 300px repeat(5, 1fr); min-width: 900px;"
+			>
+				<!-- Plan header row -->
+				<div class="p-2 bg-surface-50-950 font-semibold text-xs">Feature</div>
+				{#each plans as plan (plan.key)}
+					<div
+						class="p-2 border-l border-surface-500/20 bg-surface-50-950 text-center {plan.featured
+							? 'bg-primary-500/5'
+							: ''}"
+					>
+						<p class="text-xs uppercase tracking-wide opacity-60">{plan.name}</p>
+						<p class="text-base font-semibold leading-tight mt-1">
+							{plan.price}<span class="text-xs opacity-60 ml-1">{plan.period || ''}</span>
+						</p>
+						<p class="text-xs opacity-70 mt-1 leading-snug">{plan.description}</p>
+					</div>
+				{/each}
 
-			<!-- Features Table -->
-			<div class="overflow-x-auto">
-				<div
-					class="grid gap-px border border-surface-500/20"
-					style="grid-template-columns: 300px repeat(5, 1fr); min-width: 900px;"
-				>
-					<!-- Plan header row -->
-					<div class="p-2 bg-surface-50-950 font-semibold text-xs">Feature</div>
+				<!-- Feature rows -->
+				{#each features as feature}
+					<!-- Feature name cell -->
+					<div class="p-2 bg-surface-50-950 text-xs md:text-sm">{feature.name}</div>
+
+					<!-- Feature checkmark cells -->
 					{#each plans as plan (plan.key)}
+						{@const hasFeature = getFeatureValue(feature, plan.key)}
 						<div
 							class="p-2 border-l border-surface-500/20 bg-surface-50-950 text-center {plan.featured
 								? 'bg-primary-500/5'
 								: ''}"
 						>
-							<p class="text-xs uppercase tracking-wide opacity-60">{plan.name}</p>
-							<p class="text-base font-semibold leading-tight mt-1">
-								{plan.price}<span class="text-xs opacity-60 ml-1">{plan.period || ''}</span>
-							</p>
-							<p class="text-xs opacity-70 mt-1 leading-snug">{plan.description}</p>
-						</div>
-					{/each}
-
-					<!-- Feature rows -->
-					{#each features as feature}
-						<!-- Feature name cell -->
-						<div class="p-2 bg-surface-50-950 text-xs md:text-sm">{feature.name}</div>
-
-						<!-- Feature checkmark cells -->
-						{#each plans as plan (plan.key)}
-							{@const hasFeature = getFeatureValue(feature, plan.key)}
-							<div
-								class="p-2 border-l border-surface-500/20 bg-surface-50-950 text-center {plan.featured
-									? 'bg-primary-500/5'
-									: ''}"
-							>
-								{#if hasFeature}
-									<Check
-										class="w-4 h-4 mx-auto text-success-700-300 opacity-75"
-										aria-hidden="true"
-									/>
-									<span class="sr-only">Included</span>
-								{:else}
-									<X class="w-4 h-4 mx-auto opacity-20" aria-hidden="true" />
-									<span class="sr-only">Not included</span>
-								{/if}
-							</div>
-						{/each}
-					{/each}
-
-					<!-- CTA row -->
-					<div class="p-2 bg-surface-50-950 font-semibold text-xs">Choose Plan</div>
-					{#each plans as plan (plan.key)}
-						<div
-							class="p-2 border-l border-surface-500/20 bg-surface-50-950 {plan.featured
-								? 'bg-primary-500/5'
-								: ''}"
-						>
-							{#if plan.included}
-								{#if !data?.user}
-									<a href="/auth/signup" class="btn preset-filled-primary-500 w-full text-xs"
-										>Create Account</a
-									>
-								{:else}
-									<p class="text-center text-xs opacity-60">Included with your account</p>
-								{/if}
+							{#if hasFeature}
+								<Check
+									class="w-4 h-4 md:w-6 md:h-6 mx-auto text-success-700-300 "
+									aria-hidden="true"
+								/>
+								<span class="sr-only">Included</span>
 							{:else}
-								<form
-									method="POST"
-									action="?/subscribe"
-									use:enhance={subscribeEnhance}
-									data-price-key={plan.key}
-								>
-									<input type="hidden" name="priceKey" value={plan.key} />
-									<button
-										type="submit"
-										disabled={loading}
-										class="btn preset-filled-primary-500 w-full text-xs"
-									>
-										{loading && activePriceKey === plan.key ? 'Redirecting...' : 'Get ' + plan.name}
-									</button>
-								</form>
+								<X class="w-3 h-3 md:w-4 md:h-4 mx-auto opacity-20" aria-hidden="true" />
+								<span class="sr-only">Not included</span>
 							{/if}
 						</div>
 					{/each}
-				</div>
+				{/each}
+
+				<!-- CTA row -->
+				<div class="p-2 bg-surface-50-950 font-semibold text-xs">Choose Plan</div>
+				{#each plans as plan (plan.key)}
+					<div
+						class="p-2 border-l border-surface-500/20 bg-surface-50-950 {plan.featured
+							? 'bg-primary-500/5'
+							: ''}"
+					>
+						{#if plan.included}
+							{#if !data?.user}
+								<a href="/auth/signup" class="btn preset-tonal-primary w-full">Create Account</a>
+							{:else}
+								<p class="text-center text-xs opacity-60">Included with your account</p>
+							{/if}
+						{:else}
+							<form
+								method="POST"
+								action="?/subscribe"
+								use:enhance={subscribeEnhance}
+								data-price-key={plan.key}
+							>
+								<input type="hidden" name="priceKey" value={plan.key} />
+								<button type="submit" disabled={loading} class="btn preset-tonal-primary w-full">
+									{loading && activePriceKey === plan.key ? 'Redirecting...' : 'Get ' + plan.name}
+								</button>
+							</form>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		</div>
+
+		<div class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+			<div class="card preset-outlined-surface-100-900 p-5 space-y-3">
+				<h3 class="text-lg font-semibold">For Researchers, Journalists, and Academics</h3>
+				<p class="text-sm">
+					AppGoblin supports independent research and journalism. If you're a student, academic
+					researcher, or investigative journalist working on mobile advertising, privacy, or app
+					ecosystems, you're welcome to reach out for collaboration.
+				</p>
 			</div>
 
-			<div class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-				<div class="card preset-filled-surface-50-950 p-5 space-y-3">
-					<h3 class="text-lg font-semibold">For Researchers, Journalists, and Academics</h3>
-					<p class="text-sm text-surface-600-400">
-						AppGoblin supports independent research and journalism. If you're a student, academic
-						researcher, or investigative journalist working on mobile advertising, privacy, or app
-						ecosystems, you're welcome to reach out for collaboration.
-					</p>
-				</div>
-
-				<div class="card preset-filled-surface-50-950 p-5 space-y-3">
-					<h3 class="text-lg font-semibold">Free Resources</h3>
-					<p class="text-sm text-surface-600-400">
-						The majority of AppGoblin's marketing data and ASO features are free to browse. You can
-						also use the
-						<a
-							href="/free-app-datasets"
-							class="underline decoration-primary-500/60 hover:decoration-primary-500"
-						>
-							free app datasets page
-						</a>
-						for free app metrics and app description exports with a free account. Additional open source
-						data sets are available for free download at
-						<a
-							href="https://github.com/appgoblin-dev/appgoblin-data"
-							class="underline decoration-primary-500/60 hover:decoration-primary-500"
-						>
-							github.com/appgoblin-dev/appgoblin-data
-						</a>
-						. Feel free to reach out if there are other parts of data you'd like to see exported.
-					</p>
-					<p class="text-sm text-surface-600-400">
-						The code is maintained open source for transparency. The data is collected with
-						<a
-							href="https://github.com/appgoblin-dev/adscrawler"
-							class="underline decoration-primary-500/60 hover:decoration-primary-500"
-						>
-							github.com/appgoblin-dev/adscrawler
-						</a>
-						and the website code can be found at
-						<a
-							href="https://github.com/appgoblin-dev/appgoblin"
-							class="underline decoration-primary-500/60 hover:decoration-primary-500"
-						>
-							github.com/appgoblin-dev/appgoblin
-						</a>
-						.
-					</p>
-				</div>
+			<div class="card preset-outlined-surface-100-900 p-5 space-y-3">
+				<h3 class="text-lg font-semibold">Free Resources</h3>
+				<p class="text-sm">
+					Many of AppGoblin's marketing data and ASO features are free to browse. You can also use
+					the
+					<a
+						href="/free-app-datasets"
+						class="underline decoration-primary-500/60 hover:decoration-primary-500"
+					>
+						free app datasets page
+					</a>
+					for free app metrics and app description exports with a free account. Additional open source
+					data sets are available for free download at
+					<a
+						href="https://github.com/appgoblin-dev/appgoblin-data"
+						class="underline decoration-primary-500/60 hover:decoration-primary-500"
+					>
+						github.com/appgoblin-dev/appgoblin-data
+					</a>
+					. Feel free to reach out if there are other parts of data you'd like to see exported.
+				</p>
+				<p class="text-sm">
+					The code is maintained open source for transparency. The data is collected with
+					<a
+						href="https://github.com/appgoblin-dev/adscrawler"
+						class="underline decoration-primary-500/60 hover:decoration-primary-500"
+					>
+						github.com/appgoblin-dev/adscrawler
+					</a>
+					and the website code can be found at
+					<a
+						href="https://github.com/appgoblin-dev/appgoblin"
+						class="underline decoration-primary-500/60 hover:decoration-primary-500"
+					>
+						github.com/appgoblin-dev/appgoblin
+					</a>
+					.
+				</p>
 			</div>
 		</div>
 	</div>

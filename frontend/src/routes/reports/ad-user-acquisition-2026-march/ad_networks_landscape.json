@@ -1,0 +1,114 @@
+[
+  {
+    "ad_network_name": "Google",
+    "ad_network_domain": "google.com",
+    "company_logo_url": "company-logos/google.com/logo_200x200.jpeg",
+    "all_domains": [
+      "google.com"
+    ],
+    "publisher_count": 364,
+    "advertiser_count": 70,
+    "creatives_count": 401
+  },
+  {
+    "ad_network_name": "AppLovin",
+    "ad_network_domain": "applovin.com",
+    "company_logo_url": "company-logos/applovin.com/logo_200x200.jpeg",
+    "all_domains": [
+      "applovin.com"
+    ],
+    "publisher_count": 121,
+    "advertiser_count": 0,
+    "creatives_count": 525
+  },
+  {
+    "ad_network_name": "RTB House",
+    "ad_network_domain": "rtbhouse.com",
+    "company_logo_url": "company-logos/rtbhouse.com/logo_200x200.jpeg",
+    "all_domains": [
+      "rtbhouse.com"
+    ],
+    "publisher_count": 74,
+    "advertiser_count": 1,
+    "creatives_count": 10
+  },
+  {
+    "ad_network_name": "Smadex",
+    "ad_network_domain": "smadex.com",
+    "company_logo_url": "company-logos/smadex.com/logo_200x200.jpeg",
+    "all_domains": [
+      "smadex.com"
+    ],
+    "publisher_count": 35,
+    "advertiser_count": 2,
+    "creatives_count": 8
+  },
+  {
+    "ad_network_name": "Criteo",
+    "ad_network_domain": "criteo.com",
+    "company_logo_url": "company-logos/criteo.com/logo_200x200.jpeg",
+    "all_domains": [
+      "criteo.com"
+    ],
+    "publisher_count": 30,
+    "advertiser_count": 0,
+    "creatives_count": 21
+  },
+  {
+    "ad_network_name": "Remerge",
+    "ad_network_domain": "remerge.io",
+    "company_logo_url": "company-logos/remerge.io/logo_200x200.jpeg",
+    "all_domains": [
+      "remerge.io"
+    ],
+    "publisher_count": 23,
+    "advertiser_count": 1,
+    "creatives_count": 20
+  },
+  {
+    "ad_network_name": "Unity",
+    "ad_network_domain": "unity.com",
+    "company_logo_url": "company-logos/unity.com/logo_200x200.jpeg",
+    "all_domains": [
+      "unity.com",
+      "unity3d.com"
+    ],
+    "publisher_count": 19,
+    "advertiser_count": 6,
+    "creatives_count": 36
+  },
+  {
+    "ad_network_name": "Mobvista",
+    "ad_network_domain": "mobvista.com",
+    "company_logo_url": "company-logos/mobvista.com/logo_200x200.jpeg",
+    "all_domains": [
+      "mintegral.com"
+    ],
+    "publisher_count": 18,
+    "advertiser_count": 3,
+    "creatives_count": 30
+  },
+  {
+    "ad_network_name": "Affle",
+    "ad_network_domain": "affle.com",
+    "company_logo_url": "company-logos/affle.com/logo_200x200.jpeg",
+    "all_domains": [
+      "revx.io",
+      "youappi.com"
+    ],
+    "publisher_count": 17,
+    "advertiser_count": 1,
+    "creatives_count": 14
+  },
+  {
+    "ad_network_name": "Publicis Groupe",
+    "ad_network_domain": "publicisgroupe.com",
+    "company_logo_url": null,
+    "all_domains": [
+      "epsilon.com"
+    ],
+    "publisher_count": 11,
+    "advertiser_count": 0,
+    "creatives_count": 9
+  }
+]

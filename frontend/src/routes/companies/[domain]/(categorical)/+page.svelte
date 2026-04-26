@@ -38,7 +38,7 @@
 	let associatedDomains = $derived(data.companyTree?.domains ?? []);
 </script>
 
-<p class="text-sm text-surface-600-400 mb-4">
+<p class="text-sm mb-4">
 	AppGoblin intelligence for {companyName} SDKs, API calls, app-ads.txt records. Browse {companyName}
 	creatives, and mediation relationships tied to real mobile app IDs so you can evaluate technical footprint
 	and competitive position quickly.
@@ -128,16 +128,13 @@
 			{/snippet}
 			<div class="p-2">
 				{#if hasHierarchyContext}
-					<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Hierarchy</p>
-					<div class="mb-4 rounded-md border border-surface-200-800 bg-surface-100-900 p-3">
-						<HierarchyTree
-							companyTree={data.companyTree}
-							{hasHigherLevelParent}
-							{queriedIsMappedCompany}
-							{associatedDomains}
-							showTruncated={true}
-						/>
-					</div>
+					<HierarchyTree
+						companyTree={data.companyTree}
+						{hasHigherLevelParent}
+						{queriedIsMappedCompany}
+						{associatedDomains}
+						showTruncated={true}
+					/>
 				{/if}
 
 				{#if typeof data.companyTree == 'string'}
@@ -168,15 +165,13 @@
 		<p class="text-sm text-gray-600 mb-3">
 			Complete company ownership structure and all associated domains.
 		</p>
-		<div class="p-4 rounded-md border border-surface-200-800 bg-surface-100-900">
-			<HierarchyTree
-				companyTree={data.companyTree}
-				{hasHigherLevelParent}
-				{queriedIsMappedCompany}
-				{associatedDomains}
-				showTruncated={false}
-			/>
-		</div>
+		<HierarchyTree
+			companyTree={data.companyTree}
+			{hasHigherLevelParent}
+			{queriedIsMappedCompany}
+			{associatedDomains}
+			showTruncated={false}
+		/>
 	</section>
 {/if}
 
@@ -186,9 +181,7 @@
 		<Dialog.Trigger class="btn preset-filled">APP FILTERS</Dialog.Trigger>
 		<Portal>
 			<Dialog.Positioner class="fixed inset-0 z-50 flex justify-start">
-				<Dialog.Content
-					class="h-screen card bg-surface-100-900 w-sm p-4 space-y-4 shadow-xl max-w-[320px]"
-				>
+				<Dialog.Content class="h-screen card w-sm p-4 space-y-4 shadow-xl max-w-[320px]">
 					<SideBarCompanies myCatData={data.appCats} />
 				</Dialog.Content>
 			</Dialog.Positioner>

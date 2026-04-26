@@ -37,7 +37,7 @@
 			<p class="text-sm text-surface-500">No scan requests yet.</p>
 		{:else}
 			{#each scans as scan (scan.id)}
-				<div class="rounded-lg bg-surface-100-900 p-3">
+				<div class="rounded-lg border border-surface-100-900 p-3">
 					<p class="font-medium">
 						{#if scan.app_name}
 							<a class="hover:underline" href={`/apps/${scan.store_id}`}>{scan.app_name}</a>

@@ -17,7 +17,7 @@
 	rel="noopener noreferrer"
 	class="flex items-center"
 >
-	<span class="inline-flex items-center gap-1 text-tertiary-400-600 hover:text-primary-900-100">
+	<span class="inline-flex items-center gap-1 text-tertiary-400-600 hover:">
 		{replace_domain_parts(domain)}
 		<ExternalLinkSvg />
 	</span>
