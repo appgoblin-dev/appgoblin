@@ -71,8 +71,8 @@ from dbcon.queries import (
 )
 from dbcon.static import (
     get_adtech_categories,
-    get_company_categories,
     get_company_api_call_countrys,
+    get_company_categories,
     get_company_countries,
     get_company_logos_df,
     get_company_open_source,
@@ -721,6 +721,78 @@ def get_company_types_for_domain(state: State, company_domain: str) -> list[str]
     return sorted(company_types)
 
 
+def build_company_overview_payload(
+    state: State, company_domain: str, category: str | None = None
+) -> CompanyCategoryOverview:
+    """Build the company overview payload shared by v1 and private endpoints."""
+    df = get_company_stats(
+        state=state, company_domain=company_domain, app_category=category
+    )
+
+    if df["tag_source"].str.contains("app_ads").any():
+        ad_domain_overview = get_company_adstxt_ad_domain_overview(
+            state=state, ad_domain_url=company_domain
+        )
+        final_ad_domain_overview = (
+            ad_domain_overview.set_index(["store", "relationship"])
+            .groupby(level=[0, 1])
+            .apply(lambda x: x.iloc[0].dropna().to_dict())
+            .unstack(level=0)
+            .to_dict()
+        )
+        publishers_overview = get_company_adstxt_publishers_overview(
+            state=state, ad_domain_url=company_domain
+        )
+        final_publishers_overview = (
+            publishers_overview.set_index(["store", "relationship"])
+            .groupby(level=[0, 1])
+            .apply(lambda x: x.to_dict(orient="records"))
+            .unstack(level=0)
+            .to_dict()
+        )
+    else:
+        final_ad_domain_overview = None
+        final_publishers_overview = None
+
+    mediation_companies = get_mediation_companies(state)
+
+    if company_domain in mediation_companies["company_domain"].tolist():
+        mediation_adapters = get_mediation_adapters(state, company_domain)
+        if category is None:
+            mediation_adapters = (
+                mediation_adapters.groupby(
+                    [
+                        "adapter_company_domain",
+                        "adapter_company_name",
+                        "adapter_logo_url",
+                    ],
+                    dropna=False,
+                )[["app_count"]]
+                .sum()
+                .reset_index()
+            )
+            mediation_adapters = mediation_adapters[mediation_adapters["app_count"] > 1]
+        else:
+            mediation_adapters = mediation_adapters[
+                mediation_adapters["app_category"] == category
+            ]
+
+        mediation_adapters = mediation_adapters.sort_values(
+            by="app_count", ascending=False
+        ).to_dict(orient="records")
+    else:
+        mediation_adapters = None
+
+    overview = make_company_stats(df=df)
+    overview.company_types = get_company_types_for_domain(
+        state=state, company_domain=company_domain
+    )
+    overview.adstxt_ad_domain_overview = final_ad_domain_overview
+    overview.adstxt_publishers_overview = final_publishers_overview
+    overview.mediation_adapters = mediation_adapters
+    return overview
+
+
 class CompaniesController(Controller):
     """API EndPoint return for all ad tech companies."""
 
@@ -798,74 +870,9 @@ class CompaniesController(Controller):
         """
         start = time.perf_counter() * 1000
 
-        df = get_company_stats(
-            state=state, company_domain=company_domain, app_category=category
+        overview = build_company_overview_payload(
+            state=state, company_domain=company_domain, category=category
         )
-
-        if df["tag_source"].str.contains("app_ads").any():
-            ad_domain_overview = get_company_adstxt_ad_domain_overview(
-                state=state, ad_domain_url=company_domain
-            )
-            final_ad_domain_overview = (
-                ad_domain_overview.set_index(["store", "relationship"])
-                .groupby(level=[0, 1])
-                .apply(lambda x: x.iloc[0].dropna().to_dict())
-                .unstack(level=0)
-                .to_dict()
-            )
-            publishers_overview = get_company_adstxt_publishers_overview(
-                state=state, ad_domain_url=company_domain
-            )
-            final_publishers_overview = (
-                publishers_overview.set_index(["store", "relationship"])
-                .groupby(level=[0, 1])
-                .apply(lambda x: x.to_dict(orient="records"))
-                .unstack(level=0)
-                .to_dict()
-            )
-        else:
-            final_ad_domain_overview = None
-            final_publishers_overview = None
-
-        mediation_companies = get_mediation_companies(state)
-
-        if company_domain in mediation_companies["company_domain"].tolist():
-            mediation_adapters = get_mediation_adapters(state, company_domain)
-            if category is None:
-                mediation_adapters = (
-                    mediation_adapters.groupby(
-                        [
-                            "adapter_company_domain",
-                            "adapter_company_name",
-                            "adapter_logo_url",
-                        ],
-                        dropna=False,
-                    )[["app_count"]]
-                    .sum()
-                    .reset_index()
-                )
-                mediation_adapters = mediation_adapters[
-                    mediation_adapters["app_count"] > 1
-                ]
-            else:
-                mediation_adapters = mediation_adapters[
-                    mediation_adapters["app_category"] == category
-                ]
-
-            mediation_adapters = mediation_adapters.sort_values(
-                by="app_count", ascending=False
-            ).to_dict(orient="records")
-        else:
-            mediation_adapters = None
-
-        overview = make_company_stats(df=df)
-
-        overview.company_types = get_company_types_for_domain(
-            state=state, company_domain=company_domain
-        )
-        overview.adstxt_ad_domain_overview = final_ad_domain_overview
-        overview.adstxt_publishers_overview = final_publishers_overview
-        overview.mediation_adapters = mediation_adapters
         duration = round((time.perf_counter() * 1000 - start), 2)
         logger.info(f"GET /api/companies/{company_domain} took {duration}ms")
         return overview

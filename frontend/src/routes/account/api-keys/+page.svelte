@@ -65,10 +65,7 @@
 					Generate API keys to access the AppGoblin public API programmatically.
 				</p>
 			</div>
-			<a
-				href="/account/api-keys/docs"
-				class="btn preset-tonal flex items-center gap-2 text-sm"
-			>
+			<a href="/api-docs" class="btn preset-tonal flex items-center gap-2 text-sm">
 				<ExternalLink size={16} />
 				API Docs
 			</a>
@@ -148,6 +145,10 @@
 
 	<!-- Create new key -->
 	<div class="card preset-tonal p-6 md:p-8 space-y-4">
+		<p class="text-sm text-surface-600-400">
+			Authentication, endpoints, and example requests live in the
+			<a href="/api-docs" class="text-primary-500 hover:underline">public API docs</a>.
+		</p>
 		{#if !showCreateForm}
 			<button
 				class="btn preset-filled-primary-500 flex items-center gap-2"
@@ -172,9 +173,7 @@
 					/>
 				</div>
 				<div class="flex gap-3">
-					<button type="submit" class="btn preset-filled-primary-500">
-						Create Key
-					</button>
+					<button type="submit" class="btn preset-filled-primary-500"> Create Key </button>
 					<button
 						type="button"
 						class="btn preset-tonal"
@@ -193,9 +192,7 @@
 	<!-- Keys list -->
 	<div class="card preset-tonal p-6 md:p-8">
 		{#if data.apiKeys.length === 0}
-			<p class="text-surface-500 text-center py-8">
-				No API keys yet. Generate one to get started.
-			</p>
+			<p class="text-surface-500 text-center py-8">No API keys yet. Generate one to get started.</p>
 		{:else}
 			<div class="overflow-x-auto">
 				<table class="w-full text-sm">

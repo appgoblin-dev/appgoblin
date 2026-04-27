@@ -395,6 +395,35 @@ class CompanyCategoryOverview:
 
 
 @dataclass
+class CompanyExportTarget:
+    """Download metadata for a single public company export."""
+
+    available: bool
+    estimated_rows: int
+    url: str | None
+
+
+@dataclass
+class CompanyExports:
+    """Public company export links grouped by platform."""
+
+    sdk_api_android: CompanyExportTarget
+    sdk_api_ios: CompanyExportTarget
+
+
+@dataclass
+class PublicCompanyOverview:
+    """Public company detail payload returned by the v1 API."""
+
+    metrics_overview: CategoryCompanyStats = field(default_factory=CategoryCompanyStats)
+    company_types: list[str] = field(default_factory=list)
+    adstxt_ad_domain_overview: dict | None = None
+    adstxt_publishers_overview: dict | None = None
+    mediation_adapters: dict | None = None
+    exports: CompanyExports | None = None
+
+
+@dataclass
 class CompaniesOverview:
     """Contains a list of CompanyDetail objects.
 

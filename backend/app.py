@@ -22,8 +22,10 @@ from api_app.controllers.keywords import KeywordsController
 from api_app.controllers.rankings import RankingsController
 from api_app.controllers.scry import ScryController
 from api_app.controllers.sdks import SdksController
-from api_app.guards import configure_tier_mapping
+from api_app.controllers.v1_apps import V1AppsController
 from api_app.controllers.v1_companies import V1CompaniesController
+from api_app.controllers.v1_docs import V1DocsController
+from api_app.guards import configure_tier_mapping
 from config import CONFIG
 from dbcon.connections import get_db_connection
 from dbcon.static import load_static_data
@@ -117,7 +119,7 @@ class RateLimitMiddleware:
                     headers.append(
                         (
                             b"x-ratelimit-policy",
-                            f'{rate_info["daily_limit"]};w=86400'.encode(),
+                            f"{rate_info['daily_limit']};w=86400".encode(),
                         )
                     )
                     headers.append(
@@ -240,7 +242,9 @@ app = Litestar(
         CreativesController,
         ExportsController,
         HealthController,
+        V1AppsController,
         V1CompaniesController,
+        V1DocsController,
     ],
     cors_config=cors_config,
     openapi_config=OpenAPIConfig(
