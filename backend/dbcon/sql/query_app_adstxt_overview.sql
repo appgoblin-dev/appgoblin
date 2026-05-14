@@ -12,9 +12,11 @@ WITH all_apps AS (
     LEFT JOIN app_ads_entrys AS aae
         ON
             aesa.app_ad_entry_id = aae.id
+    LEFT JOIN adtech.company_domain_mapping AS cdm
+        ON aesa.ad_domain_id = cdm.domain_id
     LEFT JOIN adtech.companies AS c
         ON
-            aesa.company_id = c.id
+            cdm.company_id = c.id
     LEFT JOIN domains AS ad ON
         aesa.ad_domain_id = ad.id
 )
