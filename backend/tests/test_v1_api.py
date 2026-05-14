@@ -832,7 +832,9 @@ class TestV1Docs:
         assert data["info"]["version"] == "0.1.0"
         assert "X-API-Key" in data["info"]["description"]
         assert data["servers"] == [{"url": "https://appgoblin.info"}]
-        assert data["components"]["securitySchemes"]["ApiKeyAuth"]["name"] == "X-API-Key"
+        assert (
+            data["components"]["securitySchemes"]["ApiKeyAuth"]["name"] == "X-API-Key"
+        )
         assert data["security"] == [{"ApiKeyAuth": []}]
         assert "/health" not in data["paths"]
         assert data["paths"]
