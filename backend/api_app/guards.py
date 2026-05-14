@@ -29,13 +29,37 @@ class TierLimits:
 
 TIER_LIMITS: dict[str, TierLimits] = {
     "free": TierLimits(requests_per_minute=30, requests_per_day=1_000),
-    "premium_access": TierLimits(requests_per_minute=200, requests_per_day=10_000),
     "b2b_sdk": TierLimits(requests_per_minute=2_000, requests_per_day=100_000),
     "b2b_appads": TierLimits(requests_per_minute=2_000, requests_per_day=100_000),
     "b2b_premium": TierLimits(requests_per_minute=10_000, requests_per_day=500_000),
 }
 
+REQUIRED_PRICE_MAPPED_TIERS = frozenset(tier for tier in TIER_LIMITS if tier != "free")
+
 PRICE_ID_TO_TIER: dict[str, str] = {}
+
+
+def validate_tier_mapping_config(price_map: dict[str, str] | None) -> None:
+    """Validate the required Stripe price to tier mapping config."""
+    if not price_map:
+        raise ValueError(
+            "Missing required [tier_prices] section in config.toml. "
+            f"Expected mappings for: {', '.join(sorted(REQUIRED_PRICE_MAPPED_TIERS))}"
+        )
+
+    configured_tiers = set(price_map.values())
+    unknown_tiers = sorted(configured_tiers - set(TIER_LIMITS))
+    if unknown_tiers:
+        raise ValueError(
+            "Unknown tier label(s) in [tier_prices]: " + ", ".join(unknown_tiers)
+        )
+
+    missing_tiers = sorted(REQUIRED_PRICE_MAPPED_TIERS - configured_tiers)
+    if missing_tiers:
+        raise ValueError(
+            "Missing required tier mapping(s) in [tier_prices]: "
+            + ", ".join(missing_tiers)
+        )
 
 
 def configure_tier_mapping(price_map: dict[str, str]) -> None:
@@ -51,6 +75,25 @@ def configure_tier_mapping(price_map: dict[str, str]) -> None:
 def get_tier_limits(tier: str) -> TierLimits:
     """Get limits for a tier, defaulting to free."""
     return TIER_LIMITS.get(tier, TIER_LIMITS["free"])
+
+
+def _resolve_tier(price_id: str | None) -> str:
+    """Resolve a subscription price identifier to a configured tier label."""
+    if not price_id:
+        return "free"
+
+    if price_id in TIER_LIMITS:
+        return price_id
+
+    mapped_tier = PRICE_ID_TO_TIER.get(price_id)
+    if mapped_tier in TIER_LIMITS:
+        return mapped_tier
+
+    logger.warning(
+        "Unknown subscription price id %r for API rate limiting; defaulting to free",
+        price_id,
+    )
+    return "free"
 
 
 # ---------------------------------------------------------------------------
@@ -72,9 +115,7 @@ class _RateLimiter:
         self._buckets: dict[str, _TokenBucket] = {}
         self._lock = Lock()
 
-    def check(
-        self, key_hash: str, rate_per_minute: int
-    ) -> tuple[bool, int, int, int]:
+    def check(self, key_hash: str, rate_per_minute: int) -> tuple[bool, int, int, int]:
         """Check and consume one token.
 
         Returns
@@ -196,8 +237,7 @@ class ApiKeyContext:
 
 def _query_key(engine: Engine, key_hash: str) -> _CachedKey | None:
     """Look up an API key and its owner's subscription tier."""
-    query = text(
-        """
+    query = text("""
         SELECT ak.user_id,
                COALESCE(s.provider_price_id, 'free') AS price_id
         FROM public.api_keys ak
@@ -213,8 +253,7 @@ def _query_key(engine: Engine, key_hash: str) -> _CachedKey | None:
         WHERE ak.key_hash = :key_hash
           AND ak.is_active = true
           AND (ak.expires_at IS NULL OR ak.expires_at > now())
-        """
-    )
+        """)
 
     with engine.connect() as conn:
         row = conn.execute(query, {"key_hash": key_hash}).fetchone()
@@ -223,7 +262,7 @@ def _query_key(engine: Engine, key_hash: str) -> _CachedKey | None:
         return None
 
     price_id = row.price_id or "free"
-    tier = PRICE_ID_TO_TIER.get(price_id, "free")
+    tier = _resolve_tier(price_id)
 
     return _CachedKey(
         user_id=row.user_id,

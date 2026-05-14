@@ -532,6 +532,10 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
         "sdk_ios": (df["store"].str.contains("Apple")) & (df["tag_source"] == "sdk"),
         "sdk_android": (df["store"].str.contains("Google"))
         & (df["tag_source"] == "sdk"),
+        "api_android": (df["store"].str.contains("Google"))
+        & (df["tag_source"] == "api_call"),
+        "api_ios": (df["store"].str.contains("Apple"))
+        & (df["tag_source"] == "api_call"),
         "adstxt_direct_ios": (df["store"].str.contains("Apple"))
         & (df["tag_source"] == "app_ads_direct"),
         "adstxt_direct_android": (df["store"].str.contains("Google"))
@@ -557,6 +561,8 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
     (
         sdk_ios_total_apps,
         sdk_android_total_apps,
+        api_ios_total_apps,
+        api_android_total_apps,
         adstxt_direct_ios_total_apps,
         adstxt_direct_android_total_apps,
         adstxt_reseller_ios_total_apps,
@@ -564,6 +570,8 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
     ) = (
         res_app_counts["sdk_ios"],
         res_app_counts["sdk_android"],
+        res_app_counts["api_ios"],
+        res_app_counts["api_android"],
         res_app_counts["adstxt_direct_ios"],
         res_app_counts["adstxt_direct_android"],
         res_app_counts["adstxt_reseller_ios"],
@@ -581,8 +589,10 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
     )
 
     sdk_total_apps = sdk_ios_total_apps + sdk_android_total_apps
+    api_total_apps = api_ios_total_apps + api_android_total_apps
     total_apps = (
         sdk_total_apps
+        + api_total_apps
         + adstxt_direct_ios_total_apps
         + adstxt_direct_android_total_apps
         + adstxt_reseller_ios_total_apps
@@ -600,6 +610,9 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
         sdk_android_total_apps=int(sdk_android_total_apps),
         sdk_total_apps=int(sdk_total_apps),
         sdk_android_installs_d30=int(sdk_android_installs_d30),
+        api_ios_total_apps=int(api_ios_total_apps),
+        api_android_total_apps=int(api_android_total_apps),
+        api_total_apps=int(api_total_apps),
         adstxt_direct_android_installs_d30=int(adstxt_direct_android_installs_d30),
         adstxt_reseller_android_installs_d30=int(adstxt_reseller_android_installs_d30),
     )
@@ -611,6 +624,12 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
             & (df["app_category"] == cat),
             "sdk_android": (df["store"].str.contains("Google"))
             & (df["tag_source"] == "sdk")
+            & (df["app_category"] == cat),
+            "api_ios": (df["store"].str.contains("Apple"))
+            & (df["tag_source"] == "api_call")
+            & (df["app_category"] == cat),
+            "api_android": (df["store"].str.contains("Google"))
+            & (df["tag_source"] == "api_call")
             & (df["app_category"] == cat),
             "adstxt_direct_ios": (df["store"].str.contains("Apple"))
             & (df["tag_source"] == "app_ads_direct")
@@ -640,6 +659,8 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
         (
             sdk_ios_total_apps,
             sdk_android_total_apps,
+            api_ios_total_apps,
+            api_android_total_apps,
             adstxt_direct_ios_total_apps,
             adstxt_direct_android_total_apps,
             adstxt_reseller_ios_total_apps,
@@ -647,6 +668,8 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
         ) = (
             res_app_counts["sdk_ios"],
             res_app_counts["sdk_android"],
+            res_app_counts["api_ios"],
+            res_app_counts["api_android"],
             res_app_counts["adstxt_direct_ios"],
             res_app_counts["adstxt_direct_android"],
             res_app_counts["adstxt_reseller_ios"],
@@ -664,6 +687,7 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
         )
 
         sdk_total_apps = sdk_ios_total_apps + sdk_android_total_apps
+        api_total_apps = api_ios_total_apps + api_android_total_apps
         total_apps = (
             sdk_total_apps
             + adstxt_direct_ios_total_apps
@@ -682,6 +706,9 @@ def make_company_stats(df: pd.DataFrame) -> CompanyCategoryOverview:
             sdk_ios_total_apps=int(sdk_ios_total_apps),
             sdk_android_total_apps=int(sdk_android_total_apps),
             sdk_total_apps=int(sdk_total_apps),
+            api_ios_total_apps=int(api_ios_total_apps),
+            api_android_total_apps=int(api_android_total_apps),
+            api_total_apps=int(api_total_apps),
             sdk_android_installs_d30=int(sdk_android_installs_d30),
             adstxt_direct_android_installs_d30=int(adstxt_direct_android_installs_d30),
             adstxt_reseller_android_installs_d30=int(
@@ -721,10 +748,10 @@ def get_company_types_for_domain(state: State, company_domain: str) -> list[str]
     return sorted(company_types)
 
 
-def build_company_overview_payload(
+def build_company_overview_base(
     state: State, company_domain: str, category: str | None = None
 ) -> CompanyCategoryOverview:
-    """Build the company overview payload shared by v1 and private endpoints."""
+    """Compute company overview data shared by private and public endpoints."""
     df = get_company_stats(
         state=state, company_domain=company_domain, app_category=category
     )
@@ -791,6 +818,15 @@ def build_company_overview_payload(
     overview.adstxt_publishers_overview = final_publishers_overview
     overview.mediation_adapters = mediation_adapters
     return overview
+
+
+def build_private_company_overview_payload(
+    state: State, company_domain: str, category: str | None = None
+) -> CompanyCategoryOverview:
+    """Build the private company overview payload."""
+    return build_company_overview_base(
+        state=state, company_domain=company_domain, category=category
+    )
 
 
 class CompaniesController(Controller):
@@ -870,7 +906,7 @@ class CompaniesController(Controller):
         """
         start = time.perf_counter() * 1000
 
-        overview = build_company_overview_payload(
+        overview = build_private_company_overview_payload(
             state=state, company_domain=company_domain, category=category
         )
         duration = round((time.perf_counter() * 1000 - start), 2)

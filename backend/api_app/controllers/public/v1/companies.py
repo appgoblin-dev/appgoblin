@@ -7,16 +7,20 @@ from urllib.parse import quote
 
 from litestar import Controller, get
 from litestar.datastructures import State
+from litestar.exceptions import NotFoundException, PermissionDeniedException
 
 from api_app.controllers.companies import (
-    build_company_overview_payload,
+    build_company_overview_base,
     get_overviews,
 )
 from api_app.guards import validate_api_key
 from api_app.models import (
-    CategoryCompanyStats,
-    CompanyExports,
-    CompanyExportTarget,
+    CompanyCategoryOverview as PrivateCompanyCategoryOverview,
+)
+from api_app.controllers.public.v1.public_models import (
+    CompanyDatasets,
+    CompanyDatasetTarget,
+    PublicCategoryCompanyStats,
     PublicCompanyOverview,
 )
 from config import get_logger
@@ -24,12 +28,22 @@ from config import get_logger
 logger = get_logger(__name__)
 
 DEFAULT_DOWNLOADS_BASE = "https://media.appgoblin.info/"
+UNMAPPED_COMPANY_NOTICE = (
+    "This domain has not yet been manually mapped to a company in the AppGoblin "
+    "database. Current results may include incidental matches from ads.txt or "
+    "recorded API calls. Contact contact@appgoblin.info to request mapping; "
+    "additions are usually completed within 1-2 business days."
+)
 
 
 def _api_key_guard(request, route_handler) -> None:
     """Guard that validates the X-API-Key header."""
     state = request.app.state
-    validate_api_key(request, state)
+    context = validate_api_key(request, state)
+    if context.tier == "free":
+        raise PermissionDeniedException(
+            detail="Companies API v1 requires a paid subscription tier"
+        )
 
 
 def _get_downloads_base_url() -> str:
@@ -54,17 +68,17 @@ def _build_company_verified_apps_url(company_domain: str, platform: str) -> str 
     )
 
 
-def _build_company_exports(
+def _build_company_datasets(
     company_domain: str, categories: dict[str, object]
-) -> CompanyExports:
-    """Build public SDK/API export metadata for a company domain."""
+) -> CompanyDatasets:
+    """Build public SDK/API dataset metadata for a company domain."""
     totals = categories.get("all")
 
     android_rows = int(getattr(totals, "sdk_android_total_apps", 0)) if totals else 0
     ios_rows = int(getattr(totals, "sdk_ios_total_apps", 0)) if totals else 0
 
-    return CompanyExports(
-        sdk_api_android=CompanyExportTarget(
+    return CompanyDatasets(
+        sdk_api_android=CompanyDatasetTarget(
             available=android_rows > 0,
             estimated_rows=android_rows,
             url=(
@@ -73,7 +87,7 @@ def _build_company_exports(
                 else None
             ),
         ),
-        sdk_api_ios=CompanyExportTarget(
+        sdk_api_ios=CompanyDatasetTarget(
             available=ios_rows > 0,
             estimated_rows=ios_rows,
             url=(
@@ -85,21 +99,39 @@ def _build_company_exports(
     )
 
 
+def _has_company_overview_data(
+    metrics: PublicCategoryCompanyStats, overview: PrivateCompanyCategoryOverview
+) -> bool:
+    """Return whether the computed company overview contains any material data."""
+    if any(bool(value) for value in vars(metrics).values()):
+        return True
+
+    return any((bool(overview.company_types),))
+
+
 def _build_public_company_overview_payload(
     state: State, company_domain: str, category: str | None = None
 ) -> PublicCompanyOverview:
-    """Build the public company detail payload for v1 endpoints."""
-    overview = build_company_overview_payload(
+    """Project shared company overview data into the public v1 response shape."""
+    overview = build_company_overview_base(
         state=state, company_domain=company_domain, category=category
     )
+    metrics_overview = overview.categories.get("all", PublicCategoryCompanyStats())
+    if not _has_company_overview_data(metrics_overview, overview):
+        msg = f"Company domain not found: {company_domain!r}"
+        raise NotFoundException(msg, status_code=404)
+
+    domain_is_mapped = len(overview.company_types) > 0
+    mapping_notice = None
+    if not domain_is_mapped:
+        mapping_notice = UNMAPPED_COMPANY_NOTICE
 
     return PublicCompanyOverview(
-        metrics_overview=overview.categories.get("all", CategoryCompanyStats()),
+        metrics=metrics_overview,
         company_types=overview.company_types,
-        adstxt_ad_domain_overview=overview.adstxt_ad_domain_overview,
-        adstxt_publishers_overview=overview.adstxt_publishers_overview,
-        mediation_adapters=overview.mediation_adapters,
-        exports=_build_company_exports(company_domain, overview.categories),
+        domain_is_mapped=domain_is_mapped,
+        mapping_notice=mapping_notice,
+        datasets=_build_company_datasets(company_domain, overview.categories),
     )
 
 

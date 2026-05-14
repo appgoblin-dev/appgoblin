@@ -331,26 +331,6 @@ class CategoryCompaniesStats:
 
 
 @dataclass
-class CategoryCompanyStats:
-    """Contains a list of CompanyDetail objects.
-
-    Representing the top networks identified.
-    """
-
-    total_apps: int = 0
-    adstxt_direct_ios_total_apps: int = 0
-    adstxt_direct_android_total_apps: int = 0
-    adstxt_reseller_ios_total_apps: int = 0
-    adstxt_reseller_android_total_apps: int = 0
-    sdk_ios_total_apps: int = 0
-    sdk_android_total_apps: int = 0
-    sdk_total_apps: int = 0
-    sdk_android_installs_d30: int = 0
-    adstxt_direct_android_installs_d30: int = 0
-    adstxt_reseller_android_installs_d30: int = 0
-
-
-@dataclass
 class CompaniesCategoryOverview:
     """Contains a dictionary of categories, each with their associated statistics."""
 
@@ -368,6 +348,29 @@ class CompaniesCategoryOverview:
         for key, value in kwargs.items():
             if hasattr(self.categories[category], key):
                 setattr(self.categories[category], key, value)
+
+
+@dataclass
+class CategoryCompanyStats:
+    """Contains a list of CompanyDetail objects.
+
+    Representing the top networks identified.
+    """
+
+    total_apps: int = 0
+    adstxt_direct_ios_total_apps: int = 0
+    adstxt_direct_android_total_apps: int = 0
+    adstxt_reseller_ios_total_apps: int = 0
+    adstxt_reseller_android_total_apps: int = 0
+    sdk_ios_total_apps: int = 0
+    sdk_android_total_apps: int = 0
+    sdk_total_apps: int = 0
+    api_ios_total_apps: int = 0
+    api_android_total_apps: int = 0
+    api_total_apps: int = 0
+    sdk_android_installs_d30: int = 0
+    adstxt_direct_android_installs_d30: int = 0
+    adstxt_reseller_android_installs_d30: int = 0
 
 
 @dataclass
@@ -415,8 +418,10 @@ class CompanyExports:
 class PublicCompanyOverview:
     """Public company detail payload returned by the v1 API."""
 
-    metrics_overview: CategoryCompanyStats = field(default_factory=CategoryCompanyStats)
+    domain_is_mapped: bool = False
     company_types: list[str] = field(default_factory=list)
+    metrics: CategoryCompanyStats = field(default_factory=CategoryCompanyStats)
+    mapping_notice: str | None = None
     adstxt_ad_domain_overview: dict | None = None
     adstxt_publishers_overview: dict | None = None
     mediation_adapters: dict | None = None
