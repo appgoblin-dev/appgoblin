@@ -18,8 +18,10 @@ LEFT JOIN domains AS ad
 LEFT JOIN adstxt_crawl_results AS pdcr
     ON
         aesa.pub_domain_id = pdcr.domain_id
+LEFT JOIN adtech.company_domain_mapping AS cdm
+    ON ad.id = cdm.domain_id
 LEFT JOIN adtech.companies AS c
     ON
-        aesa.company_id = c.id
+        cdm.company_id = c.id
 WHERE
     sa.store_id = :store_id;
