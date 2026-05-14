@@ -6,14 +6,14 @@
 		title,
 		description,
 		backendPath,
-		primaryLabel,
+		primaryLabel = undefined,
 		secondaryHref = undefined,
 		secondaryLabel = undefined
 	}: {
 		title: string;
 		description: string;
 		backendPath: string;
-		primaryLabel: string;
+		primaryLabel?: string;
 		secondaryHref?: string;
 		secondaryLabel?: string;
 	} = $props();
@@ -42,15 +42,17 @@
 				{#if secondaryHref && secondaryLabel}
 					<a href={secondaryHref} class="btn preset-tonal text-sm">{secondaryLabel}</a>
 				{/if}
-				<a
-					href={docsUrl}
-					target="_blank"
-					rel="noreferrer"
-					class="btn preset-filled-primary-500 flex items-center gap-2 text-sm"
-				>
-					<ExternalLink size={16} />
-					{primaryLabel}
-				</a>
+				{#if primaryLabel}
+					<a
+						href={docsUrl}
+						target="_blank"
+						rel="noreferrer"
+						class="btn preset-filled-primary-500 flex items-center gap-2 text-sm"
+					>
+						<ExternalLink size={16} />
+						{primaryLabel}
+					</a>
+				{/if}
 			</div>
 		</div>
 	</div>

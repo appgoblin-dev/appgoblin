@@ -7,16 +7,18 @@ from unittest.mock import MagicMock
 import pytest
 
 from api_app.guards import (
+    REQUIRED_PRICE_MAPPED_TIERS,
     TIER_LIMITS,
     ApiKeyContext,
     TierLimits,
     _DailyQuotaTracker,
     _RateLimiter,
+    _resolve_tier,
     configure_tier_mapping,
     get_tier_limits,
+    validate_tier_mapping_config,
     validate_api_key,
 )
-
 
 # ---------------------------------------------------------------------------
 # Tier configuration
@@ -68,6 +70,58 @@ class TestConfigureTierMapping:
             "price_abc": "b2b_premium",
             "price_def": "free",
         }
+
+
+class TestValidateTierMappingConfig:
+    def test_missing_section_raises(self):
+        with pytest.raises(ValueError, match="Missing required \[tier_prices\]"):
+            validate_tier_mapping_config(None)
+
+    def test_missing_required_tiers_raises(self):
+        with pytest.raises(ValueError, match="Missing required tier mapping"):
+            validate_tier_mapping_config({"price_sdk": "b2b_sdk"})
+
+    def test_unknown_tier_label_raises(self):
+        with pytest.raises(ValueError, match="Unknown tier label"):
+            validate_tier_mapping_config(
+                {
+                    "price_unknown": "enterprise",
+                    "price_app_dev": "premium_access",
+                    "price_sdk": "b2b_sdk",
+                    "price_appads": "b2b_appads",
+                    "price_premium": "b2b_premium",
+                }
+            )
+
+    def test_complete_paid_tier_mapping_passes(self):
+        price_map = {
+            f"price_{tier}": tier for tier in sorted(REQUIRED_PRICE_MAPPED_TIERS)
+        }
+
+        validate_tier_mapping_config(price_map)
+
+
+class TestResolveTier:
+    def test_accepts_direct_tier_label(self, monkeypatch):
+        from api_app import guards as guards_mod
+
+        monkeypatch.setattr(guards_mod, "PRICE_ID_TO_TIER", {})
+
+        assert _resolve_tier("b2b_sdk") == "b2b_sdk"
+
+    def test_maps_known_price_id(self, monkeypatch):
+        from api_app import guards as guards_mod
+
+        monkeypatch.setattr(guards_mod, "PRICE_ID_TO_TIER", {"price_sdk": "b2b_sdk"})
+
+        assert _resolve_tier("price_sdk") == "b2b_sdk"
+
+    def test_unknown_price_id_defaults_to_free(self, monkeypatch):
+        from api_app import guards as guards_mod
+
+        monkeypatch.setattr(guards_mod, "PRICE_ID_TO_TIER", {})
+
+        assert _resolve_tier("price_unknown") == "free"
 
 
 # ---------------------------------------------------------------------------
@@ -257,6 +311,18 @@ class TestValidateApiKey:
         ctx = validate_api_key(request, state)
         assert ctx.tier == "b2b_premium"
         assert ctx.limits.requests_per_minute == 10_000
+
+    def test_direct_tier_label_lookup(self, mock_state, monkeypatch):
+        from api_app import guards as guards_mod
+
+        monkeypatch.setattr(guards_mod, "PRICE_ID_TO_TIER", {})
+        row = _make_db_row(user_id=7, price_id="b2b_sdk")
+        request = _make_request(api_key="ag_b2bsdk")
+        state = mock_state(row=row)
+
+        ctx = validate_api_key(request, state)
+        assert ctx.tier == "b2b_sdk"
+        assert ctx.limits.requests_per_minute == 2_000
 
     def test_no_goblinadmin_connection_raises(self):
         from litestar.exceptions import NotAuthorizedException

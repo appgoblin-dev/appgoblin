@@ -19,13 +19,13 @@ from api_app.controllers.developers import DeveloperController
 from api_app.controllers.exports import ExportsController
 from api_app.controllers.health import HealthController
 from api_app.controllers.keywords import KeywordsController
+from api_app.controllers.public.v1.apps import V1AppsController
+from api_app.controllers.public.v1.companies import V1CompaniesController
+from api_app.controllers.public.v1.docs import V1DocsController
 from api_app.controllers.rankings import RankingsController
 from api_app.controllers.scry import ScryController
 from api_app.controllers.sdks import SdksController
-from api_app.controllers.v1_apps import V1AppsController
-from api_app.controllers.v1_companies import V1CompaniesController
-from api_app.controllers.v1_docs import V1DocsController
-from api_app.guards import configure_tier_mapping
+from api_app.guards import configure_tier_mapping, validate_tier_mapping_config
 from config import CONFIG
 from dbcon.connections import get_db_connection
 from dbcon.static import load_static_data
@@ -176,10 +176,15 @@ async def db_lifespan(app: Litestar) -> AsyncGenerator[None]:
     logger.info("Starting database connections...")
 
     # Load Stripe price → tier mapping from config
-    tier_prices = CONFIG.get("tier_prices", {})
-    if tier_prices:
-        configure_tier_mapping(tier_prices)
-        logger.info(f"Loaded {len(tier_prices)} tier price mappings")
+    tier_prices = CONFIG.get("tier_prices")
+    try:
+        validate_tier_mapping_config(tier_prices)
+    except ValueError as exc:
+        logger.exception("Invalid API tier pricing config")
+        raise RuntimeError("Invalid API tier pricing config in config.toml") from exc
+
+    configure_tier_mapping(tier_prices)
+    logger.info(f"Loaded {len(tier_prices)} tier price mappings")
 
     # Initialize connections
     try:

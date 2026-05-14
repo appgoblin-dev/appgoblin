@@ -13,9 +13,13 @@ from litestar.openapi.config import OpenAPIConfig
 from litestar.testing import TestClient
 
 from api_app.controllers.health import HealthController
-from api_app.controllers.v1_apps import V1AppsController
-from api_app.controllers.v1_companies import V1CompaniesController
-from api_app.controllers.v1_docs import V1DocsController
+from api_app.controllers.public.v1.apps import V1AppsController
+from api_app.controllers.public.v1.companies import (
+    UNMAPPED_COMPANY_NOTICE,
+    V1CompaniesController,
+)
+from api_app.controllers.public.v1.public_models import PublicCategoryCompanyStats
+from api_app.controllers.public.v1.docs import V1DocsController
 from api_app.guards import _CachedKey
 from app import RateLimitMiddleware
 
@@ -106,32 +110,44 @@ FAKE_OVERVIEW = FakeCompaniesOverview(
 
 def _patch_overview(overview=FAKE_OVERVIEW):
     return patch(
-        "api_app.controllers.v1_companies.get_overviews", return_value=overview
+        "api_app.controllers.public.v1.companies.get_overviews", return_value=overview
     )
 
 
 def _patch_company_detail(payload: dict):
     return patch(
-        "api_app.controllers.v1_companies._build_public_company_overview_payload",
+        "api_app.controllers.public.v1.companies._build_public_company_overview_payload",
         return_value=payload,
+    )
+
+
+def _patch_raw_company_detail(overview: FakeCompanyCategoryOverview):
+    return patch(
+        "api_app.controllers.public.v1.companies.build_company_overview_base",
+        return_value=overview,
     )
 
 
 def _patch_single_app(row: dict | None):
     app_df = pd.DataFrame([row]) if row is not None else pd.DataFrame()
-    return patch("api_app.controllers.v1_apps.get_single_app", return_value=app_df)
+    return patch(
+        "api_app.controllers.public.v1.apps.get_single_app", return_value=app_df
+    )
 
 
 def _patch_ranks_overview(rows: list[dict]):
     ranks_df = pd.DataFrame(rows)
     return patch(
-        "api_app.controllers.v1_apps.get_ranks_for_app_overview", return_value=ranks_df
+        "api_app.controllers.public.v1.apps.get_ranks_for_app_overview",
+        return_value=ranks_df,
     )
 
 
 def _patch_ranks(rows: list[dict]):
     ranks_df = pd.DataFrame(rows)
-    return patch("api_app.controllers.v1_apps.get_ranks_for_app", return_value=ranks_df)
+    return patch(
+        "api_app.controllers.public.v1.apps.get_ranks_for_app", return_value=ranks_df
+    )
 
 
 @contextmanager
@@ -140,10 +156,12 @@ def _patch_sdk_overview(rows: list[dict], logos: list[dict] | None = None):
     logos_df = pd.DataFrame(logos or [])
     with (
         patch(
-            "api_app.controllers.v1_apps.get_app_sdk_overview", return_value=overview_df
+            "api_app.controllers.public.v1.apps.get_app_sdk_overview",
+            return_value=overview_df,
         ),
         patch(
-            "api_app.controllers.v1_apps.get_company_logos_df", return_value=logos_df
+            "api_app.controllers.public.v1.apps.get_company_logos_df",
+            return_value=logos_df,
         ),
     ):
         yield
@@ -152,7 +170,8 @@ def _patch_sdk_overview(rows: list[dict], logos: list[dict] | None = None):
 def _patch_sdk_details(rows: list[dict]):
     details_df = pd.DataFrame(rows)
     return patch(
-        "api_app.controllers.v1_apps.get_app_sdk_details", return_value=details_df
+        "api_app.controllers.public.v1.apps.get_app_sdk_details",
+        return_value=details_df,
     )
 
 
@@ -217,10 +236,39 @@ class TestV1CompaniesAuth:
             )
         assert resp.status_code == 401
 
-    def test_valid_key_returns_200(self):
+    def test_free_tier_returns_403_for_companies(self):
         app = _make_test_app()
         with (
             _patch_key_found("free"),
+            _patch_overview(),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/companies",
+                headers={"X-API-Key": "ag_goodkey"},
+            )
+
+        assert resp.status_code == 403
+        assert "paid subscription tier" in resp.json()["detail"]
+
+    def test_free_tier_returns_403_for_company_detail(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/companies/google.com",
+                headers={"X-API-Key": "ag_goodkey"},
+            )
+
+        assert resp.status_code == 403
+        assert "paid subscription tier" in resp.json()["detail"]
+
+    def test_paid_key_returns_200(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("premium_access"),
             _patch_overview(),
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
@@ -241,7 +289,7 @@ class TestV1CompaniesRateLimitHeaders:
     def test_response_has_ratelimit_headers(self):
         app = _make_test_app()
         with (
-            _patch_key_found("free"),
+            _patch_key_found("premium_access"),
             _patch_overview(),
             TestClient(app=app) as client,
         ):
@@ -251,13 +299,13 @@ class TestV1CompaniesRateLimitHeaders:
             )
 
         assert resp.status_code == 200
-        assert resp.headers["x-ratelimit-limit"] == "30"
-        assert resp.headers["x-ratelimit-remaining"] == "29"
+        assert resp.headers["x-ratelimit-limit"] == "200"
+        assert resp.headers["x-ratelimit-remaining"] == "199"
 
     def test_daily_quota_headers_present(self):
         app = _make_test_app()
         with (
-            _patch_key_found("free"),
+            _patch_key_found("premium_access"),
             _patch_overview(),
             TestClient(app=app) as client,
         ):
@@ -266,22 +314,22 @@ class TestV1CompaniesRateLimitHeaders:
                 headers={"X-API-Key": "ag_dailyheader"},
             )
 
-        assert resp.headers["x-ratelimit-policy"] == "1000;w=86400"
-        assert resp.headers["x-ratelimit-quota-remaining"] == "999"
+        assert resp.headers["x-ratelimit-policy"] == "10000;w=86400"
+        assert resp.headers["x-ratelimit-quota-remaining"] == "9999"
 
 
 class TestV1CompaniesRateLimit:
     def test_per_minute_429(self):
         app = _make_test_app()
         with (
-            _patch_key_found("free"),
+            _patch_key_found("premium_access"),
             _patch_overview(),
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
             key = "ag_ratelimit429"
             headers = {"X-API-Key": key}
 
-            for _ in range(30):
+            for _ in range(200):
                 resp = client.get("/api/v1/companies", headers=headers)
                 assert resp.status_code == 200
 
@@ -317,7 +365,6 @@ class TestV1CompaniesTierRateLimits:
     @pytest.mark.parametrize(
         "tier,expected_minute",
         [
-            ("free", "30"),
             ("premium_access", "200"),
             ("b2b_sdk", "2000"),
             ("b2b_premium", "10000"),
@@ -349,10 +396,11 @@ class TestV1CompanyDetail:
                 "sdk_total_apps": 168,
             },
             "company_types": ["ad-network"],
+            "domain_is_mapped": True,
             "adstxt_ad_domain_overview": {"google": {"direct": {"count": 10}}},
             "adstxt_publishers_overview": None,
             "mediation_adapters": None,
-            "exports": {
+            "datasets": {
                 "sdk_api_android": {
                     "available": True,
                     "estimated_rows": 123,
@@ -372,9 +420,10 @@ class TestV1CompanyDetail:
                     ),
                 },
             },
+            "mapping_notice": None,
         }
         with (
-            _patch_key_found("free"),
+            _patch_key_found("b2b_sdk"),
             _patch_company_detail(payload),
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
@@ -385,6 +434,59 @@ class TestV1CompanyDetail:
 
         assert resp.status_code == 200
         assert resp.json() == payload
+
+    def test_company_detail_returns_mapping_notice_for_unmapped_company(self):
+        app = _make_test_app()
+        overview = FakeCompanyCategoryOverview(
+            categories={
+                "all": PublicCategoryCompanyStats(
+                    total_apps=1,
+                    adstxt_direct_android_total_apps=1,
+                )
+            },
+            company_types=[],
+            adstxt_ad_domain_overview=None,
+            adstxt_publishers_overview=None,
+            mediation_adapters=None,
+        )
+
+        with (
+            _patch_key_found("b2b_sdk"),
+            _patch_raw_company_detail(overview),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/companies/google.com",
+                headers={"X-API-Key": "ag_companydetail"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json()["company_types"] == []
+        assert resp.json()["domain_is_mapped"] is False
+        assert resp.json()["mapping_notice"] == UNMAPPED_COMPANY_NOTICE
+
+    def test_company_detail_returns_404_for_empty_company_payload(self):
+        app = _make_test_app()
+        overview = FakeCompanyCategoryOverview(
+            categories={"all": PublicCategoryCompanyStats()},
+            company_types=[],
+            adstxt_ad_domain_overview=None,
+            adstxt_publishers_overview=None,
+            mediation_adapters=None,
+        )
+
+        with (
+            _patch_key_found("b2b_sdk"),
+            _patch_raw_company_detail(overview),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/companies/missing.example",
+                headers={"X-API-Key": "ag_missingcompany"},
+            )
+
+        assert resp.status_code == 404
+        assert "Company domain not found" in resp.json()["detail"]
 
 
 class TestV1Apps:
@@ -727,15 +829,26 @@ class TestV1Docs:
         assert resp.status_code == 200
         data = resp.json()
         assert data["info"]["title"] == "AppGoblin Public API v1"
+        assert data["info"]["version"] == "0.1.0"
+        assert "X-API-Key" in data["info"]["description"]
+        assert data["servers"] == [{"url": "https://appgoblin.info"}]
+        assert data["components"]["securitySchemes"]["ApiKeyAuth"]["name"] == "X-API-Key"
+        assert data["security"] == [{"ApiKeyAuth": []}]
         assert "/health" not in data["paths"]
         assert data["paths"]
         assert all(path.startswith("/api/v1/") for path in data["paths"])
 
-    def test_openapi_page_renders_stoplight(self):
+    def test_openapi_page_renders_scalar(self):
         app = _make_docs_test_app()
         with TestClient(app=app, raise_server_exceptions=False) as client:
             resp = client.get("/api/v1/docs/openapi")
 
         assert resp.status_code == 200
-        assert "elements-api" in resp.text
+        assert 'id="api-reference"' in resp.text
+        assert '"hideModels":true' in resp.text
+        assert '"showDeveloperTools":"never"' in resp.text
+        assert '"showToolbar":"localhost"' in resp.text
+        assert '"agent":{"disabled":true}' in resp.text
+        assert '"mcp":' not in resp.text
+        assert 'href="data:text/css,"' in resp.text
         assert "/api/v1/docs/openapi.json" in resp.text

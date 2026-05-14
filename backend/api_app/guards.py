@@ -121,6 +121,7 @@ class _RateLimiter:
         Returns
         -------
         (allowed, limit, remaining, retry_after_seconds)
+
         """
         rate_per_second = rate_per_minute / 60.0
         now = time.monotonic()
@@ -183,6 +184,7 @@ class _DailyQuotaTracker:
         Returns
         -------
         (allowed, limit, remaining)
+
         """
         today = self._today_utc()
 

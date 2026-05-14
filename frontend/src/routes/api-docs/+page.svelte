@@ -1,11 +1,18 @@
 <script lang="ts">
-	import PublicApiDocsFrame from '$lib/components/docs/PublicApiDocsFrame.svelte';
+	import { page } from '$app/state';
 
 	const title = 'API Docs | AppGoblin Public API';
 	const description =
-		'Generated OpenAPI reference for the AppGoblin public v1 API, including authentication, schemas, and interactive endpoint browsing.';
+		'Generated OpenAPI reference for the AppGoblin public v1 API, including API token authentication, schemas, and interactive endpoint browsing.';
 	const keywords =
-		'api docs, openapi, appgoblin api, public api, stoplight elements, api reference';
+		'api docs, openapi, appgoblin api, public api, api token, scalar api reference, api reference';
+
+	const docsUrl = $derived.by(() => {
+		const { hostname, origin } = page.url;
+		const backendOrigin =
+			hostname === 'localhost' || hostname === '127.0.0.1' ? 'http://localhost:8000' : origin;
+		return `${backendOrigin}/api/v1/docs/openapi`;
+	});
 </script>
 
 <svelte:head>
@@ -22,12 +29,15 @@
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:card" content="summary" />
 </svelte:head>
+<div class="space-y-4 py-4 md:py-6">
+	<div class="px-4 md:px-6">
+		<h1 class="text-2xl font-bold md:text-3xl">API Documentation</h1>
+	</div>
 
-<PublicApiDocsFrame
-	title="API Documentation"
-	description="Generated OpenAPI reference for the AppGoblin public v1 API, including authentication requirements, schemas, and interactive endpoint browsing."
-	backendPath="/api/v1/docs/openapi"
-	primaryLabel="Open Raw OpenAPI Docs"
-	secondaryHref="/account/api-keys"
-	secondaryLabel="Get an API Key"
-/>
+	<iframe
+		title="API Documentation"
+		src={docsUrl}
+		class="block min-h-[82vh] w-full border-0 bg-white"
+		loading="eager"
+	></iframe>
+</div>

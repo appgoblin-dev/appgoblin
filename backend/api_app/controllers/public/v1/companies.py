@@ -2,26 +2,33 @@
 
 import os
 import time
-from typing import Self
+from collections.abc import Mapping
+from typing import Self, cast
 from urllib.parse import quote
 
-from litestar import Controller, get
+from litestar import Controller, Request, get
+from litestar.connection import ASGIConnection
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException, PermissionDeniedException
+from litestar.handlers import BaseRouteHandler
 
 from api_app.controllers.companies import (
     build_company_overview_base,
     get_overviews,
-)
-from api_app.guards import validate_api_key
-from api_app.models import (
-    CompanyCategoryOverview as PrivateCompanyCategoryOverview,
 )
 from api_app.controllers.public.v1.public_models import (
     CompanyDatasets,
     CompanyDatasetTarget,
     PublicCategoryCompanyStats,
     PublicCompanyOverview,
+)
+from api_app.guards import validate_api_key
+from api_app.models import (
+    CategoryCompanyStats,
+    CompanyDetail,
+)
+from api_app.models import (
+    CompanyCategoryOverview as PrivateCompanyCategoryOverview,
 )
 from config import get_logger
 
@@ -36,10 +43,10 @@ UNMAPPED_COMPANY_NOTICE = (
 )
 
 
-def _api_key_guard(request, route_handler) -> None:
+def _api_key_guard(request: ASGIConnection, route_handler: BaseRouteHandler) -> None:
     """Guard that validates the X-API-Key header."""
     state = request.app.state
-    context = validate_api_key(request, state)
+    context = validate_api_key(cast("Request", request), state)
     if context.tier == "free":
         raise PermissionDeniedException(
             detail="Companies API v1 requires a paid subscription tier"
@@ -69,7 +76,7 @@ def _build_company_verified_apps_url(company_domain: str, platform: str) -> str 
 
 
 def _build_company_datasets(
-    company_domain: str, categories: dict[str, object]
+    company_domain: str, categories: Mapping[str, CategoryCompanyStats]
 ) -> CompanyDatasets:
     """Build public SDK/API dataset metadata for a company domain."""
     totals = categories.get("all")
@@ -106,7 +113,34 @@ def _has_company_overview_data(
     if any(bool(value) for value in vars(metrics).values()):
         return True
 
-    return any((bool(overview.company_types),))
+    return bool(overview.company_types)
+
+
+def _to_public_category_company_stats(
+    metrics: CategoryCompanyStats | None,
+) -> PublicCategoryCompanyStats:
+    """Project private company metrics into the public contract type."""
+    if metrics is None:
+        return PublicCategoryCompanyStats()
+
+    return PublicCategoryCompanyStats(
+        total_apps=metrics.total_apps,
+        adstxt_direct_ios_total_apps=metrics.adstxt_direct_ios_total_apps,
+        adstxt_direct_android_total_apps=metrics.adstxt_direct_android_total_apps,
+        adstxt_reseller_ios_total_apps=metrics.adstxt_reseller_ios_total_apps,
+        adstxt_reseller_android_total_apps=metrics.adstxt_reseller_android_total_apps,
+        sdk_ios_total_apps=metrics.sdk_ios_total_apps,
+        sdk_android_total_apps=metrics.sdk_android_total_apps,
+        sdk_total_apps=metrics.sdk_total_apps,
+        api_ios_total_apps=metrics.api_ios_total_apps,
+        api_android_total_apps=metrics.api_android_total_apps,
+        api_total_apps=metrics.api_total_apps,
+        sdk_android_installs_d30=metrics.sdk_android_installs_d30,
+        adstxt_direct_android_installs_d30=metrics.adstxt_direct_android_installs_d30,
+        adstxt_reseller_android_installs_d30=(
+            metrics.adstxt_reseller_android_installs_d30
+        ),
+    )
 
 
 def _build_public_company_overview_payload(
@@ -116,7 +150,7 @@ def _build_public_company_overview_payload(
     overview = build_company_overview_base(
         state=state, company_domain=company_domain, category=category
     )
-    metrics_overview = overview.categories.get("all", PublicCategoryCompanyStats())
+    metrics_overview = _to_public_category_company_stats(overview.categories.get("all"))
     if not _has_company_overview_data(metrics_overview, overview):
         msg = f"Company domain not found: {company_domain!r}"
         raise NotFoundException(msg, status_code=404)
@@ -142,7 +176,7 @@ class V1CompaniesController(Controller):
     guards = [_api_key_guard]
 
     @get(path="/companies", cache=86400)
-    async def companies(self: Self, state: State) -> list[dict]:
+    async def companies(self: Self, state: State) -> list[CompanyDetail]:
         """Return a list of all mapped companies.
 
         Each entry contains ``company_id``, ``name``, and ``count``
