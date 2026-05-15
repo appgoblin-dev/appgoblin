@@ -224,6 +224,12 @@ export interface AdsTxtEntriesResult {
 export interface CompaniesOverviewEntries {
 	company_domain: string;
 	company_name: string;
+	parent_company_domain?: string | null;
+	parent_company_name?: string | null;
+	company_logo_url?: string | null;
+	parent_company_logo_url?: string | null;
+	api_ip_resolved_country?: string | null;
+	total_app_count?: number | null;
 	tag_source: string;
 	store: string;
 	app_count: number;

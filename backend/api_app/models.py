@@ -435,7 +435,7 @@ class CompaniesOverview:
     Representing the top networks identified.
     """
 
-    companies_overview: list[CompanyDetail]
+    companies_overview: list[dict[str, object]]
     top: TopCompaniesShort
     categories: CompaniesCategoryOverview
 

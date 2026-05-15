@@ -164,7 +164,7 @@ def _build_app_sdk_details_payload(state: State, store_id: str) -> PublicAppSdkD
     is_skadnetwork = sdk_df["xml_path"] == "SKAdNetworkItems"
 
     permissions_df = sdk_df[is_permission]
-    leftovers_df = sdk_df[
+    unmapped_sdks_df = sdk_df[
         ~is_permission
         & ~is_matching_store_id
         & ~is_android_activity
@@ -173,13 +173,15 @@ def _build_app_sdk_details_payload(state: State, store_id: str) -> PublicAppSdkD
         & ~is_skadnetwork
         & sdk_df["company_name"].isna()
     ]
-    leftovers_df = leftovers_df[~leftovers_df["value_name"].isin(unwanted_value_names)]
+    unmapped_sdks_df = unmapped_sdks_df[
+        ~unmapped_sdks_df["value_name"].isin(unwanted_value_names)
+    ]
 
-    leftovers = {
+    unmapped_sdks = {
         short_value_name: grouped_df.groupby("xml_path")["value_name"]
         .apply(list)
         .to_dict()
-        for short_value_name, grouped_df in leftovers_df.groupby("short_value_name")
+        for short_value_name, grouped_df in unmapped_sdks_df.groupby("short_value_name")
     }
     permissions = [
         value.replace("android.permission.", "")
@@ -193,7 +195,7 @@ def _build_app_sdk_details_payload(state: State, store_id: str) -> PublicAppSdkD
         permissions=permissions,
         app_queries=app_queries,
         skadnetwork=skadnetwork,
-        leftovers=leftovers,
+        unmapped_sdks=unmapped_sdks,
     )
 
 

@@ -3,17 +3,18 @@
 
 	import type { ActionData, PageData } from './$types';
 
-	export let data: PageData;
-	export let form: ActionData;
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	$: verificationEmailsRemaining =
+	const verificationEmailsRemaining = $derived(
 		form?.resend?.verificationEmailsRemaining ??
-		form?.verify?.verificationEmailsRemaining ??
-		data.verificationEmailsRemaining;
-	$: highlightSpamNotice =
+			form?.verify?.verificationEmailsRemaining ??
+			data.verificationEmailsRemaining
+	);
+	const highlightSpamNotice = $derived(
 		form?.resend?.highlightSpamNotice ??
-		form?.verify?.highlightSpamNotice ??
-		data.highlightSpamNotice;
+			form?.verify?.highlightSpamNotice ??
+			data.highlightSpamNotice
+	);
 </script>
 
 <h2 class="text-2xl font-bold">Verify your email address</h2>

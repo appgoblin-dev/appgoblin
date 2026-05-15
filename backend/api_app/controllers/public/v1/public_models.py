@@ -7,20 +7,24 @@ from typing import TypeAlias
 
 AppRankHistoryEntryValue: TypeAlias = str | int | None
 AppRankHistoryEntry: TypeAlias = dict[str, AppRankHistoryEntryValue]
-AppSdkXmlPathValues: TypeAlias = dict[str, list[str]]
-AppSdkShortNameValues: TypeAlias = dict[str, AppSdkXmlPathValues]
-AppSdkCompanyValues: TypeAlias = dict[str, AppSdkShortNameValues]
-AppSdkCategoryValues: TypeAlias = dict[str, AppSdkCompanyValues]
-AppSdkLeftovers: TypeAlias = dict[str, AppSdkXmlPathValues]
+AppSdkEvidenceByPath: TypeAlias = dict[str, list[str]]
+AppSdkEvidenceByPackage: TypeAlias = dict[str, AppSdkEvidenceByPath]
+AppSdkEvidenceByCompany: TypeAlias = dict[str, AppSdkEvidenceByPackage]
+AppSdkEvidenceByCategory: TypeAlias = dict[str, AppSdkEvidenceByCompany]
+AppSdkUnmappedEvidence: TypeAlias = dict[str, AppSdkEvidenceByPath]
 
 
 @dataclass
 class PublicCompanyListItem:
     """Minimal company entry returned by the public companies index."""
 
-    name: str
+    name: str | None = None
     company_domain: str | None = None
-    company_logo_url: str | None = None
+    parent_company_domain: str | None = None
+    parent_company_name: str | None = None
+    api_ip_resolved_country: str | None = None
+    total_app_count: int | None = None
+    installs_d30: int | None = None
 
 
 @dataclass
@@ -122,10 +126,16 @@ class PublicAppRankHistory:
 
 @dataclass
 class PublicAppSdkDetails:
-    """Detailed SDK and manifest findings for a single app."""
+    """Detailed SDK and manifest findings for a single app.
 
-    company_categories: AppSdkCategoryValues = field(default_factory=dict)
+    The nested keys below identifiers such as category slug, company domain, and
+    SDK package prefix are dynamic. Evidence keys like ``smali`` or
+    ``application/provider`` represent the file path or manifest/XML path where
+    AppGoblin found the matched value, so they intentionally remain open-ended.
+    """
+
+    company_categories: AppSdkEvidenceByCategory = field(default_factory=dict)
     permissions: list[str] = field(default_factory=list)
     app_queries: list[str] = field(default_factory=list)
     skadnetwork: list[str] = field(default_factory=list)
-    leftovers: AppSdkLeftovers = field(default_factory=dict)
+    unmapped_sdks: AppSdkUnmappedEvidence = field(default_factory=dict)

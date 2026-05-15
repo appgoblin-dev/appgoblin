@@ -248,11 +248,47 @@ def prep_companies_overview_df(
     """Prep companies overview dataframe."""
     overview_df = (
         overview_df.groupby(
-            ["company_name", "company_domain", "store", "tag_source"],
+            [
+                "company_name",
+                "company_domain",
+                "parent_company_domain",
+                "parent_company_name",
+                "store",
+                "tag_source",
+            ],
             dropna=False,
         )[["app_count", "cat_total_app_count", "installs_d30"]]
         .sum()
         .reset_index()
+    )
+
+    total_app_count_df = (
+        overview_df.groupby(
+            [
+                "company_name",
+                "company_domain",
+                "parent_company_domain",
+                "parent_company_name",
+            ],
+            dropna=False,
+        )[["app_count"]]
+        .sum()
+        .reset_index()
+        .rename(columns={"app_count": "total_app_count"})
+    )
+    total_installs_d30_df = (
+        overview_df.groupby(
+            [
+                "company_name",
+                "company_domain",
+                "parent_company_domain",
+                "parent_company_name",
+            ],
+            dropna=False,
+        )[["installs_d30"]]
+        .sum()
+        .reset_index()
+        .rename(columns={"installs_d30": "installs_d30"})
     )
 
     overview_df["percentage"] = (
@@ -277,7 +313,12 @@ def prep_companies_overview_df(
     adstxt_direct_cols = [x for x in adstxt_cols if "direct" in x]
 
     pivoted_df = overview_df.pivot(
-        index=["company_name", "company_domain"],
+        index=[
+            "company_name",
+            "company_domain",
+            "parent_company_domain",
+            "parent_company_name",
+        ],
         columns=["store_tag_source"],
         values=["percentage", "installs_d30"],
     )
@@ -285,6 +326,28 @@ def prep_companies_overview_df(
     # Flatten the multi-level columns
     pivoted_df.columns = [f"{col[1]}_{col[0]}" for col in pivoted_df.columns]
     overview_df = pivoted_df.reset_index()
+    overview_df = overview_df.merge(
+        total_app_count_df,
+        on=[
+            "company_name",
+            "company_domain",
+            "parent_company_domain",
+            "parent_company_name",
+        ],
+        how="left",
+        validate="1:1",
+    )
+    overview_df = overview_df.merge(
+        total_installs_d30_df,
+        on=[
+            "company_name",
+            "company_domain",
+            "parent_company_domain",
+            "parent_company_name",
+        ],
+        how="left",
+        validate="1:1",
+    )
 
     overview_df["tempsort"] = (
         overview_df[sdk_cols + adstxt_direct_cols].fillna(0).mean(axis=1)
@@ -303,18 +366,33 @@ def prep_companies_overview_df(
         open_source_df, on="company_domain", how="left", validate="m:1"
     )
     overview_df["percent_open_source"] = overview_df["percent_open_source"].fillna(0)
-    countries_df = get_company_countries(state)
+    countries_df = get_company_countries(state).drop(
+        columns=["total_app_count"], errors="ignore"
+    )
     overview_df = overview_df.merge(
         countries_df,
         on="company_domain",
         how="left",
         validate="1:1",
     )
+    company_logos_df = get_company_logos_df(state)
     overview_df = overview_df.merge(
-        get_company_logos_df(state),
+        company_logos_df,
         on="company_domain",
         how="left",
         validate="1:1",
+    )
+    parent_company_logos_df = company_logos_df.rename(
+        columns={
+            "company_domain": "parent_company_domain",
+            "company_logo_url": "parent_company_logo_url",
+        }
+    )
+    overview_df = overview_df.merge(
+        parent_company_logos_df,
+        on="parent_company_domain",
+        how="left",
+        validate="m:1",
     )
 
     return overview_df

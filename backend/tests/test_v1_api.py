@@ -103,12 +103,20 @@ FAKE_OVERVIEW = FakeCompaniesOverview(
         {
             "company_name": "Google",
             "company_domain": "google.com",
-            "company_logo_url": "https://cdn.example/google.png",
+            "parent_company_domain": "alphabet.com",
+            "parent_company_name": "Alphabet",
+            "api_ip_resolved_country": "US",
+            "total_app_count": 50000,
+            "installs_d30": 123456789,
         },
         {
-            "company_name": "Meta",
-            "company_domain": "meta.com",
-            "company_logo_url": None,
+            "company_name": float("nan"),
+            "company_domain": "blasto.ai",
+            "parent_company_domain": None,
+            "parent_company_name": None,
+            "api_ip_resolved_country": None,
+            "total_app_count": 30000,
+            "installs_d30": 450000,
         },
     ]
 )
@@ -265,9 +273,18 @@ class TestV1CompaniesAuth:
         assert len(data) == 2
         assert data[0]["name"] == "Google"
         assert data[0]["company_domain"] == "google.com"
-        assert data[0]["company_logo_url"] == "https://cdn.example/google.png"
-        assert data[1]["name"] == "Meta"
-        assert data[1]["company_domain"] == "meta.com"
+        assert data[0]["parent_company_domain"] == "alphabet.com"
+        assert data[0]["parent_company_name"] == "Alphabet"
+        assert data[0]["api_ip_resolved_country"] == "US"
+        assert data[0]["total_app_count"] == 50000
+        assert data[0]["installs_d30"] == 123456789
+        assert data[1]["name"] is None
+        assert data[1]["company_domain"] == "blasto.ai"
+        assert data[1]["parent_company_domain"] is None
+        assert data[1]["parent_company_name"] is None
+        assert data[1]["api_ip_resolved_country"] is None
+        assert data[1]["total_app_count"] == 30000
+        assert data[1]["installs_d30"] == 450000
 
 
 class TestV1CompaniesRateLimitHeaders:
@@ -746,7 +763,7 @@ class TestV1Apps:
             "permissions": ["INTERNET"],
             "app_queries": ["com.adjust.sdk"],
             "skadnetwork": ["cstr6suwn9.skadnetwork"],
-            "leftovers": {
+            "unmapped_sdks": {
                 "mystery.vendor": {"application/meta-data": ["mystery.vendor.sdk"]}
             },
         }
@@ -769,7 +786,7 @@ class TestV1Apps:
             "permissions": [],
             "app_queries": [],
             "skadnetwork": [],
-            "leftovers": {},
+            "unmapped_sdks": {},
         }
 
 

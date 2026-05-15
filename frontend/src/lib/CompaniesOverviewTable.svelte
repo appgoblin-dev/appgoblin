@@ -46,12 +46,22 @@
 		},
 		{
 			title: 'Servers',
-			accessorKey: 'most_common_country',
+			accessorKey: 'api_ip_resolved_country',
 			isSortable: true
 		},
 		{
 			title: 'Company',
 			accessorKey: 'company_name',
+			isSortable: true
+		},
+		{
+			title: 'Parent Company',
+			accessorKey: 'parent_company_name',
+			isSortable: true
+		},
+		{
+			title: 'Total Apps',
+			accessorKey: 'total_app_count',
 			isSortable: true
 		},
 		// ### SDK Stats
@@ -101,8 +111,15 @@
 	const globalFilterFn = (row: any, columnId: string, filterValue: string) => {
 		const name = row.original.company_name?.toLowerCase() ?? '';
 		const domain = row.original.company_domain?.toLowerCase() ?? '';
+		const parentName = row.original.parent_company_name?.toLowerCase() ?? '';
+		const parentDomain = row.original.parent_company_domain?.toLowerCase() ?? '';
 		const query = filterValue.toLowerCase();
-		return name.includes(query) || domain.includes(query);
+		return (
+			name.includes(query) ||
+			domain.includes(query) ||
+			parentName.includes(query) ||
+			parentDomain.includes(query)
+		);
 	};
 
 	const table = createSvelteTable({
@@ -175,8 +192,10 @@
 
 	function shouldShowHeader(header: any) {
 		if (header.column.id === 'percent_open_source') return true;
-		if (header.column.id === 'most_common_country') return true;
+		if (header.column.id === 'api_ip_resolved_country') return true;
 		if (header.column.id === 'company_name') return true;
+		if (header.column.id === 'parent_company_name') return true;
+		if (header.column.id === 'total_app_count') return dataMetric === 'app_count';
 
 		let headerHasInstall = header.column.id.includes('install');
 		let headerHasPercent = header.column.id.includes('percentage');
@@ -205,12 +224,21 @@
 	function getCompanyNameColumnWidth(header: any) {
 		if (header.column.id === 'company_name') {
 			if (isAdsPage) {
-				return 'w-[40%]';
+				return 'w-[30%]';
 			} else {
-				return 'w-[50%]';
+				return 'w-[36%]';
 			}
 		}
+		if (header.column.id === 'parent_company_name') {
+			return 'w-[18%]';
+		}
 		return '';
+	}
+
+	function hasDistinctParentCompany(company: any) {
+		return Boolean(
+			company.parent_company_domain && company.parent_company_domain !== company.company_domain
+		);
 	}
 </script>
 
@@ -255,6 +283,19 @@
 						}}
 					/>
 					<p class="text-xs md:text-sm">Percent</p>
+				</label>
+				<label class="flex flex-row items-center space-x-1">
+					<input
+						class="radio"
+						type="radio"
+						checked={dataMetric == 'app_count'}
+						name="radio-direct"
+						value="app_count"
+						onchange={() => {
+							dataMetric = 'app_count';
+						}}
+					/>
+					<p class="text-xs md:text-sm">Total Apps</p>
 				</label>
 			</form>
 		</div>
@@ -317,12 +358,12 @@
 							{/if}
 						</td>
 						<td class="text-center">
-							{#if row.original.most_common_country}
+							{#if row.original.api_ip_resolved_country}
 								<span
 									class="text-xs md:text-sm"
-									title={`IP addresses for this domain commonly resolve to: ${row.original.most_common_country}`}
+									title={`API IP addresses for this domain commonly resolve to: ${row.original.api_ip_resolved_country}`}
 								>
-									{countryCodeToEmoji(row.original.most_common_country)}
+									{countryCodeToEmoji(row.original.api_ip_resolved_country)}
 								</span>
 							{/if}
 						</td>
@@ -357,6 +398,48 @@
 								</div>
 							</a>
 						</td>
+						<td class="w-0">
+							{#if hasDistinctParentCompany(row.original)}
+								<a
+									href="/companies/{row.original.parent_company_domain}"
+									style="cursor: pointer;"
+									class="text-xs md:text-sm"
+								>
+									<div class="flex items-center">
+										{#if row.original.parent_company_logo_url}
+											<img
+												src={`https://media.appgoblin.info/${row.original.parent_company_logo_url}`}
+												alt={row.original.parent_company_name ?? row.original.parent_company_domain}
+												class="w-8 h-8 rounded-sm mr-2"
+												loading="lazy"
+											/>
+										{:else}
+											<img
+												src="/default_company_logo.png"
+												alt="Default Company Logo"
+												class="w-8 h-8 rounded-sm mr-2"
+												loading="lazy"
+											/>
+										{/if}
+										{#if row.original.parent_company_name}
+											{row.original.parent_company_name}
+											({row.original.parent_company_domain})
+										{:else}
+											{row.original.parent_company_domain}
+										{/if}
+									</div>
+								</a>
+							{:else}
+								<span class="text-xs text-surface-500-400">-</span>
+							{/if}
+						</td>
+						{#if dataMetric == 'app_count'}
+							<td class="table-cell-fit">
+								<p class="text-xs md:text-sm">
+									{formatNumber(row.original.total_app_count)}
+								</p>
+							</td>
+						{/if}
 
 						{#if dataMetric == 'installs'}
 							<td class="table-cell-fit">

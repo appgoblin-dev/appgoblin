@@ -43,6 +43,35 @@ UNMAPPED_COMPANY_NOTICE = (
 )
 
 
+def _is_missing_value(value: object) -> bool:
+    """Return whether a value is missing after dataframe serialization."""
+    if value is None:
+        return True
+
+    try:
+        return bool(value != value)
+    except TypeError:
+        return False
+
+
+def _optional_string(value: object) -> str | None:
+    """Normalize optional strings from serialized pandas rows."""
+    if _is_missing_value(value):
+        return None
+
+    normalized = str(value).strip()
+    if not normalized or normalized.lower() == "nan":
+        return None
+    return normalized
+
+
+def _optional_int(value: object) -> int | None:
+    """Normalize optional integers from serialized pandas rows."""
+    if _is_missing_value(value):
+        return None
+    return int(value)
+
+
 def _api_key_guard(request: ASGIConnection, route_handler: BaseRouteHandler) -> None:
     """Guard that validates the X-API-Key header."""
     state = request.app.state
@@ -111,17 +140,15 @@ def _to_public_company_list_item(
 ) -> PublicCompanyListItem:
     """Project an internal company summary into the public contract type."""
     return PublicCompanyListItem(
-        company_domain=(
-            str(company["company_domain"])
-            if company.get("company_domain") is not None
-            else None
+        company_domain=_optional_string(company.get("company_domain")),
+        name=_optional_string(company.get("name") or company.get("company_name")),
+        parent_company_domain=_optional_string(company.get("parent_company_domain")),
+        parent_company_name=_optional_string(company.get("parent_company_name")),
+        api_ip_resolved_country=_optional_string(
+            company.get("api_ip_resolved_country")
         ),
-        name=str(company.get("name") or company["company_name"]),
-        company_logo_url=(
-            str(company["company_logo_url"])
-            if company.get("company_logo_url") is not None
-            else None
-        ),
+        total_app_count=_optional_int(company.get("total_app_count")),
+        installs_d30=_optional_int(company.get("installs_d30")),
     )
 
 
@@ -195,10 +222,11 @@ class V1CompaniesController(Controller):
 
     @get(path="/companies", cache=86400)
     async def companies(self: Self, state: State) -> list[PublicCompanyListItem]:
-        """Return a list of all mapped companies.
+        """Return a list of all queryable company domains.
 
-        Each entry contains the canonical ``company_domain``, display ``name``,
-        and optional ``company_logo_url``.
+        Each entry contains the exact ``company_domain``, display ``name``,
+        parent company mapping fields, and lightweight summary fields already
+        present in the overview data.
         """
         start = time.perf_counter() * 1000
         overview = get_overviews(state=state)
