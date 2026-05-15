@@ -1003,6 +1003,7 @@ def query_apps_crossfilter(
     max_rating_count: int | None = None,
     min_installs_d30: int | None = None,
     max_installs_d30: int | None = None,
+    limit: int = 100,
 ) -> pd.DataFrame:
     """Query apps for analytics dashboard."""
     # Ensure domains are lists, not None
@@ -1037,6 +1038,7 @@ def query_apps_crossfilter(
             "max_rating_count": max_rating_count,
             "min_installs_d30": min_installs_d30,
             "max_installs_d30": max_installs_d30,
+            "limit": limit,
         },
     )
     return df

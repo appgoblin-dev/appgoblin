@@ -53,3 +53,9 @@ host = "nyc3.digitaloceanspaces.com"
 access_key_id = "myaccesskey"
 secret_key = "mysecretkey"
 bucket = "my-public-bucket"
+
+[smtp]
+host = "smtp.zoho.com"
+port = 465
+user = "contact@appgoblin.info"
+password = "my-email-password"

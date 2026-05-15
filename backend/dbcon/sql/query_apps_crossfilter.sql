@@ -112,4 +112,5 @@ WHERE
     )
 ORDER BY
     sao.installs DESC NULLS LAST
-LIMIT 100;
+LIMIT :limit
+;
