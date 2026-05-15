@@ -132,6 +132,8 @@ def get_companies_category_tag_type_stats(
                 "tag_source",
                 "company_domain",
                 "company_name",
+                "parent_company_domain",
+                "parent_company_name",
                 "app_category",
                 "type_url_slug",
             ]
@@ -333,17 +335,17 @@ def get_companies_parent_category_stats(
             state.dbcon.engine,
             params={"app_category": app_category},
         )
-        child_df = pd.read_sql(
+        all_company_domains_df = pd.read_sql(
             sql.companies_category_tag_stats,
             state.dbcon.engine,
             params={"app_category": app_category},
         )
-        child_df = child_df[
-            ~child_df["company_domain"].isin(
+        all_company_domains_df = all_company_domains_df[
+            ~all_company_domains_df["company_domain"].isin(
                 parent_company_domains + child_company_domains
             )
         ]
-        df = pd.concat([parents_df, child_df], axis=0)
+        df = pd.concat([parents_df, all_company_domains_df], axis=0)
         if app_category == "game%":
             df["app_category"] = "games"
             df = (
@@ -361,13 +363,27 @@ def get_companies_parent_category_stats(
             )
     else:
         parents_df = pd.read_sql(sql.companies_parent_tag_stats, state.dbcon.engine)
-        child_df = pd.read_sql(sql.companies_tag_stats, state.dbcon.engine)
-        child_df = child_df[
-            ~child_df["company_domain"].isin(
-                parent_company_domains + child_company_domains
+        all_company_domains_df = pd.read_sql(
+            sql.companies_tag_stats, state.dbcon.engine
+        )
+        all_company_domains_df = all_company_domains_df[
+            ~all_company_domains_df["company_domain"].isin(
+                parent_company_domains
+                # parent_company_domains + child_company_domains
             )
         ]
-        df = pd.concat([parents_df, child_df], axis=0)
+        df = pd.concat([parents_df, all_company_domains_df], axis=0)
+        df[
+            df["company_domain"].isin(
+                [
+                    "applovin.com",
+                    "adjust.com",
+                    "rubiconproject.com",
+                    "magnite.com",
+                    "ignitemediatech.com",
+                ]
+            )
+        ]
     df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
     df.loc[df["app_category"].isna(), "app_category"] = "None"
     # NULL domains come from IP addresses called directly in api calls
@@ -452,6 +468,17 @@ def get_company_stats(
         )
     df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
     df.loc[df["app_category"].isna(), "app_category"] = "None"
+    return df
+
+
+def get_combined_companies_history(state: State, company_domain: str) -> pd.DataFrame:
+    """Get quarterly company trend history for a company domain."""
+    logger.info(f"query combined company history: {company_domain=}")
+    df = pd.read_sql(
+        sql.combined_companies_history,
+        state.dbcon.engine,
+        params={"company_domain": company_domain},
+    )
     return df
 
 

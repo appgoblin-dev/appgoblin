@@ -32,6 +32,31 @@ export async function getUserEmailVerificationRequest(
 	return request;
 }
 
+export async function getUserEmailVerificationRequestByUserId(
+	userId: number
+): Promise<EmailVerificationRequest | null> {
+	const row = await db.queryOne<{
+		id: string;
+		user_id: number;
+		code: string;
+		email: string;
+		expires_at: string;
+	}>(
+		'SELECT id, user_id, code, email, expires_at FROM email_verification_requests WHERE user_id = $1',
+		[userId]
+	);
+	if (row === null) {
+		return null;
+	}
+	return {
+		id: row.id,
+		userId: row.user_id,
+		code: row.code,
+		email: row.email,
+		expiresAt: new Date(row.expires_at)
+	};
+}
+
 export async function createEmailVerificationRequest(
 	userId: number,
 	email: string
@@ -92,13 +117,18 @@ export async function getUserEmailVerificationRequestFromRequest(
 		return null;
 	}
 	const id = event.cookies.get('email_verification') ?? null;
-	if (id === null) {
-		return null;
-	}
-	const request = await getUserEmailVerificationRequest(event.locals.user.id, id);
-	if (request === null) {
+	if (id !== null) {
+		const request = await getUserEmailVerificationRequest(event.locals.user.id, id);
+		if (request !== null) {
+			return request;
+		}
 		deleteEmailVerificationRequestCookie(event);
 	}
+	const request = await getUserEmailVerificationRequestByUserId(event.locals.user.id);
+	if (request === null) {
+		return null;
+	}
+	setEmailVerificationRequestCookie(event, request);
 	return request;
 }
 
@@ -202,7 +232,20 @@ export async function sendPasswordResetEmail(email: string, code: string): Promi
 	}
 }
 
-export const sendVerificationEmailBucket = new ExpiringTokenBucket<number>(3, 60 * 10);
+export const EMAIL_VERIFICATION_SEND_LIMIT = 3;
+const EMAIL_VERIFICATION_SEND_WINDOW_SECONDS = 60 * 60;
+
+export const EMAIL_VERIFICATION_LIMIT_MESSAGE =
+	'You can request up to 3 verification emails for now. Check spam or junk for the latest AppGoblin email.';
+
+export const sendVerificationEmailBucket = new ExpiringTokenBucket<number>(
+	EMAIL_VERIFICATION_SEND_LIMIT,
+	EMAIL_VERIFICATION_SEND_WINDOW_SECONDS
+);
+
+export function getRemainingVerificationEmailSends(userId: number): number {
+	return sendVerificationEmailBucket.getRemaining(userId);
+}
 
 export interface EmailVerificationRequest {
 	id: string;

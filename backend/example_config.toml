@@ -29,6 +29,24 @@ secret_key = "mysecretkey"
 site_id = "my-site-id"
 base_url = "https://my-umami-instance.com"
 
+# Backend serves /api/v1/* endpoints which validate API keys against
+# the goblinadmin database (same DB the SvelteKit frontend uses).
+# The goblinadmin-write config is used for key validation queries.
+# Ensure this user has SELECT on api_keys, users, and subscriptions.
+[goblinadmin-write]
+host = "192.168.0.1"
+db_user = "myuser"
+db_password = "mypassword"
+db_name = "goblinadmin"
+
+# Stripe price ID → tier label mapping for API key rate limits.
+# Values must match STRIPE_PRICE_*_ID env vars from the SvelteKit frontend.
+[tier_prices]
+"price_xxx_app_dev" = "premium_access"
+"price_xxx_b2b_sdk" = "b2b_sdk"
+"price_xxx_b2b_appads" = "b2b_appads"
+"price_xxx_b2b_premium" = "b2b_premium"
+
 [public-s3]
 region_name = "nyc3"
 host = "nyc3.digitaloceanspaces.com"

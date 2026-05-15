@@ -120,6 +120,10 @@
 			<p class={sectionLabel}>Resources</p>
 			<a href="/blog" class={isHighlighted('/blog') ? topBarHighlightedFont : topBarFont}>BLOG</a>
 			<div class={myDivider}></div>
+			<a href="/api-docs" class={isHighlighted('/api-docs') ? topBarHighlightedFont : topBarFont}
+				>API DOCS</a
+			>
+			<div class={myDivider}></div>
 			<a href="/reports" class={isHighlighted('/reports') ? topBarHighlightedFont : topBarFont}
 				>REPORTS</a
 			>
@@ -273,7 +277,12 @@
 		<!-- RESOURCES dropdown -->
 		<div class="relative group">
 			<button
-				class="flex items-center gap-0.5 {isHighlighted('/blog', '/reports', '/free-app-datasets')
+				class="flex items-center gap-0.5 {isHighlighted(
+					'/blog',
+					'/api-docs',
+					'/reports',
+					'/free-app-datasets'
+				)
 					? topBarHighlightedFont
 					: topBarFont}"
 			>
@@ -283,6 +292,10 @@
 				<div class="card bg-surface-50-950 shadow-xl rounded-md py-1">
 					<a href="/blog" class={isHighlighted('/blog') ? dropdownHighlightedItem : dropdownItem}
 						>Blog</a
+					>
+					<a
+						href="/api-docs"
+						class={isHighlighted('/api-docs') ? dropdownHighlightedItem : dropdownItem}>API Docs</a
 					>
 					<a
 						href="/reports"

@@ -103,6 +103,18 @@ export class ExpiringTokenBucket<_Key> {
 		return bucket.count >= cost;
 	}
 
+	public getRemaining(key: _Key): number {
+		const bucket = this.storage.get(key) ?? null;
+		const now = Date.now();
+		if (bucket === null) {
+			return this.max;
+		}
+		if (now - bucket.createdAt >= this.expiresInSeconds * 1000) {
+			return this.max;
+		}
+		return bucket.count;
+	}
+
 	public consume(key: _Key, cost: number): boolean {
 		let bucket = this.storage.get(key) ?? null;
 		const now = Date.now();

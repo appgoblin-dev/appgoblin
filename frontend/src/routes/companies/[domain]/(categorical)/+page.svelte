@@ -11,6 +11,7 @@
 	import HierarchyTree from '$lib/HierarchyTree.svelte';
 	import WhiteCard from '$lib/WhiteCard.svelte';
 	import CompaniesLayout from '$lib/CompaniesLayout.svelte';
+	import CompanyTrendsSummary from '$lib/CompanyTrendsSummary.svelte';
 	interface Props {
 		data: CompanyFullDetails;
 	}
@@ -151,6 +152,20 @@
 				{/if}
 			</div>
 		</WhiteCard>
+	{/snippet}
+
+	{#snippet card4()}
+		{#if data.companyDetails?.trends_summary}
+			<WhiteCard>
+				{#snippet title()}
+					<span>{companyName}'s Trend Snapshot</span>
+				{/snippet}
+				<CompanyTrendsSummary
+					summary={data.companyDetails.trends_summary}
+					companyDomain={data.companyTree.company_domain || data.companyTree.queried_domain}
+				/>
+			</WhiteCard>
+		{/if}
 	{/snippet}
 </CompaniesLayout>
 

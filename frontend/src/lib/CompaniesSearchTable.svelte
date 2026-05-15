@@ -110,12 +110,12 @@
 				{#each table.getRowModel().rows as row (row.id)}
 					<tr class="px-0">
 						<td class="text-center">
-							{#if row.original.most_common_country}
+							{#if row.original.api_ip_resolved_country}
 								<span
 									class="text-xs md:text-sm"
-									title={`IP addresses for this domain commonly resolve to: ${row.original.most_common_country}`}
+									title={`API IP addresses for this domain commonly resolve to: ${row.original.api_ip_resolved_country}`}
 								>
-									{countryCodeToEmoji(row.original.most_common_country)}
+									{countryCodeToEmoji(row.original.api_ip_resolved_country)}
 								</span>
 							{/if}
 						</td>

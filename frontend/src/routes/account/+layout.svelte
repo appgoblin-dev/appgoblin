@@ -7,6 +7,7 @@
 	import CreditCard from 'lucide-svelte/icons/credit-card';
 	import LayoutDashboard from 'lucide-svelte/icons/layout-dashboard';
 	import ListTodo from 'lucide-svelte/icons/list-todo';
+	import Code from 'lucide-svelte/icons/code';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
@@ -15,6 +16,7 @@
 	const navItems = [
 		{ href: '/account', label: 'Overview', icon: LayoutDashboard },
 		{ href: '/account/watchlist', label: 'Watchlists', icon: ListTodo },
+		{ href: '/account/api-keys', label: 'API Keys', icon: Code },
 		{ href: '/account/settings', label: 'Settings', icon: Settings },
 		{ href: '/account/security', label: 'Security', icon: ShieldCheck },
 		{ href: '/account/subscription', label: 'Subscription', icon: CreditCard }
