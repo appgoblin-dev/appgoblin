@@ -47,8 +47,8 @@
 			href="/pricing"
 			class="underline decoration-primary-500/60 hover:decoration-primary-500">pricing page</a
 		>
-		for plan details. We offer Free access for exploration, Premium Access for exports, and B2B tiers
-		for SDK intelligence, app-ads.txt datasets, and combined access.
+		for plan details. We offer Free access for exploration plus B2B tiers for SDK intelligence, app-ads.txt
+		datasets, and combined access.
 	</p>
 	<p>
 		Looking for open app data? Browse our

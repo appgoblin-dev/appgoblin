@@ -19,7 +19,7 @@ export const actions: Actions = {
 			return fail(400, { message: 'Missing price selection' });
 		}
 
-		const allowedKeys: StripePriceKey[] = ['app_dev', 'b2b_sdk', 'b2b_appads', 'b2b_premium'];
+		const allowedKeys: StripePriceKey[] = ['b2b_sdk', 'b2b_appads', 'b2b_premium'];
 
 		if (!allowedKeys.includes(priceKey as StripePriceKey)) {
 			return fail(400, { message: 'Invalid price selection' });

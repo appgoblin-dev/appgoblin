@@ -27,6 +27,11 @@ from api_app.models import (
     AppSDKsOverview,
     SDKsDetails,
 )
+from api_app.report_exports import (
+    create_report_id,
+    run_app_explorer_export_job,
+    validate_export_dependencies,
+)
 from api_app.utils import extend_app_icon_url
 from config import get_logger
 from dbcon.queries import (
@@ -57,6 +62,42 @@ logger = get_logger(__name__)
 # Constants for URL truncation
 MAX_URL_DISPLAY_LENGTH = 44
 TRUNCATED_LENGTH = 41
+
+
+def has_crossfilter_export_filters(payload: dict) -> bool:
+    """Return True when at least one meaningful export filter is set."""
+    array_fields = ("include_domains", "exclude_domains")
+    boolean_fields = ("require_sdk_api", "require_iap", "require_ads")
+    value_fields = (
+        "ranking_country",
+        "category",
+        "store",
+        "min_installs",
+        "max_installs",
+        "min_rating_count",
+        "max_rating_count",
+        "min_installs_d30",
+        "max_installs_d30",
+    )
+
+    for field in array_fields:
+        value = payload.get(field)
+        if isinstance(value, list) and len(value) > 0:
+            return True
+
+    for field in boolean_fields:
+        if payload.get(field) is True:
+            return True
+
+    for field in value_fields:
+        value = payload.get(field)
+        if value is None:
+            continue
+        if isinstance(value, str) and not value.strip():
+            continue
+        return True
+
+    return False
 
 
 def api_call_dfs(state: State, store_id: str) -> pd.DataFrame:
@@ -971,6 +1012,50 @@ class AppController(Controller):
             f"{self.path}/crossfilter returned {len(apps_list)} apps in {duration}ms"
         )
         return apps_dict
+
+    @post(path="/crossfilter/export")
+    async def export_crossfilter_apps(self: Self, state: State, data: dict) -> Response:
+        """Queue an app explorer CSV export and email the download link."""
+        validate_export_dependencies()
+
+        recipient_email = str(data.get("recipient_email", "")).strip()
+        if not recipient_email:
+            return Response(
+                {"success": False, "error": "recipient_email is required"},
+                status_code=400,
+            )
+
+        if not has_crossfilter_export_filters(data):
+            return Response(
+                {
+                    "success": False,
+                    "error": "At least one filter must be set before exporting.",
+                },
+                status_code=400,
+            )
+
+        report_id = create_report_id()
+        logger.info(
+            "Queueing app explorer export %s for %s",
+            report_id,
+            recipient_email,
+        )
+
+        response = {
+            "success": True,
+            "report_id": report_id,
+            "message": "Export queued. A download link will be sent by email.",
+        }
+        return Response(
+            response,
+            background=BackgroundTask(
+                run_app_explorer_export_job,
+                state=state,
+                payload=data,
+                recipient_email=recipient_email,
+                report_id=report_id,
+            ),
+        )
 
 
 COLLECTIONS = {

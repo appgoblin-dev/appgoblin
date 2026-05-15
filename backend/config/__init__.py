@@ -99,4 +99,10 @@ if not pathlib.Path.exists(CONFIG_FILE_PATH):
 with CONFIG_FILE_PATH.open("rb") as f:
     CONFIG = tomllib.load(f)
 
+SMTP_CONFIG = CONFIG.get("smtp", {})
+SMTP_HOST = SMTP_CONFIG.get("host")
+SMTP_PORT = SMTP_CONFIG.get("port")
+SMTP_USER = SMTP_CONFIG.get("user")
+SMTP_PASSWORD = SMTP_CONFIG.get("password")
+
 DATE_FORMAT = "%Y-%m-%d"
