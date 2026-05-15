@@ -1,7 +1,7 @@
 """Integration tests for /api/v1 endpoints."""
 
 from collections.abc import AsyncGenerator
-from contextlib import asynccontextmanager, contextmanager
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from unittest.mock import MagicMock, patch
 
@@ -18,17 +18,15 @@ from api_app.controllers.public.v1.companies import (
     UNMAPPED_COMPANY_NOTICE,
     V1CompaniesController,
 )
-from api_app.controllers.public.v1.public_models import PublicCategoryCompanyStats
+from api_app.controllers.public.v1.public_models import (
+    CompanyDatasets,
+    CompanyDatasetTarget,
+    PublicCategoryCompanyStats,
+    PublicCompanyOverview,
+)
 from api_app.controllers.public.v1.docs import V1DocsController
 from api_app.guards import _CachedKey
 from app import RateLimitMiddleware
-
-
-@dataclass
-class FakeCompanyDetail:
-    company_id: int
-    name: str
-    count: int
 
 
 @dataclass
@@ -102,8 +100,16 @@ def _patch_key_not_found():
 
 FAKE_OVERVIEW = FakeCompaniesOverview(
     companies_overview=[
-        FakeCompanyDetail(company_id=1, name="Google", count=50000),
-        FakeCompanyDetail(company_id=2, name="Meta", count=30000),
+        {
+            "company_name": "Google",
+            "company_domain": "google.com",
+            "company_logo_url": "https://cdn.example/google.png",
+        },
+        {
+            "company_name": "Meta",
+            "company_domain": "meta.com",
+            "company_logo_url": None,
+        },
     ]
 )
 
@@ -150,23 +156,6 @@ def _patch_ranks(rows: list[dict]):
     )
 
 
-@contextmanager
-def _patch_sdk_overview(rows: list[dict], logos: list[dict] | None = None):
-    overview_df = pd.DataFrame(rows)
-    logos_df = pd.DataFrame(logos or [])
-    with (
-        patch(
-            "api_app.controllers.public.v1.apps.get_app_sdk_overview",
-            return_value=overview_df,
-        ),
-        patch(
-            "api_app.controllers.public.v1.apps.get_company_logos_df",
-            return_value=logos_df,
-        ),
-    ):
-        yield
-
-
 def _patch_sdk_details(rows: list[dict]):
     details_df = pd.DataFrame(rows)
     return patch(
@@ -200,13 +189,6 @@ class TestV1CompaniesAuth:
         app = _make_test_app()
         with TestClient(app=app, raise_server_exceptions=False) as client:
             resp = client.get("/api/v1/apps/com.example.app/ranks/overview")
-        assert resp.status_code == 401
-        assert "Missing X-API-Key" in resp.json()["detail"]
-
-    def test_app_sdk_overview_requires_api_key(self):
-        app = _make_test_app()
-        with TestClient(app=app, raise_server_exceptions=False) as client:
-            resp = client.get("/api/v1/apps/com.example.app/sdksoverview")
         assert resp.status_code == 401
         assert "Missing X-API-Key" in resp.json()["detail"]
 
@@ -282,7 +264,10 @@ class TestV1CompaniesAuth:
         assert isinstance(data, list)
         assert len(data) == 2
         assert data[0]["name"] == "Google"
-        assert data[1]["count"] == 30000
+        assert data[0]["company_domain"] == "google.com"
+        assert data[0]["company_logo_url"] == "https://cdn.example/google.png"
+        assert data[1]["name"] == "Meta"
+        assert data[1]["company_domain"] == "meta.com"
 
 
 class TestV1CompaniesRateLimitHeaders:
@@ -389,17 +374,66 @@ class TestV1CompaniesTierRateLimits:
 class TestV1CompanyDetail:
     def test_company_detail_returns_expected_payload(self):
         app = _make_test_app()
-        payload = {
-            "metrics_overview": {
+        payload = PublicCompanyOverview(
+            metrics=PublicCategoryCompanyStats(
+                sdk_android_total_apps=123,
+                sdk_ios_total_apps=45,
+                sdk_total_apps=168,
+            ),
+            company_types=["ad-network"],
+            domain_is_mapped=True,
+            datasets=CompanyDatasets(
+                sdk_api_android=CompanyDatasetTarget(
+                    available=True,
+                    estimated_rows=123,
+                    url=(
+                        "https://media.appgoblin.info/"
+                        "downloads/company-verified-apps/domains/domain=google.com/"
+                        "source=all/appgoblin_google.com_android_verified_apps.csv"
+                    ),
+                ),
+                sdk_api_ios=CompanyDatasetTarget(
+                    available=True,
+                    estimated_rows=45,
+                    url=(
+                        "https://media.appgoblin.info/"
+                        "downloads/company-verified-apps/domains/domain=google.com/"
+                        "source=all/appgoblin_google.com_ios_verified_apps.csv"
+                    ),
+                ),
+            ),
+            mapping_notice=None,
+        )
+        with (
+            _patch_key_found("b2b_sdk"),
+            _patch_company_detail(payload),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/companies/google.com",
+                headers={"X-API-Key": "ag_companydetail"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == {
+            "metrics": {
+                "total_apps": 0,
+                "adstxt_direct_android_total_apps": 0,
+                "adstxt_direct_ios_total_apps": 0,
+                "adstxt_reseller_android_total_apps": 0,
+                "adstxt_reseller_ios_total_apps": 0,
                 "sdk_android_total_apps": 123,
                 "sdk_ios_total_apps": 45,
                 "sdk_total_apps": 168,
+                "api_android_total_apps": 0,
+                "api_ios_total_apps": 0,
+                "api_total_apps": 0,
+                "sdk_android_installs_d30": 0,
+                "adstxt_direct_android_installs_d30": 0,
+                "adstxt_reseller_android_installs_d30": 0,
             },
             "company_types": ["ad-network"],
             "domain_is_mapped": True,
-            "adstxt_ad_domain_overview": {"google": {"direct": {"count": 10}}},
-            "adstxt_publishers_overview": None,
-            "mediation_adapters": None,
             "datasets": {
                 "sdk_api_android": {
                     "available": True,
@@ -422,18 +456,6 @@ class TestV1CompanyDetail:
             },
             "mapping_notice": None,
         }
-        with (
-            _patch_key_found("b2b_sdk"),
-            _patch_company_detail(payload),
-            TestClient(app=app, raise_server_exceptions=False) as client,
-        ):
-            resp = client.get(
-                "/api/v1/companies/google.com",
-                headers={"X-API-Key": "ag_companydetail"},
-            )
-
-        assert resp.status_code == 200
-        assert resp.json() == payload
 
     def test_company_detail_returns_mapping_notice_for_unmapped_company(self):
         app = _make_test_app()
@@ -603,75 +625,6 @@ class TestV1Apps:
         assert resp.status_code == 200
         assert resp.json() == {"countries": [], "best_ranks": []}
 
-    def test_app_sdk_overview_returns_expected_shape(self):
-        app = _make_test_app()
-        sdk_rows = [
-            {
-                "category_slug": "ad_network",
-                "company_name": "Google",
-                "company_domain": "google.com",
-            },
-            {
-                "category_slug": "measurement",
-                "company_name": "Adjust",
-                "company_domain": "adjust.com",
-            },
-        ]
-        logos = [
-            {
-                "company_domain": "google.com",
-                "company_logo_url": "https://cdn.example/google.png",
-            },
-            {
-                "company_domain": "adjust.com",
-                "company_logo_url": "https://cdn.example/adjust.png",
-            },
-        ]
-        with (
-            _patch_key_found("free"),
-            _patch_sdk_overview(sdk_rows, logos),
-            TestClient(app=app, raise_server_exceptions=False) as client,
-        ):
-            resp = client.get(
-                "/api/v1/apps/com.example.app/sdksoverview",
-                headers={"X-API-Key": "ag_sdkkey"},
-            )
-
-        assert resp.status_code == 200
-        assert resp.json() == {
-            "company_categories": {
-                "ad_network": [
-                    {
-                        "company_name": "Google",
-                        "company_domain": "google.com",
-                        "company_logo_url": "https://cdn.example/google.png",
-                    }
-                ],
-                "measurement": [
-                    {
-                        "company_name": "Adjust",
-                        "company_domain": "adjust.com",
-                        "company_logo_url": "https://cdn.example/adjust.png",
-                    }
-                ],
-            }
-        }
-
-    def test_app_sdk_overview_returns_empty_shape_when_missing(self):
-        app = _make_test_app()
-        with (
-            _patch_key_found("free"),
-            _patch_sdk_overview([]),
-            TestClient(app=app, raise_server_exceptions=False) as client,
-        ):
-            resp = client.get(
-                "/api/v1/apps/com.example.app/sdksoverview",
-                headers={"X-API-Key": "ag_sdkempty"},
-            )
-
-        assert resp.status_code == 200
-        assert resp.json() == {"company_categories": {}}
-
     def test_app_ranks_returns_expected_shape(self):
         app = _make_test_app()
         rank_rows = [
@@ -837,8 +790,53 @@ class TestV1Docs:
         )
         assert data["security"] == [{"ApiKeyAuth": []}]
         assert "/health" not in data["paths"]
+        assert "/api/v1/apps/{store_id}/sdksoverview" not in data["paths"]
         assert data["paths"]
         assert all(path.startswith("/api/v1/") for path in data["paths"])
+        assert "PublicAppSdkOverview" not in data["components"]["schemas"]
+        app_basics_operation = data["paths"]["/api/v1/apps/{store_id}"]["get"]
+        store_id_parameter = next(
+            parameter
+            for parameter in app_basics_operation["parameters"]
+            if parameter["name"] == "store_id"
+        )
+        assert store_id_parameter["example"] == "dev.thirdgate.appgoblin"
+        examples = app_basics_operation["responses"]["200"]["content"][
+            "application/json"
+        ]["examples"]
+        assert examples["appgoblin_android_app"]["value"]["store_id"] == (
+            "dev.thirdgate.appgoblin"
+        )
+        assert examples["appgoblin_android_app"]["value"]["name"] == (
+            "AppGoblin: Scan Trackers & SDK"
+        )
+        company_overview_operation = data["paths"][
+            "/api/v1/companies/{company_domain}"
+        ]["get"]
+        company_domain_parameter = next(
+            parameter
+            for parameter in company_overview_operation["parameters"]
+            if parameter["name"] == "company_domain"
+        )
+        assert company_domain_parameter["example"] == "unity.com"
+        company_examples = company_overview_operation["responses"]["200"]["content"][
+            "application/json"
+        ]["examples"]
+        assert (
+            company_examples["unity_company_overview"]["value"]["domain_is_mapped"]
+            is True
+        )
+        assert company_examples["unity_company_overview"]["value"]["company_types"] == [
+            "ad-networks",
+            "development-tools",
+            "mediation",
+        ]
+        assert (
+            company_examples["unity_company_overview"]["value"]["metrics"][
+                "sdk_android_total_apps"
+            ]
+            == 39452
+        )
 
     def test_openapi_page_renders_scalar(self):
         app = _make_docs_test_app()

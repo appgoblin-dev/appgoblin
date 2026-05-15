@@ -8,16 +8,21 @@ from litestar import Controller, get
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException
 
+from api_app.controllers.public.v1.public_models import (
+    PublicAppBasics,
+    PublicAppBestRank,
+    PublicAppRankHistory,
+    PublicAppRanksOverview,
+    PublicAppSdkDetails,
+)
 from api_app.guards import validate_api_key
 from config import get_logger
 from dbcon.queries import (
     get_app_sdk_details,
-    get_app_sdk_overview,
     get_ranks_for_app,
     get_ranks_for_app_overview,
     get_single_app,
 )
-from dbcon.static import get_company_logos_df
 
 logger = get_logger(__name__)
 
@@ -28,7 +33,7 @@ def _api_key_guard(request, route_handler) -> None:
     validate_api_key(request, state)
 
 
-def _build_app_basics_payload(state: State, store_id: str) -> dict:
+def _build_app_basics_payload(state: State, store_id: str) -> PublicAppBasics:
     """Return a stable subset of basic app metadata for a store_id."""
     app_df = get_single_app(state, store_id)
     if app_df.empty:
@@ -54,57 +59,37 @@ def _build_app_basics_payload(state: State, store_id: str) -> dict:
         "app_icon_url",
         "store_link",
     ]
-    return {field: app_dict.get(field) for field in fields}
+    return PublicAppBasics(**{field: app_dict.get(field) for field in fields})
 
 
-def _build_app_ranks_overview_payload(state: State, store_id: str) -> dict:
+def _build_app_ranks_overview_payload(
+    state: State, store_id: str
+) -> PublicAppRanksOverview:
     """Return the existing app ranks overview response shape."""
     overview_df = get_ranks_for_app_overview(state, store_id=store_id, days=90)
     if overview_df.empty:
-        return {"countries": [], "best_ranks": []}
+        return PublicAppRanksOverview()
 
     countries = sorted(overview_df["country"].unique().tolist())
-    return {
-        "countries": countries,
-        "best_ranks": overview_df.to_dict(orient="records"),
-    }
-
-
-def _build_app_sdk_overview_payload(state: State, store_id: str) -> dict:
-    """Return the existing app SDK overview response shape."""
-    overview_df = get_app_sdk_overview(state, store_id)
-    if overview_df.empty:
-        return {"company_categories": {}}
-
-    overview_df = overview_df.merge(
-        get_company_logos_df(state),
-        left_on="company_domain",
-        right_on="company_domain",
-        how="left",
-        validate="m:1",
-    )
-
-    company_categories: dict[str, list[dict]] = {}
-    categories = (
-        overview_df.loc[overview_df["category_slug"].notna(), "category_slug"]
-        .unique()
-        .tolist()
-    )
-    for category_slug in categories:
-        company_categories[category_slug] = overview_df[
-            overview_df["category_slug"] == category_slug
-        ][["company_name", "company_domain", "company_logo_url"]].to_dict(
-            orient="records"
+    best_ranks = [
+        PublicAppBestRank(
+            country=str(row["country"]),
+            collection=str(row["collection"]),
+            category=str(row["category"]),
+            best_rank=int(row["best_rank"]),
         )
+        for row in overview_df.to_dict(orient="records")
+    ]
+    return PublicAppRanksOverview(countries=countries, best_ranks=best_ranks)
 
-    return {"company_categories": company_categories}
 
-
-def _build_app_ranks_payload(state: State, store_id: str, country: str = "US") -> dict:
+def _build_app_ranks_payload(
+    state: State, store_id: str, country: str = "US"
+) -> PublicAppRankHistory:
     """Return the existing app rank history response shape."""
     ranks_df = get_ranks_for_app(state, store_id=store_id, country=country, days=90)
     if ranks_df.empty:
-        return {"history": {}}
+        return PublicAppRankHistory()
 
     ranks_df["rank_group"] = ranks_df["collection"] + ": " + ranks_df["category"]
     ranks_df["crawled_date"] = pd.to_datetime(ranks_df["crawled_date"]).dt.strftime(
@@ -120,21 +105,15 @@ def _build_app_ranks_payload(state: State, store_id: str, country: str = "US") -
         .reset_index()
         .to_dict(orient="records")
     )
-    return {"history": history}
+    return PublicAppRankHistory(history=history)
 
 
-def _build_app_sdk_details_payload(state: State, store_id: str) -> dict:
+def _build_app_sdk_details_payload(state: State, store_id: str) -> PublicAppSdkDetails:
     """Return the existing app SDK details response shape."""
     sdk_df = get_app_sdk_details(state, store_id)
 
     if sdk_df.empty or sdk_df.isna().all().all():
-        return {
-            "company_categories": {},
-            "permissions": [],
-            "app_queries": [],
-            "skadnetwork": [],
-            "leftovers": {},
-        }
+        return PublicAppSdkDetails()
 
     sdk_df.loc[sdk_df["value_name"].isna(), "value_name"] = ""
     sdk_df["short_value_name"] = sdk_df.value_name.apply(
@@ -209,13 +188,13 @@ def _build_app_sdk_details_payload(state: State, store_id: str) -> dict:
     app_queries = sdk_df[is_package_query].value_name.unique().tolist()
     skadnetwork = sdk_df[is_skadnetwork].value_name.unique().tolist()
 
-    return {
-        "company_categories": company_sdk_dict,
-        "permissions": permissions,
-        "app_queries": app_queries,
-        "skadnetwork": skadnetwork,
-        "leftovers": leftovers,
-    }
+    return PublicAppSdkDetails(
+        company_categories=company_sdk_dict,
+        permissions=permissions,
+        app_queries=app_queries,
+        skadnetwork=skadnetwork,
+        leftovers=leftovers,
+    )
 
 
 class V1AppsController(Controller):
@@ -225,7 +204,7 @@ class V1AppsController(Controller):
     guards = [_api_key_guard]
 
     @get(path="/apps/{store_id:str}", cache=3600)
-    async def app_basics(self: Self, state: State, store_id: str) -> dict:
+    async def app_basics(self: Self, state: State, store_id: str) -> PublicAppBasics:
         """Return basic app metadata for a store identifier."""
         start = time.perf_counter() * 1000
         payload = _build_app_basics_payload(state=state, store_id=store_id)
@@ -234,7 +213,9 @@ class V1AppsController(Controller):
         return payload
 
     @get(path="/apps/{store_id:str}/ranks/overview", cache=3600)
-    async def app_ranks_overview(self: Self, state: State, store_id: str) -> dict:
+    async def app_ranks_overview(
+        self: Self, state: State, store_id: str
+    ) -> PublicAppRanksOverview:
         """Return ranking overview data for a store identifier."""
         start = time.perf_counter() * 1000
         payload = _build_app_ranks_overview_payload(state=state, store_id=store_id)
@@ -245,7 +226,7 @@ class V1AppsController(Controller):
     @get(path="/apps/{store_id:str}/ranks", cache=3600)
     async def app_ranks(
         self: Self, state: State, store_id: str, country: str = "US"
-    ) -> dict:
+    ) -> PublicAppRankHistory:
         """Return app rank history for a store identifier and country."""
         start = time.perf_counter() * 1000
         payload = _build_app_ranks_payload(
@@ -255,17 +236,10 @@ class V1AppsController(Controller):
         logger.info(f"GET /api/v1/apps/{store_id}/ranks took {duration}ms")
         return payload
 
-    @get(path="/apps/{store_id:str}/sdksoverview", cache=3600)
-    async def app_sdk_overview(self: Self, state: State, store_id: str) -> dict:
-        """Return SDK overview data grouped by company category."""
-        start = time.perf_counter() * 1000
-        payload = _build_app_sdk_overview_payload(state=state, store_id=store_id)
-        duration = round((time.perf_counter() * 1000 - start), 2)
-        logger.info(f"GET /api/v1/apps/{store_id}/sdksoverview took {duration}ms")
-        return payload
-
     @get(path="/apps/{store_id:str}/sdks", cache=3600)
-    async def app_sdk_details(self: Self, state: State, store_id: str) -> dict:
+    async def app_sdk_details(
+        self: Self, state: State, store_id: str
+    ) -> PublicAppSdkDetails:
         """Return SDK details for a store identifier."""
         start = time.perf_counter() * 1000
         payload = _build_app_sdk_details_payload(state=state, store_id=store_id)

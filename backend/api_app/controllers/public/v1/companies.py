@@ -20,12 +20,12 @@ from api_app.controllers.public.v1.public_models import (
     CompanyDatasets,
     CompanyDatasetTarget,
     PublicCategoryCompanyStats,
+    PublicCompanyListItem,
     PublicCompanyOverview,
 )
 from api_app.guards import validate_api_key
 from api_app.models import (
     CategoryCompanyStats,
-    CompanyDetail,
 )
 from api_app.models import (
     CompanyCategoryOverview as PrivateCompanyCategoryOverview,
@@ -106,6 +106,25 @@ def _build_company_datasets(
     )
 
 
+def _to_public_company_list_item(
+    company: Mapping[str, object],
+) -> PublicCompanyListItem:
+    """Project an internal company summary into the public contract type."""
+    return PublicCompanyListItem(
+        company_domain=(
+            str(company["company_domain"])
+            if company.get("company_domain") is not None
+            else None
+        ),
+        name=str(company.get("name") or company["company_name"]),
+        company_logo_url=(
+            str(company["company_logo_url"])
+            if company.get("company_logo_url") is not None
+            else None
+        ),
+    )
+
+
 def _has_company_overview_data(
     metrics: PublicCategoryCompanyStats, overview: PrivateCompanyCategoryOverview
 ) -> bool:
@@ -124,16 +143,15 @@ def _to_public_category_company_stats(
         return PublicCategoryCompanyStats()
 
     return PublicCategoryCompanyStats(
-        total_apps=metrics.total_apps,
-        adstxt_direct_ios_total_apps=metrics.adstxt_direct_ios_total_apps,
         adstxt_direct_android_total_apps=metrics.adstxt_direct_android_total_apps,
-        adstxt_reseller_ios_total_apps=metrics.adstxt_reseller_ios_total_apps,
+        adstxt_direct_ios_total_apps=metrics.adstxt_direct_ios_total_apps,
         adstxt_reseller_android_total_apps=metrics.adstxt_reseller_android_total_apps,
-        sdk_ios_total_apps=metrics.sdk_ios_total_apps,
+        adstxt_reseller_ios_total_apps=metrics.adstxt_reseller_ios_total_apps,
         sdk_android_total_apps=metrics.sdk_android_total_apps,
+        sdk_ios_total_apps=metrics.sdk_ios_total_apps,
         sdk_total_apps=metrics.sdk_total_apps,
-        api_ios_total_apps=metrics.api_ios_total_apps,
         api_android_total_apps=metrics.api_android_total_apps,
+        api_ios_total_apps=metrics.api_ios_total_apps,
         api_total_apps=metrics.api_total_apps,
         sdk_android_installs_d30=metrics.sdk_android_installs_d30,
         adstxt_direct_android_installs_d30=metrics.adstxt_direct_android_installs_d30,
@@ -176,18 +194,21 @@ class V1CompaniesController(Controller):
     guards = [_api_key_guard]
 
     @get(path="/companies", cache=86400)
-    async def companies(self: Self, state: State) -> list[CompanyDetail]:
+    async def companies(self: Self, state: State) -> list[PublicCompanyListItem]:
         """Return a list of all mapped companies.
 
-        Each entry contains ``company_id``, ``name``, and ``count``
-        (number of apps associated with the company across stores).
+        Each entry contains the canonical ``company_domain``, display ``name``,
+        and optional ``company_logo_url``.
         """
         start = time.perf_counter() * 1000
         overview = get_overviews(state=state)
         duration = round((time.perf_counter() * 1000 - start), 2)
         logger.info(f"GET /api/v1/companies took {duration}ms")
 
-        return overview.companies_overview
+        return [
+            _to_public_company_list_item(company)
+            for company in overview.companies_overview
+        ]
 
     @get(path="/companies/{company_domain:str}", cache=86400)
     async def company_overview(

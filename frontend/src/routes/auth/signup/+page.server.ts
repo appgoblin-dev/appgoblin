@@ -12,6 +12,7 @@ import {
 import {
 	createEmailVerificationRequest,
 	sendVerificationEmail,
+	sendVerificationEmailBucket,
 	setEmailVerificationRequestCookie
 } from '$lib/server/auth/email-verification';
 import { redirectIfAuthenticated } from '$lib/server/auth/auth';
@@ -99,6 +100,7 @@ async function action(event: RequestEvent) {
 	}
 	const user = await createUser(email, username, password);
 	const emailVerificationRequest = await createEmailVerificationRequest(user.id, user.email);
+	sendVerificationEmailBucket.consume(user.id, 1);
 	await sendVerificationEmail(emailVerificationRequest.email, emailVerificationRequest.code);
 	setEmailVerificationRequestCookie(event, emailVerificationRequest);
 
