@@ -40,6 +40,10 @@ from api_app.models import (
     CompanyPubIDOverview,
     CompanyPubIDTotals,
     CompanyTree,
+    CompanyTrendPoint,
+    CompanyTrends,
+    CompanyTrendsSummary,
+    CompanyTrendSummary,
     CompanyTypes,
     ParentCompanyContext,
     TopCompaniesOverviewShort,
@@ -48,6 +52,7 @@ from api_app.models import (
 from config import get_logger
 from dbcon.queries import (
     get_category_tag_type_stats,
+    get_combined_companies_history,
     get_companies_category_tag_type_stats,
     get_companies_parent_category_stats,
     get_companies_tag_type_stats,
@@ -82,6 +87,31 @@ from dbcon.static import (
 )
 
 logger = get_logger(__name__)
+
+TREND_HISTORY_WINDOW_QUARTERS = 4
+TREND_PLATFORM_MAP = {1: "android", 2: "ios"}
+TREND_TAG_SOURCE_ORDER = {"sdk_api": 0, "app_ads_direct": 1}
+
+
+def _normalize_trend_platform(store: object) -> str:
+    """Map backend store identifiers to stable trend platform slugs."""
+    if pd.isna(store):
+        return "unknown"
+
+    if store in TREND_PLATFORM_MAP:
+        return TREND_PLATFORM_MAP[int(store)]
+
+    normalized = str(store).strip().lower()
+    if "google" in normalized or normalized == "android":
+        return "android"
+    if "apple" in normalized or normalized == "ios":
+        return "ios"
+    return normalized or "unknown"
+
+
+def _make_trend_source_key(platform: str, tag_source: str) -> str:
+    """Build a stable key for a platform + tag source trend series."""
+    return f"{platform}_{tag_source}"
 
 
 def enrich_domains(
@@ -826,12 +856,233 @@ def get_company_types_for_domain(state: State, company_domain: str) -> list[str]
     return sorted(company_types)
 
 
+def _optional_int(value: object) -> int | None:
+    """Convert nullable pandas scalar values to plain ints."""
+    if pd.isna(value):
+        return None
+    return int(value)
+
+
+def _optional_float(value: object, digits: int = 4) -> float | None:
+    """Convert nullable pandas scalar values to rounded floats."""
+    if pd.isna(value):
+        return None
+    return round(float(value), digits)
+
+
+def _make_company_trend_points(df: pd.DataFrame) -> list[CompanyTrendPoint]:
+    """Convert aggregated quarterly rows into typed trend records."""
+    points: list[CompanyTrendPoint] = []
+    for row in df.to_dict(orient="records"):
+        points.append(
+            CompanyTrendPoint(
+                source_key=str(row["source_key"]),
+                platform=str(row["platform"]),
+                tag_source=str(row["tag_source"]),
+                period=str(row["period"]),
+                year=int(row["year"]),
+                quarter=int(row["quarter"]),
+                total_apps=int(row["total_apps"]),
+                total_apps_in_quarter=int(row["total_apps_in_quarter"]),
+                apps_added=int(row["apps_added"]),
+                apps_lost=int(row["apps_lost"]),
+                net_apps_change=int(row["net_apps_change"]),
+                pct_market_share=_optional_float(row.get("pct_market_share"), digits=6),
+                previous_pct_market_share=_optional_float(
+                    row.get("previous_pct_market_share"), digits=6
+                ),
+                pct_market_share_change=_optional_float(
+                    row.get("pct_market_share_change"), digits=6
+                ),
+                pct_market_share_change_pct=_optional_float(
+                    row.get("pct_market_share_change_pct")
+                ),
+                pct_apps_added=_optional_float(row.get("pct_apps_added")),
+                pct_apps_lost=_optional_float(row.get("pct_apps_lost")),
+                total_apps_change=_optional_int(row.get("total_apps_change")),
+                total_apps_change_pct=_optional_float(row.get("total_apps_change_pct")),
+            )
+        )
+    return points
+
+
+def make_company_trends(df: pd.DataFrame) -> CompanyTrends | None:
+    """Aggregate quarterly company history into dashboard-friendly trend slices."""
+    if df.empty:
+        return None
+
+    trends_df = df.copy()
+    trends_df["platform"] = trends_df["store"].apply(_normalize_trend_platform)
+    trends_df["source_key"] = trends_df.apply(
+        lambda row: _make_trend_source_key(
+            str(row["platform"]), str(row["tag_source"])
+        ),
+        axis=1,
+    )
+    int_columns = [
+        "year",
+        "quarter",
+        "total_apps",
+        "total_apps_in_quarter",
+        "apps_added",
+        "apps_lost",
+    ]
+    for column in int_columns:
+        trends_df[column] = pd.to_numeric(trends_df[column], errors="coerce").fillna(0)
+        trends_df[column] = trends_df[column].astype(int)
+
+    aggregated_df = (
+        trends_df.groupby(
+            ["year", "quarter", "platform", "tag_source", "source_key"],
+            dropna=False,
+        )[["total_apps", "total_apps_in_quarter", "apps_added", "apps_lost"]]
+        .sum()
+        .reset_index()
+        .sort_values(
+            ["year", "quarter", "platform", "tag_source"],
+            key=lambda series: (
+                series.map(TREND_TAG_SOURCE_ORDER)
+                if series.name == "tag_source"
+                else series
+            ),
+        )
+        .reset_index(drop=True)
+    )
+    aggregated_df["period"] = (
+        aggregated_df["year"].astype(str) + "-Q" + aggregated_df["quarter"].astype(str)
+    )
+    aggregated_df["previous_total_apps"] = aggregated_df.groupby("source_key")[
+        "total_apps"
+    ].shift(1)
+    aggregated_df["net_apps_change"] = (
+        aggregated_df["apps_added"] - aggregated_df["apps_lost"]
+    )
+    aggregated_df["pct_market_share"] = np.where(
+        aggregated_df["total_apps_in_quarter"] > 0,
+        aggregated_df["total_apps"] / aggregated_df["total_apps_in_quarter"] * 100,
+        np.nan,
+    )
+    aggregated_df["previous_pct_market_share"] = aggregated_df.groupby("source_key")[
+        "pct_market_share"
+    ].shift(1)
+    aggregated_df["pct_market_share_change"] = np.where(
+        aggregated_df["previous_pct_market_share"].notna(),
+        aggregated_df["pct_market_share"] - aggregated_df["previous_pct_market_share"],
+        np.nan,
+    )
+    aggregated_df["pct_market_share_change_pct"] = np.where(
+        aggregated_df["previous_pct_market_share"] > 0,
+        aggregated_df["pct_market_share_change"]
+        / aggregated_df["previous_pct_market_share"]
+        * 100,
+        np.nan,
+    )
+    aggregated_df["pct_apps_added"] = np.where(
+        aggregated_df["previous_total_apps"] > 0,
+        aggregated_df["apps_added"] / aggregated_df["previous_total_apps"] * 100,
+        np.nan,
+    )
+    aggregated_df["pct_apps_lost"] = np.where(
+        aggregated_df["previous_total_apps"] > 0,
+        aggregated_df["apps_lost"] / aggregated_df["previous_total_apps"] * 100,
+        np.nan,
+    )
+    aggregated_df["total_apps_change"] = np.where(
+        aggregated_df["previous_total_apps"].notna(),
+        aggregated_df["total_apps"] - aggregated_df["previous_total_apps"],
+        np.nan,
+    )
+    aggregated_df["total_apps_change_pct"] = np.where(
+        aggregated_df["previous_total_apps"] > 0,
+        aggregated_df["total_apps_change"] / aggregated_df["previous_total_apps"] * 100,
+        np.nan,
+    )
+
+    latest_period = str(aggregated_df.iloc[-1]["period"])
+    history: dict[str, list[CompanyTrendPoint]] = {}
+    past_year: dict[str, list[CompanyTrendPoint]] = {}
+    summaries: dict[str, CompanyTrendSummary] = {}
+
+    for source_key, source_df in aggregated_df.groupby("source_key", sort=False):
+        source_df = source_df.sort_values(["year", "quarter"]).reset_index(drop=True)
+        recent_df = source_df.tail(TREND_HISTORY_WINDOW_QUARTERS).reset_index(drop=True)
+        latest = source_df.iloc[-1]
+
+        history[str(source_key)] = _make_company_trend_points(source_df)
+        past_year[str(source_key)] = _make_company_trend_points(recent_df)
+        summaries[str(source_key)] = CompanyTrendSummary(
+            source_key=str(source_key),
+            platform=str(latest["platform"]),
+            tag_source=str(latest["tag_source"]),
+            latest_period=str(latest["period"]),
+            latest_total_apps=int(latest["total_apps"]),
+            previous_total_apps=_optional_int(latest["previous_total_apps"]),
+            latest_apps_added=int(latest["apps_added"]),
+            latest_apps_lost=int(latest["apps_lost"]),
+            latest_net_apps_change=int(latest["net_apps_change"]),
+            latest_pct_market_share=_optional_float(
+                latest["pct_market_share"], digits=6
+            ),
+            previous_pct_market_share=_optional_float(
+                latest["previous_pct_market_share"], digits=6
+            ),
+            latest_pct_market_share_change=_optional_float(
+                latest["pct_market_share_change"], digits=6
+            ),
+            latest_pct_market_share_change_pct=_optional_float(
+                latest["pct_market_share_change_pct"]
+            ),
+            latest_pct_apps_added=_optional_float(latest["pct_apps_added"]),
+            latest_pct_apps_lost=_optional_float(latest["pct_apps_lost"]),
+            qoq_total_apps_change=_optional_int(latest["total_apps_change"]),
+            qoq_total_apps_change_pct=_optional_float(latest["total_apps_change_pct"]),
+            trailing_year_apps_added=int(recent_df["apps_added"].sum()),
+            trailing_year_apps_lost=int(recent_df["apps_lost"].sum()),
+            trailing_year_net_apps_change=int(recent_df["net_apps_change"].sum()),
+            trailing_year_start_total_apps=int(recent_df.iloc[0]["total_apps"]),
+            trailing_year_end_total_apps=int(recent_df.iloc[-1]["total_apps"]),
+        )
+
+    return CompanyTrends(
+        latest_period=latest_period,
+        sources=summaries,
+        past_year=past_year,
+        history=history,
+    )
+
+
+def make_company_trends_summary(df: pd.DataFrame) -> CompanyTrendsSummary | None:
+    """Return only trend summary metrics for lightweight overview payloads."""
+    trends = make_company_trends(df)
+    if trends is None:
+        return None
+
+    return CompanyTrendsSummary(
+        latest_period=trends.latest_period,
+        sources=trends.sources,
+    )
+
+
+def build_company_trends_payload(state: State, company_domain: str) -> CompanyTrends:
+    """Build the full quarterly company trends payload."""
+    trends_df = get_combined_companies_history(
+        state=state, company_domain=company_domain
+    )
+    trends = make_company_trends(trends_df)
+    if trends is None:
+        return CompanyTrends()
+    return trends
+
+
 def build_company_overview_base(
     state: State, company_domain: str, category: str | None = None
 ) -> CompanyCategoryOverview:
     """Compute company overview data shared by private and public endpoints."""
     df = get_company_stats(
         state=state, company_domain=company_domain, app_category=category
+    )
+    trends_df = get_combined_companies_history(
+        state=state, company_domain=company_domain
     )
 
     if df["tag_source"].str.contains("app_ads").any():
@@ -895,6 +1146,7 @@ def build_company_overview_base(
     overview.adstxt_ad_domain_overview = final_ad_domain_overview
     overview.adstxt_publishers_overview = final_publishers_overview
     overview.mediation_adapters = mediation_adapters
+    overview.trends_summary = make_company_trends_summary(trends_df)
     return overview
 
 
@@ -990,6 +1242,21 @@ class CompaniesController(Controller):
         duration = round((time.perf_counter() * 1000 - start), 2)
         logger.info(f"GET /api/companies/{company_domain} took {duration}ms")
         return overview
+
+    @get(path="/companies/{company_domain:str}/trends", cache=86400)
+    async def company_trends(
+        self: Self,
+        state: State,
+        company_domain: str,
+    ) -> CompanyTrends:
+        """Handle GET request for full quarterly trends for a specific company."""
+        start = time.perf_counter() * 1000
+        trends = build_company_trends_payload(
+            state=state, company_domain=company_domain
+        )
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(f"GET /api/companies/{company_domain}/trends took {duration}ms")
+        return trends
 
     @get(path="/companies/{company_domain:str}/lookup", cache=3600)
     async def company_lookup(

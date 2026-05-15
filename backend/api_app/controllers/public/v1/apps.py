@@ -1,9 +1,9 @@
 """Versioned public app endpoints — requires API key authentication."""
 
 import time
+from dataclasses import fields as dataclass_fields
 from typing import Self
 
-import pandas as pd
 from litestar import Controller, get
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException
@@ -11,20 +11,23 @@ from litestar.exceptions import NotFoundException
 from api_app.controllers.public.v1.public_models import (
     PublicAppBasics,
     PublicAppBestRank,
-    PublicAppRankHistory,
-    PublicAppRanksOverview,
     PublicAppSdkDetails,
 )
 from api_app.guards import validate_api_key
 from config import get_logger
 from dbcon.queries import (
     get_app_sdk_details,
-    get_ranks_for_app,
     get_ranks_for_app_overview,
     get_single_app,
 )
 
 logger = get_logger(__name__)
+
+APP_BASICS_FIELD_SOURCES = {
+    "installs_weekly": "installs_sum_1w",
+    "installs_monthly": "installs_sum_4w",
+    "rating_count_weekly": "ratings_sum_1w",
+}
 
 
 def _api_key_guard(request, route_handler) -> None:
@@ -34,44 +37,30 @@ def _api_key_guard(request, route_handler) -> None:
 
 
 def _build_app_basics_payload(state: State, store_id: str) -> PublicAppBasics:
-    """Return a stable subset of basic app metadata for a store_id."""
+    """Return public app metadata plus estimated growth, usage, and revenue signals."""
     app_df = get_single_app(state, store_id)
     if app_df.empty:
         msg = f"Store ID not found: {store_id!r}"
         raise NotFoundException(msg, status_code=404)
 
     app_dict = app_df.to_dict(orient="records")[0]
-    fields = [
-        "id",
-        "name",
-        "store_id",
-        "store",
-        "category",
-        "rating",
-        "rating_count",
-        "installs",
-        "developer_id",
-        "developer_name",
-        "developer_url",
-        "release_date",
-        "ad_supported",
-        "in_app_purchases",
-        "app_icon_url",
-        "store_link",
-    ]
-    return PublicAppBasics(**{field: app_dict.get(field) for field in fields})
+    return PublicAppBasics(
+        **{
+            field.name: app_dict.get(
+                APP_BASICS_FIELD_SOURCES.get(field.name, field.name)
+            )
+            for field in dataclass_fields(PublicAppBasics)
+        }
+    )
 
 
-def _build_app_ranks_overview_payload(
-    state: State, store_id: str
-) -> PublicAppRanksOverview:
-    """Return the existing app ranks overview response shape."""
+def _build_app_ranks_payload(state: State, store_id: str) -> list[PublicAppBestRank]:
+    """Return best-rank records for a store identifier across countries."""
     overview_df = get_ranks_for_app_overview(state, store_id=store_id, days=90)
     if overview_df.empty:
-        return PublicAppRanksOverview()
+        return []
 
-    countries = sorted(overview_df["country"].unique().tolist())
-    best_ranks = [
+    return [
         PublicAppBestRank(
             country=str(row["country"]),
             collection=str(row["collection"]),
@@ -80,32 +69,6 @@ def _build_app_ranks_overview_payload(
         )
         for row in overview_df.to_dict(orient="records")
     ]
-    return PublicAppRanksOverview(countries=countries, best_ranks=best_ranks)
-
-
-def _build_app_ranks_payload(
-    state: State, store_id: str, country: str = "US"
-) -> PublicAppRankHistory:
-    """Return the existing app rank history response shape."""
-    ranks_df = get_ranks_for_app(state, store_id=store_id, country=country, days=90)
-    if ranks_df.empty:
-        return PublicAppRankHistory()
-
-    ranks_df["rank_group"] = ranks_df["collection"] + ": " + ranks_df["category"]
-    ranks_df["crawled_date"] = pd.to_datetime(ranks_df["crawled_date"]).dt.strftime(
-        "%Y-%m-%d"
-    )
-    pivot_source = ranks_df[ranks_df["country"] == country][
-        ["crawled_date", "rank", "rank_group"]
-    ].sort_values("crawled_date")
-    history = (
-        pivot_source.pivot_table(
-            columns=["rank_group"], index=["crawled_date"], values="rank"
-        )
-        .reset_index()
-        .to_dict(orient="records")
-    )
-    return PublicAppRankHistory(history=history)
 
 
 def _build_app_sdk_details_payload(state: State, store_id: str) -> PublicAppSdkDetails:
@@ -214,26 +177,13 @@ class V1AppsController(Controller):
         logger.info(f"GET /api/v1/apps/{store_id} took {duration}ms")
         return payload
 
-    @get(path="/apps/{store_id:str}/ranks/overview", cache=3600)
-    async def app_ranks_overview(
-        self: Self, state: State, store_id: str
-    ) -> PublicAppRanksOverview:
-        """Return ranking overview data for a store identifier."""
-        start = time.perf_counter() * 1000
-        payload = _build_app_ranks_overview_payload(state=state, store_id=store_id)
-        duration = round((time.perf_counter() * 1000 - start), 2)
-        logger.info(f"GET /api/v1/apps/{store_id}/ranks/overview took {duration}ms")
-        return payload
-
     @get(path="/apps/{store_id:str}/ranks", cache=3600)
     async def app_ranks(
-        self: Self, state: State, store_id: str, country: str = "US"
-    ) -> PublicAppRankHistory:
-        """Return app rank history for a store identifier and country."""
+        self: Self, state: State, store_id: str
+    ) -> list[PublicAppBestRank]:
+        """Return best-rank records for a store identifier across countries."""
         start = time.perf_counter() * 1000
-        payload = _build_app_ranks_payload(
-            state=state, store_id=store_id, country=country
-        )
+        payload = _build_app_ranks_payload(state=state, store_id=store_id)
         duration = round((time.perf_counter() * 1000 - start), 2)
         logger.info(f"GET /api/v1/apps/{store_id}/ranks took {duration}ms")
         return payload

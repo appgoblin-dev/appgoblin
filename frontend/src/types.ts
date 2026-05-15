@@ -470,18 +470,86 @@ export interface CompanyCategoryOverview {
 	company_types: string[];
 	adstxt_ad_domain_overview: AdsTxtAdDomainOverview;
 	adstxt_publishers_overview: AdsTxtPublishersOverview;
+	trends_summary?: CompanyTrendsSummary | null;
 	mediation_adapters:
-		| {
-				adapter_string: string;
-				adapter_company_domain: string;
-				adapter_company_name: string;
-				adapter_logo_url: string;
-				app_category: string;
-				app_count: number;
-		  }[]
-		| null;
+	| {
+		adapter_string: string;
+		adapter_company_domain: string;
+		adapter_company_name: string;
+		adapter_logo_url: string;
+		app_category: string;
+		app_count: number;
+	}[]
+	| null;
 	categories: {
 		[key: string]: CategoryAppStats;
+	};
+}
+
+export interface CompanyTrendPoint {
+	source_key: string;
+	platform: string;
+	tag_source: string;
+	period: string;
+	year: number;
+	quarter: number;
+	total_apps: number;
+	total_apps_in_quarter: number;
+	apps_added: number;
+	apps_lost: number;
+	net_apps_change: number;
+	pct_market_share?: number | null;
+	previous_pct_market_share?: number | null;
+	pct_market_share_change?: number | null;
+	pct_market_share_change_pct?: number | null;
+	pct_apps_added?: number | null;
+	pct_apps_lost?: number | null;
+	total_apps_change?: number | null;
+	total_apps_change_pct?: number | null;
+}
+
+export interface CompanyTrendSummary {
+	source_key?: string | null;
+	platform?: string | null;
+	tag_source?: string | null;
+	latest_period?: string | null;
+	latest_total_apps: number;
+	previous_total_apps?: number | null;
+	latest_apps_added: number;
+	latest_apps_lost: number;
+	latest_net_apps_change: number;
+	latest_pct_market_share?: number | null;
+	previous_pct_market_share?: number | null;
+	latest_pct_market_share_change?: number | null;
+	latest_pct_market_share_change_pct?: number | null;
+	latest_pct_apps_added?: number | null;
+	latest_pct_apps_lost?: number | null;
+	qoq_total_apps_change?: number | null;
+	qoq_total_apps_change_pct?: number | null;
+	trailing_year_apps_added: number;
+	trailing_year_apps_lost: number;
+	trailing_year_net_apps_change: number;
+	trailing_year_start_total_apps?: number | null;
+	trailing_year_end_total_apps?: number | null;
+}
+
+export interface CompanyTrendsSummary {
+	latest_period?: string | null;
+	sources: {
+		[key: string]: CompanyTrendSummary;
+	};
+}
+
+export interface CompanyTrends {
+	latest_period?: string | null;
+	sources: {
+		[key: string]: CompanyTrendSummary;
+	};
+	past_year: {
+		[key: string]: CompanyTrendPoint[];
+	};
+	history: {
+		[key: string]: CompanyTrendPoint[];
 	};
 }
 
@@ -526,6 +594,17 @@ export interface CompanyFullDetails {
 	companyParentCategories: TabularData;
 	companyCreatives: CompanyCreative[];
 }
+
+export interface CompanyTrendsDetails {
+	status?: number;
+	error?: string;
+	companyDetails: CompanyCategoryOverview;
+	companyTree: CompanyTree;
+	companyTrends: CompanyTrends;
+	companyLookup?: CompanyLookup | null;
+	isFollowingCompany?: boolean;
+}
+
 export interface CompanyCategoryDetails {
 	status?: number;
 	error?: string;

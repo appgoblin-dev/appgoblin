@@ -471,6 +471,17 @@ def get_company_stats(
     return df
 
 
+def get_combined_companies_history(state: State, company_domain: str) -> pd.DataFrame:
+    """Get quarterly company trend history for a company domain."""
+    logger.info(f"query combined company history: {company_domain=}")
+    df = pd.read_sql(
+        sql.combined_companies_history,
+        state.dbcon.engine,
+        params={"company_domain": company_domain},
+    )
+    return df
+
+
 def get_company_adstxt_publisher_id_apps_overview(
     state: State, ad_domain_url: str, publisher_id: str
 ) -> pd.DataFrame:

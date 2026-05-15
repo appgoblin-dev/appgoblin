@@ -149,18 +149,11 @@ def _patch_single_app(row: dict | None):
     )
 
 
-def _patch_ranks_overview(rows: list[dict]):
+def _patch_ranks(rows: list[dict]):
     ranks_df = pd.DataFrame(rows)
     return patch(
         "api_app.controllers.public.v1.apps.get_ranks_for_app_overview",
         return_value=ranks_df,
-    )
-
-
-def _patch_ranks(rows: list[dict]):
-    ranks_df = pd.DataFrame(rows)
-    return patch(
-        "api_app.controllers.public.v1.apps.get_ranks_for_app", return_value=ranks_df
     )
 
 
@@ -190,13 +183,6 @@ class TestV1CompaniesAuth:
         app = _make_test_app()
         with TestClient(app=app, raise_server_exceptions=False) as client:
             resp = client.get("/api/v1/apps/com.example.app")
-        assert resp.status_code == 401
-        assert "Missing X-API-Key" in resp.json()["detail"]
-
-    def test_app_ranks_overview_requires_api_key(self):
-        app = _make_test_app()
-        with TestClient(app=app, raise_server_exceptions=False) as client:
-            resp = client.get("/api/v1/apps/com.example.app/ranks/overview")
         assert resp.status_code == 401
         assert "Missing X-API-Key" in resp.json()["detail"]
 
@@ -540,6 +526,14 @@ class TestV1Apps:
             "rating": 4.5,
             "rating_count": 100,
             "installs": 50000,
+            "weekly_active_users": 3200,
+            "monthly_active_users": 12800,
+            "monthly_ad_revenue": 1200.5,
+            "monthly_iap_revenue": 875.25,
+            "installs_sum_1w": 1400,
+            "installs_sum_4w": 5300,
+            "ratings_sum_1w": 43,
+            "store_last_updated": "2026-05-01",
             "developer_id": "dev123",
             "developer_name": "Example Dev",
             "developer_url": "https://example.com/dev",
@@ -548,6 +542,8 @@ class TestV1Apps:
             "in_app_purchases": False,
             "app_icon_url": "https://media.appgoblin.info/icon.png",
             "store_link": "https://play.google.com/store/apps/details?id=com.example.app",
+            "ad_creative_count": 12,
+            "ad_monetized_creative_count": 4,
             "description": "ignored",
         }
         with (
@@ -562,7 +558,6 @@ class TestV1Apps:
 
         assert resp.status_code == 200
         assert resp.json() == {
-            "id": 1,
             "name": "Example App",
             "store_id": "com.example.app",
             "store": "Google Play",
@@ -570,15 +565,26 @@ class TestV1Apps:
             "rating": 4.5,
             "rating_count": 100,
             "installs": 50000,
+            "weekly_active_users": 3200,
+            "monthly_active_users": 12800,
+            "monthly_ad_revenue": 1200.5,
+            "monthly_iap_revenue": 875.25,
+            "installs_weekly": 1400,
+            "installs_monthly": 5300,
+            "rating_count_weekly": 43,
+            "store_last_updated": "2026-05-01",
             "developer_id": "dev123",
             "developer_name": "Example Dev",
             "developer_url": "https://example.com/dev",
             "release_date": "2024-01-01",
             "ad_supported": True,
             "in_app_purchases": False,
-            "app_icon_url": "https://media.appgoblin.info/icon.png",
             "store_link": "https://play.google.com/store/apps/details?id=com.example.app",
         }
+        assert "id" not in resp.json()
+        assert "app_icon_url" not in resp.json()
+        assert "ad_creative_count" not in resp.json()
+        assert "ad_monetized_creative_count" not in resp.json()
 
     def test_app_basics_returns_404_for_unknown_store_id(self):
         app = _make_test_app()
@@ -595,69 +601,20 @@ class TestV1Apps:
         assert resp.status_code == 404
         assert "Store ID not found" in resp.json()["detail"]
 
-    def test_app_ranks_overview_returns_expected_shape(self):
-        app = _make_test_app()
-        rank_rows = [
-            {
-                "country": "US",
-                "collection": "topfreeapplications",
-                "category": "overall",
-                "best_rank": 7,
-            },
-            {
-                "country": "CA",
-                "collection": "topfreeapplications",
-                "category": "overall",
-                "best_rank": 11,
-            },
-        ]
-        with (
-            _patch_key_found("free"),
-            _patch_ranks_overview(rank_rows),
-            TestClient(app=app, raise_server_exceptions=False) as client,
-        ):
-            resp = client.get(
-                "/api/v1/apps/com.example.app/ranks/overview",
-                headers={"X-API-Key": "ag_rankkey"},
-            )
-
-        assert resp.status_code == 200
-        assert resp.json() == {
-            "countries": ["CA", "US"],
-            "best_ranks": rank_rows,
-        }
-
-    def test_app_ranks_overview_returns_empty_shape_when_missing(self):
-        app = _make_test_app()
-        with (
-            _patch_key_found("free"),
-            _patch_ranks_overview([]),
-            TestClient(app=app, raise_server_exceptions=False) as client,
-        ):
-            resp = client.get(
-                "/api/v1/apps/com.example.app/ranks/overview",
-                headers={"X-API-Key": "ag_rankempty"},
-            )
-
-        assert resp.status_code == 200
-        assert resp.json() == {"countries": [], "best_ranks": []}
-
     def test_app_ranks_returns_expected_shape(self):
         app = _make_test_app()
         rank_rows = [
             {
                 "country": "US",
-                "collection": "topfreeapplications",
-                "category": "overall",
-                "crawled_date": "2026-04-01",
-                "rank": 5,
+                "collection": "GROSSING",
+                "category": "GAME_STRATEGY",
+                "best_rank": 26,
             },
             {
-                "country": "US",
-                "collection": "topfreeapplications",
-                "category": "overall",
-                "crawled_date": "2026-04-02",
-                "rank": 3,
+                "country": "BD",
+                "collection": "GROSSING",
+                "category": "GAME_STRATEGY",
+                "best_rank": 169,
             },
         ]
         with (
@@ -671,18 +628,7 @@ class TestV1Apps:
             )
 
         assert resp.status_code == 200
-        assert resp.json() == {
-            "history": [
-                {
-                    "crawled_date": "2026-04-01",
-                    "topfreeapplications: overall": 5,
-                },
-                {
-                    "crawled_date": "2026-04-02",
-                    "topfreeapplications: overall": 3,
-                },
-            ]
-        }
+        assert resp.json() == rank_rows
 
     def test_app_ranks_returns_empty_shape_when_missing(self):
         app = _make_test_app()
@@ -697,7 +643,7 @@ class TestV1Apps:
             )
 
         assert resp.status_code == 200
-        assert resp.json() == {"history": {}}
+        assert resp.json() == []
 
     def test_app_sdks_returns_expected_shape(self):
         app = _make_test_app()
@@ -801,6 +747,11 @@ class TestV1Docs:
         assert data["info"]["title"] == "AppGoblin Public API v1"
         assert data["info"]["version"] == "0.1.0"
         assert "X-API-Key" in data["info"]["description"]
+        assert "## Rate Limits" in data["info"]["description"]
+        assert "30 requests per minute" in data["info"]["description"]
+        assert "1,000 requests per day" in data["info"]["description"]
+        assert "X-RateLimit-Limit" in data["info"]["description"]
+        assert "429 Too Many Requests" in data["info"]["description"]
         assert data["servers"] == [{"url": "https://appgoblin.info"}]
         assert (
             data["components"]["securitySchemes"]["ApiKeyAuth"]["name"] == "X-API-Key"
@@ -827,15 +778,56 @@ class TestV1Docs:
         assert examples["appgoblin_android_app"]["value"]["name"] == (
             "AppGoblin: Scan Trackers & SDK"
         )
+        assert "id" not in examples["appgoblin_android_app"]["value"]
+        assert "app_icon_url" not in examples["appgoblin_android_app"]["value"]
+        assert "ad_creative_count" not in examples["appgoblin_android_app"]["value"]
+        assert (
+            "ad_monetized_creative_count"
+            not in examples["appgoblin_android_app"]["value"]
+        )
+        assert app_basics_operation["summary"] == "/apps/{store_id}"
+        assert (
+            app_basics_operation["description"]
+            == "Endpoint: `GET /api/v1/apps/{store_id}`\n\n"
+            "Returns stable public app metadata plus MAU, recent install, and "
+            "estimated revenue signals for a single app."
+        )
+        app_ranks_operation = data["paths"]["/api/v1/apps/{store_id}/ranks"]["get"]
+        assert [
+            parameter["name"] for parameter in app_ranks_operation["parameters"]
+        ] == ["store_id"]
+        assert app_ranks_operation["summary"] == "/apps/{store_id}/ranks"
+        assert (
+            app_ranks_operation["description"]
+            == "Endpoint: `GET /api/v1/apps/{store_id}/ranks`\n\n"
+            "Returns flat best-rank records by country, collection, and category "
+            "for the last 90 days."
+        )
+        assert "/api/v1/apps/{store_id}/ranks/overview" not in data["paths"]
         company_overview_operation = data["paths"][
             "/api/v1/companies/{company_domain}"
         ]["get"]
+        companies_operation = data["paths"]["/api/v1/companies"]["get"]
+        assert companies_operation["summary"] == "/companies"
+        assert (
+            companies_operation["description"]
+            == "Endpoint: `GET /api/v1/companies`\n\n"
+            "Returns the public company index with queryable company domains, "
+            "display names, parent mappings, and lightweight summary metrics."
+        )
         company_domain_parameter = next(
             parameter
             for parameter in company_overview_operation["parameters"]
             if parameter["name"] == "company_domain"
         )
         assert company_domain_parameter["example"] == "unity.com"
+        assert company_overview_operation["summary"] == "/companies/{company_domain}"
+        assert (
+            company_overview_operation["description"]
+            == "Endpoint: `GET /api/v1/companies/{company_domain}`\n\n"
+            "Returns the public company overview for a single domain, including "
+            "mapping status, company types, key metrics, and dataset availability."
+        )
         company_examples = company_overview_operation["responses"]["200"]["content"][
             "application/json"
         ]["examples"]
@@ -853,6 +845,14 @@ class TestV1Docs:
                 "sdk_android_total_apps"
             ]
             == 39452
+        )
+        app_sdks_operation = data["paths"]["/api/v1/apps/{store_id}/sdks"]["get"]
+        assert app_sdks_operation["summary"] == "/apps/{store_id}/sdks"
+        assert (
+            app_sdks_operation["description"]
+            == "Endpoint: `GET /api/v1/apps/{store_id}/sdks`\n\n"
+            "Returns public SDK findings, permissions, package queries, SKAdNetwork "
+            "entries, and unmapped evidence for a single app."
         )
 
     def test_openapi_page_renders_scalar(self):

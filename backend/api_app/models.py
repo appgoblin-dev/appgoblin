@@ -382,6 +382,7 @@ class CompanyCategoryOverview:
     adstxt_ad_domain_overview: dict | None = None
     adstxt_publishers_overview: dict | None = None
     mediation_adapters: dict | None = None
+    trends_summary: "CompanyTrendsSummary | None" = None
 
     def add_category(self, category: str) -> None:
         """Add a category to the overview."""
@@ -412,6 +413,77 @@ class CompanyExports:
 
     sdk_api_android: CompanyExportTarget
     sdk_api_ios: CompanyExportTarget
+
+
+@dataclass
+class CompanyTrendPoint:
+    """A single quarterly company trend datapoint for one tag source."""
+
+    source_key: str
+    platform: str
+    tag_source: str
+    period: str
+    year: int
+    quarter: int
+    total_apps: int
+    total_apps_in_quarter: int
+    apps_added: int
+    apps_lost: int
+    net_apps_change: int
+    pct_market_share: float | None = None
+    previous_pct_market_share: float | None = None
+    pct_market_share_change: float | None = None
+    pct_market_share_change_pct: float | None = None
+    pct_apps_added: float | None = None
+    pct_apps_lost: float | None = None
+    total_apps_change: int | None = None
+    total_apps_change_pct: float | None = None
+
+
+@dataclass
+class CompanyTrendSummary:
+    """Derived summary fields for a company trend source."""
+
+    source_key: str | None = None
+    platform: str | None = None
+    tag_source: str | None = None
+    latest_period: str | None = None
+    latest_total_apps: int = 0
+    previous_total_apps: int | None = None
+    latest_apps_added: int = 0
+    latest_apps_lost: int = 0
+    latest_net_apps_change: int = 0
+    latest_pct_market_share: float | None = None
+    previous_pct_market_share: float | None = None
+    latest_pct_market_share_change: float | None = None
+    latest_pct_market_share_change_pct: float | None = None
+    latest_pct_apps_added: float | None = None
+    latest_pct_apps_lost: float | None = None
+    qoq_total_apps_change: int | None = None
+    qoq_total_apps_change_pct: float | None = None
+    trailing_year_apps_added: int = 0
+    trailing_year_apps_lost: int = 0
+    trailing_year_net_apps_change: int = 0
+    trailing_year_start_total_apps: int | None = None
+    trailing_year_end_total_apps: int | None = None
+
+
+@dataclass
+class CompanyTrends:
+    """Quarterly company trend history grouped by platform and tag source."""
+
+    latest_period: str | None = None
+    sources: dict[str, CompanyTrendSummary] = field(default_factory=dict)
+    past_year: dict[str, list[CompanyTrendPoint]] = field(default_factory=dict)
+    history: dict[str, list[CompanyTrendPoint]] = field(default_factory=dict)
+
+
+@dataclass
+class CompanyTrendsSummary:
+    """Quarterly company trend summary grouped by platform and tag source."""
+
+    latest_period: str | None = None
+    sources: dict[str, CompanyTrendSummary] = field(default_factory=dict)
 
 
 @dataclass

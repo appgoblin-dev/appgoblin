@@ -31,6 +31,7 @@
 		if (pathname.includes('/creatives')) return 'creatives';
 		if (pathname.includes('/data-exports')) return 'data-exports';
 		if (pathname.includes('/mediation')) return 'mediation';
+		if (pathname.includes('/trends')) return 'trends';
 		if (pathname.includes('/sdks')) return 'sdks';
 		return 'overview';
 	}
@@ -59,6 +60,7 @@
 			data.companyDetails?.company_types?.some((companyType) => companyType === 'ad-networks')
 		)
 	);
+	let showTrendsTab = $derived(Boolean(data.companyDetails?.trends_summary));
 	let companyDisplayName = $derived(
 		data.companyTree?.company_name ||
 			data.companyTree?.company_domain ||
@@ -84,6 +86,8 @@
 
 	let pageTitle = $derived.by(() => {
 		switch (sectionSlug) {
+			case 'trends':
+				return `${companyDisplayName} Quarterly Market Share Trends | AppGoblin`;
 			case 'sdks':
 				return `${companyDisplayName} SDK Intelligence for ${categoryContext} | AppGoblin`;
 			case 'mediation':
@@ -103,6 +107,8 @@
 
 	let pageDescription = $derived.by(() => {
 		switch (sectionSlug) {
+			case 'trends':
+				return `Analyze quarterly iOS and Android market share trends for ${companyDisplayName}, split by SDK/API and app-ads.txt direct signals.`;
 			case 'sdks':
 				return `Review the SDK footprint for ${companyDisplayName} across ${categoryContext}, including adtech, analytics, and developer tooling integrations.`;
 			case 'mediation':
@@ -226,6 +232,11 @@
 	{#if showCreativesTab}
 		<a href={`/companies/${companyDomain}/creatives`} class={sectionTabClass('creatives')}
 			>{companyDisplayName} Creatives
+		</a>
+	{/if}
+	{#if showTrendsTab}
+		<a href={`/companies/${companyDomain}/trends`} class={sectionTabClass('trends')}>
+			{companyDisplayName} Trends
 		</a>
 	{/if}
 	<a href={`/companies/${companyDomain}/sdks`} class={sectionTabClass('sdks')}>

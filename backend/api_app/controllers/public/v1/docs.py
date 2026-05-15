@@ -14,7 +14,6 @@ PUBLIC_API_SERVER_URL = "https://appgoblin.info"
 SCALAR_CSS_URL = "data:text/css,"
 APP_BASICS_EXAMPLE_STORE_ID = "dev.thirdgate.appgoblin"
 APP_BASICS_EXAMPLE_RESPONSE = {
-    "id": 144772845,
     "name": "AppGoblin: Scan Trackers & SDK",
     "store_id": APP_BASICS_EXAMPLE_STORE_ID,
     "store": "Google Play",
@@ -22,16 +21,20 @@ APP_BASICS_EXAMPLE_RESPONSE = {
     "rating": 0,
     "rating_count": 0,
     "installs": 37,
+    "weekly_active_users": 3,
+    "monthly_active_users": 4,
+    "monthly_ad_revenue": 0.0,
+    "monthly_iap_revenue": 0.0,
+    "installs_weekly": 1,
+    "installs_monthly": 6.0,
+    "rating_count_weekly": None,
+    "store_last_updated": "2026-03-14",
     "developer_id": "9106252563958903597",
     "developer_name": "3rd Gate",
     "developer_url": "appgoblin.info",
     "release_date": "2025-03-16",
     "ad_supported": False,
     "in_app_purchases": False,
-    "app_icon_url": (
-        "https://media.appgoblin.info/app-icons/"
-        "dev.thirdgate.appgoblin/d51e5afa09e12a69.png"
-    ),
     "store_link": (
         "https://play.google.com/store/apps/details?id=dev.thirdgate.appgoblin"
     ),
@@ -72,6 +75,58 @@ COMPANY_OVERVIEW_EXAMPLE_RESPONSE = {
             "estimated_rows": 16381,
             "url": "exampl.csv",
         },
+    },
+}
+V1_OPERATION_DOCS = {
+    "/api/v1/companies": {
+        "get": {
+            "summary": "/companies",
+            "description": (
+                "Endpoint: `GET /api/v1/companies`\n\n"
+                "Returns the public company index with queryable company domains, "
+                "display names, parent mappings, and lightweight summary metrics."
+            ),
+        }
+    },
+    "/api/v1/companies/{company_domain}": {
+        "get": {
+            "summary": "/companies/{company_domain}",
+            "description": (
+                "Endpoint: `GET /api/v1/companies/{company_domain}`\n\n"
+                "Returns the public company overview for a single domain, including "
+                "mapping status, company types, key metrics, and dataset availability."
+            ),
+        }
+    },
+    "/api/v1/apps/{store_id}": {
+        "get": {
+            "summary": "/apps/{store_id}",
+            "description": (
+                "Endpoint: `GET /api/v1/apps/{store_id}`\n\n"
+                "Returns stable public app metadata plus MAU, recent install, and "
+                "estimated revenue signals for a single app."
+            ),
+        }
+    },
+    "/api/v1/apps/{store_id}/ranks": {
+        "get": {
+            "summary": "/apps/{store_id}/ranks",
+            "description": (
+                "Endpoint: `GET /api/v1/apps/{store_id}/ranks`\n\n"
+                "Returns flat best-rank records by country, collection, and category "
+                "for the last 90 days."
+            ),
+        }
+    },
+    "/api/v1/apps/{store_id}/sdks": {
+        "get": {
+            "summary": "/apps/{store_id}/sdks",
+            "description": (
+                "Endpoint: `GET /api/v1/apps/{store_id}/sdks`\n\n"
+                "Returns public SDK findings, permissions, package queries, SKAdNetwork "
+                "entries, and unmapped evidence for a single app."
+            ),
+        }
     },
 }
 
@@ -193,6 +248,26 @@ def _set_company_overview_example(schema: dict[str, Any]) -> None:
     }
 
 
+def _set_operation_docs(schema: dict[str, Any]) -> None:
+    """Set stable Scalar-friendly summaries and descriptions for public v1 routes."""
+    paths = schema.get("paths", {})
+    if not isinstance(paths, dict):
+        return
+
+    for path, methods in V1_OPERATION_DOCS.items():
+        path_item = paths.get(path)
+        if not isinstance(path_item, dict):
+            continue
+
+        for method, metadata in methods.items():
+            operation = path_item.get(method)
+            if not isinstance(operation, dict):
+                continue
+
+            operation["summary"] = metadata["summary"]
+            operation["description"] = metadata["description"]
+
+
 def build_v1_openapi_schema(request: Request) -> dict[str, Any]:
     """Return a filtered OpenAPI schema containing only public v1 endpoints."""
     schema = deepcopy(request.app.openapi_schema.to_schema())
@@ -212,6 +287,21 @@ def build_v1_openapi_schema(request: Request) -> dict[str, Any]:
             "then send it in the `X-API-Key` header on each request.\n\n"
             "- Header: `X-API-Key: <your-api-token>`\n"
             f"- Get a token: {PUBLIC_API_SERVER_URL}/account/api-keys\n"
+            "\n"
+            "## Rate Limits\n"
+            "Rate limits are enforced per API key and vary by subscription tier.\n\n"
+            "- Free API keys include a baseline limit of 30 requests per minute and "
+            "1,000 requests per day\n"
+            "- Paid tiers include higher per-minute and daily quotas\n"
+            "- Responses include `X-RateLimit-Limit`, `X-RateLimit-Remaining`, "
+            "`X-RateLimit-Policy`, and `X-RateLimit-Quota-Remaining` headers\n"
+            "- Requests that exceed a limit return `429 Too Many Requests`; "
+            "minute-limit responses may also include `Retry-After`\n"
+            "\n"
+            "- App basics include stable store metadata plus MAU, recent install, and "
+            "estimated revenue metrics\n"
+            "- Public app payloads intentionally omit internal IDs, app icon URLs, and "
+            "creative inventory counters\n"
             "- App endpoints accept valid public API tokens\n"
             "- Company endpoints require a paid subscription tier"
         ),
@@ -229,6 +319,7 @@ def build_v1_openapi_schema(request: Request) -> dict[str, Any]:
     }
     schema["security"] = [{"ApiKeyAuth": []}]
     schema["servers"] = [{"url": PUBLIC_API_SERVER_URL}]
+    _set_operation_docs(schema)
     _set_app_basics_example(schema)
     _set_company_overview_example(schema)
     return schema

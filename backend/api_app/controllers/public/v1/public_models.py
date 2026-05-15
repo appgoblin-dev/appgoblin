@@ -5,8 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TypeAlias
 
-AppRankHistoryEntryValue: TypeAlias = str | int | None
-AppRankHistoryEntry: TypeAlias = dict[str, AppRankHistoryEntryValue]
 AppSdkEvidenceByPath: TypeAlias = dict[str, list[str]]
 AppSdkEvidenceByPackage: TypeAlias = dict[str, AppSdkEvidenceByPath]
 AppSdkEvidenceByCompany: TypeAlias = dict[str, AppSdkEvidenceByPackage]
@@ -79,9 +77,8 @@ class PublicCompanyOverview:
 
 @dataclass
 class PublicAppBasics:
-    """Stable public metadata returned for a single app."""
+    """Stable public app metadata plus power-user adoption and revenue estimates."""
 
-    id: int | None = None
     name: str | None = None
     store_id: str | None = None
     store: str | None = None
@@ -89,13 +86,20 @@ class PublicAppBasics:
     rating: float | None = None
     rating_count: int | None = None
     installs: int | None = None
+    weekly_active_users: int | None = None
+    monthly_active_users: int | None = None
+    monthly_ad_revenue: float | None = None
+    monthly_iap_revenue: float | None = None
+    installs_weekly: int | float | None = None
+    installs_monthly: int | float | None = None
+    rating_count_weekly: int | None = None
+    store_last_updated: str | None = None
     developer_id: str | None = None
     developer_name: str | None = None
     developer_url: str | None = None
     release_date: str | None = None
     ad_supported: bool | None = None
     in_app_purchases: bool | None = None
-    app_icon_url: str | None = None
     store_link: str | None = None
 
 
@@ -107,21 +111,6 @@ class PublicAppBestRank:
     collection: str
     category: str
     best_rank: int
-
-
-@dataclass
-class PublicAppRanksOverview:
-    """Country coverage and best-rank summary for an app."""
-
-    countries: list[str] = field(default_factory=list)
-    best_ranks: list[PublicAppBestRank] = field(default_factory=list)
-
-
-@dataclass
-class PublicAppRankHistory:
-    """Rank history records keyed by derived rank-group names."""
-
-    history: list[AppRankHistoryEntry] | dict[str, None] = field(default_factory=dict)
 
 
 @dataclass
