@@ -14,17 +14,10 @@
 	const plans = [
 		{
 			key: 'free',
-			name: 'Free',
+			name: 'Deeper App Insights',
 			price: '$0',
 			description: 'Indie devs, researchers, casual users',
 			included: true
-		},
-		{
-			key: 'app_dev',
-			name: 'Premium Access',
-			price: '$49',
-			period: '/mo',
-			description: 'Freelance ASO, small teams, power users'
 		},
 		{
 			key: 'b2b_sdk',
@@ -53,18 +46,16 @@
 	const features = [
 		{
 			category: 'Core Features',
-			name: 'Advanced App SDK view',
+			name: 'Advanced SDK app data',
 			free: true,
-			premium: true,
 			sdk: true,
 			appads: true,
 			b2b: true
 		},
 		{
 			category: 'Core Features',
-			name: 'Request SDK/API scans',
+			name: 'Request free SDK/API scans',
 			free: true,
-			premium: true,
 			sdk: true,
 			appads: true,
 			b2b: true
@@ -73,7 +64,6 @@
 			category: 'Core Features',
 			name: 'App Comparisons',
 			free: true,
-			premium: true,
 			sdk: true,
 			appads: true,
 			b2b: true
@@ -82,7 +72,6 @@
 			category: 'Core Features',
 			name: 'ASO keyword dash',
 			free: true,
-			premium: true,
 			sdk: true,
 			appads: true,
 			b2b: true
@@ -91,23 +80,21 @@
 			category: 'Core Features',
 			name: 'Ad intelligence',
 			free: true,
-			premium: true,
 			sdk: true,
 			appads: true,
 			b2b: true
 		},
 		{
 			category: 'Premium Tools',
-			name: 'App Explorer dash',
+			name: 'App Explorer dash + SDK filters',
 			free: false,
-			premium: true,
 			sdk: true,
 			appads: true,
 			b2b: true
 		},
 		{
 			category: 'Data Export',
-			name: 'Export all apps per SDK/API breakdown',
+			name: 'Export Company / SDK apps',
 			free: false,
 			premium: false,
 			sdk: true,
@@ -175,7 +162,6 @@
 
 	const getFeatureValue = (feature: (typeof features)[0], planKey: string): boolean => {
 		if (planKey === 'free') return feature.free;
-		if (planKey === 'app_dev') return feature.premium;
 		if (planKey === 'b2b_sdk') return feature.sdk;
 		if (planKey === 'b2b_appads') return feature.appads;
 		if (planKey === 'b2b_premium') return feature.b2b;
@@ -196,13 +182,18 @@
 			>.
 		</p>
 
+		<p class="text-sm opacity-80 mt-3 max-w-3xl">
+			Paid plans are billed monthly. You can cancel anytime, and your access will remain active
+			through the end of your current billing period. Payments already made are non-refundable.
+		</p>
+
 		<br />
 
 		<!-- Features Table -->
 		<div class="overflow-x-auto">
 			<div
 				class="grid gap-px border border-surface-500/20"
-				style="grid-template-columns: 300px repeat(5, 1fr); min-width: 900px;"
+				style={`grid-template-columns: 300px repeat(${plans.length}, 1fr); min-width: 780px;`}
 			>
 				<!-- Plan header row -->
 				<div class="p-2 bg-surface-50-950 font-semibold text-xs">Feature</div>
