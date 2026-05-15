@@ -59,6 +59,8 @@ def load_s3_datasets() -> list[dict]:
         for page in paginator.paginate(Bucket=bucket):
             for obj in page.get("Contents", []):
                 key = obj["Key"]
+                if "user-reports/" in key or "company-verified-apps" in key:
+                    continue
                 datasets.append(
                     {
                         "key": key,
