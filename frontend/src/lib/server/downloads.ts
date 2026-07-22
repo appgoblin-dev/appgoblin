@@ -1,11 +1,11 @@
-import { env } from '$env/dynamic/private';
 
-const DEFAULT_BASE = 'https://media.appgoblin.info/';
+import { APPGOBLIN_DOWNLOADS_BASE } from '$env/static/private';
+
 
 function getDownloadsBaseUrl(): string {
-	const base = env.APPGOBLIN_DOWNLOADS_BASE?.trim();
+	const base = APPGOBLIN_DOWNLOADS_BASE?.trim();
 	if (base) return base.endsWith('/') ? base : `${base}/`;
-	return DEFAULT_BASE;
+	return 'localhost';
 }
 
 /** app-ads.txt (both iOS and Android): downloads/app-ads-txt/domain=x/appgoblin_x_app_ads_txt.csv */

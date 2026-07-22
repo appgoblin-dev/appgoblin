@@ -308,6 +308,7 @@ def upload_advertiser_csv(csv_bytes: bytes, slug: str) -> str:
         Bucket=s3_config["bucket"],
         Key=s3_key,
         Body=csv_bytes,
+        ACL="public-read",
         ContentType="text/csv; charset=utf-8",
     )
 

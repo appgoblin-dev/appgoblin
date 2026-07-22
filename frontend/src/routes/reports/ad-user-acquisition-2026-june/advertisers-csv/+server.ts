@@ -1,12 +1,12 @@
+import { APPGOBLIN_DOWNLOADS_BASE } from '$env/static/private';
 import type { RequestEvent } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import { requireFullAuth } from '$lib/server/auth/auth';
 import { userHasTierAccess } from '$lib/server/subscription';
 
-const PUBLIC_DATA_URL = 'https://data.appgoblin.info';
 
 function buildCsvUrl(slug: string): string {
-	return `${PUBLIC_DATA_URL}/downloads/reports/${slug}/advertisers.csv`;
+	return `${APPGOBLIN_DOWNLOADS_BASE}downloads/reports/${slug}/advertisers.csv`;
 }
 
 export async function GET(event: RequestEvent) {

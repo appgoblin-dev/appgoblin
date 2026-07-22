@@ -752,11 +752,6 @@
 		</div>
 
 		<div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-			<div class="flex gap-4">
-				<span class={featureBulletClass}>🔍 SDK detection</span>
-				<span class={featureBulletClass}>📈 Market share analytics</span>
-				<span class={featureBulletClass}>🏢 Company profiles</span>
-			</div>
 			<a href="/companies" class="btn preset-filled-primary-200-800">
 				Find SDK Clients by Category →</a
 			>
@@ -840,11 +835,6 @@
 		</div>
 
 		<div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-			<div class="flex gap-4">
-				<span class={featureBulletClass}>📱 Real-time rankings</span>
-				<span class={featureBulletClass}>🌍 Global + country data</span>
-				<span class={featureBulletClass}>📈 Historical tracking</span>
-			</div>
 			<a
 				href="/rankings/store/1/collection/1/category/1/US"
 				class="btn preset-filled-secondary-200-800"
@@ -932,13 +922,8 @@
 		</div>
 
 		<div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-			<div class="flex gap-4">
-				<span class={featureBulletClass}>📱 Cross-platform tracking</span>
-				<span class={featureBulletClass}>📈 Trending analysis</span>
-				<span class={featureBulletClass}>🎯 Category insights</span>
-			</div>
 			<a href="/collections/new_monthly/google/overall" class="btn preset-filled-primary-200-800">
-				Discover New Releases →
+				Discover New App & Game Releases →
 			</a>
 		</div>
 	</section>
