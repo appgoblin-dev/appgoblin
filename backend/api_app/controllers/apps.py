@@ -552,7 +552,7 @@ class AppController(Controller):
         logger.info(f"{self.path}/{store_id}/sdksoverview took {duration}ms")
         return sdk_overview_dict
 
-    @get(path="/{store_id:str}/versions", cache=3600)
+    @get(path="/{store_id:str}/versions", cache=7200)
     async def get_version_timeline(self: Self, state: State, store_id: str) -> dict:
         """Handle GET request for timeline of versions for a specific app.
 
@@ -570,7 +570,7 @@ class AppController(Controller):
         logger.info(f"{self.path}/{store_id}/versiontimeline took {duration}ms")
         return version_timeline
 
-    @get(path="/{store_id:str}/sdks", cache=3600)
+    @get(path="/{store_id:str}/sdks", cache=7200)
     async def get_sdk_details(self: Self, state: State, store_id: str) -> SDKsDetails:
         """Handle GET request for all SDKs for a specific app.
 

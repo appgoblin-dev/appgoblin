@@ -1,51 +1,23 @@
---- noqa: disable=LT02
---- noqa: disable=LT08
---- noqa: disable=RF02
---- noqa: disable=PRS
-WITH company_results AS (
-    SELECT
-        cac.store,
-        cac.tag_source,
-        cac.company_domain,
-        cac.company_name,
-        cac.app_count
-    FROM frontend.companies_category_tag_stats AS cac
-    WHERE
-        cac.company_name ILIKE '%' || :searchinput || '%'
-        OR cac.company_domain ILIKE '%' || :searchinput || '%'
-),
-
-company_counts AS (
-    SELECT
-        company_domain,
-        company_name,
-        -- api_call
-        SUM(CASE WHEN tag_source = 'api_call' THEN app_count END)
-            AS api_call_app_count,
-        -- sdks
-        SUM(CASE WHEN tag_source = 'sdk' THEN app_count END) AS sdk_app_count,
-        -- app_ads_direct
-        SUM(CASE WHEN tag_source = 'app_ads_direct' THEN app_count END)
-            AS app_ads_direct_app_count,
-        -- app_ads_reseller
-        SUM(CASE WHEN tag_source = 'app_ads_reseller' THEN app_count END)
-            AS app_ads_reseller_app_count
-    FROM company_results
-    GROUP BY company_domain, company_name
-)
-
 SELECT
     company_domain,
     company_name,
-    api_call_app_count,
-    sdk_app_count,
-    app_ads_direct_app_count,
-    app_ads_reseller_app_count
-FROM company_counts
+    logo_url,
+    has_api_signal,
+    has_sdk_signal,
+    has_publisher_signal,
+    has_app_ads_direct,
+    has_app_ads_reseller
+FROM frontend.companies_overview
+WHERE
+    company_name ILIKE '%' || :searchinput || '%'
+    OR company_domain ILIKE '%' || :searchinput || '%'
 ORDER BY
-    COALESCE(api_call_app_count, 0) * 100
-    + COALESCE(sdk_app_count, 0)
-    + COALESCE(app_ads_direct_app_count, 0)
-    + COALESCE(app_ads_reseller_app_count, 0)
+    CASE WHEN company_name IS NOT NULL THEN 3 ELSE 0 END
+    + CASE WHEN
+        has_api_signal THEN 2 ELSE 0 END
+    + CASE WHEN has_sdk_signal THEN 2 ELSE 0 END
+    + CASE WHEN has_publisher_signal THEN 1 ELSE 0 END
+    + CASE WHEN has_app_ads_direct THEN 1 ELSE 0 END
+    + CASE WHEN has_app_ads_reseller THEN 1 ELSE 0 END
     DESC
 LIMIT :mylimit;

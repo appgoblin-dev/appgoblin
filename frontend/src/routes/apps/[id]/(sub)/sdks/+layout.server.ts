@@ -6,7 +6,6 @@ export const load: LayoutServerLoad = async ({ fetch, params, parent, locals }) 
 	const api = createApiClient(fetch);
 
 	const id = params.id;
-	const versionTimeline = await api.get(`/apps/${id}/versions`, 'App Version Timeline');
 
 	let myPackageInfo: Record<string, any> = {};
 	// Only fetch SDK package info for logged-in users to avoid wasted backend queries
@@ -16,7 +15,6 @@ export const load: LayoutServerLoad = async ({ fetch, params, parent, locals }) 
 
 	return {
 		myPackageInfo,
-		versionTimeline,
 		companyTypes,
 		myapp
 	};

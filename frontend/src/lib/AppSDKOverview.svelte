@@ -40,12 +40,12 @@
 			{#each Object.keys(myPackageInfo.company_categories) as category (category)}
 				<WhiteCard>
 					{#snippet title()}
-						<span class="text-base">
-							AppGoblin saw {myapp.name} uses
+						<a href="/apps/{page.params.id}/sdks" class="text-base anchor">
+							{myapp.name} has
 							{myPackageInfo.company_categories[category].length}
 							{companyTypes.types.find((x: { url_slug: string }) => x.url_slug === category)
-								?.name || category}
-						</span>
+								?.name || category} SDKs
+						</a>
 					{/snippet}
 					<div class="grid grid-cols-2 gap-1 p-2">
 						{#each myPackageInfo.company_categories[category].slice(0, 4) as company}

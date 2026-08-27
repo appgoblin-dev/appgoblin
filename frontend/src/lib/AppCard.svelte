@@ -3,8 +3,7 @@
 
 	import Rating from '$lib/StarsRating.svelte';
 	import IconDownload from '$lib/svg/IconDownload.svelte';
-	import IconGoogle from './svg/IconGoogle.svelte';
-	import IconiOs from './svg/IconiOS.svelte';
+	import StoreIcon from './StoreIcon.svelte';
 	import { formatNumber } from '$lib/utils/formatNumber';
 
 	interface Props {
@@ -73,12 +72,7 @@
 				<div class="grid grid-cols-1 p-1">
 					<p class="text-base md:text-xl">{app.name}</p>
 					<div class="flex flex-row gap-2">
-						{#if app.store == 1 || (app.store_link && app.store_link.includes('google.com'))}
-							<IconGoogle size="14" />
-						{/if}
-						{#if app.store == 2 || (app.store_link && app.store_link.includes('apple.com'))}
-							<IconiOs size="14" />
-						{/if}
+						<StoreIcon store={app.store} />
 						<p class="text-sm md:base">{app.developer_name || ''}</p>
 					</div>
 					<!-- Ratings: STARS (123) -->

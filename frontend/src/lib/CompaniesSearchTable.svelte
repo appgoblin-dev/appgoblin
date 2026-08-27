@@ -1,4 +1,7 @@
 <script lang="ts">
+	import Check from '@lucide/svelte/icons/check';
+	import X from '@lucide/svelte/icons/x';
+
 	import type { CompaniesSearchEntries } from '../types';
 
 	import type { SortingState } from '@tanstack/svelte-table';
@@ -11,14 +14,13 @@
 
 	import { genericColumns } from '$lib/components/data-table/generic-column';
 
-	import { formatNumber } from '$lib/utils/formatNumber';
-	import { countryCodeToEmoji } from '$lib/utils/countryCodeToEmoji';
-
 	type DataTableProps = {
 		data: CompaniesSearchEntries[];
 	};
 
 	const [sorting, onSortingChange] = createTableState<SortingState>([]);
+	const checkIconClass = 'w-4 h-4 text-success-700-300';
+	const xIconClass = 'w-4 h-4 text-error-200';
 
 	let { data }: DataTableProps = $props();
 
@@ -28,26 +30,29 @@
 			accessorKey: 'company_name',
 			isSortable: true
 		},
-		// ### SDK Stats
 		{
-			title: 'SDK Apps',
-			accessorKey: 'sdk_app_count',
+			title: 'API Calls',
+			accessorKey: 'has_api_signal',
 			isSortable: true
 		},
 		{
-			title: 'API Calls Apps',
-			accessorKey: 'api_call_app_count',
-			isSortable: true
-		},
-		// ### Direct Stats
-		{
-			title: 'App-Ads.txt Apps',
-			accessorKey: 'app_ads_direct_app_count',
+			title: 'SDKs',
+			accessorKey: 'has_sdk_signal',
 			isSortable: true
 		},
 		{
-			title: 'App-Ads.txt Reseller Apps',
-			accessorKey: 'app_ads_reseller_app_count',
+			title: 'Published Apps',
+			accessorKey: 'has_publisher_signal',
+			isSortable: true
+		},
+		{
+			title: 'App-Ads.txt Direct',
+			accessorKey: 'has_app_ads_direct',
+			isSortable: true
+		},
+		{
+			title: 'App-Ads.txt Reseller',
+			accessorKey: 'has_app_ads_reseller',
 			isSortable: true
 		}
 	]);
@@ -96,21 +101,14 @@
 							<a
 								href="/companies/{row.original.company_domain}"
 								style="cursor: pointer;"
-								class=" text-xs md:text-sm"
+								class="text-sm md:text-base"
 							>
-								<div class="flex items-center">
-									{#if row.original.company_logo_url}
+								<div class="flex items-center gap-2">
+									{#if row.original.logo_url}
 										<img
-											src={`https://media.appgoblin.info/${row.original.company_logo_url}`}
-											alt={row.original.company_name}
-											class="w-12 h-12 rounded-sm mr-2"
-											loading="lazy"
-										/>
-									{:else}
-										<img
-											src="/default_company_logo.png"
-											alt="Default Company Logo"
-											class="w-8 h-8 rounded-sm mr-2"
+											src={`https://media.appgoblin.info/${row.original.logo_url}`}
+											alt={row.original.company_name || row.original.company_domain}
+											class="w-8 h--8 md:w-14 md:h-14 rounded-sm"
 											loading="lazy"
 										/>
 									{/if}
@@ -125,27 +123,43 @@
 						</td>
 
 						<td class="table-cell-fit">
-							<p class="text-sm md:text-base">
-								{formatNumber(row.original.sdk_app_count)}
-							</p>
+							{#if row.original.has_api_signal}
+								<Check class={checkIconClass} />
+							{:else}
+								<X class={xIconClass} />
+							{/if}
 						</td>
 
 						<td class="table-cell-fit">
-							<p class="text-sm md:text-base">
-								{formatNumber(row.original.api_call_app_count)}
-							</p>
+							{#if row.original.has_sdk_signal}
+								<Check class={checkIconClass} />
+							{:else}
+								<X class={xIconClass} />
+							{/if}
 						</td>
 
 						<td class="table-cell-fit">
-							<p class="text-sm md:text-base">
-								{formatNumber(row.original.app_ads_direct_app_count)}
-							</p>
+							{#if row.original.has_publisher_signal}
+								<Check class={checkIconClass} />
+							{:else}
+								<X class={xIconClass} />
+							{/if}
 						</td>
 
 						<td class="table-cell-fit">
-							<p class="text-sm md:text-base">
-								{formatNumber(row.original.app_ads_reseller_app_count)}
-							</p>
+							{#if row.original.has_app_ads_direct}
+								<Check class={checkIconClass} />
+							{:else}
+								<X class={xIconClass} />
+							{/if}
+						</td>
+
+						<td class="table-cell-fit">
+							{#if row.original.has_app_ads_reseller}
+								<Check class={checkIconClass} />
+							{:else}
+								<X class={xIconClass} />
+							{/if}
 						</td>
 					</tr>
 				{/each}

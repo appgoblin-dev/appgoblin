@@ -19,10 +19,10 @@
 	let icon = $derived(getIcon(store));
 </script>
 
-<div>
+<span class="inline-flex items-center align-middle">
 	{#if icon === IconGoogle}
 		<IconGoogle size="16" />
 	{:else}
 		<IconiOs size="16" />
 	{/if}
-</div>
+</span>

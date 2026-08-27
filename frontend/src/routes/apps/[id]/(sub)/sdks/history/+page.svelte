@@ -216,15 +216,19 @@
 						class="border-b border-surface-300-600 text-sm uppercase tracking-wide text-surface-500"
 					>
 						<th class="py-3 px-4 font-medium">Version</th>
+						<th class="py-3 px-4 font-medium">Downloaded At</th>
 						<th class="py-3 px-4 font-medium">SDK Scan Result</th>
 						<th class="py-3 px-4 font-medium">SDKs Last Scanned</th>
-						<th class="py-3 px-4 font-medium">Downloaded At</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each data.versionTimeline as entry}
 						<tr class="border-b border-surface-200-800 hover:bg-surface-100-900/50 transition">
 							<td class="py-3 px-4 font-mono text-sm">{entry.app_version_code ?? '—'}</td>
+							<td class="py-3 px-4 text-sm">
+								{entry.downloaded_at ? formatDateTime(entry.downloaded_at) : '—'}
+							</td>
+
 							<td class="py-3 px-4">
 								{#if entry.sdk_scan_result == null}
 									<span class="text-surface-500 italic">Pending</span>
@@ -236,9 +240,6 @@
 							</td>
 							<td class="py-3 px-4 text-sm">
 								{entry.sdks_last_scanned_at ? formatDateTime(entry.sdks_last_scanned_at) : '—'}
-							</td>
-							<td class="py-3 px-4 text-sm">
-								{entry.downloaded_at ? formatDateTime(entry.downloaded_at) : '—'}
 							</td>
 						</tr>
 					{/each}

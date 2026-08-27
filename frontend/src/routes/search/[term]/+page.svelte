@@ -3,6 +3,7 @@
 	import type { SearchResponse } from '../../../types';
 	import AppGroupCard from '$lib/AppGroupCard.svelte';
 	import CompaniesSearchTable from '$lib/CompaniesSearchTable.svelte';
+	import StoreIcon from '$lib/StoreIcon.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
@@ -36,7 +37,7 @@
 
 	// Determine default tab — prefer iOS when available, fall through each option
 	const defaultTab = $derived(
-		showApple ? 'apple' : showGoogle ? 'google' : showCompanies ? 'companies' : 'apple'
+		showGoogle ? 'google' : showApple ? 'apple' : showCompanies ? 'companies' : 'google'
 	);
 </script>
 
@@ -53,8 +54,8 @@
 			Search Results for: <span class="font-bold">'{searchTerm}'</span>
 		</h1>
 		<p class="text-sm opacity-80">
-			Results are split into <span class="font-medium">iOS App Store</span>,
-			<span class="font-medium">Android Google Play</span>, and
+			Results are split into <span class="font-medium">Android Google Play</span>,
+			<span class="font-medium">iOS App Store</span>, and
 			<span class="font-medium">Companies & Domains</span>. Only tabs with results are shown.
 		</p>
 	</div>
@@ -74,31 +75,33 @@
 		<div>
 			<Tabs defaultValue={defaultTab}>
 				<Tabs.List>
-					{#if showApple}
-						<Tabs.Trigger value="apple" class="p-0 md:p-8">
-							<p class="text-xs md:text-xl">
-								iOS App Store
-								<span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary-100-900">
-									{appleAppCount}
-								</span>
-							</p>
-						</Tabs.Trigger>
-					{/if}
 					{#if showGoogle}
 						<Tabs.Trigger value="google" class="p-0 md:p-8">
-							<p class="text-xs md:text-xl">
-								Android Google Play
-								<span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary-100-900">
+							<p class="inline-flex items-center gap-1 md:gap-2 text-xs md:text-xl">
+								<StoreIcon store={1} />
+								Google Play
+								<span class="md:ml-2 px-2 py-0.5 text-xs rounded-full bg-primary-100-900">
 									{googleAppCount}
 								</span>
 							</p>
 						</Tabs.Trigger>
 					{/if}
+					{#if showApple}
+						<Tabs.Trigger value="apple" class="p-0 md:p-8">
+							<p class="inline-flex items-center gap-1 md:gap-2 text-xs md:text-xl">
+								<StoreIcon store={2} />
+								iOS
+								<span class="ml-0 md:ml-2 px-2 py-0.5 text-xs rounded-full bg-primary-100-900">
+									{appleAppCount}
+								</span>
+							</p>
+						</Tabs.Trigger>
+					{/if}
 					{#if showCompanies}
-						<Tabs.Trigger value="companies" class="p-0 md:p-8">
+						<Tabs.Trigger value="companies" class="p-0 md:gap-2 md:p-8">
 							<p class="text-xs md:text-xl">
 								Companies & Domains
-								<span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary-100-900">
+								<span class="md:ml-2 px-2 py-0.5 text-xs rounded-full bg-primary-100-900">
 									{companiesCount}
 								</span>
 							</p>
@@ -130,7 +133,9 @@
 				</Tabs.Content>
 
 				<Tabs.Content value="companies">
-					<CompaniesSearchTable data={data.companiesResults} />
+					<div class="md:px-32">
+						<CompaniesSearchTable data={data.companiesResults} />
+					</div>
 				</Tabs.Content>
 			</Tabs>
 		</div>

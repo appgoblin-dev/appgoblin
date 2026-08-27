@@ -3,11 +3,10 @@ import { requireAuthOr401 } from '$lib/server/auth/auth';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuthOr401(event);
-	const { myapp, companyTypes, versionTimeline, myPackageInfo } = await event.parent();
+	const { myapp, companyTypes, myPackageInfo } = await event.parent();
 
 	return {
 		myPackageInfo,
-		versionTimeline,
 		companyTypes,
 		myapp,
 		// Meta Tags

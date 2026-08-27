@@ -88,8 +88,8 @@
 	}
 
 	function tabClass(tab: SubNavTabItem): string {
-		const selectedClass = 'bg-secondary-100-900 text-surface-900-50 font-semibold';
-		const unselectedClass = 'text-surface-700-300 hover:text-surface-900-50';
+		const selectedClass = 'bg-secondary-100-900 font-semibold';
+		const unselectedClass = 'hover:text-surface-900-100';
 
 		const isActive = isTabActive(tab);
 		let cls = isActive ? selectedClass : unselectedClass;
@@ -111,7 +111,7 @@
 		<!-- Mobile toggle header -->
 		<button
 			type="button"
-			class="flex w-full items-center justify-between gap-2 border border-surface-300-600 rounded-lg px-3 py-2 text-sm font-medium text-surface-700-300 md:hidden"
+			class="flex w-full items-center justify-between gap-2 border border-surface-300-600 rounded-lg px-3 py-2 text-sm font-medium text-tertiary-900-100 md:hidden"
 			onclick={() => (isExpanded = !isExpanded)}
 			aria-expanded={isExpanded}
 			aria-label="{isExpanded ? 'Collapse' : 'Expand'} section navigation"
@@ -122,9 +122,9 @@
 				{:else}
 					<Menu size={18} class="shrink-0" aria-hidden="true" />
 				{/if}
-				<span class="text-surface-500 font-normal">{menuLabel}</span>
+				<span class="">{menuLabel}</span>
 				{#if activeTab}
-					<span class="text-surface-500 mx-0.5">·</span>
+					<span class="mx-0.5">·</span>
 					{#if activeTab.icon}
 						{@const Icon = activeTab.icon}
 						<Icon size={16} class="shrink-0" aria-hidden="true" />

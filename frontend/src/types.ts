@@ -294,12 +294,14 @@ export interface CompaniesOverviewEntries {
 }
 
 export interface CompaniesSearchEntries {
-	country_code: string;
+	company_domain: string;
 	company_name: string;
-	sdk_app_count: number;
-	api_call_app_count: number;
-	app_ads_direct_app_count: number;
-	app_ads_reseller_app_count: number;
+	logo_url: string | null;
+	has_api_signal: boolean;
+	has_sdk_signal: boolean;
+	has_publisher_signal: boolean;
+	has_app_ads_direct: boolean;
+	has_app_ads_reseller: boolean;
 }
 
 export interface CompaniesOverviewPlatforms {
@@ -827,12 +829,6 @@ export interface AppSDKs {
 		skadnetwork: string[];
 		app_queries: string[];
 	};
-	versionTimeline: Array<{
-		app_version_code: string;
-		sdk_scan_result: number | null;
-		sdks_last_scanned_at: string | null;
-		downloaded_at: string | null;
-	}>;
 	companyTypes: CompanyTypes;
 	myapp: AppFullDetail;
 }
