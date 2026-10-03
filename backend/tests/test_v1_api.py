@@ -478,15 +478,14 @@ class TestV1CompaniesRateLimit:
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
             from api_app import guards as g
-            import hashlib
 
             raw_key = "ag_daily429"
-            key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
             headers = {"X-API-Key": raw_key}
 
-            # Exhaust daily quota using the hash
+            # Exhaust daily quota using the user ID because quotas are shared
+            # across all API keys owned by a user.
             for _ in range(500_000):
-                g._daily_quota.check(key_hash, 500_000)
+                g._daily_quota.check("1", 500_000)
 
             resp = client.get("/api/v1/companies", headers=headers)
             assert resp.status_code == 429
@@ -1495,9 +1494,7 @@ class TestV1Docs:
         assert "## AI & Raw Spec" in data["info"]["description"]
         assert "/api/v1/docs/openapi.json" in data["info"]["description"]
         assert data["servers"] == [{"url": "https://appgoblin.info"}]
-        assert (
-            data["components"]["securitySchemes"]["BearerAuth"]["scheme"] == "bearer"
-        )
+        assert data["components"]["securitySchemes"]["BearerAuth"]["scheme"] == "bearer"
         assert data["security"] == [{"BearerAuth": []}]
         assert "/health" not in data["paths"]
         assert "/api/v1/apps/{store_id}/sdksoverview" not in data["paths"]
@@ -1689,9 +1686,10 @@ class TestV1Docs:
         assert keyword_examples["keyword_metrics"]["value"]["keyword"] == (
             "app privacy"
         )
-        assert keyword_examples["keyword_metrics"]["value"]["android"][
-            "opportunity_score"
-        ] == 69.8
+        assert (
+            keyword_examples["keyword_metrics"]["value"]["android"]["opportunity_score"]
+            == 69.8
+        )
         keyword_ranks_operation = data["paths"]["/api/v1/keywords/{keyword}/ranks"][
             "get"
         ]
@@ -1705,12 +1703,15 @@ class TestV1Docs:
             "Returns grouped latest top-ranked Android and iOS apps for an exact "
             "keyword lookup in the US storefront dataset."
         )
-        keyword_ranks_examples = keyword_ranks_operation["responses"]["200"][
-            "content"
-        ]["application/json"]["examples"]
-        assert keyword_ranks_examples["keyword_ranks"]["value"]["android"][0][
-            "latest_rank"
-        ] == 4
+        keyword_ranks_examples = keyword_ranks_operation["responses"]["200"]["content"][
+            "application/json"
+        ]["examples"]
+        assert (
+            keyword_ranks_examples["keyword_ranks"]["value"]["android"][0][
+                "latest_rank"
+            ]
+            == 4
+        )
 
     def test_openapi_page_renders_scalar(self):
         app = _make_docs_test_app()

@@ -4,6 +4,7 @@ import hashlib
 import time
 from unittest.mock import MagicMock
 
+from litestar.exceptions import TooManyRequestsException
 import pytest
 
 from api_app.guards import (
@@ -259,6 +260,22 @@ def _make_db_row(user_id: int = 1, price_id: str | None = None):
     return row
 
 
+@pytest.fixture(autouse=True)
+def _reset_global_guard_state():
+    """Keep tests isolated from module-level limiter state."""
+    from api_app import guards as guards_mod
+
+    guards_mod._KEY_CACHE.clear()
+    guards_mod._LAST_USED_UPDATES.clear()
+    guards_mod._rate_limiter._buckets.clear()
+    guards_mod._daily_quota._counters.clear()
+    yield
+    guards_mod._KEY_CACHE.clear()
+    guards_mod._LAST_USED_UPDATES.clear()
+    guards_mod._rate_limiter._buckets.clear()
+    guards_mod._daily_quota._counters.clear()
+
+
 class TestQueryKey:
     def test_subscription_lookup_honors_cancel_at_window(self):
         engine = MagicMock()
@@ -351,12 +368,10 @@ class TestValidateApiKey:
         row = _make_db_row(user_id=1, price_id=None)
         state = mock_state(row=row)
         raw_key = "ag_dailytest429"
-        key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
-
         # Exhaust daily quota directly on the tracker (free = 1000/day)
-        # using the hash because validate_api_key hashes the raw key
+        # using the user ID because quotas are shared across API keys
         for _ in range(1000):
-            g_mod._daily_quota.check(key_hash, 1000)
+            g_mod._daily_quota.check("1", 1000)
 
         req = _make_request(api_key=raw_key)
         with pytest.raises(TooManyRequestsException, match="Daily request quota"):
@@ -389,3 +404,33 @@ class TestValidateApiKey:
         assert info["minute_remaining"] == 29
         assert info["daily_limit"] == 1000
         assert info["daily_remaining"] == 999
+
+    def test_multiple_keys_share_user_daily_quota(self, mock_state, monkeypatch):
+        from api_app import guards as guards_mod
+
+        def query_key(_engine, key_hash):
+            assert key_hash in {
+                hashlib.sha256(b"ag_first").hexdigest(),
+                hashlib.sha256(b"ag_second").hexdigest(),
+            }
+            return guards_mod._CachedKey(
+                user_id=42,
+                tier="free",
+                expires_at=9e9,
+            )
+
+        monkeypatch.setattr(guards_mod, "_query_key", query_key)
+        monkeypatch.setattr(
+            guards_mod._rate_limiter,
+            "check",
+            lambda _key, limit: (True, limit, limit - 1, 0),
+        )
+        state = mock_state()
+
+        for _ in range(999):
+            validate_api_key(_make_request(api_key="ag_first"), state)
+
+        validate_api_key(_make_request(api_key="ag_second"), state)
+
+        with pytest.raises(TooManyRequestsException, match="Daily request quota"):
+            validate_api_key(_make_request(api_key="ag_first"), state)

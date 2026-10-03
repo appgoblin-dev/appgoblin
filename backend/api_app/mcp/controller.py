@@ -113,9 +113,13 @@ def _authenticate(scope: Scope) -> MCPAuthContext | None:
 
     # --- Daily quota ---
     daily_ok, daily_limit, daily_remaining = _daily_quota.check(
-        key_hash, limits.requests_per_day
+        str(user_id), limits.requests_per_day
     )
     if not daily_ok:
+        logger.warning(
+            "MCP daily quota exceeded",
+            extra={"user_id": user_id, "tier": tier, "daily_limit": daily_limit},
+        )
         raise _RateLimitError(
             detail="Daily request quota exceeded",
             retry_after=86400,
@@ -125,9 +129,17 @@ def _authenticate(scope: Scope) -> MCPAuthContext | None:
 
     # --- Per-minute burst ---
     minute_ok, minute_limit, minute_remaining, retry_after = _rate_limiter.check(
-        key_hash, limits.requests_per_minute
+        str(user_id), limits.requests_per_minute
     )
     if not minute_ok:
+        logger.warning(
+            "MCP per-minute rate limit exceeded",
+            extra={
+                "user_id": user_id,
+                "tier": tier,
+                "minute_limit": minute_limit,
+            },
+        )
         raise _RateLimitError(
             detail="Rate limit exceeded",
             retry_after=retry_after,

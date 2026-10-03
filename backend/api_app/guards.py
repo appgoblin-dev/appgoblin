@@ -95,7 +95,7 @@ class _TokenBucket:
 
 
 class _RateLimiter:
-    """Thread-safe refilling token bucket keyed by API key hash."""
+    """Thread-safe refilling token bucket keyed by billing user ID."""
 
     def __init__(self) -> None:
         self._buckets: dict[str, _TokenBucket] = {}
@@ -152,7 +152,7 @@ class _DailyQuota:
 
 
 class _DailyQuotaTracker:
-    """Thread-safe daily request counter keyed by API key hash."""
+    """Thread-safe daily request counter keyed by billing user ID."""
 
     def __init__(self) -> None:
         self._counters: dict[str, _DailyQuota] = {}
@@ -349,8 +349,11 @@ def validate_api_key(request: Request, state) -> ApiKeyContext:
     limits = get_tier_limits(tier)
 
     # --- Daily quota (checked first — no point allowing burst if over daily cap) ---
+    # Quotas are deliberately keyed by user_id rather than key_hash. A user
+    # may have multiple active keys, but all keys must share the subscription's
+    # allowance.
     daily_ok, daily_limit, daily_remaining = _daily_quota.check(
-        key_hash, limits.requests_per_day
+        str(user_id), limits.requests_per_day
     )
 
     request.scope["_rate_limit_info"] = {
@@ -362,6 +365,10 @@ def validate_api_key(request: Request, state) -> ApiKeyContext:
     }
 
     if not daily_ok:
+        logger.warning(
+            "API daily quota exceeded",
+            extra={"user_id": user_id, "tier": tier, "daily_limit": daily_limit},
+        )
         request.scope["_rate_limit_info"]["minute_remaining"] = 0
         raise TooManyRequestsException(
             detail="Daily request quota exceeded",
@@ -378,7 +385,7 @@ def validate_api_key(request: Request, state) -> ApiKeyContext:
         minute_limit,
         minute_remaining,
         retry_after,
-    ) = _rate_limiter.check(key_hash, limits.requests_per_minute)
+    ) = _rate_limiter.check(str(user_id), limits.requests_per_minute)
 
     request.scope["_rate_limit_info"] = {
         "minute_limit": minute_limit,
@@ -389,6 +396,14 @@ def validate_api_key(request: Request, state) -> ApiKeyContext:
     }
 
     if not minute_ok:
+        logger.warning(
+            "API per-minute rate limit exceeded",
+            extra={
+                "user_id": user_id,
+                "tier": tier,
+                "minute_limit": minute_limit,
+            },
+        )
         raise TooManyRequestsException(
             detail="Rate limit exceeded",
             headers={

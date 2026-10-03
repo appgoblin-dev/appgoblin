@@ -5,6 +5,8 @@ import { encodeBase32, encodeHexLowerCase, sha256 } from '$lib/server/auth/utils
 
 import type { Actions, PageServerLoadEvent, RequestEvent } from './$types';
 
+const MAX_ACTIVE_API_KEYS = 5;
+
 interface ApiKeyRow {
 	id: number;
 	key_prefix: string;
@@ -46,6 +48,19 @@ export const actions: Actions = {
 		}
 		if (name.length > 100) {
 			return fail(400, { section: 'create', message: 'Key name must be 100 characters or less' });
+		}
+
+		const activeKeyCount = await db.query<{ count: string }>(
+			`SELECT COUNT(*)::text AS count
+			 FROM public.api_keys
+			 WHERE user_id = $1 AND is_active = true`,
+			[user.id]
+		);
+		if (Number(activeKeyCount[0]?.count ?? 0) >= MAX_ACTIVE_API_KEYS) {
+			return fail(400, {
+				section: 'create',
+				message: `You can have at most ${MAX_ACTIVE_API_KEYS} active API keys`
+			});
 		}
 
 		const rawKey = generateApiKey();

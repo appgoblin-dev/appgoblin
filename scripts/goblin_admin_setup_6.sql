@@ -21,3 +21,32 @@ CREATE TABLE user_requested_mapping (
 
 CREATE INDEX idx_user_requested_mapping_created
 ON user_requested_mapping (user_id, created_at DESC);
+
+CREATE OR REPLACE FUNCTION CANONICALIZE_EMAIL(email TEXT)
+RETURNS TEXT
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    SELECT
+        split_part(
+            replace(
+                split_part(lower(trim(email)), '@', 1),
+                '.',
+                ''
+            ),
+            '+',
+            1
+        )
+        || '@' ||
+        lower(split_part(trim(email), '@', 2))
+$$;
+
+
+ALTER TABLE users
+ADD COLUMN canonical_email TEXT;
+
+UPDATE users
+SET canonical_email = CANONICALIZE_EMAIL(email);
+
+CREATE UNIQUE INDEX users_canonical_email_unique
+ON users (canonical_email);

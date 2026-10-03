@@ -75,7 +75,26 @@ export async function handleSignup(event: RequestEvent) {
 		return fail(429, { message: 'Too many requests', email, username, referral_source: '' });
 	}
 
-	const user = await createUser(email, username, password);
+	let user;
+	try {
+		user = await createUser(email, username, password);
+	} catch (error: unknown) {
+		// The availability check above is not enough on its own because two
+		// signup requests can race. The database constraint is authoritative.
+		const databaseError = error as { code?: string; constraint?: string };
+		if (
+			databaseError.code === '23505' &&
+			databaseError.constraint === 'users_canonical_email_unique'
+		) {
+			return fail(400, {
+				message: 'Each email can only be used once, including “.” and “+” aliases',
+				email,
+				username,
+				referral_source: ''
+			});
+		}
+		throw error;
+	}
 	if (typeof referralSource === 'string' && referralSource.trim() !== '') {
 		await db.execute('INSERT INTO user_signup_sources (user_id, referral_source) VALUES ($1, $2)', [
 			user.id,
