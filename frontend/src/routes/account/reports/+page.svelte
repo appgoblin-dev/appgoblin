@@ -14,6 +14,11 @@
 			minute: '2-digit'
 		});
 	}
+
+	function formatRowCount(rowCount: number | null): string {
+		if (rowCount === null) return 'Row count unavailable';
+		return `${rowCount.toLocaleString('en-US')} ${rowCount === 1 ? 'row' : 'rows'}`;
+	}
 </script>
 
 <svelte:head>
@@ -41,7 +46,7 @@
 					<div class="min-w-0">
 						<p class="truncate font-semibold">{report.reportName}</p>
 						<p class="mt-1 text-xs text-surface-500">
-							Created {formatReportDate(report.createdAt)}
+							Created {formatReportDate(report.createdAt)} · {formatRowCount(report.rowCount)}
 						</p>
 					</div>
 					<a

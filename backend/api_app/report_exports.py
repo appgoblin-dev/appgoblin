@@ -126,6 +126,7 @@ def store_generated_report(
     user_id: int,
     s3_key: str,
     payload: dict,
+    row_count: int,
     report_name: str | None = None,
 ) -> None:
     """Store metadata for a completed user-generated report."""
@@ -144,14 +145,21 @@ def store_generated_report(
         connection.execute(
             text("""
                 INSERT INTO user_generated_reports
-                    (user_id, report_name, s3_key, filters)
-                VALUES (:user_id, :report_name, :s3_key, CAST(:filters AS jsonb))
+                    (user_id, report_name, s3_key, filters, row_count)
+                VALUES (
+                    :user_id,
+                    :report_name,
+                    :s3_key,
+                    CAST(:filters AS jsonb),
+                    :row_count
+                )
                 """),
             {
                 "user_id": user_id,
                 "report_name": report_name,
                 "s3_key": s3_key,
                 "filters": json.dumps(filters),
+                "row_count": row_count,
             },
         )
 
@@ -270,6 +278,7 @@ def run_app_explorer_export_job(
             user_id=user_id,
             s3_key=s3_key,
             payload=payload,
+            row_count=row_count,
         )
         send_report_ready_email(
             recipient_email=recipient_email,
@@ -305,6 +314,7 @@ def run_sdk_pattern_export_job(
             user_id=user_id,
             s3_key=s3_key,
             payload={"pattern": pattern},
+            row_count=row_count,
             report_name=f"SDK pattern export {pattern}",
         )
         send_report_ready_email(

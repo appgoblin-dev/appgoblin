@@ -7,6 +7,9 @@ CREATE TABLE user_generated_reports (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE user_generated_reports
+ADD COLUMN row_count BIGINT NULL;
+
 CREATE INDEX idx_user_generated_reports_user_created
 ON user_generated_reports (user_id, created_at DESC);
 

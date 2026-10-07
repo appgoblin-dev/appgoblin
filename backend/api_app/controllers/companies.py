@@ -71,6 +71,7 @@ from dbcon.queries import (
     get_company_categories_counts,
     get_company_country_apps,
     get_company_follow_lookup,
+    get_company_s3_reports,
     get_company_sdks,
     get_company_stats,
     get_company_tab_indicators,
@@ -1891,6 +1892,20 @@ class CompaniesController(Controller):
     """API EndPoint return for all ad tech companies."""
 
     path = "/api/"
+
+    @get(path="/companies/{company_domain:str}/reports", cache=3600)
+    async def company_reports(
+        self: Self, state: State, company_domain: str
+    ) -> list[dict[str, object]]:
+        """Return available S3 export metadata for a company domain."""
+        reports = get_company_s3_reports(state=state, company_domain=company_domain)
+        if reports.empty:
+            return []
+
+        reports["last_modified"] = pd.to_datetime(
+            reports["last_modified"], utc=True
+        ).dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        return reports.where(pd.notna(reports), None).to_dict(orient="records")
 
     @get(path="/companies", cache=86400)
     async def companies(self: Self, state: State) -> CompaniesOverview:

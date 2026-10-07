@@ -3,59 +3,51 @@
 
 	interface Props {
 		data: {
-			canDownload: boolean;
 			companyName: string;
-			downloadUrls: {
-				appAdsTxt: string | null;
-				companyVerifiedAndroid: string | null;
-				companyVerifiedIos: string | null;
-			} | null;
-			hasAdstxtData: boolean;
-			hasAndroidData: boolean;
-			hasIosData: boolean;
+			canDownload: boolean;
 			userId: number | null;
+			reports: Array<{
+				file_key: string;
+				report_name: string;
+				row_count: number | null;
+				last_modified: string;
+				url?: string | null;
+			}>;
 		};
 	}
 
 	let { data }: Props = $props();
 
-	let exportRows = $derived(
-		[
-			{
-				key: 'appAdsTxt',
-				label: 'App-Ads.txt Data',
-				platform: 'Cross-Platform',
-				signalDepth: 'Direct & Reseller Publisher IDs',
-				url: data.downloadUrls?.appAdsTxt ?? null,
-				available: data.hasAdstxtData
-			},
-			{
-				key: 'companyVerifiedAndroid',
-				label: 'SDK & API Verified Apps (Android)',
-				platform: 'Android',
-				signalDepth: 'Active SDK Runtime & API Signals',
-				url: data.downloadUrls?.companyVerifiedAndroid ?? null,
-				available: data.hasAndroidData
-			},
-			{
-				key: 'companyVerifiedIos',
-				label: 'SDK & API Verified Apps (iOS)',
-				platform: 'iOS',
-				signalDepth: 'Active SDK Runtime & API Signals',
-				url: data.downloadUrls?.companyVerifiedIos ?? null,
-				available: data.hasIosData
-			}
-		].filter((r) => r.available)
+	let hasAnyExports = $derived(data.reports.length > 0);
+	let hasAppAdsTxtExport = $derived(
+		data.reports.some((report) => report.report_name.toLowerCase().includes('app-ads'))
+	);
+	let hasVerifiedAppsExport = $derived(
+		data.reports.some((report) => !report.report_name.toLowerCase().includes('app-ads'))
 	);
 
-	let hasAnyExports = $derived(data.hasAdstxtData || data.hasAndroidData || data.hasIosData);
+	const getDatasetMetadata = (report: Props['data']['reports'][number]) => {
+		const name = `${report.report_name} ${report.file_key}`.toLowerCase();
+		const isAppAdsTxt = name.includes('app-ads') || name.includes('ads_txt');
+		const isIos = name.includes('ios') || name.includes('apple');
+
+		return {
+			label: isAppAdsTxt
+				? 'App-Ads.txt Data'
+				: `SDK & API Verified Apps (${isIos ? 'iOS' : 'Android'})`,
+			platform: isAppAdsTxt ? 'Cross-Platform' : isIos ? 'iOS' : 'Android',
+			signalDepth: isAppAdsTxt
+				? 'Apps with app-ads.txt records for the company domain.'
+				: 'Apps verified by matched SDKs or API HTTP requests.'
+		};
+	};
 </script>
 
 <svelte:head>
 	<title>{data.companyName} Data Exports — AppGoblin</title>
 	<meta
 		name="description"
-		content="Download the complete {data.companyName} market footprint — SDK adoption, API signals, and app-ads.txt records. Analysis-ready data for B2B prospecting, compliance, and competitive intelligence."
+		content="Download the complete {data.companyName} app list by SDK adoption, API signals, and app-ads.txt records. Analysis-ready data for B2B prospecting, compliance, and competitive intelligence."
 	/>
 	<meta name="robots" content="index, nofollow" />
 </svelte:head>
@@ -139,37 +131,42 @@
 						<tr class="border-b border-surface-200-800/50">
 							<th class="text-left py-3 px-4 text-sm font-semibold">Dataset</th>
 							<th class="text-left py-3 px-4 text-sm font-semibold">Platform</th>
-							<th class="text-left py-3 px-4 text-sm font-semibold">Signal Depth</th>
+							<th class="text-left py-3 px-4 text-sm font-semibold">Description</th>
+							<th class="text-right py-3 px-4 text-sm font-semibold">Rows</th>
+							<th class="text-right py-3 px-4 text-sm font-semibold">Updated</th>
 							<th class="text-center py-3 px-4 text-sm font-semibold">Format</th>
 							<th class="text-right py-3 px-4"></th>
 						</tr>
 					</thead>
 					<tbody>
-						{#each exportRows as row}
+						{#each data.reports as row}
+							{@const metadata = getDatasetMetadata(row)}
 							<tr class="border-b border-surface-200-800/30 last:border-b-0">
-								<td class="py-3 px-4 text-sm font-medium">{row.label}</td>
-								<td class="py-3 px-4 text-sm opacity-70">{row.platform}</td>
-								<td class="py-3 px-4 text-sm opacity-70">{row.signalDepth}</td>
-								<td class="py-3 px-4 text-sm text-center opacity-70">CSV</td>
+								<td class="py-3 px-4 text-sm font-medium">{metadata.label}</td>
+								<td class="py-3 px-4 text-sm opacity-70">{metadata.platform}</td>
+								<td class="py-3 px-4 text-sm opacity-70">{metadata.signalDepth}</td>
+								<td class="py-3 px-4 text-right text-sm opacity-70">
+									{row.row_count?.toLocaleString() ?? '—'}
+								</td>
+								<td class="py-3 px-4 text-right text-sm opacity-70">
+									{new Date(row.last_modified).toLocaleDateString()}
+								</td>
+								<td class="py-3 px-4 text-center text-sm opacity-70">CSV</td>
+
 								<td class="py-3 px-4 text-right">
 									{#if data.canDownload && row.url}
 										<a
 											href={row.url}
-											class="btn preset-filled-primary-500 p-3 text-sm"
 											target="_blank"
 											rel="noopener noreferrer"
-											data-umami-event="data-export-download"
-											data-umami-event-company={data.companyName}
-											data-umami-event-type={row.key}
-											data-umami-event-platform={row.platform}
-											data-umami-event-userid={data.userId}
+											class="btn preset-filled-primary-500 p-3 text-sm"
 										>
-											Download CSV
+											Signed Download
 										</a>
 									{:else}
-										<a href="/pricing" class="btn preset-filled-primary-500 p-3 text-sm">
-											Get B2B Intelligence
-										</a>
+										<a href="/pricing" class="btn preset-filled-primary-500 p-3 text-sm"
+											>Get B2B Premium</a
+										>
 									{/if}
 								</td>
 							</tr>
@@ -178,33 +175,17 @@
 				</table>
 			</div>
 		</section>
-
-		{#if !data.canDownload}
-			<div class="rounded-lg border border-surface-200-800/70 p-5 space-y-4">
-				<p class="text-sm opacity-80 max-w-2xl">
-					Data exports are included with B2B SDK Intelligence and Premium plans. This data is also
-					available programmatically via the
-					<a href="/api-docs" class="underline hover:text-primary-600-400">AppGoblin API</a>.
-				</p>
-				<div class="flex flex-wrap gap-3">
-					<a href="/pricing" class="btn preset-filled-primary-500 p-3 font-semibold">
-						See Plans & Pricing
-					</a>
-					<a href="/contact" class="btn preset-outlined-surface-100-900 p-3"> Contact Sales </a>
-				</div>
-			</div>
-		{/if}
 	{/if}
 
 	<!-- Column reference documentation -->
 	<section class="space-y-8">
 		<h2 class="text-xl font-bold">CSV Column References</h2>
 
-		{#if data.hasAndroidData || data.hasIosData}
+		{#if hasVerifiedAppsExport}
 			<DataExportColumnDocs variant="verified-apps" companyName={data.companyName} />
 		{/if}
 
-		{#if data.hasAdstxtData}
+		{#if hasAppAdsTxtExport}
 			<DataExportColumnDocs variant="app-ads-txt" companyName={data.companyName} />
 		{/if}
 	</section>
