@@ -78,6 +78,15 @@ def get_company_creatives(
     return df
 
 
+def get_company_s3_reports(state: State, company_domain: str) -> pd.DataFrame:
+    """Get registered S3 export metadata for a company domain."""
+    return pd.read_sql(
+        sql.company_s3_reports,
+        con=state.dbcon.engine,
+        params={"company_domain": company_domain},
+    )
+
+
 def get_advertiser_creatives_by_host(state: State, host_domain: str) -> pd.DataFrame:
     """Get advertiser creatives for a host domain (public v1 endpoint)."""
     df = pd.read_sql(

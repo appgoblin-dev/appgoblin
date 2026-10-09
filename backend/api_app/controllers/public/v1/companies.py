@@ -378,7 +378,7 @@ def _build_public_company_app_change_payload(
             tag_source=tag_source,
             year=year,
             quarter=quarter,
-            status="lost" if status == "removed" else status,
+            status="removed" if status == "lost" else status,
         ),
     )
 

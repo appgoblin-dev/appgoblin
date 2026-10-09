@@ -9,8 +9,10 @@ import boto3
 from litestar import Controller, get
 from litestar.config.response_cache import CACHE_FOREVER
 from litestar.datastructures import State
+from litestar.exceptions import ClientException, NotFoundException
 
 from config import CONFIG, get_logger
+from dbcon.queries import get_company_s3_reports
 from dbcon.static import get_s3_datasets
 
 logger = get_logger(__name__)
@@ -59,24 +61,43 @@ class ExportsController(Controller):
     @get(path="exports/signed-url")
     async def get_signed_url(
         self: Self,
+        state: State,
         dataset: str,
         domain: str,
         platform: str | None = None,
+        s3_key: str | None = None,
     ) -> dict[str, str]:
         """Return a short-lived signed URL for a company data export."""
         if not domain:
             raise ValueError("A domain is required")
-        try:
-            s3_key = _build_signed_download_key(dataset, domain, platform)
-        except ValueError as exc:
-            from litestar.exceptions import ClientException
-
-            raise ClientException(detail=str(exc), status_code=400) from exc
 
         s3_config = CONFIG[SIGNED_DOWNLOADS_CONFIG_KEY]
-        url = _get_signed_download_client().generate_presigned_url(
+        bucket = s3_config["bucket"]
+        region = s3_config["region_name"]
+        if s3_key:
+            reports = get_company_s3_reports(state=state, company_domain=domain)
+            report = reports[reports["file_key"] == s3_key]
+            if report.empty:
+                raise NotFoundException("Report not found", status_code=404)
+            key = str(report.iloc[0]["file_key"])
+            bucket = str(report.iloc[0]["bucket"])
+            region = str(report.iloc[0]["myregion"])
+        else:
+            try:
+                key = _build_signed_download_key(dataset, domain, platform)
+            except ValueError as exc:
+                raise ClientException(detail=str(exc), status_code=400) from exc
+
+        client = boto3.session.Session().client(
+            "s3",
+            region_name=region,
+            endpoint_url="https://" + s3_config["host"],
+            aws_access_key_id=s3_config["access_key_id"],
+            aws_secret_access_key=s3_config["secret_key"],
+        )
+        url = client.generate_presigned_url(
             "get_object",
-            Params={"Bucket": s3_config["bucket"], "Key": s3_key},
+            Params={"Bucket": bucket, "Key": key},
             ExpiresIn=SIGNED_DOWNLOAD_URL_TTL_SECONDS,
         )
         return {"url": url}

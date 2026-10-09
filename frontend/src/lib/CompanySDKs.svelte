@@ -19,7 +19,7 @@
 		)
 	]);
 
-	function truncateList<T>(list: T[], maxItems = 8) {
+	function truncateList<T>(list: T[], maxItems = 20) {
 		return list.slice(0, maxItems);
 	}
 </script>
