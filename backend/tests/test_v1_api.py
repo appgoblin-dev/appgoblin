@@ -836,6 +836,22 @@ class TestV1CompanyAppChanges:
             ios_apps=["id123456"],
         )
 
+    def test_build_public_company_app_change_payload_maps_lost_to_removed(self):
+        with patch(
+            "api_app.controllers.public.v1.companies.get_company_app_change_store_ids_by_platform",
+            return_value={"android_apps": [], "ios_apps": []},
+        ) as get_store_ids:
+            v1_companies._build_public_company_app_change_payload(
+                state=MagicMock(),
+                company_domain="adcolony.com",
+                tag_source="sdk",
+                year=2026,
+                quarter=3,
+                status="lost",
+            )
+
+        assert get_store_ids.call_args.kwargs["status"] == "removed"
+
 
 class TestV1Apps:
     def test_app_basics_logs_umami_page_view_with_user_id(self):
