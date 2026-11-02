@@ -103,18 +103,24 @@ export async function requirePaidSubscription(event: RequestEvent) {
 
 /**
  * Redirect authenticated users away from auth pages (login, signup).
- * If redirectTo is in the URL and valid, redirect there; otherwise home.
+ * If redirectTo is in the URL and valid, redirect there; otherwise defaultTarget.
+ * Users who still need to verify their email go to the verification page, which
+ * will then send them to unverifiedDefaultTarget (when set).
  */
-export function redirectIfAuthenticated(event: RequestEvent) {
+export function redirectIfAuthenticated(
+	event: RequestEvent,
+	defaultTarget = '/',
+	unverifiedDefaultTarget = ''
+) {
 	if (event.locals.session !== null && event.locals.user !== null) {
 		if (event.locals.user.emailVerified) {
 			const redirectTo = event.url.searchParams.get('redirectTo');
-			const target = isSafeRedirect(redirectTo) ? redirectTo : '/';
+			const target = isSafeRedirect(redirectTo) ? redirectTo : defaultTarget;
 			redirect(302, target);
 		}
 		if (!event.locals.user.emailVerified) {
 			const redirectTo = event.url.searchParams.get('redirectTo');
-			const target = isSafeRedirect(redirectTo) ? redirectTo : '';
+			const target = isSafeRedirect(redirectTo) ? redirectTo : unverifiedDefaultTarget;
 			if (target) {
 				redirect(302, `/auth/verify-email?redirectTo=${encodeURIComponent(target)}`);
 			}
