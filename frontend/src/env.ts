@@ -14,6 +14,8 @@ export const variables = defineEnvVars({
 	EMAIL_PASSWORD: { static: true },
 	APPGOBLIN_DOWNLOADS_BASE: { static: true },
 	STRIPE_SECRET_KEY: { static: true },
+	STRIPE_PROFILE_ID: { static: true },
+	STRIPE_TEMPO_DEPOSIT_ADDRESS: { static: true },
 	PGHOST: { static: true },
 	PGPORT: { static: true },
 	PGDATABASE: { static: true },

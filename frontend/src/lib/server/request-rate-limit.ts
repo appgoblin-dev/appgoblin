@@ -5,6 +5,9 @@ import { getClientIP } from './request.js';
 
 export type RateLimitTier = 'authenticated' | 'anonymous' | 'jsonScraper';
 
+export const isSearchResultsPath = (pathname: string): boolean =>
+	pathname.startsWith(`${SEARCH_PAGE_PATH}/`);
+
 export interface RateLimitResult {
 	allowed: boolean;
 	tier: RateLimitTier;
@@ -208,10 +211,6 @@ export function isBlockedDataRequest(event: RequestEvent): boolean {
  * The rendered results route, `/search/<term>`. The bare `/search` route only
  * 303s to it, so charging that too would bill one search twice.
  */
-function isSearchResultsPath(pathname: string): boolean {
-	return pathname.startsWith(`${SEARCH_PAGE_PATH}/`);
-}
-
 /**
  * Charge a signed-out visit to a search page against the daily quota.
  *

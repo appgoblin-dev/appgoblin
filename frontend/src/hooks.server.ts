@@ -14,9 +14,11 @@ import {
 	checkRateLimit,
 	isBlockedDataRequest,
 	isNoindexPath,
+	isSearchResultsPath,
 	isStaticAssetPath,
 	rateLimitResponse
 } from '#lib/server/request-rate-limit.js';
+import { machineSearchPayment } from '#lib/server/machine-payment.js';
 
 // Static assets, the live-session probe (the header calls /auth/me on every SPA
 // navigation, so a 429 would blank it) and the health check.
@@ -62,6 +64,17 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 
 	const result = checkRateLimit(event);
 	if (!result.allowed) {
+		// Paid machine requests can continue only after an MPP payment. Human
+		// browsers keep the existing sign-in challenge below.
+		if (
+			result.reason === 'searchQuota' &&
+			isSearchResultsPath(event.url.pathname) &&
+			!event.request.headers.has('cookie')
+		) {
+			const paymentResponse = await machineSearchPayment(event.request, () => resolve(event));
+			if (paymentResponse !== null) return paymentResponse;
+		}
+
 		// Throws a redirect to the login page when the anonymous search quota is
 		// exhausted; every other limit still answers with a 429.
 		challengeAnonymousSearchQuota(event, result);
