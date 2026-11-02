@@ -159,19 +159,17 @@ export async function sendOrganizationInvitationEmail(
 	const signupUrl = `${APPGOBLIN_ENDPOINT_URL}/auth/invitation-signup?token=${encodeURIComponent(invitationToken)}`;
 	const subject = `You’re invited to join ${organizationName} on AppGoblin`;
 	const text = [
-		`You’ve been invited to join ${organizationName} on AppGoblin.`,
+		`You’ve been invited to join an organization: '${organizationName}' on AppGoblin.`,
 		'',
-		'Create your AppGoblin account here:',
+		'Confirm or create your AppGoblin account here:',
 		signupUrl,
-		'',
-		'If you do not see this email, please check your Spam or Junk folder.'
+		''
 	].join('\n');
 	const html = `
 		<div>
 			<h2>You’re invited to AppGoblin</h2>
 			<p>You’ve been invited to join <strong>${organizationName}</strong> on AppGoblin.</p>
 			<p><a href="${signupUrl}">Create your AppGoblin account</a></p>
-			<p>If you do not see this email, please check your Spam or Junk folder.</p>
 		</div>
 	`;
 

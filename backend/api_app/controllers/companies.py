@@ -1746,14 +1746,11 @@ def _build_company_overview_scope(
         app_category=category,
         include_parent_rollup=include_parent_rollup,
     )
-    # Lightweight callers (including the public/MCP adapters) may provide the
-    # legacy company-stat shape without category denominator columns. In that
-    # case market-share denominators cannot be computed and no category-total
-    # query is needed.
+    # Category totals are queried separately from company stats. The company
+    # stats query contains app_count/installs_d30, not the cat_total_* columns,
+    # so checking df for denominator columns would disable penetration metrics.
     category_totals = (
-        get_tag_source_category_totals(state, category)
-        if {"cat_total_app_count", "cat_total_installs_d30"}.issubset(df.columns)
-        else None
+        get_tag_source_category_totals(state, category) if not df.empty else None
     )
     stats_overview = make_company_stats(df=df, category_totals=category_totals)
 

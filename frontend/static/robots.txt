@@ -6,6 +6,7 @@ Disallow: /apps/*.jpeg
 Disallow: /apps/*.png
 Disallow: /auth/*
 Disallow: /account/
+Disallow: /search
 Disallow: /apps/comparison/
 Disallow: /apps/*/keywords
 Disallow: /apps/*/keywords/

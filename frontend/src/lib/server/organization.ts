@@ -76,7 +76,8 @@ export async function acceptOrganizationInvitation(
 
 		await client.query(
 			`INSERT INTO organization_members (organization_id, user_id, role)
-			 VALUES ($1, $2, 'member')`,
+			 VALUES ($1, $2, 'member')
+			 ON CONFLICT (organization_id, user_id) DO NOTHING`,
 			[row.organization_id, userId]
 		);
 		await client.query(
