@@ -1,6 +1,6 @@
-import type { RequestEvent } from '@sveltejs/kit';
+import { redirect, type RequestEvent } from '@sveltejs/kit';
 
-import { RefillingTokenBucket } from './auth/rate-limit.js';
+import { ExpiringTokenBucket, RefillingTokenBucket } from './auth/rate-limit.js';
 import { getClientIP } from './request.js';
 
 export type RateLimitTier = 'authenticated' | 'anonymous' | 'jsonScraper';
@@ -11,6 +11,8 @@ export interface RateLimitResult {
 	limit: number;
 	remaining: number;
 	retryAfterSeconds: number;
+	/** Set when the anonymous search quota, not the token bucket, is the blocker. */
+	reason?: 'searchQuota';
 }
 
 /**
@@ -30,6 +32,21 @@ const BUCKETS: Record<RateLimitTier, RefillingTokenBucket<string>> = {
  * Runs before session validation, which costs a database lookup per request.
  */
 const PRE_AUTH_BUCKET = new RefillingTokenBucket<string>(600, 1);
+
+/**
+ * Anonymous search is metered separately and on a much tighter budget than the
+ * general token bucket: the search page is the most expensive and most scraped
+ * route, so signed-out visitors get three searches per day and are then asked
+ * to sign in. Signed-in users keep the `authenticated` bucket above.
+ */
+export const ANONYMOUS_SEARCHES_PER_DAY = 5;
+const DAY_SECONDS = 24 * 60 * 60;
+const SEARCH_PAGE_PATH = '/search';
+
+const anonymousSearchBucket = new ExpiringTokenBucket<string>(
+	ANONYMOUS_SEARCHES_PER_DAY,
+	DAY_SECONDS
+);
 
 interface CostProfile {
 	read: number;
@@ -97,7 +114,7 @@ export function isJsonScrape(event: RequestEvent): boolean {
 	return event.isDataRequest && !isBrowserDataFetch(event);
 }
 
-function clientKey(event: RequestEvent): string {
+function clientKey(event: Pick<RequestEvent, 'request' | 'getClientAddress'>): string {
 	const ip = getClientIP(event.request);
 	if (ip !== null) {
 		return ip;
@@ -160,6 +177,13 @@ export function checkPreAuthRateLimit(event: RequestEvent): Omit<RateLimitResult
  */
 export function checkRateLimit(event: RequestEvent): RateLimitResult {
 	const user = event.locals.user;
+	const searchQuota = consumeAnonymousSearch(event);
+	if (searchQuota !== null && !searchQuota.allowed) {
+		// Report the quota rather than the general bucket: it is the tighter of
+		// the two limits and the one the caller can act on.
+		return { ...searchQuota, tier: 'anonymous', reason: 'searchQuota' };
+	}
+
 	const tier: RateLimitTier =
 		user !== null ? 'authenticated' : isJsonScrape(event) ? 'jsonScraper' : 'anonymous';
 
@@ -178,6 +202,67 @@ export function isBlockedDataRequest(event: RequestEvent): boolean {
 		return false;
 	}
 	return isJsonScrape(event) && isNoindexPath(event.url.pathname);
+}
+
+/**
+ * The rendered results route, `/search/<term>`. The bare `/search` route only
+ * 303s to it, so charging that too would bill one search twice.
+ */
+function isSearchResultsPath(pathname: string): boolean {
+	return pathname.startsWith(`${SEARCH_PAGE_PATH}/`);
+}
+
+/**
+ * Charge a signed-out visit to a search page against the daily quota.
+ *
+ * Both the rendered page and the `__data.json` twin are charged, because the
+ * site's own search box navigates client-side and would otherwise never touch
+ * the quota. Crawlers calling `__data.json` directly never get this far:
+ * `isBlockedDataRequest` 404s them first, so one charge means one search.
+ */
+function consumeAnonymousSearch(event: RequestEvent): Omit<RateLimitResult, 'tier'> | null {
+	if (event.locals.user !== null || !isSearchResultsPath(event.url.pathname)) {
+		return null;
+	}
+	const key = `ip:${clientKey(event)}`;
+	const allowed = anonymousSearchBucket.consume(key, 1);
+	return {
+		allowed,
+		limit: anonymousSearchBucket.max,
+		remaining: anonymousSearchBucket.getRemaining(key),
+		retryAfterSeconds: allowed ? 0 : DAY_SECONDS
+	};
+}
+
+/**
+ * What is left of the anonymous daily search quota, for the page to warn with.
+ * `null` for signed-in users, who are not on this quota.
+ */
+export function getAnonymousSearchQuota(
+	event: Pick<RequestEvent, 'locals' | 'request' | 'getClientAddress'>
+): { remaining: number; limit: number } | null {
+	if (event.locals.user !== null) {
+		return null;
+	}
+	return {
+		remaining: anonymousSearchBucket.getRemaining(`ip:${clientKey(event)}`),
+		limit: anonymousSearchBucket.max
+	};
+}
+
+/**
+ * Signed-out visitors who exhausted their daily search quota are sent to the
+ * login page rather than shown a 429: the quota is a sign-up prompt, not a
+ * punishment, and `redirectTo` brings them back to the results they wanted.
+ * SvelteKit turns a hook redirect into a JSON redirect for `__data.json`
+ * requests, so client-side navigations follow it too.
+ */
+export function challengeAnonymousSearchQuota(event: RequestEvent, result: RateLimitResult): void {
+	if (result.allowed || result.reason !== 'searchQuota') {
+		return;
+	}
+	const redirectTo = encodeURIComponent(event.url.pathname + event.url.search);
+	redirect(303, `/auth/login?redirectTo=${redirectTo}`);
 }
 
 export function rateLimitResponse(
@@ -213,5 +298,6 @@ const sweepTimer = setInterval(() => {
 		bucket.sweep();
 	}
 	PRE_AUTH_BUCKET.sweep();
+	anonymousSearchBucket.sweep();
 }, 60_000);
 sweepTimer.unref?.();

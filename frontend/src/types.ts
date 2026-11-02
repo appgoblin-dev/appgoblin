@@ -93,8 +93,15 @@ export interface CompanyApps {
 export interface SearchResponse {
 	appGroupByStore: AppGroupByStore;
 	companiesResults: CompaniesSearchEntries[];
+	/** Signed-out visitors only: what is left of the free daily search quota. */
+	searchQuota?: AnonymousSearchQuota | null;
 	status?: number;
 	error?: string;
+}
+
+export interface AnonymousSearchQuota {
+	remaining: number;
+	limit: number;
 }
 
 export interface PlaystoreSearchResponse {

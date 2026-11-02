@@ -9,6 +9,7 @@ import {
 	deleteSessionTokenCookie
 } from '#lib/server/auth/session.js';
 import {
+	challengeAnonymousSearchQuota,
 	checkPreAuthRateLimit,
 	checkRateLimit,
 	isBlockedDataRequest,
@@ -61,6 +62,9 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 
 	const result = checkRateLimit(event);
 	if (!result.allowed) {
+		// Throws a redirect to the login page when the anonymous search quota is
+		// exhausted; every other limit still answers with a 429.
+		challengeAnonymousSearchQuota(event, result);
 		return rateLimitResponse(event, result);
 	}
 

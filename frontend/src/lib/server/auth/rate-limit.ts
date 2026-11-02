@@ -159,7 +159,11 @@ export class ExpiringTokenBucket<_Key> {
 			return true;
 		}
 		if (now - bucket.createdAt >= this.expiresInSeconds * 1000) {
+			// Start a fresh window. Leaving `createdAt` stale would keep the bucket
+			// permanently "expired", so every later request would refill it and the
+			// limit would never apply again.
 			bucket.count = this.max;
+			bucket.createdAt = now;
 		}
 		if (bucket.count < cost) {
 			return false;
@@ -171,6 +175,20 @@ export class ExpiringTokenBucket<_Key> {
 
 	public reset(key: _Key): void {
 		this.storage.delete(key);
+	}
+
+	/**
+	 * Drop buckets whose window has expired. An expired bucket behaves exactly
+	 * like a missing one, so this is safe, and it keeps the map from growing
+	 * without bound when keys are unbounded (e.g. client IPs).
+	 */
+	public sweep(): void {
+		const now = Date.now();
+		for (const [key, bucket] of this.storage) {
+			if (now - bucket.createdAt >= this.expiresInSeconds * 1000) {
+				this.storage.delete(key);
+			}
+		}
 	}
 }
 

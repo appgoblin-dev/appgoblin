@@ -12,6 +12,8 @@
 
 	let { data }: Props = $props();
 	const searchTerm = $derived(page.params.term || '');
+	const searchQuota = $derived(data.searchQuota ?? null);
+	const isOnLastSearch = $derived(searchQuota !== null && searchQuota.remaining <= 1);
 
 	// Computed values
 	const appleAppCount = $derived(
@@ -59,6 +61,34 @@
 			<span class="font-medium">Companies & Domains</span>. Only tabs with results are shown.
 		</p>
 	</div>
+
+	{#if isOnLastSearch}
+		<div class="preset-filled-surface-100-900 p-4 flex flex-col md:flex-row md:items-center gap-3">
+			<p class="text-sm flex-1">
+				{#if searchQuota?.remaining === 0}
+					That was your last free search for today.
+				{:else}
+					You have <span class="font-medium">{searchQuota?.remaining}</span> free
+					{searchQuota?.remaining === 1 ? 'search' : 'searches'} left today.
+				{/if}
+				Create a free account to search without limits.
+			</p>
+			<div class="flex gap-2 shrink-0">
+				<a
+					class="btn preset-filled text-sm"
+					href="/auth/signup?redirectTo={encodeURIComponent(page.url.pathname + page.url.search)}"
+				>
+					Create Free Account
+				</a>
+				<a
+					class="btn preset-tonal text-sm"
+					href="/auth/login?redirectTo={encodeURIComponent(page.url.pathname + page.url.search)}"
+				>
+					Sign In
+				</a>
+			</div>
+		</div>
+	{/if}
 
 	<!-- Three flat tabs: iOS | Android | Companies -->
 	{#if hasAnyError}
