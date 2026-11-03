@@ -168,6 +168,11 @@
 											target="_blank"
 											rel="noopener noreferrer"
 											class="btn preset-filled-primary-500 p-3 text-sm"
+											data-umami-event="data-export-download"
+											data-umami-event-company={data.companyName}
+											data-umami-event-type={row.file_key}
+											data-umami-event-platform={metadata.platform}
+											data-umami-event-userid={data.userId}
 										>
 											Download
 										</a>
