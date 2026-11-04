@@ -1,6 +1,6 @@
 # AppGoblin Mobile App & Ads Analysis
 
-[AppGoblin is a mobile app and ad intelligence platform offering free app intelligence, ASO tools, and paid reports on ad industry and SDK usage. It focuses on technical app analysis — SDKs, API calls, and data security.](https://appgoblin.info).  This repo is the frontend and backend of [AppGoblin](https://appgoblin.info) website itself. The data is crawled by [appgoblin-dev/adscrawler](https://github.com/appgoblin-dev/adscrawler).
+[AppGoblin is a mobile app and ad intelligence platform offering free app intelligence, ASO tools, and paid reports on ad industry and SDK usage. It focuses on technical app analysis — SDKs, API calls, and data security.](https://appgoblin.info). This repo is the frontend and backend of [AppGoblin](https://appgoblin.info) website itself. The data is crawled by [appgoblin-dev/adscrawler](https://github.com/appgoblin-dev/adscrawler).
 
 [<img src="/frontend/static/appgoblin_screenshot.png" width="500"/>](/frontend/static/appgoblin_screenshot.png)
 
@@ -12,7 +12,6 @@
   - **Rankings** — Daily tracking of top apps from Google Play and Apple App Store
   - **New Apps Discovery** — Surfaces newly released apps often buried by official store algorithms
   - **Growth Metrics** — Daily install estimates, app ratings, ad revenue and IAP revenue estimates
-
 
 - **[SDK Analysis](https://appgoblin.info/sdks)** — Detailed breakdown of SDKs found in decompiled 200k+ Android and iOS apps, including advertising, analytics, and open-source libraries
 
@@ -44,7 +43,6 @@
 - **Competitor researchers** tracking SDK adoption, quarterly app churn, and growth trends
 - **Privacy advocates** identifying hidden trackers and ad-tech domains in popular apps
 
-
 ### Project Structure
 
 1.  Python Litestar backend API found in `backend/`
@@ -72,18 +70,21 @@ AppGoblin exposes a public REST API and an MCP (Model Context Protocol) server f
 
 AI agents and crawlers can discover the server at these well-known paths:
 
-| Path | Purpose |
-|---|---|
-| `/.well-known/mcp.json` | MCP manifest (short alias) |
+| Path                                | Purpose                     |
+| ----------------------------------- | --------------------------- |
+| `/.well-known/mcp.json`             | MCP manifest (short alias)  |
 | `/.well-known/mcp/server-card.json` | Full server card (SEP-1649) |
 
 Headers advertised in `robots.txt`:
+
 ```
 Mcp-Server-Card: https://appgoblin.info/.well-known/mcp/server-card.json
 Mcp-Manifest: https://appgoblin.info/.well-known/mcp.json
 ```
 
+### Machine payments (MPP and x402)
 
+Selected public pages and searches accept micro payments through both MPP and x402. MPP supports
 
 
 ### Setup

@@ -46,9 +46,7 @@ const preAuthRateLimitHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-// Machine clients get a 402 challenge instead of the login screen on selected
-// non-personal pages. Runs before the rate limiter so a paying client is never
-// turned away with a 429 first.
+// Offer payment before auth and rate limiting on eligible pages.
 const machinePagePaymentHandle: Handle = async ({ event, resolve }) => {
 	if (
 		event.locals.user !== null ||
@@ -64,7 +62,6 @@ const machinePagePaymentHandle: Handle = async ({ event, resolve }) => {
 	});
 	if (paymentResponse !== null) return paymentResponse;
 
-	// Not configured: fall through so the page still answers 401.
 	return resolve(event);
 };
 
@@ -75,9 +72,7 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	// A paid machine request is already metered by its payment. Rate limiting it
-	// again would answer 429 after the client was charged, without a receipt or
-	// the content it bought.
+	// Don't rate-limit a request after charging it.
 	if (event.locals.machinePaid) {
 		return resolve(event);
 	}
@@ -98,14 +93,15 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 
 	const result = checkRateLimit(event);
 	if (!result.allowed) {
-		// Paid machine requests can continue only after an MPP payment. Human
-		// browsers keep the existing sign-in challenge below.
 		if (
 			result.reason === 'searchQuota' &&
 			isSearchResultsPath(event.url.pathname) &&
 			!event.request.headers.has('cookie')
 		) {
-			const paymentResponse = await machineSearchPayment(event.request, () => resolve(event));
+			const paymentResponse = await machineSearchPayment(event.request, () => {
+				event.locals.machinePaid = true;
+				return resolve(event);
+			});
 			if (paymentResponse !== null) return paymentResponse;
 		}
 

@@ -72,8 +72,8 @@
 					You have <span class="font-medium">{searchQuota?.remaining}</span> free
 					{searchQuota?.remaining === 1 ? 'search' : 'searches'} left today.
 				{/if}
-				Create a Free user account to search without limits. Agentic clients may use x402 or the Machine
-				Payment Protocol.
+				Create a Free user account to search without limits. Agentic clients may use x402 or MPP instead
+				of signing in.
 			</p>
 			<div class="flex gap-2 shrink-0">
 				<a

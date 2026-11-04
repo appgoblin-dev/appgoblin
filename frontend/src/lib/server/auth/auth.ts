@@ -45,11 +45,7 @@ export function requireAuthOr401(event: RequestEvent) {
 	};
 }
 
-/**
- * Require either a signed-in user or a single-page machine payment (x402 /
- * Machine Payments Protocol). Use only for pages whose data is not scoped to
- * an individual account: `user` is `null` for a paid machine request.
- */
+/** Require a user session or a payment for non-account-scoped data. */
 export function requireAuthOrMachinePayment(event: RequestEvent) {
 	if (event.locals.session !== null && event.locals.user !== null) {
 		return { session: event.locals.session, user: event.locals.user };
