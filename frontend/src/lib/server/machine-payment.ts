@@ -36,7 +36,10 @@ const mppx = machinePayments
 interface MachinePageOffer {
 	amount: string;
 	description: string;
+	resource: string;
 }
+
+const DEFAULT_MACHINE_PAYMENT_AMOUNT = '0.10';
 
 /**
  * Pages that sit behind the free account login but hold no account-scoped
@@ -48,65 +51,134 @@ interface MachinePageOffer {
 const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 	{
 		pattern: /^\/apps\/[^/]+\/keywords\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app keywords page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app keywords page',
+			resource: '/apps/{id}/keywords'
+		}
 	},
 	{
 		pattern: /^\/apps\/[^/]+\/keywords\/discovery\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app keyword discovery page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app keyword discovery page',
+			resource: '/apps/{id}/keywords/discovery'
+		}
 	},
 	{
 		pattern: /^\/apps\/[^/]+\/keywords\/ranking\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app keyword ranking page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app keyword ranking page',
+			resource: '/apps/{id}/keywords/ranking'
+		}
 	},
 	{
 		pattern: /^\/apps\/[^/]+\/keywords\/compare\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app keyword compare page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app keyword compare page',
+			resource: '/apps/{id}/keywords/compare'
+		}
 	},
 	{
 		pattern: /^\/apps\/[^/]+\/sdks\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app SDK page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app SDK page',
+			resource: '/apps/{id}/sdks'
+		}
 	},
 	{
 		pattern: /^\/apps\/[^/]+\/sdks\/permissions\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app permissions page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app permissions page',
+			resource: '/apps/{id}/sdks/permissions'
+		}
 	},
 	{
 		pattern: /^\/apps\/[^/]+\/sdks\/queries\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app queries page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app queries page',
+			resource: '/apps/{id}/sdks/queries'
+		}
 	},
 	{
 		pattern: /^\/apps\/[^/]+\/sdks\/skadnetwork\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app SKAdNetwork page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app SKAdNetwork page',
+			resource: '/apps/{id}/sdks/skadnetwork'
+		}
 	},
 	{
 		pattern: /^\/apps\/[^/]+\/sdks\/unknowns\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app unmapped SDK page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app unmapped SDK page',
+			resource: '/apps/{id}/sdks/unknowns'
+		}
 	},
 	{
 		pattern: /^\/apps\/comparison\/[^/]+\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app comparison page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app comparison page',
+			resource: '/apps/comparison/{id}'
+		}
 	},
 	{
 		pattern: /^\/apps\/comparison\/[^/]+\/[^/]+\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app comparison page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app comparison page',
+			resource: '/apps/comparison/{id1}/{id2}'
+		}
 	},
 	{
 		pattern: /^\/sdks\/[^/]+\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin SDK pattern page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin SDK pattern page',
+			resource: '/sdks/{pattern}'
+		}
 	},
 	{
 		pattern: /^\/sdks\/mapped\/[^/]+\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin SDK details page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin SDK details page',
+			resource: '/sdks/mapped/{sdkSlug}'
+		}
 	},
 	{
 		pattern: /^\/developers\/[^/]+\/sdks\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin developer SDK page' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin developer SDK page',
+			resource: '/developers/{developer}/sdks'
+		}
 	},
 	{
 		pattern: /^\/reports\/app-ecosystem-report-Q2-2026\/download\/?$/,
-		offer: { amount: '0.50', description: 'AppGoblin app ecosystem report download' }
+		offer: {
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin app ecosystem report download',
+			resource: '/reports/app-ecosystem-report-Q2-2026/download'
+		}
 	}
 ];
+
+/** URL templates for the dynamic search endpoint and one-off page offers. */
+export function getMachinePaymentResources(origin: string): string[] {
+	const baseUrl = new URL(origin);
+	baseUrl.protocol = 'https:';
+	return ['/search/{term}', ...PAGE_OFFERS.map(({ offer }) => offer.resource)].map(
+		(resource) => `${baseUrl.origin}${resource}`
+	);
+}
 
 /** Strips SvelteKit's `__data.json` suffix so data requests match the page path. */
 function pagePath(pathname: string): string {
@@ -152,7 +224,11 @@ export async function machineSearchPayment(
 	return chargePage(
 		request,
 		resolve,
-		{ amount: '0.50', description: 'AppGoblin search page' },
+		{
+			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+			description: 'AppGoblin search page',
+			resource: '/search/{term}'
+		},
 		new URL(request.url).pathname
 	);
 }
