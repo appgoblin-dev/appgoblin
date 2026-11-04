@@ -45,8 +45,11 @@
 		"vite": "^8.2.1"
 	},
 	"dependencies": {
+		"@coinbase/x402": "^2.1.0",
 		"@tanstack/svelte-store": "^0.12.1",
 		"@tanstack/svelte-table": "^9.1.2",
+		"@x402/core": "^2.29.0",
+		"@x402/evm": "^2.29.0",
 		"altcha": "^3.2.1",
 		"altcha-lib": "^2.3.2",
 		"argon": "^2.0.21",
@@ -62,8 +65,9 @@
 		"viem": "^2.57.14"
 	},
 	"allowScripts": {
-		"argon2@0.45.1": true,
-		"sharp@0.34.5": true
+		"argon2": true,
+		"sharp@0.34.5": true,
+		"@coinbase/x402": true
 	},
 	"imports": {
 		"#lib": "./src/lib/index.js",
