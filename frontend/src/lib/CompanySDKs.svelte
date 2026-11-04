@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { CompanySDKsDict } from '../types';
+	import { page } from '$app/state';
 	import WhiteCard from './WhiteCard.svelte';
 	import { formatNumber } from './utils/formatNumber';
 	import Crown from '@lucide/svelte/icons/crown';
@@ -61,6 +62,12 @@
 										type="submit"
 										disabled={!hasB2BSdkAccess}
 										class="btn preset-tonal-primary flex items-center gap-2 text-sm"
+										data-umami-event="paid-report-generate"
+										data-umami-event-source="company-sdks"
+										data-umami-event-report="company-sdk-all-versions"
+										data-umami-event-company={companyName}
+										data-umami-event-sdk={patterns.sdk_slug}
+										data-umami-event-userid={page.data.user?.id}
 									>
 										<Mail size={14} /> All App Versions
 									</button>
@@ -73,6 +80,12 @@
 										type="submit"
 										disabled={!hasB2BSdkAccess}
 										class="btn preset-tonal-primary flex items-center gap-2 text-sm"
+										data-umami-event="paid-report-generate"
+										data-umami-event-source="company-sdks"
+										data-umami-event-report="company-sdk-latest-versions"
+										data-umami-event-company={companyName}
+										data-umami-event-sdk={patterns.sdk_slug}
+										data-umami-event-userid={page.data.user?.id}
 									>
 										<Mail size={14} /> Latest App Versions Only
 									</button>

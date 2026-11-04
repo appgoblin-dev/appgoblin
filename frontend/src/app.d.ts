@@ -6,6 +6,12 @@ declare global {
 		interface Locals {
 			user: User | null;
 			session: Session | null;
+			/**
+			 * Set when a signed-out machine client paid for this single request
+			 * via x402 / the Machine Payments Protocol. Page loads accept it in
+			 * place of a login for non account-scoped data.
+			 */
+			machinePaid: boolean;
 		}
 		// interface Error {}
 		// interface PageData {}

@@ -1,8 +1,8 @@
 import type { PageServerLoad } from './$types';
-import { requireAuthOr401 } from '#lib/server/auth/auth.js';
+import { requireAuthOrMachinePayment } from '#lib/server/auth/auth.js';
 
 export const load: PageServerLoad = async (event) => {
-	requireAuthOr401(event);
+	requireAuthOrMachinePayment(event);
 	const { myapp, myPackageInfo } = await event.parent();
 
 	return {

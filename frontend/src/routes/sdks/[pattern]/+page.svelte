@@ -87,6 +87,11 @@
 						type="submit"
 						disabled={!data.hasB2BSdkAccess || isExporting}
 						class="btn preset-tonal-primary flex items-center gap-2 text-sm"
+						data-umami-event="paid-report-generate"
+						data-umami-event-source="sdk-pattern"
+						data-umami-event-report="sdk-pattern-full"
+						data-umami-event-pattern={pattern}
+						data-umami-event-userid={page.data.user?.id}
 					>
 						{#if isExporting}<Loader2 size={16} class="animate-spin" />{:else}<Mail
 								size={16}

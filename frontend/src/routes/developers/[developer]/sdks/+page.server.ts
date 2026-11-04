@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { requireAuthOr401 } from '#lib/server/auth/auth.js';
+import { requireAuthOrMachinePayment } from '#lib/server/auth/auth.js';
 import { getCachedData } from '../../../../hooks.server';
 
 export const ssr: boolean = true;
@@ -20,7 +20,7 @@ function checkStatus(resp: Response, name: string) {
 }
 
 export const load: PageServerLoad = async (event) => {
-	requireAuthOr401(event);
+	requireAuthOrMachinePayment(event);
 	const { parent, fetch } = event;
 	const { devs } = await parent();
 

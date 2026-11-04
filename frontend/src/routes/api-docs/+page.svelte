@@ -68,6 +68,14 @@
 			<code class="px-1">/api/v1/apps/{'{store_id}'}/sdks/history</code>. These endpoints require a
 			B2B SDK or B2B Premium API token.
 		</p>
+		<div class="mt-3 flex flex-wrap items-center gap-3">
+			<a href="/pricing" class="btn preset-filled-primary-500 p-2 text-sm font-semibold">
+				See Paid API Plans & Pricing
+			</a>
+			<a href="/docs/data-exports" class="btn preset-outlined-surface-100-900 p-2 text-sm">
+				Paid Datasets Guide
+			</a>
+		</div>
 	</div>
 
 	<iframe

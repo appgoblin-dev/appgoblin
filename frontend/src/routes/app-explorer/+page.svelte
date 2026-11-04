@@ -8,6 +8,7 @@
 	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 	import { countryCodeToEmoji } from '#lib/utils/countryCodeToEmoji.js';
 	import { applyAction, enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import {
 		Combobox,
 		Portal,
@@ -863,6 +864,10 @@
 						formaction="?/emailCsv"
 						class="btn preset-tonal-primary w-full flex items-center justify-center gap-2 text-sm"
 						disabled={!hasPaidAccess || isLoading || isExporting}
+						data-umami-event="paid-report-generate"
+						data-umami-event-source="app-explorer"
+						data-umami-event-report="app-explorer-csv"
+						data-umami-event-userid={page.data.user?.id}
 					>
 						{#if isExporting}
 							<Loader2 size={16} class="animate-spin" />

@@ -5,13 +5,14 @@
 	import CompaniesSearchTable from '#lib/CompaniesSearchTable.svelte';
 	import StoreIcon from '#lib/StoreIcon.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { sanitizeSearchTerm } from '#lib/search.js';
 
 	interface Props {
 		data: SearchResponse;
 	}
 
 	let { data }: Props = $props();
-	const searchTerm = $derived(page.params.term || '');
+	const searchTerm = $derived(sanitizeSearchTerm(page.params.term || ''));
 	const searchQuota = $derived(data.searchQuota ?? null);
 	const isOnLastSearch = $derived(searchQuota !== null && searchQuota.remaining <= 1);
 

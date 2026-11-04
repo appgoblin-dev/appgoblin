@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import Mail from '@lucide/svelte/icons/mail';
 	import Loader2 from '@lucide/svelte/icons/loader-2';
 	import SDKOverviewTable from '#lib/SDKOverviewTable.svelte';
@@ -91,6 +92,11 @@
 									type="submit"
 									disabled={!data.hasB2BSdkAccess || isExporting}
 									class="btn preset-tonal-primary flex items-center gap-2 text-sm"
+									data-umami-event="paid-report-generate"
+									data-umami-event-source="sdk-mapped"
+									data-umami-event-report="sdk-mapped-all-versions"
+									data-umami-event-sdk={data.sdk_slug ?? ''}
+									data-umami-event-userid={page.data.user?.id}
 								>
 									{#if isExporting}<Loader2 size={16} class="animate-spin" />{:else}<Mail
 											size={16}
@@ -116,6 +122,11 @@
 									type="submit"
 									disabled={!data.hasB2BSdkAccess || isExporting}
 									class="btn preset-tonal-primary text-sm"
+									data-umami-event="paid-report-generate"
+									data-umami-event-source="sdk-mapped"
+									data-umami-event-report="sdk-mapped-latest-versions"
+									data-umami-event-sdk={data.sdk_slug ?? ''}
+									data-umami-event-userid={page.data.user?.id}
 								>
 									{#if isExporting}<Loader2 size={16} class="animate-spin" />{:else}<Mail
 											size={16}
