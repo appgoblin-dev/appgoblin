@@ -117,6 +117,19 @@ export function isJsonScrape(event: RequestEvent): boolean {
 	return event.isDataRequest && !isBrowserDataFetch(event);
 }
 
+/**
+ * A non-browser client: an agent, crawler or CLI rather than a human's page
+ * load or the SPA's own data fetch. Only these are offered a machine payment
+ * challenge; browsers keep the sign-in prompt.
+ */
+export function isMachineClient(event: RequestEvent): boolean {
+	const accept = event.request.headers.get('accept');
+	if (accept !== null && accept.includes('text/html')) {
+		return false;
+	}
+	return !isBrowserDataFetch(event);
+}
+
 function clientKey(event: Pick<RequestEvent, 'request' | 'getClientAddress'>): string {
 	const ip = getClientIP(event.request);
 	if (ip !== null) {
@@ -201,7 +214,7 @@ export function checkRateLimit(event: RequestEvent): RateLimitResult {
  * an `X-Robots-Tag` header instead.
  */
 export function isBlockedDataRequest(event: RequestEvent): boolean {
-	if (event.locals.user !== null) {
+	if (event.locals.user !== null || event.locals.machinePaid) {
 		return false;
 	}
 	return isJsonScrape(event) && isNoindexPath(event.url.pathname);

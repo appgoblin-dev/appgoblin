@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import CompaniesOverviewTable from '#lib/CompaniesOverviewTable.svelte';
 	import CompaniesTableGrid from '#lib/CompaniesTableGrid.svelte';
+	import PaidDataUpsell from '#lib/PaidDataUpsell.svelte';
 
 	let { data } = $props();
 
@@ -33,6 +34,7 @@
 					showLimitNote={true}
 				/>
 			{/if}
+			<PaidDataUpsell class="mt-4" />
 		{/snippet}
 	</CompaniesTableGrid>
 {:else}

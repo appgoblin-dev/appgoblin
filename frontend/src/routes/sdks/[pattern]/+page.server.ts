@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { createApiClient } from '#lib/server/api.js';
-import { requireAuthOr401 } from '#lib/server/auth/auth.js';
+import { requireAuthOr401, requireAuthOrMachinePayment } from '#lib/server/auth/auth.js';
 import { userHasTierAccess } from '#lib/server/subscription.js';
 
 export const ssr: boolean = true;
@@ -9,9 +9,9 @@ export const csr: boolean = true;
 export const load: PageServerLoad = async (event) => {
 	const { params, fetch } = event;
 	const value_pattern = params.pattern;
-	const { user } = requireAuthOr401(event);
+	const { user } = requireAuthOrMachinePayment(event);
 	const api = createApiClient(fetch);
-	const hasB2BSdkAccess = await userHasTierAccess(user.id, 'b2b_sdk', 'b2b_premium');
+	const hasB2BSdkAccess = user ? await userHasTierAccess(user.id, 'b2b_sdk', 'b2b_premium') : false;
 
 	const matchedApps = api.get(`/sdks/${value_pattern}`, 'Sdks Pattern');
 	const matchedCompanies = api.get(`/sdks/${value_pattern}/companies`, 'Sdks Pattern Companies');

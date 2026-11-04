@@ -34,8 +34,9 @@ export const load: LayoutServerLoad = async ({ fetch, params, parent, locals }) 
 	};
 
 	let myPackageInfo: Record<string, any> = {};
-	// Only fetch SDK package info for logged-in users to avoid wasted backend queries
-	if (locals.user && myapp.sdk_successful_last_crawled) {
+	// Only fetch SDK package info for logged-in or paid machine requests to avoid
+	// wasted backend queries
+	if ((locals.user || locals.machinePaid) && myapp.sdk_successful_last_crawled) {
 		myPackageInfo = await api.get(`/apps/${id}/sdks`, 'App Package Info');
 	}
 

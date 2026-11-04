@@ -1,11 +1,11 @@
 import type { PageServerLoad } from './$types';
 import { createApiClient } from '#lib/server/api.js';
 import { db } from '#lib/server/auth/db.js';
-import { requireAuthOr401 } from '#lib/server/auth/auth.js';
+import { requireAuthOrMachinePayment } from '#lib/server/auth/auth.js';
 
 export const load: PageServerLoad = async (event) => {
 	const { fetch, params, parent } = event;
-	const { user } = requireAuthOr401(event);
+	const { user } = requireAuthOrMachinePayment(event);
 	const api = createApiClient(fetch);
 	const id = params.id;
 	// Load parent data first because it is cached
@@ -17,17 +17,19 @@ export const load: PageServerLoad = async (event) => {
 		myKeywords = await api.get(`/apps/${id}/keywords`, 'App Keywords');
 	}
 
-	const userTrackedKeywordsForApp = await db.query<{
-		id: number;
-		keyword_text: string;
-		created_at: Date;
-	}>(
-		`SELECT id, keyword_text, created_at
+	const userTrackedKeywordsForApp = user
+		? await db.query<{
+				id: number;
+				keyword_text: string;
+				created_at: Date;
+			}>(
+				`SELECT id, keyword_text, created_at
 		 FROM public.user_tracked_keywords
 		 WHERE user_id = $1 AND store_id = $2
 		 ORDER BY created_at DESC`,
-		[user.id, id]
-	);
+				[user.id, id]
+			)
+		: [];
 
 	return {
 		// Meta Tags

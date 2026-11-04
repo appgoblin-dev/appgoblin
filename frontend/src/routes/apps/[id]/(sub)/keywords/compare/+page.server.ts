@@ -1,11 +1,11 @@
 import type { PageServerLoad } from './$types';
 import { createApiClient } from '#lib/server/api.js';
 import { db } from '#lib/server/auth/db.js';
-import { requireAuthOr401 } from '#lib/server/auth/auth.js';
+import { requireAuthOrMachinePayment } from '#lib/server/auth/auth.js';
 
 export const load: PageServerLoad = async (event) => {
 	const { fetch, url, parent } = event;
-	const { user } = requireAuthOr401(event);
+	const { user } = requireAuthOrMachinePayment(event);
 	const api = createApiClient(fetch);
 	const { myapp } = await parent();
 	const storeId = myapp.store_id as string;
@@ -37,12 +37,14 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	// Fetch user's personally tracked keywords for this app
-	const rows = await db.query<{ keyword_text: string }>(
-		`SELECT keyword_text FROM public.user_tracked_keywords
+	const rows = user
+		? await db.query<{ keyword_text: string }>(
+				`SELECT keyword_text FROM public.user_tracked_keywords
 		 WHERE user_id = $1 AND store_id = $2
 		 ORDER BY created_at DESC`,
-		[user.id, storeId]
-	);
+				[user.id, storeId]
+			)
+		: [];
 	const trackedKeywords = rows.map((r) => r.keyword_text);
 
 	let keywordHistory: any[] = [];

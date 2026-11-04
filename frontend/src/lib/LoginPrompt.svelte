@@ -86,6 +86,15 @@
 	};
 
 	const context = $derived(contextMap[contextKey]);
+
+	// Pages that also answer a 402 to paying machine clients, matching the
+	// offers in `#lib/server/machine-payment.ts`. Account-scoped pages such as
+	// `/keywords/tracked` and the paid `/sdks/history` are excluded.
+	const machinePayable = $derived(
+		/^\/apps\/(comparison\/[^/]+(\/[^/]+)?|[^/]+\/(keywords|sdks)(\/(discovery|ranking|compare|permissions|queries|skadnetwork|unknowns))?)\/?$/.test(
+			page.url.pathname
+		)
+	);
 </script>
 
 <svelte:head>
@@ -129,6 +138,11 @@
 			<p class="mt-3 flex items-center justify-center gap-1">
 				<span>It is free to create an account. No credit card required.</span>
 			</p>
+			{#if machinePayable}
+				<p class="mt-2 text-xs">
+					Agentic clients may use x402 or the Machine Payment Protocol instead of signing in.
+				</p>
+			{/if}
 		</div>
 	</div>
 

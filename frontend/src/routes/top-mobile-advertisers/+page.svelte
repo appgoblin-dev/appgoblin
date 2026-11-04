@@ -46,11 +46,22 @@
 			These are top mobile ad buyers (advertisers) from this month. The top advertisers and their
 			creatives are based on actual ads seen in publishing apps in the past month.
 		</p>
-		<div class="mt-4">
+		<div class="mt-4 flex flex-wrap items-center gap-3">
 			<a href="/ad-creatives" class="btn variant-filled-secondary">
 				View Ad Creative Clusters Dashboard 📈
 			</a>
+			<a href="/pricing" class="btn preset-filled-primary-500">
+				Full Advertiser Reports & API Pricing
+			</a>
 		</div>
+		<p class="mt-3 text-sm">
+			Full monthly advertiser reports, bulk creative datasets, and API access are included with
+			<a href="/pricing" class="underline hover:text-primary-600-400">paid B2B plans</a>. See the
+			<a href="/docs/data-exports" class="underline hover:text-primary-600-400"
+				>paid datasets guide</a
+			>
+			for CSV column definitions.
+		</p>
 	</div>
 
 	<WhiteCard>

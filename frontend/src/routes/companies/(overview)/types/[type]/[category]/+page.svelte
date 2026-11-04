@@ -4,6 +4,7 @@
 	import CompaniesTableGrid from '#lib/CompaniesTableGrid.svelte';
 	import WhiteCard from '#lib/WhiteCard.svelte';
 	import CompanyCountryPie from '#lib/CompanyCountryPie.svelte';
+	import PaidDataUpsell from '#lib/PaidDataUpsell.svelte';
 
 	let { data } = $props();
 
@@ -41,6 +42,7 @@
 			{#if data.companiesOverview && data.companiesOverview.companies_overview.length > 0}
 				<CompaniesOverviewTable data={data.companiesOverview.companies_overview} />
 			{/if}
+			<PaidDataUpsell class="mt-4" />
 		{/snippet}
 		{#snippet countryChart()}
 			{#if hasCountryStats}

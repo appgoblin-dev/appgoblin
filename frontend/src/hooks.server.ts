@@ -16,9 +16,14 @@ import {
 	isNoindexPath,
 	isSearchResultsPath,
 	isStaticAssetPath,
+	isMachineClient,
 	rateLimitResponse
 } from '#lib/server/request-rate-limit.js';
-import { machineSearchPayment } from '#lib/server/machine-payment.js';
+import {
+	machinePagePayment,
+	machineSearchPayment,
+	isMachinePayablePath
+} from '#lib/server/machine-payment.js';
 
 // Static assets, the live-session probe (the header calls /auth/me on every SPA
 // navigation, so a 429 would blank it) and the health check.
@@ -41,6 +46,28 @@ const preAuthRateLimitHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
+// Machine clients get a 402 challenge instead of the login screen on selected
+// non-personal pages. Runs before the rate limiter so a paying client is never
+// turned away with a 429 first.
+const machinePagePaymentHandle: Handle = async ({ event, resolve }) => {
+	if (
+		event.locals.user !== null ||
+		!isMachinePayablePath(event.url.pathname) ||
+		!isMachineClient(event)
+	) {
+		return resolve(event);
+	}
+
+	const paymentResponse = await machinePagePayment(event.request, () => {
+		event.locals.machinePaid = true;
+		return resolve(event);
+	});
+	if (paymentResponse !== null) return paymentResponse;
+
+	// Not configured: fall through so the page still answers 401.
+	return resolve(event);
+};
+
 // Runs after authHandle so signed-in users are keyed by user id, and so clients
 // that call `__data.json` directly are charged to the scraper bucket.
 const rateLimitHandle: Handle = async ({ event, resolve }) => {
@@ -48,9 +75,16 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
+	// A paid machine request is already metered by its payment. Rate limiting it
+	// again would answer 429 after the client was charged, without a receipt or
+	// the content it bought.
+	if (event.locals.machinePaid) {
+		return resolve(event);
+	}
+
 	// A direct `__data.json` call skips the page's `noindex` meta tag and the
 	// analytics script. Real navigations still get the data, with an
-	// `X-Robots-Tag` set below.
+	// `X-Robots-Tag` set below. Paid machine requests are allowed through.
 	if (isBlockedDataRequest(event)) {
 		return new Response(JSON.stringify({ message: 'Not found' }), {
 			status: 404,
@@ -86,6 +120,7 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 
 // Authentication handle
 const authHandle: Handle = async ({ event, resolve }) => {
+	event.locals.machinePaid = false;
 	const token = event.cookies.get('session') ?? null;
 	if (token === null) {
 		event.locals.user = null;
@@ -191,16 +226,22 @@ const cacheAndRoutingHandle: Handle = async ({ event, resolve }) => {
 
 	const response = await resolve(event);
 
-	// --- Cache control for specific paths ---
-	// Only cache when unauthenticated: layout data includes user, so cached HTML would show
+	// --- Cache control for specific paths ---	// Only cache when unauthenticated: layout data includes user, so cached HTML would show
 	// "logged out" on direct navigation even when the user has a valid session.
+	// A machine-paid response is also excluded: it is a single paid view and must
+	// never be replayed from a shared cache to unpaid visitors.
 	const cacheablePaths = ['/companies', '/about', '/apps', '/top-mobile-advertisers'];
 	const pathIsCacheable = cacheablePaths.some((path) => event.url.pathname.startsWith(path));
 	const isAuthenticated = event.locals.user !== null;
+	const isMachinePaid = event.locals.machinePaid;
 	const isStaticAssetRequest = route.startsWith('/_app') || route.startsWith('/favicon');
 
 	if (!isStaticAssetRequest) {
 		appendVaryHeader(response, 'Cookie');
+	}
+
+	if (isMachinePaid) {
+		response.headers.set('cache-control', 'private, no-store');
 	}
 
 	// The `__data.json` twin of a noindex page has none of the HTML page's
@@ -209,7 +250,7 @@ const cacheAndRoutingHandle: Handle = async ({ event, resolve }) => {
 		response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 	}
 
-	if (pathIsCacheable && !isAuthenticated) {
+	if (pathIsCacheable && !isAuthenticated && !isMachinePaid) {
 		response.headers.set('cache-control', 'public, max-age=86400, stale-while-revalidate=3600');
 	}
 
@@ -230,6 +271,7 @@ const cacheAndRoutingHandle: Handle = async ({ event, resolve }) => {
 export const handle = sequence(
 	preAuthRateLimitHandle,
 	authHandle,
+	machinePagePaymentHandle,
 	rateLimitHandle,
 	cacheAndRoutingHandle
 );

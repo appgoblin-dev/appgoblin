@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
-import { requireAuth } from '#lib/server/auth/auth.js';
+import { requireAuthOrMachinePayment } from '#lib/server/auth/auth.js';
 
 export const GET: RequestHandler = async (event) => {
-	requireAuth(event);
+	requireAuthOrMachinePayment(event);
 
 	const csvResponse = await event.fetch(
 		'/reports/mobile-apps-growth-sdks-q2-2026/AppGoblin Mobile Ecosystem 2026 Q2.csv'
