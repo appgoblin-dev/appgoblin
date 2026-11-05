@@ -122,17 +122,18 @@ class TestResolveTier:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("isolated_guards")
 class TestRateLimiter:
-    def test_allows_within_limit(self):
-        limiter = _RateLimiter()
+    def test_allows_within_limit(self, redis_client):
+        limiter = _RateLimiter(redis_client)
         for _ in range(10):
             allowed, limit, remaining, retry = limiter.check("key1", 30)
             assert allowed is True
             assert limit == 30
         assert remaining == 20  # 30 - 10
 
-    def test_blocks_over_limit(self):
-        limiter = _RateLimiter()
+    def test_blocks_over_limit(self, redis_client):
+        limiter = _RateLimiter(redis_client)
         for _ in range(30):
             allowed, _, _, _ = limiter.check("key1", 30)
             assert allowed is True
@@ -143,8 +144,8 @@ class TestRateLimiter:
         assert remaining == 0
         assert retry > 0
 
-    def test_independent_keys(self):
-        limiter = _RateLimiter()
+    def test_independent_keys(self, redis_client):
+        limiter = _RateLimiter(redis_client)
         for _ in range(30):
             limiter.check("key1", 30)
 
@@ -153,25 +154,31 @@ class TestRateLimiter:
         assert allowed is True
         assert remaining == 29
 
-    def test_refills_over_time(self, monkeypatch):
-        limiter = _RateLimiter()
-        base_time = time.monotonic()
-        monkeypatch.setattr(time, "monotonic", lambda: base_time)
+    def test_refills_using_redis_time(self, redis_client, monkeypatch):
+        limiter = _RateLimiter(redis_client)
+        monkeypatch.setattr(time, "monotonic", lambda: 1)
+        assert limiter.check("key1", 60)[0] is True
+        for _ in range(59):
+            assert limiter.check("key1", 60)[0] is True
+        assert limiter.check("key1", 60)[0] is False
+        time.sleep(1.1)
+        assert limiter.check("key1", 60)[0] is True
 
-        # Exhaust tokens
-        for _ in range(30):
-            limiter.check("key1", 30)
+    def test_shared_between_clients(self, redis_client, redis_server):
+        import redis
 
-        # Advance time by 60 seconds (full refill)
-        monkeypatch.setattr(time, "monotonic", lambda: base_time + 60)
-        allowed, limit, remaining, _ = limiter.check("key1", 30)
-        assert allowed is True
-        assert limit == 30
-        # Bucket refilled to 30, we consumed 1, so remaining = 29
-        assert remaining == 29
+        other_client = redis.Redis(host="127.0.0.1", port=redis_server)
+        try:
+            first = _RateLimiter(redis_client)
+            second = _RateLimiter(other_client)
+            assert first.check("shared", 2)[0] is True
+            assert second.check("shared", 2)[0] is True
+            assert first.check("shared", 2)[0] is False
+        finally:
+            other_client.close()
 
-    def test_different_rate_limits(self):
-        limiter = _RateLimiter()
+    def test_different_rate_limits(self, redis_client):
+        limiter = _RateLimiter(redis_client)
         # 30/min key
         for _ in range(30):
             limiter.check("free_key", 30)
@@ -189,16 +196,17 @@ class TestRateLimiter:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("isolated_guards")
 class TestDailyQuotaTracker:
-    def test_counts_requests(self):
-        tracker = _DailyQuotaTracker()
+    def test_counts_requests(self, redis_client):
+        tracker = _DailyQuotaTracker(redis_client)
         for i in range(100):
             allowed, limit, remaining = tracker.check("key1", 1000)
             assert allowed is True
             assert remaining == 1000 - i - 1
 
-    def test_blocks_at_limit(self):
-        tracker = _DailyQuotaTracker()
+    def test_blocks_at_limit(self, redis_client):
+        tracker = _DailyQuotaTracker(redis_client)
         for _ in range(1000):
             allowed, _, _ = tracker.check("key1", 1000)
             assert allowed is True
@@ -207,8 +215,8 @@ class TestDailyQuotaTracker:
         assert allowed is False
         assert remaining == 0
 
-    def test_independent_keys(self):
-        tracker = _DailyQuotaTracker()
+    def test_independent_keys(self, redis_client):
+        tracker = _DailyQuotaTracker(redis_client)
         for _ in range(1000):
             tracker.check("key1", 1000)
 
@@ -217,24 +225,34 @@ class TestDailyQuotaTracker:
         assert allowed is True
         assert remaining == 999
 
-    def test_resets_at_midnight(self):
-        tracker = _DailyQuotaTracker()
+    def test_shared_between_clients(self, redis_client, redis_server):
+        import redis
 
-        # Force "today" to 2026-03-31
-        tracker._today_utc = lambda: "2026-03-31"
+        other_client = redis.Redis(host="127.0.0.1", port=redis_server)
+        try:
+            first = _DailyQuotaTracker(redis_client)
+            second = _DailyQuotaTracker(other_client)
+            assert first.check("shared", 2) == (True, 2, 1)
+            assert second.check("shared", 2) == (True, 2, 0)
+            assert first.check("shared", 2) == (False, 2, 0)
+        finally:
+            other_client.close()
 
-        for _ in range(1000):
-            tracker.check("key1", 1000)
+    def test_expiry_is_utc_midnight_and_resets(self, redis_client):
+        from datetime import UTC, datetime, timedelta
 
-        allowed, _, _ = tracker.check("key1", 1000)
-        assert allowed is False
-
-        # Advance to next day
-        tracker._today_utc = lambda: "2026-04-01"
-
-        allowed, limit, remaining = tracker.check("key1", 1000)
-        assert allowed is True
-        assert remaining == 999
+        tracker = _DailyQuotaTracker(redis_client)
+        assert tracker.check("midnight", 1) == (True, 1, 0)
+        keys = redis_client.keys("*")
+        assert len(keys) == 1
+        now = datetime.now(UTC)
+        midnight = datetime.combine(now.date() + timedelta(days=1), datetime.min.time(), UTC)
+        ttl = redis_client.ttl(keys[0])
+        assert abs(ttl - (midnight - now).total_seconds()) <= 3
+        assert tracker.check("midnight", 1) == (False, 1, 0)
+        redis_client.expire(keys[0], 1)
+        time.sleep(1.1)
+        assert tracker.check("midnight", 1) == (True, 1, 0)
 
 
 # ---------------------------------------------------------------------------
@@ -252,28 +270,18 @@ def _make_request(api_key: str | None = None):
     return request
 
 
-def _make_db_row(user_id: int = 1, price_id: str | None = None):
+def _make_db_row(user_id: int = 1, price_id: str | None = None, organization_id=None):
     """Create a mock DB row as returned by _query_key."""
     row = MagicMock()
     row.user_id = user_id
     row.price_id = price_id
+    row.organization_id = organization_id
     return row
 
 
 @pytest.fixture(autouse=True)
-def _reset_global_guard_state():
-    """Keep tests isolated from module-level limiter state."""
-    from api_app import guards as guards_mod
-
-    guards_mod._KEY_CACHE.clear()
-    guards_mod._LAST_USED_UPDATES.clear()
-    guards_mod._rate_limiter._buckets.clear()
-    guards_mod._daily_quota._counters.clear()
-    yield
-    guards_mod._KEY_CACHE.clear()
-    guards_mod._LAST_USED_UPDATES.clear()
-    guards_mod._rate_limiter._buckets.clear()
-    guards_mod._daily_quota._counters.clear()
+def _reset_global_guard_state(isolated_guards):
+    """Use an isolated Redis-backed guard state for each test."""
 
 
 class TestQueryKey:
@@ -292,6 +300,14 @@ class TestQueryKey:
         assert "sub.cancel_at IS NULL" in query.text
         assert "sub.status IN ('active', 'trialing')" in query.text
         assert "ORDER BY sub.updated_at DESC" in query.text
+
+    def test_preserves_organization_id(self):
+        engine = MagicMock()
+        conn = engine.connect.return_value.__enter__.return_value
+        conn.execute.return_value.fetchone.return_value = _make_db_row(
+            user_id=9, organization_id=123
+        )
+        assert _query_key(engine, "hash123").organization_id == 123
 
 
 class TestValidateApiKey:
@@ -371,7 +387,7 @@ class TestValidateApiKey:
         # Exhaust daily quota directly on the tracker (free = 1000/day)
         # using the user ID because quotas are shared across API keys
         for _ in range(1000):
-            g_mod._daily_quota.check("1", 1000)
+            g_mod._daily_quota.check("user:1", 1000)
 
         req = _make_request(api_key=raw_key)
         with pytest.raises(TooManyRequestsException, match="Daily request quota"):
@@ -434,3 +450,48 @@ class TestValidateApiKey:
 
         with pytest.raises(TooManyRequestsException, match="Daily request quota"):
             validate_api_key(_make_request(api_key="ag_first"), state)
+
+    @pytest.mark.parametrize("limit_kind", ["daily", "minute"])
+    def test_organization_shares_limit_across_users(self, mock_state, monkeypatch, limit_kind):
+        from api_app import guards
+
+        limits = TierLimits(100, 2) if limit_kind == "daily" else TierLimits(2, 100)
+        monkeypatch.setitem(guards.TIER_LIMITS, "free", limits)
+        users = {
+            hashlib.sha256(b"ag_first").hexdigest(): 1,
+            hashlib.sha256(b"ag_second").hexdigest(): 2,
+        }
+        monkeypatch.setattr(
+            guards, "_query_key",
+            lambda _engine, key_hash: guards._CachedKey(
+                user_id=users[key_hash], tier="free", expires_at=9e9, organization_id=7
+            ),
+        )
+        state = mock_state()
+        validate_api_key(_make_request("ag_first"), state)
+        validate_api_key(_make_request("ag_second"), state)
+        with pytest.raises(TooManyRequestsException):
+            validate_api_key(_make_request("ag_first"), state)
+
+    def test_fallback_is_per_user_and_separate_from_organization(self, mock_state, monkeypatch):
+        from api_app import guards
+
+        monkeypatch.setitem(guards.TIER_LIMITS, "free", TierLimits(100, 1))
+        users = {
+            hashlib.sha256(b"ag_user1").hexdigest(): (1, None),
+            hashlib.sha256(b"ag_user2").hexdigest(): (2, None),
+            hashlib.sha256(b"ag_org1").hexdigest(): (3, 1),
+        }
+        monkeypatch.setattr(
+            guards, "_query_key",
+            lambda _engine, key_hash: guards._CachedKey(
+                user_id=users[key_hash][0], tier="free", expires_at=9e9,
+                organization_id=users[key_hash][1],
+            ),
+        )
+        state = mock_state()
+        for key in ("ag_user1", "ag_user2", "ag_org1"):
+            validate_api_key(_make_request(key), state)
+        for key in ("ag_user1", "ag_user2", "ag_org1"):
+            with pytest.raises(TooManyRequestsException):
+                validate_api_key(_make_request(key), state)

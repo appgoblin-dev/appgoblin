@@ -77,10 +77,12 @@ async def _build_tools_docs() -> dict:
             ),
         },
         "rate_limits": (
-            "Rate limits use the same per-key token bucket as the REST API. "
-            "Free tier: 30 req/min, 1,000 req/day. Paid tiers scale higher. "
-            "Each HTTP request to the MCP endpoint counts as one request "
-            "against the per-minute bucket."
+            "REST and MCP share per-organization minute and daily limits across "
+            "all members and API keys. Users without an organization have a "
+            "separate free-tier allowance. Limits vary by subscription tier. "
+            "Daily quotas reset at UTC midnight. "
+            "Every MCP HTTP request counts toward the daily quota, including "
+            "requests rejected by the per-minute limit."
         ),
         "tier_access": {
             "apps": "All tiers (free and paid).",

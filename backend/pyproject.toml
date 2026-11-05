@@ -13,6 +13,7 @@ dependencies = [
     "boto3",
     "mcp>=2,<3",
     "asyncssh",
+    "redis>=8.1.0,<9",
 ]
 
 [project.optional-dependencies]
