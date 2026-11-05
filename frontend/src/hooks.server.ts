@@ -1,5 +1,6 @@
 import { sequence, type Handle, type ServerInit } from '@sveltejs/kit/hooks';
 import type { RequestEvent } from '@sveltejs/kit';
+import { building } from '$app/env';
 
 import type { CompanyTypes, AppStore, CollectionRanks, CategoryRanks, Countries } from './types';
 
@@ -29,7 +30,17 @@ import {
 // navigation, so a 429 would blank it) and the health check.
 function isRateLimitExempt(event: RequestEvent): boolean {
 	const route = event.url.pathname;
-	return isStaticAssetPath(route) || route === '/auth/me' || route === '/check';
+	return building || isStaticAssetPath(route) || route === '/auth/me' || route === '/check';
+}
+
+function rateLimitUnavailableResponse(event: RequestEvent): Response {
+	const headers = { 'Cache-Control': 'no-store', 'Retry-After': '1' };
+	return event.isDataRequest
+		? new Response(JSON.stringify({ message: 'Rate limiting unavailable' }), {
+				status: 503,
+				headers: { ...headers, 'Content-Type': 'application/json' }
+			})
+		: new Response('Rate limiting unavailable', { status: 503, headers });
 }
 
 // Runs before session validation, which costs a database lookup per request.
@@ -38,7 +49,12 @@ const preAuthRateLimitHandle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	const result = checkPreAuthRateLimit(event);
+	let result;
+	try {
+		result = await checkPreAuthRateLimit(event);
+	} catch {
+		return rateLimitUnavailableResponse(event);
+	}
 	if (!result.allowed) {
 		return rateLimitResponse(event, result);
 	}
@@ -65,8 +81,7 @@ const machinePagePaymentHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-// Runs after authHandle so signed-in users are keyed by user id, and so clients
-// that call `__data.json` directly are charged to the scraper bucket.
+// Runs after authHandle so signed-in users are keyed by user id.
 const rateLimitHandle: Handle = async ({ event, resolve }) => {
 	if (isRateLimitExempt(event)) {
 		return resolve(event);
@@ -77,26 +92,18 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	// A direct `__data.json` call skips the page's `noindex` meta tag and the
-	// analytics script. Real navigations still get the data, with an
-	// `X-Robots-Tag` set below. Paid machine requests are allowed through.
-	if (isBlockedDataRequest(event)) {
-		return new Response(JSON.stringify({ message: 'Not found' }), {
-			status: 404,
-			headers: {
-				'Content-Type': 'application/json',
-				'X-Robots-Tag': 'noindex, nofollow',
-				'Cache-Control': 'no-store'
-			}
-		});
+	let result;
+	try {
+		result = await checkRateLimit(event);
+	} catch {
+		return rateLimitUnavailableResponse(event);
 	}
-
-	const result = checkRateLimit(event);
 	if (!result.allowed) {
 		if (
 			result.reason === 'searchQuota' &&
 			isSearchResultsPath(event.url.pathname) &&
-			!event.request.headers.has('cookie')
+			!event.request.headers.has('cookie') &&
+			isMachineClient(event)
 		) {
 			const paymentResponse = await machineSearchPayment(event.request, () => {
 				event.locals.machinePaid = true;
@@ -109,6 +116,18 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 		// exhausted; every other limit still answers with a 429.
 		challengeAnonymousSearchQuota(event, result);
 		return rateLimitResponse(event, result);
+	}
+
+	// This is a heuristic, not an authorization boundary: headers can be spoofed.
+	if (isBlockedDataRequest(event)) {
+		return new Response(JSON.stringify({ message: 'Not found' }), {
+			status: 404,
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Robots-Tag': 'noindex, nofollow',
+				'Cache-Control': 'no-store'
+			}
+		});
 	}
 
 	return resolve(event);

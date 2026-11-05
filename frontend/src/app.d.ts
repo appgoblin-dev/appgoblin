@@ -8,6 +8,7 @@ declare global {
 			session: Session | null;
 			/** True when this request was paid via x402 or MPP. */
 			machinePaid: boolean;
+			anonymousSearchQuota?: { remaining: number; limit: number };
 		}
 		// interface Error {}
 		// interface PageData {}
