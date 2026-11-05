@@ -37,7 +37,7 @@
 		minlength="2"
 		maxlength="31"
 	/><br />
-	<label class="label" for="form-signup.email">Email</label>
+	<label class="label" for="form-signup.email">Work Email</label>
 	<input
 		class="input"
 		type="email"

@@ -86,14 +86,8 @@ def _make_docs_test_app():
 
 
 @pytest.fixture(autouse=True)
-def _reset_caches():
-    from api_app import guards as g
-
-    g._KEY_CACHE.clear()
-    g._LAST_USED_UPDATES.clear()
-    g._rate_limiter._buckets.clear()
-    g._daily_quota._counters.clear()
-    yield
+def _reset_caches(isolated_guards):
+    """Use disposable Redis-backed guard state for each test."""
 
 
 def _patch_key_found(tier="free"):
@@ -583,16 +577,19 @@ class TestV1CompaniesRateLimitHeaders:
 
 class TestV1CompaniesRateLimit:
     def test_per_minute_429(self):
+        from api_app import guards as g
+
         app = _make_test_app()
         with (
             _patch_key_found("premium_access"),
             _patch_overview(),
+            patch.dict(g.TIER_LIMITS, {"premium_access": g.TierLimits(2, 100)}),
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
             key = "ag_ratelimit429"
             headers = {"X-API-Key": key}
 
-            for _ in range(200):
+            for _ in range(2):
                 resp = client.get("/api/v1/companies", headers=headers)
                 assert resp.status_code == 200
 
@@ -603,24 +600,124 @@ class TestV1CompaniesRateLimit:
 
     def test_daily_quota_429(self):
         app = _make_test_app()
+        from api_app import guards as g
+
         with (
             _patch_key_found("b2b_premium"),
             _patch_overview(),
+            patch.dict(g.TIER_LIMITS, {"b2b_premium": g.TierLimits(100, 2)}),
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
-            from api_app import guards as g
-
-            raw_key = "ag_daily429"
-            headers = {"X-API-Key": raw_key}
-
-            # Exhaust daily quota using the user ID because quotas are shared
-            # across all API keys owned by a user.
-            for _ in range(500_000):
-                g._daily_quota.check("1", 500_000)
+            headers = {"X-API-Key": "ag_daily429"}
+            for _ in range(2):
+                g._daily_quota.check("user:1", 2)
 
             resp = client.get("/api/v1/companies", headers=headers)
             assert resp.status_code == 429
             assert "Daily request quota" in resp.json()["detail"]
+
+
+class TestRedisGuardIntegration:
+    @pytest.mark.parametrize("tracker_name", ["_daily_quota", "_rate_limiter"])
+    def test_rest_redis_outage_returns_503(self, tracker_name):
+        import redis
+        from api_app import guards
+
+        app = _make_test_app()
+        tracker = getattr(guards, tracker_name)
+        with (
+            _patch_key_found(),
+            _patch_overview(),
+            patch.object(tracker, "check", side_effect=redis.exceptions.ConnectionError("offline")),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            response = client.get("/api/v1/companies", headers={"X-API-Key": "ag_rest"})
+        assert response.status_code == 503
+
+    @pytest.mark.parametrize("tracker_name", ["_daily_quota", "_rate_limiter"])
+    def test_mcp_redis_outage_returns_503(self, tracker_name, monkeypatch):
+        import asyncio
+        import redis
+        from api_app import guards
+        from api_app.mcp import controller
+
+        monkeypatch.setattr(controller, "get_engine", lambda: MagicMock())
+        monkeypatch.setattr(controller, "_query_key", lambda *_: _CachedKey(1, "free", 9e9))
+        monkeypatch.setattr(
+            getattr(guards, tracker_name), "check",
+            MagicMock(side_effect=redis.exceptions.ConnectionError("offline")),
+        )
+        messages = []
+
+        async def send(message):
+            messages.append(message)
+
+        async def downstream(scope, receive, send):
+            raise AssertionError("MCP request reached downstream during Redis outage")
+
+        scope = {"type": "http", "headers": [(b"x-api-key", b"ag_mcp")]}
+        asyncio.run(controller.AuthenticatedMCPMiddleware(downstream)(scope, None, send))
+        assert messages[0]["status"] == 503
+
+    def test_mcp_organization_shares_and_user_fallback_is_isolated(self, monkeypatch):
+        import hashlib
+        from api_app import guards
+        from api_app.mcp import controller
+
+        monkeypatch.setitem(guards.TIER_LIMITS, "free", guards.TierLimits(100, 1))
+        keys = {
+            hashlib.sha256(raw.encode()).hexdigest(): _CachedKey(user, "free", 9e9, org)
+            for raw, user, org in (
+                ("org-first", 1, 7),
+                ("org-second", 2, 7),
+                ("user-first", 1, None),
+                ("user-second", 2, None),
+            )
+        }
+        monkeypatch.setattr(controller, "get_engine", lambda: MagicMock())
+        monkeypatch.setattr(controller, "_query_key", lambda _engine, key: keys[key])
+
+        def authenticate(key):
+            return controller._authenticate({"headers": [(b"x-api-key", key.encode())]})
+
+        assert authenticate("org-first").user_id == 1
+        with pytest.raises(controller._RateLimitError):
+            authenticate("org-second")
+        assert authenticate("user-first").user_id == 1
+        assert authenticate("user-second").user_id == 2
+        with pytest.raises(controller._RateLimitError):
+            authenticate("user-first")
+
+    def test_rest_and_mcp_share_organization_quota(self, monkeypatch):
+        import asyncio
+        from api_app import guards
+        from api_app.mcp import controller
+
+        monkeypatch.setitem(guards.TIER_LIMITS, "premium_access", guards.TierLimits(100, 1))
+        monkeypatch.setattr(controller, "get_engine", lambda: MagicMock())
+        monkeypatch.setattr(
+            controller, "_query_key",
+            lambda *_: _CachedKey(2, "premium_access", 9e9, organization_id=7),
+        )
+        app = _make_test_app()
+        with (
+            patch("api_app.guards._query_key", return_value=_CachedKey(1, "premium_access", 9e9, organization_id=7)),
+            _patch_overview(),
+            TestClient(app=app) as client,
+        ):
+            assert client.get("/api/v1/companies", headers={"X-API-Key": "ag_rest"}).status_code == 200
+
+        messages = []
+
+        async def send(message):
+            messages.append(message)
+
+        async def downstream(scope, receive, send):
+            raise AssertionError("MCP request exceeded the shared daily quota")
+
+        scope = {"type": "http", "headers": [(b"x-api-key", b"ag_mcp")]}
+        asyncio.run(controller.AuthenticatedMCPMiddleware(downstream)(scope, None, send))
+        assert messages[0]["status"] == 429
 
 
 class TestV1CompaniesTierRateLimits:
@@ -1923,8 +2020,9 @@ class TestV1Docs:
         assert "## Rate Limits" in data["info"]["description"]
         assert "## Plans & Access" in data["info"]["description"]
         assert "https://appgoblin.info/pricing" in data["info"]["description"]
-        assert "30 requests per minute" in data["info"]["description"]
-        assert "1,000 requests per day" in data["info"]["description"]
+        assert "vary by subscription tier" in data["info"]["description"]
+        assert "30 requests per minute" not in data["info"]["description"]
+        assert "1,000 requests per day" not in data["info"]["description"]
         assert "X-RateLimit-Limit" in data["info"]["description"]
         assert "429 Too Many Requests" in data["info"]["description"]
         assert "## AI & Raw Spec" in data["info"]["description"]

@@ -76,26 +76,61 @@ export async function sendContactEmail(
 	await t.sendMail(mailOptions);
 }
 
+type NotificationUser = {
+	id?: number | null;
+	username?: string | null;
+	email?: string | null;
+};
+
+function notificationUserFields(user?: NotificationUser | null) {
+	return [
+		user?.id != null ? ['User ID', String(user.id)] : null,
+		user?.username ? ['Username', user.username] : null,
+		user?.email ? ['Customer email', user.email] : null
+	].filter((field): field is string[] => field !== null);
+}
+
+function escapeHtml(value: string): string {
+	return value.replace(/[&<>"']/g, (character) => {
+		const entities: Record<string, string> = {
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;',
+			'"': '&quot;',
+			"'": '&#39;'
+		};
+		return entities[character];
+	});
+}
+
 export async function sendPricingPlanSelectionEmail(
 	planKey: StripePriceKey,
-	billingCycle: BillingCycle
+	billingCycle: BillingCycle,
+	user?: NotificationUser | null
 ): Promise<void> {
 	const t = getTransporter();
 	const planName = STRIPE_PLAN_LABELS[planKey];
 	const selectedAt = new Date().toISOString();
 	const subject = `Pricing signup started: ${planName}`;
-	const text = `A visitor selected the ${planName} plan (${billingCycle} billing) and started the signup flow.\n\nSelected at: ${selectedAt}`;
+	const userFields = notificationUserFields(user);
+	const text = [
+		`A visitor selected the ${planName} plan (${billingCycle} billing) and started the signup flow.`,
+		'',
+		...userFields.map(([label, value]) => `${label}: ${value}`),
+		`Selected at: ${selectedAt}`
+	].join('\n');
 	const html = `
 		<div>
 			<h2>New pricing signup started</h2>
 			<p><strong>Plan:</strong> ${planName}</p>
 			<p><strong>Billing:</strong> ${billingCycle}</p>
+			${userFields.map(([label, value]) => `<p><strong>${label}:</strong> ${escapeHtml(value)}</p>`).join('\n')}
 			<p><strong>Selected at:</strong> ${selectedAt}</p>
 		</div>
 	`;
 
 	if (!t) {
-		console.log(`[DEV] ${subject} (${billingCycle})`);
+		console.log(`[DEV] ${subject} (${billingCycle})`, userFields);
 		return;
 	}
 
@@ -111,17 +146,18 @@ export async function sendPricingPlanSelectionEmail(
 export async function sendPricingPlanCompletionEmail(
 	planKey: StripePriceKey,
 	billingCycle: BillingCycle,
-	userEmail: string,
+	user: NotificationUser | null,
 	checkoutSessionId: string
 ): Promise<void> {
 	const t = getTransporter();
 	const planName = STRIPE_PLAN_LABELS[planKey];
 	const completedAt = new Date().toISOString();
 	const subject = `Pricing signup completed: ${planName}`;
+	const userFields = notificationUserFields(user);
 	const text = [
 		`A customer completed signup for the ${planName} plan (${billingCycle} billing).`,
 		'',
-		`Customer email: ${userEmail}`,
+		...userFields.map(([label, value]) => `${label}: ${value}`),
 		`Checkout session: ${checkoutSessionId}`,
 		`Completed at: ${completedAt}`
 	].join('\n');
@@ -130,14 +166,14 @@ export async function sendPricingPlanCompletionEmail(
 			<h2>Pricing signup completed</h2>
 			<p><strong>Plan:</strong> ${planName}</p>
 			<p><strong>Billing:</strong> ${billingCycle}</p>
-			<p><strong>Customer email:</strong> ${userEmail}</p>
-			<p><strong>Checkout session:</strong> ${checkoutSessionId}</p>
+			${userFields.map(([label, value]) => `<p><strong>${label}:</strong> ${escapeHtml(value)}</p>`).join('\n')}
+			<p><strong>Checkout session:</strong> ${escapeHtml(checkoutSessionId)}</p>
 			<p><strong>Completed at:</strong> ${completedAt}</p>
 		</div>
 	`;
 
 	if (!t) {
-		console.log(`[DEV] ${subject} (${billingCycle}) for ${userEmail}`);
+		console.log(`[DEV] ${subject} (${billingCycle})`, userFields);
 		return;
 	}
 

@@ -1,382 +1,382 @@
 {
-	"categories": [
-		{
-			"id": "overall",
-			"android": true,
-			"ios": true,
-			"name": "Overall",
-			"type": "app"
-		},
-		{
-			"id": "games",
-			"android": true,
-			"ios": true,
-			"name": "Games",
-			"type": "game"
-		},
-		{
-			"id": "art_and_design",
-			"android": true,
-			"ios": true,
-			"name": "Art & Design",
-			"type": "app"
-		},
-		{
-			"id": "auto_and_vehicles",
-			"android": true,
-			"ios": false,
-			"name": "Auto & Vehicles",
-			"type": "app"
-		},
-		{
-			"id": "beauty",
-			"android": true,
-			"ios": false,
-			"name": "Beauty",
-			"type": "app"
-		},
-		{
-			"id": "books_and_reference",
-			"android": true,
-			"ios": true,
-			"name": "Books & Reference",
-			"type": "app"
-		},
-		{
-			"id": "business",
-			"android": true,
-			"ios": true,
-			"name": "Business",
-			"type": "app"
-		},
-		{
-			"id": "comics",
-			"android": true,
-			"ios": false,
-			"name": "Comics",
-			"type": "app"
-		},
-		{
-			"id": "communication",
-			"android": true,
-			"ios": false,
-			"name": "Communication",
-			"type": "app"
-		},
-		{
-			"id": "dating",
-			"android": true,
-			"ios": false,
-			"name": "Dating",
-			"type": "app"
-		},
-		{
-			"id": "developer tools",
-			"android": false,
-			"ios": true,
-			"name": "Developer Tools",
-			"type": "app"
-		},
-		{
-			"id": "education",
-			"android": true,
-			"ios": true,
-			"name": "Education",
-			"type": "app"
-		},
-		{
-			"id": "entertainment",
-			"android": true,
-			"ios": true,
-			"name": "Entertainment",
-			"type": "app"
-		},
-		{
-			"id": "events",
-			"android": true,
-			"ios": false,
-			"name": "Events",
-			"type": "app"
-		},
-		{
-			"id": "family",
-			"android": true,
-			"ios": false,
-			"name": "Family",
-			"type": "app"
-		},
-		{
-			"id": "finance",
-			"android": true,
-			"ios": true,
-			"name": "Finance",
-			"type": "app"
-		},
-		{
-			"id": "food_and_drink",
-			"android": true,
-			"ios": true,
-			"name": "Food & Drink",
-			"type": "app"
-		},
-		{
-			"id": "game_action",
-			"android": true,
-			"ios": true,
-			"name": "Games: Action",
-			"type": "app"
-		},
-		{
-			"id": "game_adventure",
-			"android": true,
-			"ios": true,
-			"name": "Games: Adventure",
-			"type": "app"
-		},
-		{
-			"id": "game_arcade",
-			"android": true,
-			"ios": false,
-			"name": "Games: Arcade",
-			"type": "app"
-		},
-		{
-			"id": "game_board",
-			"android": true,
-			"ios": true,
-			"name": "Games: Board",
-			"type": "app"
-		},
-		{
-			"id": "game_card",
-			"android": true,
-			"ios": true,
-			"name": "Games: Card",
-			"type": "app"
-		},
-		{
-			"id": "game_casino",
-			"android": true,
-			"ios": true,
-			"name": "Games: Casino",
-			"type": "app"
-		},
-		{
-			"id": "game_casual",
-			"android": true,
-			"ios": true,
-			"name": "Games: Casual",
-			"type": "app"
-		},
-		{
-			"id": "game_educational",
-			"android": true,
-			"ios": false,
-			"name": "Games: Educational",
-			"type": "app"
-		},
-		{
-			"id": "game_music",
-			"android": true,
-			"ios": true,
-			"name": "Games: Music",
-			"type": "app"
-		},
-		{
-			"id": "game_puzzle",
-			"android": true,
-			"ios": true,
-			"name": "Games: Puzzle",
-			"type": "app"
-		},
-		{
-			"id": "game_racing",
-			"android": true,
-			"ios": true,
-			"name": "Games: Racing",
-			"type": "app"
-		},
-		{
-			"id": "game_role_playing",
-			"android": true,
-			"ios": false,
-			"name": "Games: Role Playing",
-			"type": "app"
-		},
-		{
-			"id": "game_simulation",
-			"android": true,
-			"ios": true,
-			"name": "Games: Simulation",
-			"type": "app"
-		},
-		{
-			"id": "game_sports",
-			"android": true,
-			"ios": true,
-			"name": "Games: Sports",
-			"type": "app"
-		},
-		{
-			"id": "game_strategy",
-			"android": true,
-			"ios": true,
-			"name": "Games: Strategy",
-			"type": "app"
-		},
-		{
-			"id": "game_trivia",
-			"android": true,
-			"ios": true,
-			"name": "Games: Trivia",
-			"type": "app"
-		},
-		{
-			"id": "game_word",
-			"android": true,
-			"ios": true,
-			"name": "Games: Word",
-			"type": "app"
-		},
-		{
-			"id": "health_and_fitness",
-			"android": true,
-			"ios": true,
-			"name": "Health & Fitness",
-			"type": "app"
-		},
-		{
-			"id": "house_and_home",
-			"android": true,
-			"ios": false,
-			"name": "House & Home",
-			"type": "app"
-		},
-		{
-			"id": "libraries_and_demo",
-			"android": true,
-			"ios": false,
-			"name": "Libraries & Demo",
-			"type": "app"
-		},
-		{
-			"id": "lifestyle",
-			"android": true,
-			"ios": true,
-			"name": "Lifestyle",
-			"type": "app"
-		},
-		{
-			"id": "magazines_and_newspapers",
-			"android": false,
-			"ios": true,
-			"name": "Magazines & Newspapers",
-			"type": "app"
-		},
-		{
-			"id": "maps_and_navigation",
-			"android": true,
-			"ios": true,
-			"name": "Maps & Navigation",
-			"type": "app"
-		},
-		{
-			"id": "medical",
-			"android": true,
-			"ios": true,
-			"name": "Medical",
-			"type": "app"
-		},
-		{
-			"id": "music_and_audio",
-			"android": true,
-			"ios": true,
-			"name": "Music & Audio",
-			"type": "app"
-		},
-		{
-			"id": "news",
-			"android": true,
-			"ios": true,
-			"name": "News",
-			"type": "app"
-		},
-		{
-			"id": "personalization",
-			"android": true,
-			"ios": false,
-			"name": "Personalization",
-			"type": "app"
-		},
-		{
-			"id": "photo_and_video",
-			"android": true,
-			"ios": true,
-			"name": "Photo & Video",
-			"type": "app"
-		},
-		{
-			"id": "productivity",
-			"android": true,
-			"ios": true,
-			"name": "Productivity",
-			"type": "app"
-		},
-		{
-			"id": "shopping",
-			"android": true,
-			"ios": true,
-			"name": "Shopping",
-			"type": "app"
-		},
-		{
-			"id": "social networking",
-			"android": true,
-			"ios": true,
-			"name": "Social Networking",
-			"type": "app"
-		},
-		{
-			"id": "sports",
-			"android": true,
-			"ios": true,
-			"name": "Sports",
-			"type": "app"
-		},
-		{
-			"id": "stickers",
-			"android": false,
-			"ios": true,
-			"name": "Stickers",
-			"type": "app"
-		},
-		{
-			"id": "tools",
-			"android": true,
-			"ios": true,
-			"name": "Tools",
-			"type": "app"
-		},
-		{
-			"id": "travel_and_local",
-			"android": true,
-			"ios": true,
-			"name": "Travel & Local",
-			"type": "app"
-		},
-		{
-			"id": "video_players",
-			"android": true,
-			"ios": false,
-			"name": "Video Players",
-			"type": "app"
-		},
-		{
-			"id": "weather",
-			"android": true,
-			"ios": true,
-			"name": "Weather",
-			"type": "app"
-		}
-	]
+  "categories": [
+    {
+      "id": "overall",
+      "android": true,
+      "ios": true,
+      "name": "Overall",
+      "type": "app"
+    },
+    {
+      "id": "games",
+      "android": true,
+      "ios": true,
+      "name": "Games",
+      "type": "game"
+    },
+    {
+      "id": "art_and_design",
+      "android": true,
+      "ios": true,
+      "name": "Art & Design",
+      "type": "app"
+    },
+    {
+      "id": "auto_and_vehicles",
+      "android": true,
+      "ios": false,
+      "name": "Auto & Vehicles",
+      "type": "app"
+    },
+    {
+      "id": "beauty",
+      "android": true,
+      "ios": false,
+      "name": "Beauty",
+      "type": "app"
+    },
+    {
+      "id": "books_and_reference",
+      "android": true,
+      "ios": true,
+      "name": "Books & Reference",
+      "type": "app"
+    },
+    {
+      "id": "business",
+      "android": true,
+      "ios": true,
+      "name": "Business",
+      "type": "app"
+    },
+    {
+      "id": "comics",
+      "android": true,
+      "ios": false,
+      "name": "Comics",
+      "type": "app"
+    },
+    {
+      "id": "communication",
+      "android": true,
+      "ios": false,
+      "name": "Communication",
+      "type": "app"
+    },
+    {
+      "id": "dating",
+      "android": true,
+      "ios": false,
+      "name": "Dating",
+      "type": "app"
+    },
+    {
+      "id": "developer tools",
+      "android": false,
+      "ios": true,
+      "name": "Developer Tools",
+      "type": "app"
+    },
+    {
+      "id": "education",
+      "android": true,
+      "ios": true,
+      "name": "Education",
+      "type": "app"
+    },
+    {
+      "id": "entertainment",
+      "android": true,
+      "ios": true,
+      "name": "Entertainment",
+      "type": "app"
+    },
+    {
+      "id": "events",
+      "android": true,
+      "ios": false,
+      "name": "Events",
+      "type": "app"
+    },
+    {
+      "id": "family",
+      "android": true,
+      "ios": false,
+      "name": "Family",
+      "type": "app"
+    },
+    {
+      "id": "finance",
+      "android": true,
+      "ios": true,
+      "name": "Finance",
+      "type": "app"
+    },
+    {
+      "id": "food_and_drink",
+      "android": true,
+      "ios": true,
+      "name": "Food & Drink",
+      "type": "app"
+    },
+    {
+      "id": "game_action",
+      "android": true,
+      "ios": true,
+      "name": "Games: Action",
+      "type": "app"
+    },
+    {
+      "id": "game_adventure",
+      "android": true,
+      "ios": true,
+      "name": "Games: Adventure",
+      "type": "app"
+    },
+    {
+      "id": "game_arcade",
+      "android": true,
+      "ios": false,
+      "name": "Games: Arcade",
+      "type": "app"
+    },
+    {
+      "id": "game_board",
+      "android": true,
+      "ios": true,
+      "name": "Games: Board",
+      "type": "app"
+    },
+    {
+      "id": "game_card",
+      "android": true,
+      "ios": true,
+      "name": "Games: Card",
+      "type": "app"
+    },
+    {
+      "id": "game_casino",
+      "android": true,
+      "ios": true,
+      "name": "Games: Casino",
+      "type": "app"
+    },
+    {
+      "id": "game_casual",
+      "android": true,
+      "ios": true,
+      "name": "Games: Casual",
+      "type": "app"
+    },
+    {
+      "id": "game_educational",
+      "android": true,
+      "ios": false,
+      "name": "Games: Educational",
+      "type": "app"
+    },
+    {
+      "id": "game_music",
+      "android": true,
+      "ios": true,
+      "name": "Games: Music",
+      "type": "app"
+    },
+    {
+      "id": "game_puzzle",
+      "android": true,
+      "ios": true,
+      "name": "Games: Puzzle",
+      "type": "app"
+    },
+    {
+      "id": "game_racing",
+      "android": true,
+      "ios": true,
+      "name": "Games: Racing",
+      "type": "app"
+    },
+    {
+      "id": "game_role_playing",
+      "android": true,
+      "ios": false,
+      "name": "Games: Role Playing",
+      "type": "app"
+    },
+    {
+      "id": "game_simulation",
+      "android": true,
+      "ios": true,
+      "name": "Games: Simulation",
+      "type": "app"
+    },
+    {
+      "id": "game_sports",
+      "android": true,
+      "ios": true,
+      "name": "Games: Sports",
+      "type": "app"
+    },
+    {
+      "id": "game_strategy",
+      "android": true,
+      "ios": true,
+      "name": "Games: Strategy",
+      "type": "app"
+    },
+    {
+      "id": "game_trivia",
+      "android": true,
+      "ios": true,
+      "name": "Games: Trivia",
+      "type": "app"
+    },
+    {
+      "id": "game_word",
+      "android": true,
+      "ios": true,
+      "name": "Games: Word",
+      "type": "app"
+    },
+    {
+      "id": "health_and_fitness",
+      "android": true,
+      "ios": true,
+      "name": "Health & Fitness",
+      "type": "app"
+    },
+    {
+      "id": "house_and_home",
+      "android": true,
+      "ios": false,
+      "name": "House & Home",
+      "type": "app"
+    },
+    {
+      "id": "libraries_and_demo",
+      "android": true,
+      "ios": false,
+      "name": "Libraries & Demo",
+      "type": "app"
+    },
+    {
+      "id": "lifestyle",
+      "android": true,
+      "ios": true,
+      "name": "Lifestyle",
+      "type": "app"
+    },
+    {
+      "id": "magazines_and_newspapers",
+      "android": false,
+      "ios": true,
+      "name": "Magazines & Newspapers",
+      "type": "app"
+    },
+    {
+      "id": "maps_and_navigation",
+      "android": true,
+      "ios": true,
+      "name": "Maps & Navigation",
+      "type": "app"
+    },
+    {
+      "id": "medical",
+      "android": true,
+      "ios": true,
+      "name": "Medical",
+      "type": "app"
+    },
+    {
+      "id": "music_and_audio",
+      "android": true,
+      "ios": true,
+      "name": "Music & Audio",
+      "type": "app"
+    },
+    {
+      "id": "news",
+      "android": true,
+      "ios": true,
+      "name": "News",
+      "type": "app"
+    },
+    {
+      "id": "personalization",
+      "android": true,
+      "ios": false,
+      "name": "Personalization",
+      "type": "app"
+    },
+    {
+      "id": "photo_and_video",
+      "android": true,
+      "ios": true,
+      "name": "Photo & Video",
+      "type": "app"
+    },
+    {
+      "id": "productivity",
+      "android": true,
+      "ios": true,
+      "name": "Productivity",
+      "type": "app"
+    },
+    {
+      "id": "shopping",
+      "android": true,
+      "ios": true,
+      "name": "Shopping",
+      "type": "app"
+    },
+    {
+      "id": "social networking",
+      "android": true,
+      "ios": true,
+      "name": "Social Networking",
+      "type": "app"
+    },
+    {
+      "id": "sports",
+      "android": true,
+      "ios": true,
+      "name": "Sports",
+      "type": "app"
+    },
+    {
+      "id": "stickers",
+      "android": false,
+      "ios": true,
+      "name": "Stickers",
+      "type": "app"
+    },
+    {
+      "id": "tools",
+      "android": true,
+      "ios": true,
+      "name": "Tools",
+      "type": "app"
+    },
+    {
+      "id": "travel_and_local",
+      "android": true,
+      "ios": true,
+      "name": "Travel & Local",
+      "type": "app"
+    },
+    {
+      "id": "video_players",
+      "android": true,
+      "ios": false,
+      "name": "Video Players",
+      "type": "app"
+    },
+    {
+      "id": "weather",
+      "android": true,
+      "ios": true,
+      "name": "Weather",
+      "type": "app"
+    }
+  ]
 }

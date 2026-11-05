@@ -3,10 +3,14 @@
 import hashlib
 import time
 from dataclasses import dataclass
-from threading import Lock
 
+import redis
 from litestar import Request
-from litestar.exceptions import NotAuthorizedException, TooManyRequestsException
+from litestar.exceptions import (
+    NotAuthorizedException,
+    ServiceUnavailableException,
+    TooManyRequestsException,
+)
 from sqlalchemy import Engine, text
 
 from api_app.analytics import set_request_analytics_context
@@ -29,10 +33,10 @@ class TierLimits:
 
 
 PUBLIC_TIER_LIMITS: dict[str, TierLimits] = {
-    "free": TierLimits(requests_per_minute=30, requests_per_day=1_000),
-    "b2b_sdk": TierLimits(requests_per_minute=2_000, requests_per_day=100_000),
-    "b2b_appads": TierLimits(requests_per_minute=2_000, requests_per_day=100_000),
-    "b2b_premium": TierLimits(requests_per_minute=10_000, requests_per_day=500_000),
+    "free": TierLimits(requests_per_minute=20, requests_per_day=1_000),
+    "b2b_sdk": TierLimits(requests_per_minute=200, requests_per_day=100_000),
+    "b2b_appads": TierLimits(requests_per_minute=200, requests_per_day=100_000),
+    "b2b_premium": TierLimits(requests_per_minute=200, requests_per_day=500_000),
 }
 
 LEGACY_TIER_LIMITS: dict[str, TierLimits] = {
@@ -83,112 +87,114 @@ def get_tier_limits(tier: str) -> TierLimits:
 
 
 # ---------------------------------------------------------------------------
-# In-memory rate limiter (refilling token bucket per key)
+# Shared Redis rate limits
 # ---------------------------------------------------------------------------
 
 
-@dataclass
-class _TokenBucket:
-    tokens: float
-    last_refill: float
-    rate_per_second: float
+_redis_client = redis.Redis(
+    host="127.0.0.1",
+    port=6379,
+    db=0,
+    decode_responses=True,
+    socket_connect_timeout=1,
+    socket_timeout=1,
+)
+
+# Redis TIME keeps worker clocks consistent; the script makes refill and
+# consumption atomic across all backend processes.
+_BUCKET_SCRIPT = """
+local limit = tonumber(ARGV[1])
+local clock = redis.call('TIME')
+local now = tonumber(clock[1]) + tonumber(clock[2]) / 1000000
+local state = redis.call('HMGET', KEYS[1], 'tokens', 'last_refill', 'limit')
+local tokens = tonumber(state[1])
+local last_refill = tonumber(state[2])
+if not tokens or not last_refill then
+    tokens = limit
+else
+    local previous_limit = tonumber(state[3]) or limit
+    local elapsed = math.max(0, now - last_refill)
+    tokens = math.min(limit, tokens + elapsed * previous_limit / 60)
+end
+local allowed = 0
+local retry = 0
+if tokens >= 1 then
+    tokens = tokens - 1
+    allowed = 1
+else
+    retry = math.max(1, math.ceil((1 - tokens) * 60 / limit))
+end
+redis.call('HSET', KEYS[1], 'tokens', string.format('%.17g', tokens),
+    'last_refill', string.format('%.6f', now), 'limit', limit)
+redis.call('EXPIRE', KEYS[1], 60)
+return {allowed, math.floor(tokens), retry}
+"""
+
+# Use a UTC epoch-day key, and set its expiry atomically with the increment.
+_DAILY_QUOTA_SCRIPT = """
+local clock = redis.call('TIME')
+local now = tonumber(clock[1])
+local day = math.floor(now / 86400)
+local key = KEYS[1] .. ':' .. day
+local count = redis.call('INCR', key)
+redis.call('EXPIREAT', key, (day + 1) * 86400)
+return count
+"""
 
 
 class _RateLimiter:
-    """Thread-safe refilling token bucket keyed by billing user ID."""
+    """Redis-backed token bucket shared by all workers."""
 
-    def __init__(self) -> None:
-        self._buckets: dict[str, _TokenBucket] = {}
-        self._lock = Lock()
+    def __init__(self, client: redis.Redis = _redis_client) -> None:
+        self._client = client
 
-    def check(self, key_hash: str, rate_per_minute: int) -> tuple[bool, int, int, int]:
-        """Check and consume one token.
-
-        Returns
-        -------
-        (allowed, limit, remaining, retry_after_seconds)
-
-        """
-        rate_per_second = rate_per_minute / 60.0
-        now = time.monotonic()
-
-        with self._lock:
-            bucket = self._buckets.get(key_hash)
-            if bucket is None or bucket.rate_per_second != rate_per_second:
-                bucket = _TokenBucket(
-                    tokens=float(rate_per_minute),
-                    last_refill=now,
-                    rate_per_second=rate_per_second,
-                )
-                self._buckets[key_hash] = bucket
-
-            elapsed = now - bucket.last_refill
-            bucket.tokens = min(
-                float(rate_per_minute), bucket.tokens + elapsed * rate_per_second
-            )
-            bucket.last_refill = now
-
-            if bucket.tokens >= 1.0:
-                bucket.tokens -= 1.0
-                remaining = int(bucket.tokens)
-                return True, rate_per_minute, remaining, 0
-
-            retry_after = int((1.0 - bucket.tokens) / rate_per_second) + 1
-            return False, rate_per_minute, 0, retry_after
-
-
-_rate_limiter = _RateLimiter()
-
-
-# ---------------------------------------------------------------------------
-# Daily quota tracker (in-memory, resets at UTC midnight)
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class _DailyQuota:
-    date: str  # YYYY-MM-DD
-    count: int
+    def check(self, key: str, rate_per_minute: int) -> tuple[bool, int, int, int]:
+        """Consume a token and return allowed, limit, remaining, and retry time."""
+        allowed, remaining, retry = self._client.eval(
+            _BUCKET_SCRIPT, 1, f"appgoblin:rate:minute:{key}", rate_per_minute
+        )
+        return bool(allowed), rate_per_minute, int(remaining), int(retry)
 
 
 class _DailyQuotaTracker:
-    """Thread-safe daily request counter keyed by billing user ID."""
+    """Redis-backed daily request counter, resetting at UTC midnight."""
 
-    def __init__(self) -> None:
-        self._counters: dict[str, _DailyQuota] = {}
-        self._lock = Lock()
+    def __init__(self, client: redis.Redis = _redis_client) -> None:
+        self._client = client
 
-    def _today_utc(self) -> str:
-        """Return today's date as YYYY-MM-DD (UTC)."""
-        from datetime import UTC, datetime
-
-        return datetime.now(UTC).strftime("%Y-%m-%d")
-
-    def check(self, key_hash: str, daily_limit: int) -> tuple[bool, int, int]:
-        """Check and consume one request from the daily quota.
-
-        Returns
-        -------
-        (allowed, limit, remaining)
-
-        """
-        today = self._today_utc()
-
-        with self._lock:
-            counter = self._counters.get(key_hash)
-            if counter is None or counter.date != today:
-                counter = _DailyQuota(date=today, count=0)
-                self._counters[key_hash] = counter
-
-            counter.count += 1
-
-            if counter.count <= daily_limit:
-                return True, daily_limit, daily_limit - counter.count
-
-            return False, daily_limit, 0
+    def check(self, key: str, daily_limit: int) -> tuple[bool, int, int]:
+        """Consume one daily request and return allowed, limit, and remaining."""
+        count = int(
+            self._client.eval(_DAILY_QUOTA_SCRIPT, 1, f"appgoblin:rate:daily:{key}")
+        )
+        return count <= daily_limit, daily_limit, max(0, daily_limit - count)
 
 
+_rate_limiter = _RateLimiter()
 _daily_quota = _DailyQuotaTracker()
+
+
+def _rate_limit_key(user_id: int, organization_id: int | None) -> str:
+    """Keep organization and fallback user identifiers in separate namespaces."""
+    if organization_id is not None:
+        return f"org:{organization_id}"
+    return f"user:{user_id}"
+
+
+def _check_daily_quota(key: str, limit: int) -> tuple[bool, int, int]:
+    try:
+        return _daily_quota.check(key, limit)
+    except redis.exceptions.RedisError as exc:
+        logger.exception("Redis daily quota check failed")
+        raise ServiceUnavailableException(detail="Rate limiting unavailable") from exc
+
+
+def _check_minute_limit(key: str, limit: int) -> tuple[bool, int, int, int]:
+    try:
+        return _rate_limiter.check(key, limit)
+    except redis.exceptions.RedisError as exc:
+        logger.exception("Redis rate limit check failed")
+        raise ServiceUnavailableException(detail="Rate limiting unavailable") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -201,6 +207,7 @@ class _CachedKey:
     user_id: int
     tier: str
     expires_at: float  # monotonic time when this cache entry expires
+    organization_id: int | None = None
 
 
 _KEY_CACHE: dict[str, _CachedKey] = {}
@@ -230,17 +237,23 @@ def _query_key(engine: Engine, key_hash: str) -> _CachedKey | None:
     """
     query = text("""
         SELECT ak.user_id,
+               membership.organization_id,
                tp.provider_price_id AS price_id,
                t.slug AS tier
         FROM public.api_keys ak
         JOIN public.users u ON u.id = ak.user_id
         LEFT JOIN LATERAL (
+            SELECT om.organization_id
+            FROM public.organization_members om
+            WHERE om.user_id = ak.user_id
+            ORDER BY om.created_at ASC, om.id ASC
+            LIMIT 1
+        ) membership ON TRUE
+        LEFT JOIN LATERAL (
             SELECT sub.tier_price_id
             FROM public.subscriptions sub
-                        JOIN public.organization_members om
-                            ON om.organization_id = sub.organization_id
-                         AND om.user_id = ak.user_id
-                        WHERE (
+            WHERE sub.organization_id = membership.organization_id
+              AND (
                     (sub.cancel_at IS NOT NULL AND sub.cancel_at > now())
                     OR (sub.cancel_at IS NULL AND sub.status IN ('active', 'trialing'))
               )
@@ -271,6 +284,7 @@ def _query_key(engine: Engine, key_hash: str) -> _CachedKey | None:
         user_id=row.user_id,
         tier=tier,
         expires_at=time.monotonic() + _KEY_CACHE_TTL,
+        organization_id=row.organization_id,
     )
 
 
@@ -330,6 +344,7 @@ def validate_api_key(request: Request, state) -> ApiKeyContext:
     if cached is not None and time.monotonic() < cached.expires_at:
         tier = cached.tier
         user_id = cached.user_id
+        organization_id = cached.organization_id
     else:
         engine = state.dbconwrite.engine if state.dbconwrite else None
         if engine is None:
@@ -347,15 +362,14 @@ def validate_api_key(request: Request, state) -> ApiKeyContext:
         _KEY_CACHE[key_hash] = result
         tier = result.tier
         user_id = result.user_id
+        organization_id = result.organization_id
 
     limits = get_tier_limits(tier)
+    rate_key = _rate_limit_key(user_id, organization_id)
 
-    # --- Daily quota (checked first — no point allowing burst if over daily cap) ---
-    # Quotas are deliberately keyed by user_id rather than key_hash. A user
-    # may have multiple active keys, but all keys must share the subscription's
-    # allowance.
-    daily_ok, daily_limit, daily_remaining = _daily_quota.check(
-        str(user_id), limits.requests_per_day
+    # Daily quota is checked first, including requests rejected by the burst limit.
+    daily_ok, daily_limit, daily_remaining = _check_daily_quota(
+        rate_key, limits.requests_per_day
     )
 
     request.scope["_rate_limit_info"] = {
@@ -387,7 +401,7 @@ def validate_api_key(request: Request, state) -> ApiKeyContext:
         minute_limit,
         minute_remaining,
         retry_after,
-    ) = _rate_limiter.check(str(user_id), limits.requests_per_minute)
+    ) = _check_minute_limit(rate_key, limits.requests_per_minute)
 
     request.scope["_rate_limit_info"] = {
         "minute_limit": minute_limit,

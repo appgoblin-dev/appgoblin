@@ -222,35 +222,25 @@ const cacheAndRoutingHandle: Handle = async ({ event, resolve }) => {
 
 	const response = await resolve(event);
 
-	// --- Cache control for specific paths ---	// Only cache when unauthenticated: layout data includes user, so cached HTML would show
-	// "logged out" on direct navigation even when the user has a valid session.
-	// A machine-paid response is also excluded: it is a single paid view and must
-	// never be replayed from a shared cache to unpaid visitors.
-	const cacheablePaths = ['/companies', '/about', '/apps', '/top-mobile-advertisers'];
-	const pathIsCacheable = cacheablePaths.some((path) => event.url.pathname.startsWith(path));
-	const isAuthenticated = event.locals.user !== null;
-	const isMachinePaid = event.locals.machinePaid;
 	const isStaticAssetRequest = route.startsWith('/_app') || route.startsWith('/favicon');
 
 	if (!isStaticAssetRequest) {
 		appendVaryHeader(response, 'Cookie');
 	}
 
-	if (isMachinePaid) {
-		response.headers.set('cache-control', 'private, no-store');
-	}
-
-	// The `__data.json` twin of a noindex page has none of the HTML page's
-	// `<meta name="robots">` markup, so send the header form too.
 	if (event.isDataRequest && isNoindexPath(route)) {
 		response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 	}
 
-	if (pathIsCacheable && !isAuthenticated && !isMachinePaid) {
-		response.headers.set('cache-control', 'public, max-age=86400, stale-while-revalidate=3600');
-	}
-
-	if (isAuthenticated && !isStaticAssetRequest) {
+	// Page HTML and SvelteKit data can depend on the current session.
+	const contentType = response.headers.get('content-type') ?? '';
+	if (
+		!response.ok ||
+		event.isDataRequest ||
+		contentType.startsWith('text/html') ||
+		event.locals.machinePaid ||
+		(event.locals.user !== null && !isStaticAssetRequest)
+	) {
 		response.headers.set('cache-control', 'private, no-store');
 	}
 

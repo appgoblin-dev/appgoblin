@@ -22,13 +22,16 @@ import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from litestar.exceptions import ServiceUnavailableException
+
 # Import the MCP package first — the __init__.py registers all tools.
 # Then pull the server instance and shared authentication primitives.
 import api_app.mcp  # noqa: F401  # triggers tool registration
 from api_app.guards import (
-    _daily_quota,
+    _check_daily_quota,
+    _check_minute_limit,
     _query_key,
-    _rate_limiter,
+    _rate_limit_key,
     get_tier_limits,
 )
 from api_app.mcp.engine import get_engine, set_mcp_engine  # noqa: F401
@@ -101,6 +104,7 @@ def _authenticate(scope: Scope) -> MCPAuthContext | None:
     if cached is not None and time.monotonic() < cached.expires_at:
         tier = cached.tier
         user_id = cached.user_id
+        organization_id = cached.organization_id
     else:
         result = _query_key(engine, key_hash)
         if result is None:
@@ -108,12 +112,14 @@ def _authenticate(scope: Scope) -> MCPAuthContext | None:
         _KEY_CACHE[key_hash] = result
         tier = result.tier
         user_id = result.user_id
+        organization_id = result.organization_id
 
     limits = get_tier_limits(tier)
+    rate_key = _rate_limit_key(user_id, organization_id)
 
     # --- Daily quota ---
-    daily_ok, daily_limit, daily_remaining = _daily_quota.check(
-        str(user_id), limits.requests_per_day
+    daily_ok, daily_limit, daily_remaining = _check_daily_quota(
+        rate_key, limits.requests_per_day
     )
     if not daily_ok:
         logger.warning(
@@ -128,8 +134,8 @@ def _authenticate(scope: Scope) -> MCPAuthContext | None:
         )
 
     # --- Per-minute burst ---
-    minute_ok, minute_limit, minute_remaining, retry_after = _rate_limiter.check(
-        str(user_id), limits.requests_per_minute
+    minute_ok, minute_limit, minute_remaining, retry_after = _check_minute_limit(
+        rate_key, limits.requests_per_minute
     )
     if not minute_ok:
         logger.warning(
@@ -203,6 +209,22 @@ class AuthenticatedMCPMiddleware:
         # --- Authenticate ---
         try:
             user_ctx = _authenticate(scope)
+        except ServiceUnavailableException:
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": 503,
+                    "headers": [(b"content-type", b"application/json")],
+                }
+            )
+            await send(
+                {
+                    "type": "http.response.body",
+                    "body": b'{"error":"Rate limiting unavailable"}',
+                    "more_body": False,
+                }
+            )
+            return
         except _RateLimitError as exc:
             await send(
                 {
