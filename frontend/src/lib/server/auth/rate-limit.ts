@@ -49,32 +49,6 @@ export class RefillingTokenBucket<_Key> {
 		this.storage.set(key, bucket);
 		return true;
 	}
-
-	public getRemaining(key: _Key): number {
-		const bucket = this.storage.get(key) ?? null;
-		if (bucket === null) {
-			return this.max;
-		}
-		const intervalMs = this.refillIntervalSeconds * 1000;
-		const refill = Math.floor((Date.now() - bucket.refilledAt) / intervalMs);
-		return Math.min(bucket.count + refill, this.max);
-	}
-
-	/**
-	 * Drop buckets that have fully refilled. A full bucket behaves exactly like a
-	 * missing one, so this is safe, and it keeps the map from growing without
-	 * bound.
-	 */
-	public sweep(): void {
-		const intervalMs = this.refillIntervalSeconds * 1000;
-		const now = Date.now();
-		for (const [key, bucket] of this.storage) {
-			const refill = Math.floor((now - bucket.refilledAt) / intervalMs);
-			if (bucket.count + refill >= this.max) {
-				this.storage.delete(key);
-			}
-		}
-	}
 }
 
 export class Throttler<_Key> {
@@ -175,20 +149,6 @@ export class ExpiringTokenBucket<_Key> {
 
 	public reset(key: _Key): void {
 		this.storage.delete(key);
-	}
-
-	/**
-	 * Drop buckets whose window has expired. An expired bucket behaves exactly
-	 * like a missing one, so this is safe, and it keeps the map from growing
-	 * without bound when keys are unbounded (e.g. client IPs).
-	 */
-	public sweep(): void {
-		const now = Date.now();
-		for (const [key, bucket] of this.storage) {
-			if (now - bucket.createdAt >= this.expiresInSeconds * 1000) {
-				this.storage.delete(key);
-			}
-		}
 	}
 }
 

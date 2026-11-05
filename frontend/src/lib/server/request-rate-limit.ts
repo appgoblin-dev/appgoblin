@@ -2,7 +2,6 @@ import { redirect, type RequestEvent } from '@sveltejs/kit';
 
 import { ANONYMOUS_SEARCHES_PER_DAY, RedisRateLimiter } from './redis-rate-limit.js';
 
-export type RateLimitTier = 'authenticated' | 'anonymous';
 const limiter = new RedisRateLimiter();
 
 export const isSearchResultsPath = (pathname: string): boolean =>
@@ -10,7 +9,6 @@ export const isSearchResultsPath = (pathname: string): boolean =>
 
 export interface RateLimitResult {
 	allowed: boolean;
-	tier: RateLimitTier;
 	limit: number;
 	remaining: number;
 	retryAfterSeconds: number;
@@ -79,9 +77,7 @@ function clientKey(event: Pick<RequestEvent, 'getClientAddress'>): string {
 	}
 }
 
-export async function checkPreAuthRateLimit(
-	event: RequestEvent
-): Promise<Omit<RateLimitResult, 'tier'>> {
+export async function checkPreAuthRateLimit(event: RequestEvent): Promise<RateLimitResult> {
 	if (event.cookies.get('session') === undefined) {
 		return { allowed: true, limit: 600, remaining: 600, retryAfterSeconds: 0 };
 	}
@@ -90,7 +86,6 @@ export async function checkPreAuthRateLimit(
 
 export async function checkRateLimit(event: RequestEvent): Promise<RateLimitResult> {
 	const user = event.locals.user;
-	const tier: RateLimitTier = user !== null ? 'authenticated' : 'anonymous';
 	const identity = user !== null ? `user:${user.id}` : `ip:${clientKey(event)}`;
 	const search =
 		user === null && isSearchResultsPath(event.url.pathname) && !isBlockedDataRequest(event);
@@ -101,7 +96,7 @@ export async function checkRateLimit(event: RequestEvent): Promise<RateLimitResu
 			limit: ANONYMOUS_SEARCHES_PER_DAY
 		};
 	}
-	return { ...result, tier };
+	return result;
 }
 
 /**
@@ -130,10 +125,7 @@ export function challengeAnonymousSearchQuota(event: RequestEvent, result: RateL
 	redirect(303, `/auth/login?redirectTo=${redirectTo}`);
 }
 
-export function rateLimitResponse(
-	event: RequestEvent,
-	result: Omit<RateLimitResult, 'tier'>
-): Response {
+export function rateLimitResponse(event: RequestEvent, result: RateLimitResult): Response {
 	const headers = new Headers({
 		'Retry-After': String(result.retryAfterSeconds),
 		'RateLimit-Limit': String(result.limit),
