@@ -55,9 +55,8 @@ CREATE UNIQUE INDEX users_canonical_email_unique
 ON users (canonical_email);
 
 
-
-CREATE OR REPLACE FUNCTION users_set_canonical_email()
-RETURNS trigger
+CREATE OR REPLACE FUNCTION USERS_SET_CANONICAL_EMAIL()
+RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -74,4 +73,4 @@ $$;
 
 CREATE TRIGGER users_set_canonical_email
 BEFORE INSERT OR UPDATE OF email ON users
-FOR EACH ROW EXECUTE FUNCTION users_set_canonical_email();
+FOR EACH ROW EXECUTE FUNCTION USERS_SET_CANONICAL_EMAIL();

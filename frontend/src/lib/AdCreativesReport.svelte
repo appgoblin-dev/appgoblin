@@ -138,7 +138,9 @@
 
 	function clearAllFilters() {
 		selectedOrientationFilter = 'all';
-		goto(buildAdCreativesUrl({ category: 'overall', format: 'all', network: '' }), { reset: false });
+		goto(buildAdCreativesUrl({ category: 'overall', format: 'all', network: '' }), {
+			reset: false
+		});
 	}
 
 	function setOrientationFilter(value: 'all' | 'portrait' | 'landscape') {
