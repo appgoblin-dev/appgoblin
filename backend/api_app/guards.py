@@ -33,7 +33,7 @@ class TierLimits:
 
 
 PUBLIC_TIER_LIMITS: dict[str, TierLimits] = {
-    "free": TierLimits(requests_per_minute=30, requests_per_day=1_000),
+    "free": TierLimits(requests_per_minute=20, requests_per_day=1_000),
     "b2b_sdk": TierLimits(requests_per_minute=200, requests_per_day=100_000),
     "b2b_appads": TierLimits(requests_per_minute=200, requests_per_day=100_000),
     "b2b_premium": TierLimits(requests_per_minute=200, requests_per_day=500_000),
