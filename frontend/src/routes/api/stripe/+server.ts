@@ -66,12 +66,15 @@ async function handleCheckoutSessionCompleted(session: any) {
 		const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 		const subscriptionDetails = await handleSubscriptionUpdated(subscription);
 		if (subscriptionDetails) {
-			const { planKey, billingCycle, userEmail } = subscriptionDetails;
-			void sendPricingPlanCompletionEmail(planKey, billingCycle, userEmail, session.id).catch(
-				(error) => {
-					console.error('Failed to send pricing plan completion notification:', error);
-				}
-			);
+			const { planKey, billingCycle, user } = subscriptionDetails;
+			void sendPricingPlanCompletionEmail(
+				planKey,
+				billingCycle,
+				{ ...user, email: user.email || session.customer_details?.email || session.customer_email },
+				session.id
+			).catch((error) => {
+				console.error('Failed to send pricing plan completion notification:', error);
+			});
 		}
 	} else {
 		console.log(
@@ -262,14 +265,14 @@ async function handleSubscriptionUpdated(subscription: any, eventCreatedAt?: num
 			tierPriceRow.slug === 'b2b_premium') &&
 		(tierPriceRow.billing_cycle === 'monthly' || tierPriceRow.billing_cycle === 'yearly')
 	) {
-		const userDetails = await db.queryOne<{ email: string }>(
-			'SELECT email FROM users WHERE id = $1',
+		const userDetails = await db.queryOne<{ username: string | null; email: string | null }>(
+			'SELECT username, email FROM users WHERE id = $1',
 			[user.id]
 		);
 		return {
 			planKey: tierPriceRow.slug as StripePriceKey,
 			billingCycle: tierPriceRow.billing_cycle as BillingCycle,
-			userEmail: userDetails?.email ?? 'unknown'
+			user: { id: user.id, username: userDetails?.username, email: userDetails?.email }
 		};
 	}
 }

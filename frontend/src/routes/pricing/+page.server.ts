@@ -128,7 +128,11 @@ export const actions: Actions = {
 			const priceKey = formData.get('priceKey');
 			const cycle = parseBillingCycle(formData.get('billingCycle'));
 			if (typeof priceKey === 'string' && allowedKeys.includes(priceKey as StripePriceKey)) {
-				void sendPricingPlanSelectionEmail(priceKey as StripePriceKey, cycle).catch((error) => {
+				void sendPricingPlanSelectionEmail(
+					priceKey as StripePriceKey,
+					cycle,
+					event.locals.user
+				).catch((error) => {
 					console.error('Failed to send pricing plan selection notification:', error);
 				});
 				return redirect(
@@ -143,7 +147,11 @@ export const actions: Actions = {
 			const priceKey = formData.get('priceKey');
 			const cycle = parseBillingCycle(formData.get('billingCycle'));
 			if (typeof priceKey === 'string' && allowedKeys.includes(priceKey as StripePriceKey)) {
-				void sendPricingPlanSelectionEmail(priceKey as StripePriceKey, cycle).catch((error) => {
+				void sendPricingPlanSelectionEmail(
+					priceKey as StripePriceKey,
+					cycle,
+					event.locals.user
+				).catch((error) => {
 					console.error('Failed to send pricing plan selection notification:', error);
 				});
 				return redirect(
@@ -173,7 +181,7 @@ export const actions: Actions = {
 		}
 
 		const normalizedKey = priceKey as StripePriceKey;
-		void sendPricingPlanSelectionEmail(normalizedKey, billingCycle).catch((error) => {
+		void sendPricingPlanSelectionEmail(normalizedKey, billingCycle, user).catch((error) => {
 			console.error('Failed to send pricing plan selection notification:', error);
 		});
 
