@@ -13,7 +13,11 @@ const NO_CACHE_HEADERS = {
 
 export const GET: RequestHandler = async ({ locals }) => {
 	const user = locals.user
-		? { username: locals.user.username, emailVerified: locals.user.emailVerified }
+		? {
+				id: locals.user.id,
+				username: locals.user.username,
+				emailVerified: locals.user.emailVerified
+			}
 		: null;
 
 	return new Response(JSON.stringify({ user }), {
