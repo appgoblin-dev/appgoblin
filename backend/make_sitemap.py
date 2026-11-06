@@ -50,6 +50,8 @@ STATIC_URLS = [
     "https://appgoblin.info/reports/app-ecosystem-report-Q1-2026",
     "https://appgoblin.info/fastest-growing-apps/google/overall",
     "https://appgoblin.info/fastest-growing-apps/ios/overall",
+    "https://appgoblin.info/top-ctv-app-ranks/google",
+    "https://appgoblin.info/top-ctv-app-ranks/apple",
     "https://appgoblin.info/collections/new_monthly/google/overall",
     "https://appgoblin.info/collections/new_weekly/apple/overall",
     "https://appgoblin.info/collections/new_weekly/google/overall",
