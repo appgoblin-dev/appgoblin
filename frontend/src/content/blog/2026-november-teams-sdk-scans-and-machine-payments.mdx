@@ -1,0 +1,99 @@
+---
+title: 'New: team seats, SDK scan tracking, CTV rankings, and machine payments'
+description: 'AppGoblin now supports shared team accounts, per-request SDK scan progress, CTV app rankings, a rebuilt data flows view, and pay-per-page access for AI agents.'
+pubDate: 'November 6 2026'
+heroImage: '/appgoblin_screenshot.png'
+---
+
+## What shipped since the last post
+
+Most of the last month went into plumbing: shared accounts, scan tracking, and a payment path for non-human clients. A few new pages came with it.
+
+---
+
+## 1. Teams and shared seats
+
+Paid plans are now organization-based. Each subscription has an owner, members, and a seat count.
+
+- **B2B SDK Intelligence** — 3 seats included, extra seats $99/mo
+- **Premium B2B** — 10 seats included, extra seats $49/mo
+- Owners invite teammates from [Team](/account/team); invitations expire after seven days
+- Seat counts change from [Subscription](/account/subscription)
+
+One subscription now covers a whole team instead of one login.
+
+## 2. My SDK Scans
+
+Scan requests are no longer a black box. [My SDK Scans](/account/requested-scans) lets you submit a request by store ID, page through your history, and expand **View progress** to see each stage: request submitted, app downloaded, SDKs scanned, data imported, and the optional Waydroid run.
+
+Progress is inferred from crawl activity, so each stage reports what was actually observed and when. Stages with no matching event say so rather than guessing.
+
+## 3. SDK exports: latest or all versions
+
+Every SDK export now comes in two variants:
+
+- **All App Versions** — every version that matched the SDK
+- **Latest App Versions Only** — one row per app
+
+Both are emailed when ready and saved to [Generated Reports](/account/reports), with the variant recorded in the report name.
+
+## 4. New public API endpoints
+
+- `GET /api/v1/apps/{store_id}/versions` — B2B SDK or Premium
+- `GET /api/v1/apps/{store_id}/sdks/history` — B2B SDK or Premium
+- `GET /api/v1/apps/{store_id}/mapped-sdks` — B2B SDK or Premium
+- `GET /api/v1/companies/{company_domain}/sdks` — any paid tier
+- `GET /api/v1/sdks/{sdk_slug}` — any paid tier
+- `GET /api/v1/rankings/ctv/{store}` — any API key
+
+`/versions` returns an app's crawled version timeline. `/sdks/history` returns the additions, removals, and no-change rows behind the SDK History tab, with company names and logos. `/mapped-sdks` groups an app's SDK slugs by company domain.
+
+See the [API docs](/api-docs) for examples.
+
+## 5. Top CTV apps
+
+[Top CTV Apps](/top-ctv-app-ranks/google) ranks the top 50 TV-supported apps per store by estimated monthly installs, with category, total installs, monthly revenue, and a 14-day growth score.
+
+App pages now show a **TV Support** flag, and `tv_supported` is in the app basics API response.
+
+## 6. Data flows, rebuilt
+
+The per-app data flows view has three tabs:
+
+- **Overview** — scan runs, unique domains, mapped companies, captured creatives, and a summary of the latest scan
+- **All API Calls** — the full call table, filterable by scan, company category, or creative
+- **Changes** — a diff of the two most recent scans, marking each vendor new, no longer observed, or unchanged
+
+The Changes tab answers "did this app start talking to a new vendor?" without diffing tables by hand.
+
+## 7. Machine payments for AI agents
+
+Agents that are not signed in can pay $0.10 to load a page instead of creating an account.
+
+- **x402** — USDC on Base, advertised at [`/.well-known/x402`](/.well-known/x402)
+- **MPP** — the same offers via the Machine Payments Protocol
+- **OpenAPI** — [`/openapi.json`](/openapi.json) lists every payable resource with `x-payment-info`
+
+Payable surfaces cover search, app keyword and SDK pages, app comparisons, SDK pattern and mapped SDK pages, developer SDK pages, and the Q2 ecosystem report download.
+
+Signed-in users and normal browsers never see a payment challenge.
+
+## 8. October user acquisition report
+
+The [October 2026 report](/reports/ad-user-acquisition-2026-october) is live: 13,615 apps, 1.7M tracked HTTPS calls, 4,798 API domains, 356 adtech companies, 1,288 advertisers, and 19,289 creatives. It includes top ad buyers, fastest-growing advertising apps, most-distributed video creatives, network reach, and newly released apps buying ads.
+
+## Also shipped
+
+- Report and dataset downloads use signed URLs
+- Company export pages list every report with row count and last modified date
+- Parent-company verified app downloads are available as a dataset
+- SDK pattern pages sort by app count; mapped SDK pages link back to their patterns
+- Frontend moved to SvelteKit 3
+
+## Try it
+
+- [Manage your team](/account/team)
+- [Request an SDK scan](/account/requested-scans)
+- [Browse top CTV apps](/top-ctv-app-ranks/google)
+- [Read the October report](/reports/ad-user-acquisition-2026-october)
+- [See API plans and pricing](/pricing)
