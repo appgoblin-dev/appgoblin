@@ -1,6 +1,7 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 
 import { ANONYMOUS_SEARCHES_PER_DAY, RedisRateLimiter } from './redis-rate-limit.js';
+import { getClientIP } from './request.js';
 
 const limiter = new RedisRateLimiter();
 
@@ -69,7 +70,11 @@ export function isMachineClient(event: RequestEvent): boolean {
 	return !isBrowserDataFetch(event);
 }
 
-function clientKey(event: Pick<RequestEvent, 'getClientAddress'>): string {
+function clientKey(event: Pick<RequestEvent, 'request' | 'getClientAddress'>): string {
+	const forwardedIP = getClientIP(event.request);
+	if (forwardedIP !== null) {
+		return forwardedIP;
+	}
 	try {
 		return event.getClientAddress() || 'unknown';
 	} catch {
