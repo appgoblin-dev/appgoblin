@@ -18,8 +18,10 @@ from api_app.models import (
     StoreCollections,
     StoreRankings,
 )
+from api_app.utils import extend_app_icon_url
 from config import get_logger
 from dbcon.queries import (
+    get_ctv_app_ranks,
     get_history_top_ranks,
     get_most_recent_top_ranks,
 )
@@ -79,6 +81,27 @@ class RankingsController(Controller):
         overview = ranking_map(state=state)
 
         return overview
+
+    @get(path="/ctv/{store:int}", cache=86400)
+    async def get_ctv_app_ranks(
+        self: Self,
+        state: State,
+        store: int,
+        limit: int = 50,
+    ) -> dict:
+        """Handle GET request for the top CTV-supported apps in a store.
+
+        Returns
+        -------
+            A dictionary of the top apps ranked by monthly installs
+
+        """
+        start = time.perf_counter() * 1000
+        df = get_ctv_app_ranks(state, store=store, limit=limit)
+        df = extend_app_icon_url(df)
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(f"{self.path}/ctv/{store} took {duration}ms")
+        return {"apps": df.to_dict(orient="records")}
 
     @get(path="/{collection:int}/{category:int}/short", cache=86400)
     async def get_short_ranks_for_category(
