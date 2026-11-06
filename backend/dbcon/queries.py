@@ -24,9 +24,13 @@ def get_scan_progress(
 ) -> dict:
     """Get version-specific events potentially associated with a scan request."""
     with state.dbcon.engine.connect() as conn:
-        row = conn.execute(
-            sql.scan_progress, {"store_id": store_id, "requested_at": requested_at}
-        ).mappings().one()
+        row = (
+            conn.execute(
+                sql.scan_progress, {"store_id": store_id, "requested_at": requested_at}
+            )
+            .mappings()
+            .one()
+        )
     return dict(row)
 
 
