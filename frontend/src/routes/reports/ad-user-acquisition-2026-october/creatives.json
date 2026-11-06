@@ -1,0 +1,112 @@
+[
+  {
+    "phash": "02e9cfebdbb3",
+    "md5_hash": "6573608c16d3183fc8563cc63da4c55e",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 66,
+    "first_seen": "2026-10-17T12:42:01.105",
+    "last_seen": "2026-10-31T23:08:30.755",
+    "advertiser_store_id": "com.savysoda.pixelstarships",
+    "advertiser_icon_128": "a828d43f2fc1b23d_128.png"
+  },
+  {
+    "phash": "a52bfd66b694",
+    "md5_hash": "2c06f3294c8a16bccbe0ac1ac56cd771",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 53,
+    "first_seen": "2026-10-28T08:40:22.266",
+    "last_seen": "2026-10-31T14:37:32.571",
+    "advertiser_store_id": "com.bagelcode.slots1",
+    "advertiser_icon_128": "90b117137e7e71c4_128.png"
+  },
+  {
+    "phash": "39d9bfd2bdf2",
+    "md5_hash": "65c9d161d2e24905f4095f31cd25c985",
+    "file_extension": "mp4",
+    "advertiser_count": 1,
+    "publisher_count": 49,
+    "first_seen": "2026-10-29T01:49:03.108",
+    "last_seen": "2026-10-31T23:23:34.726",
+    "advertiser_store_id": "com.zhiliaoapp.musically",
+    "advertiser_icon_128": "d93b2ee16686303e_128.png"
+  },
+  {
+    "phash": "755ea993fdc9",
+    "md5_hash": "b4c918a26fee5a41c9697f462b396d1c",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 47,
+    "first_seen": "2026-10-01T14:54:17.490",
+    "last_seen": "2026-10-31T13:35:14.604",
+    "advertiser_store_id": "com.bagelcode.slots1",
+    "advertiser_icon_128": "90b117137e7e71c4_128.png"
+  },
+  {
+    "phash": "2bab2b973396",
+    "md5_hash": "a3bc73fd5393cde3efd54c1fa781653d",
+    "file_extension": "mp4",
+    "advertiser_count": 1,
+    "publisher_count": 44,
+    "first_seen": "2026-10-29T06:19:18.507",
+    "last_seen": "2026-10-31T23:56:23.664",
+    "advertiser_store_id": "com.zhiliaoapp.musically",
+    "advertiser_icon_128": "d93b2ee16686303e_128.png"
+  },
+  {
+    "phash": "7fbac9789b9f",
+    "md5_hash": "3c30c7b7571fbdfbe594e64d70cc2335",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 41,
+    "first_seen": "2026-10-06T17:03:38.739",
+    "last_seen": "2026-10-31T23:28:58.065",
+    "advertiser_store_id": "com.diamondlife.slots.vegas.free",
+    "advertiser_icon_128": "d1f8684b23c10f7e_128.png"
+  },
+  {
+    "phash": "8b77f5fdc7e6",
+    "md5_hash": "f4fe01015d3a130bb2a44a2ccf4bd5ef",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 27,
+    "first_seen": "2026-10-03T00:02:40.478",
+    "last_seen": "2026-10-31T23:19:56.497",
+    "advertiser_store_id": "com.diamondlife.slots.vegas.free",
+    "advertiser_icon_128": "d1f8684b23c10f7e_128.png"
+  },
+  {
+    "phash": "a7b6f47af3c3",
+    "md5_hash": "be595178991f24c526e871a6060b7610",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 19,
+    "first_seen": "2026-10-03T16:57:22.887",
+    "last_seen": "2026-10-06T20:13:31.117",
+    "advertiser_store_id": "gps.speedometer.tripmeter.odometer.speedtracker.stepcounter",
+    "advertiser_icon_128": "85b43ab72f60bc1c_128.png"
+  },
+  {
+    "phash": "cefa3badcd77",
+    "md5_hash": "eee8a3862753d533795fb3c75f95b0ae",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 19,
+    "first_seen": "2026-10-17T02:26:05.195",
+    "last_seen": "2026-10-26T22:22:31.127",
+    "advertiser_store_id": "com.pdfspeaker.pdfreader.pdfviewer.pdfeditor",
+    "advertiser_icon_128": "bc929269cb6dc19c_128.png"
+  },
+  {
+    "phash": "77bd6febb0b5",
+    "md5_hash": "3d42f74b3776584c099394453d24d818",
+    "file_extension": "webm",
+    "advertiser_count": 1,
+    "publisher_count": 18,
+    "first_seen": "2026-10-21T20:29:45.600",
+    "last_seen": "2026-10-30T23:16:32.558",
+    "advertiser_store_id": "com.byril.stickmanarcher",
+    "advertiser_icon_128": "bcb7c8c3884d86e6_128.png"
+  }
+]

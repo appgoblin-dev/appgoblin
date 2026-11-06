@@ -1,0 +1,1405 @@
+[
+  {
+    "advertiser_name": "TikTok - Videos, Shop & LIVE",
+    "advertiser_store_id": "com.zhiliaoapp.musically",
+    "advertiser_icon_128": "d93b2ee16686303e_128.png",
+    "advertiser_category": "social networking",
+    "advertiser_installs": 4742602412,
+    "unique_creatives": 101,
+    "unique_publishers": 223,
+    "first_seen": "2026-10-02T18:02:19.067",
+    "last_seen": "2026-10-31T23:56:23.664",
+    "ad_network_domains": [
+      "appodeal.com",
+      "digitalturbine.com",
+      "google.com",
+      "liftoff.io",
+      "moloco.com",
+      "unity.com"
+    ],
+    "avg_publisher_installs": 18238134.692111958,
+    "mmp_domains": [
+      "appsflyer.com",
+      "onelink.me"
+    ],
+    "top_md5_hashes": [
+      "13187d4df1b6c35b1eb124331d3293ae",
+      "fc466f4507c315619b28fca08aea76d2",
+      "51d152a801cba3e16ccbe1e92074ced7",
+      "fc466f4507c315619b28fca08aea76d2",
+      "85c54f846fa7443be6c67f48b16752a9"
+    ],
+    "estimated_buying_size_score": 100,
+    "buying_size_tier": "Top"
+  },
+  {
+    "advertiser_name": "Warhammer 40,000: Tacticus \u2122",
+    "advertiser_store_id": "com.snowprintstudios.tacticus",
+    "advertiser_icon_128": "b485ed7a1790caa5_128.png",
+    "advertiser_category": "game_strategy",
+    "advertiser_installs": 5936347,
+    "unique_creatives": 30,
+    "unique_publishers": 202,
+    "first_seen": "2026-10-01T02:52:29.984",
+    "last_seen": "2026-10-31T00:36:37.339",
+    "ad_network_domains": [
+      "affle.com",
+      "appodeal.com",
+      "digitalturbine.com",
+      "google.com",
+      "liftoff.io",
+      "mobvista.com"
+    ],
+    "avg_publisher_installs": 27674518.84,
+    "mmp_domains": [
+      "singular.net",
+      "sng.link"
+    ],
+    "top_md5_hashes": [
+      "44abc109395bd134b293b2d3a91e5016",
+      "44abc109395bd134b293b2d3a91e5016",
+      "b29a0eac68195c18699676873326f751",
+      "e51b6fc266ce29d1f6060ac3a16395bd",
+      "f092c17d7ad8f274f18b91bbb922d55d"
+    ],
+    "estimated_buying_size_score": 63,
+    "buying_size_tier": "Top"
+  },
+  {
+    "advertiser_name": "Club Vegas Casino Slots Games",
+    "advertiser_store_id": "com.bagelcode.slots1",
+    "advertiser_icon_128": "90b117137e7e71c4_128.png",
+    "advertiser_category": "game_casino",
+    "advertiser_installs": 21605256,
+    "unique_creatives": 37,
+    "unique_publishers": 154,
+    "first_seen": "2026-10-01T00:01:35.524",
+    "last_seen": "2026-10-31T20:00:54.840",
+    "ad_network_domains": [
+      "digitalturbine.com",
+      "google.com",
+      "liftoff.io"
+    ],
+    "avg_publisher_installs": 8979044.21491228,
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "top_md5_hashes": [
+      "04bbada7a8e10ff0945fcb67708467ef",
+      "a56742bf4613cf7bf7e1f8cb92257245",
+      "72d33f9341a7cfb38371676a420164de",
+      "c2928a44de8e4791dc4636ebcd0d6be8",
+      "b86af45b717864f50172a7a196fa6279"
+    ],
+    "estimated_buying_size_score": 51,
+    "buying_size_tier": "Top"
+  },
+  {
+    "advertiser_name": "Tiki Solitaire TriPeaks",
+    "advertiser_store_id": "com.gsn.android.tripeaks",
+    "advertiser_icon_128": "85571b4b6c991b72_128.png",
+    "advertiser_category": "game_card",
+    "advertiser_installs": 28706314,
+    "unique_creatives": 48,
+    "unique_publishers": 146,
+    "first_seen": "2026-10-01T08:13:20.122",
+    "last_seen": "2026-10-24T03:43:36.733",
+    "ad_network_domains": [
+      "affle.com",
+      "appodeal.com",
+      "digitalturbine.com",
+      "google.com",
+      "liftoff.io",
+      "mobvista.com"
+    ],
+    "avg_publisher_installs": 16684278.216,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "da2a44364db25012e7e61be1c00f8bfc",
+      "d8e86cc089ae00fdbf488647593418ab",
+      "36803aa0e31ed62ab619377ba210da5d",
+      "138777e98c67dbcb29bbc019787c08fd",
+      "4c3600653f7d10e70b9474822be4b95a"
+    ],
+    "estimated_buying_size_score": 57,
+    "buying_size_tier": "Top"
+  },
+  {
+    "advertiser_name": "Lotsa Slots - Casino Games",
+    "advertiser_store_id": "com.diamondlife.slots.vegas.free",
+    "advertiser_icon_128": "d1f8684b23c10f7e_128.png",
+    "advertiser_category": "game_casino",
+    "advertiser_installs": 33706731,
+    "unique_creatives": 18,
+    "unique_publishers": 91,
+    "first_seen": "2026-10-03T00:02:40.478",
+    "last_seen": "2026-10-31T23:28:58.065",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 14771967.44642857,
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "top_md5_hashes": [
+      "54a3225a5d5319e71cc64fa7d6bd20d1",
+      "303a6b932094188f0137825ecb75535a",
+      "ded9ba84d0b49d874789b842ea5b595e",
+      "ad03d29be324f8dc90465f92c5aca9bd",
+      "ded9ba84d0b49d874789b842ea5b595e"
+    ],
+    "estimated_buying_size_score": 26,
+    "buying_size_tier": "Big"
+  },
+  {
+    "advertiser_name": "Pixel Starships\u2122",
+    "advertiser_store_id": "com.savysoda.pixelstarships",
+    "advertiser_icon_128": "a828d43f2fc1b23d_128.png",
+    "advertiser_category": "game_strategy",
+    "advertiser_installs": 4533752,
+    "unique_creatives": 11,
+    "unique_publishers": 91,
+    "first_seen": "2026-10-02T04:04:26.477",
+    "last_seen": "2026-10-31T23:08:30.755",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 7213706.3367346935,
+    "mmp_domains": [
+      "appsflyer.com",
+      "metrica.yandex.com"
+    ],
+    "top_md5_hashes": [
+      "1ff9ace080ff351e48934763528de909",
+      "4efa5e8ac21c660970c61d0e014bb3f9",
+      "4149d84ab33d00cde60a39a9abee9caa",
+      "48253b81f9a900c123536e975e1cbaea",
+      "48253b81f9a900c123536e975e1cbaea"
+    ],
+    "estimated_buying_size_score": 22,
+    "buying_size_tier": "Big"
+  },
+  {
+    "advertiser_name": "Audible: Audiobooks & Podcasts",
+    "advertiser_store_id": "com.audible.application",
+    "advertiser_icon_128": "907a6f65b1189ec3_128.png",
+    "advertiser_category": "books_and_reference",
+    "advertiser_installs": 276344696,
+    "unique_creatives": 19,
+    "unique_publishers": 72,
+    "first_seen": "2026-10-01T00:59:12.781",
+    "last_seen": "2026-10-31T08:51:23.371",
+    "ad_network_domains": [
+      "affle.com",
+      "amazon.com",
+      "digitalturbine.com",
+      "google.com",
+      "liftoff.io",
+      "mobvista.com"
+    ],
+    "avg_publisher_installs": 22122700.315789472,
+    "mmp_domains": [
+      "kochava.com"
+    ],
+    "top_md5_hashes": [
+      "07cc3d79d8a80b25a4b315dea4424333",
+      "07cc3d79d8a80b25a4b315dea4424333",
+      "95007003ea5ec1b0adc766e4938af6a2",
+      "9bfcb4a111aa6216ea6c8cb8e8112a18",
+      "95007003ea5ec1b0adc766e4938af6a2"
+    ],
+    "estimated_buying_size_score": 26,
+    "buying_size_tier": "Big"
+  },
+  {
+    "advertiser_name": "Facebook Lite",
+    "advertiser_store_id": "com.facebook.lite",
+    "advertiser_icon_128": "f3cc8b989893636c_128.png",
+    "advertiser_category": "social networking",
+    "advertiser_installs": 4262655476,
+    "unique_creatives": 7,
+    "unique_publishers": 67,
+    "first_seen": "2026-10-04T14:54:39.850",
+    "last_seen": "2026-10-26T23:07:42.254",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 4556518.993197279,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "0791a2a126a5bee5a3d89d49ccfdc83d",
+      "2484890047e24603efb918d78958466c",
+      "63c601f2c347cfc242483468f7fcf0db",
+      "2484890047e24603efb918d78958466c",
+      "2484890047e24603efb918d78958466c"
+    ],
+    "estimated_buying_size_score": 16,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "PDF Reader - PDF Speaker",
+    "advertiser_store_id": "com.pdfspeaker.pdfreader.pdfviewer.pdfeditor",
+    "advertiser_icon_128": "bc929269cb6dc19c_128.png",
+    "advertiser_category": "tools",
+    "advertiser_installs": 3265196,
+    "unique_creatives": 15,
+    "unique_publishers": 57,
+    "first_seen": "2026-10-16T19:13:42.206",
+    "last_seen": "2026-10-27T01:11:46.687",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 9068980.363636363,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "cb3cafa5c921abdc058178966bfd19b1",
+      "2abf705ae06b12132c2503bf03f9597a",
+      "fa1e2b92094298329f1fc821b7d32028",
+      "2abf705ae06b12132c2503bf03f9597a",
+      "2abf705ae06b12132c2503bf03f9597a"
+    ],
+    "estimated_buying_size_score": 15,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Archers Online: PvP",
+    "advertiser_store_id": "com.byril.stickmanarcher",
+    "advertiser_icon_128": "bcb7c8c3884d86e6_128.png",
+    "advertiser_category": "game_action",
+    "advertiser_installs": 16940325,
+    "unique_creatives": 12,
+    "unique_publishers": 45,
+    "first_seen": "2026-10-17T16:22:41.894",
+    "last_seen": "2026-10-31T02:04:38.384",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 18155230.98214286,
+    "mmp_domains": [
+      "adjust.com",
+      "appmetrica.yandex.com",
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "4bb0883d40b594b6fb38c1ec741cb96d",
+      "3e9b8f94d16288556ecc376f0dce831c",
+      "3e9b8f94d16288556ecc376f0dce831c",
+      "3e9b8f94d16288556ecc376f0dce831c",
+      "3e9b8f94d16288556ecc376f0dce831c"
+    ],
+    "estimated_buying_size_score": 11,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "\u8766\u76ae\u8cfc\u7269 | \u82b1\u5f97\u66f4\u5c11\u8cb7\u5f97\u66f4\u597d",
+    "advertiser_store_id": "com.shopee.tw",
+    "advertiser_icon_128": "d63968c6319364db_128.png",
+    "advertiser_category": "shopping",
+    "advertiser_installs": 17531586,
+    "unique_creatives": 33,
+    "unique_publishers": 42,
+    "first_seen": "2026-10-10T09:27:24.061",
+    "last_seen": "2026-10-29T23:09:39.217",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 14512662.91935484,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "d95a62fef0479f3ffb0ce4029d9830d1",
+      "9db67bc88778b1218a3391b0d71d7f72",
+      "9db67bc88778b1218a3391b0d71d7f72",
+      "102e30aa23fe02227c63010c9a8582a5",
+      "3affcb86ac15e60925d76235dc2e6411"
+    ],
+    "estimated_buying_size_score": 19,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "IPTV Player - Smart Live TV",
+    "advertiser_store_id": "ai.metaverse.iptv.smartplayer.onlinetv",
+    "advertiser_icon_128": "c4624a356d1f1f72_128.png",
+    "advertiser_category": "entertainment",
+    "advertiser_installs": 41048776,
+    "unique_creatives": 15,
+    "unique_publishers": 39,
+    "first_seen": "2026-10-01T10:28:09.061",
+    "last_seen": "2026-10-31T00:36:37.339",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 11538212.0625,
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "top_md5_hashes": [
+      "d97b3a6444a01eb8ccb8b8b4025804c5",
+      "d97b3a6444a01eb8ccb8b8b4025804c5",
+      "40fd8108ed6e1ee139394ed5b6774210",
+      "40fd8108ed6e1ee139394ed5b6774210",
+      "8ba6f9703942e6ad74d6ce63d3668a3d"
+    ],
+    "estimated_buying_size_score": 11,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Bigo Live - Live Streaming App",
+    "advertiser_store_id": "sg.bigo.live",
+    "advertiser_icon_128": "840f052f55ee54f9_128.png",
+    "advertiser_category": "social networking",
+    "advertiser_installs": 846214072,
+    "unique_creatives": 28,
+    "unique_publishers": 38,
+    "first_seen": "2026-10-04T04:33:54.823",
+    "last_seen": "2026-10-31T13:47:42.834",
+    "ad_network_domains": [
+      "appodeal.com",
+      "bidease.com",
+      "digitalturbine.com",
+      "google.com",
+      "liftoff.io",
+      "smadex.com",
+      "unity.com"
+    ],
+    "avg_publisher_installs": 25958911.62264151,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "ab3c26cf1e6847290dbcf6e6b50e1b71",
+      "8c88aee78f7d6e0f67993260824ce258",
+      "3632c2573f03defe68bcc8b7c0d35ee1",
+      "93b5c5262081c9a6c08227b47f6d8188",
+      "01ac8d636e348598637fd78c6cc87bd8"
+    ],
+    "estimated_buying_size_score": 22,
+    "buying_size_tier": "Big"
+  },
+  {
+    "advertiser_name": "Languages Translator App",
+    "advertiser_store_id": "com.freevoicetranslator.languagetranslate.speakandtranslate",
+    "advertiser_icon_128": "bf19d060c3c73a8d_128.png",
+    "advertiser_category": "tools",
+    "advertiser_installs": 18981827,
+    "unique_creatives": 12,
+    "unique_publishers": 38,
+    "first_seen": "2026-10-09T22:53:24.871",
+    "last_seen": "2026-10-25T23:55:59.036",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 6238880.340425532,
+    "mmp_domains": [
+      "appmetrica.yandex.com",
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "7ecebb163292c340c7043abe6bedbc0e",
+      "23c4e4dee0a6694446e4b420fc33157e",
+      "3a87774073743c07ae465e3842f976e4",
+      "5a40c44736ae77bf977491d8a5e10be8",
+      "c0fa32f01ddfffc441b40ca58531c5c5"
+    ],
+    "estimated_buying_size_score": 9,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Live Cam Earth Map - GPS Cam",
+    "advertiser_store_id": "io.earthmap.livecam.streetview.gpscamera",
+    "advertiser_icon_128": "f48527f448cd69e8_128.png",
+    "advertiser_category": "maps_and_navigation",
+    "advertiser_installs": 2498412,
+    "unique_creatives": 15,
+    "unique_publishers": 37,
+    "first_seen": "2026-10-01T08:27:39.866",
+    "last_seen": "2026-10-29T07:06:38.376",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 4480495.339622642,
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "top_md5_hashes": [
+      "9bcada8597f6ff93d0ce1b9afd997f46",
+      "3d9c6bbca2d8b1092621065230b4d9e0",
+      "811aba02eb81aea0063a8d0aa444fff4",
+      "811aba02eb81aea0063a8d0aa444fff4",
+      "811aba02eb81aea0063a8d0aa444fff4"
+    ],
+    "estimated_buying_size_score": 10,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Time Warp Scan - Face Filters",
+    "advertiser_store_id": "com.timewarpscan.facescanner.timewarpfilter",
+    "advertiser_icon_128": "a5e5c43a5acb3296_128.png",
+    "advertiser_category": "photo_and_video",
+    "advertiser_installs": 188622,
+    "unique_creatives": 10,
+    "unique_publishers": 36,
+    "first_seen": "2026-10-01T02:31:11.126",
+    "last_seen": "2026-10-31T11:02:29.534",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 8192891.5227272725,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "ffe4dc6ebed7d28d9b6d972ddb578a74",
+      "1c16265b6b4a51d9841eb8a42e455784",
+      "1c16265b6b4a51d9841eb8a42e455784",
+      "eca1abc489e026304041cd973fb4944b",
+      "1c16265b6b4a51d9841eb8a42e455784"
+    ],
+    "estimated_buying_size_score": 7,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Solitaire - Classic Card Games",
+    "advertiser_store_id": "com.mobilityware.solitaire",
+    "advertiser_icon_128": "d4c0a19f6e371a0f_128.png",
+    "advertiser_category": "game_card",
+    "advertiser_installs": 152020278,
+    "unique_creatives": 11,
+    "unique_publishers": 32,
+    "first_seen": "2026-10-26T03:25:13.246",
+    "last_seen": "2026-10-29T12:38:40.745",
+    "ad_network_domains": [
+      "bigabid.com",
+      "digitalturbine.com",
+      "liftoff.io",
+      "unity.com"
+    ],
+    "avg_publisher_installs": 19904974.842105262,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "98c1dd50cd87dd6b3900a01cad920f0f",
+      "8ce3c3517e164a8d760a28ec94da883a",
+      "46814c43c4ab342b3077f955ccc95b45",
+      "8ce3c3517e164a8d760a28ec94da883a",
+      "ade63ee9647639a3965e32921fca805d"
+    ],
+    "estimated_buying_size_score": 11,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Ibotta: Save & Earn Cash Back",
+    "advertiser_store_id": "com.ibotta.android",
+    "advertiser_icon_128": "85686a97349acd6d_128.png",
+    "advertiser_category": "shopping",
+    "advertiser_installs": 24432062,
+    "unique_creatives": 22,
+    "unique_publishers": 31,
+    "first_seen": "2026-10-01T02:18:53.914",
+    "last_seen": "2026-10-31T23:38:50.166",
+    "ad_network_domains": [
+      "adikteev.com",
+      "appodeal.com",
+      "digitalturbine.com",
+      "google.com",
+      "inmobi.com",
+      "mobvista.com"
+    ],
+    "avg_publisher_installs": 91697986.21276596,
+    "mmp_domains": [
+      "appsflyer.com",
+      "onelink.me"
+    ],
+    "top_md5_hashes": [
+      "030dbe0f5ba8dca17b6bb65fb0b5dee2",
+      "e65405d0027f7ee9ca508abeecfaf7ac",
+      "1349ac1f6dde0473725d0b5d44281bfd",
+      "6025fe83ff024044a5f82ed5666cebc1",
+      "82574cc7a516cc8316d82bc0d5d9ddae"
+    ],
+    "estimated_buying_size_score": 16,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "\u5305\u4f60\u767c\uff0d\u738b\u8b58\u8ce2\u3001\u5b89\u5fc3\u4e9e\u63a8\u85a6\u4f11\u9592\u5a1b\u6a02\u57ce\uff0d\u9b54\u9f8d\u6a5f\u53f0\u5168\u65b0\u4e0a\u7dda",
+    "advertiser_store_id": "com.jumbo.yirufa",
+    "advertiser_icon_128": "936e08cc8bc1b797_128.png",
+    "advertiser_category": "game_casino",
+    "advertiser_installs": 1425372,
+    "unique_creatives": 17,
+    "unique_publishers": 31,
+    "first_seen": "2026-10-01T16:23:05.744",
+    "last_seen": "2026-10-29T23:28:04.915",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 50288321.89189189,
+    "mmp_domains": [
+      "adjust.com",
+      "appsflyer.com",
+      "branch.io"
+    ],
+    "top_md5_hashes": [
+      "bcf8491267a9ac437bcd4b1e339937d5",
+      "0051f94f4ffa1e9be0ceb8e89b15217e",
+      "44404f3f2ffe3d89beed7eb5aa5bf4c2",
+      "bcf8491267a9ac437bcd4b1e339937d5",
+      "0051f94f4ffa1e9be0ceb8e89b15217e"
+    ],
+    "estimated_buying_size_score": 9,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "\u5b85\u795e\u723a\u9ebb\u5c07\u2014\u6b63\u5b9716\u5f35\u53f0\u7063\u9ebb\u5c07\uff0c\u6355\u9b5a\u6a5f\u5927\u734e\u72c2\u5674\uff0c\u771f\u4eba\u79d2\u958b\u684c",
+    "advertiser_store_id": "air.tw.com.bonuswinner.bwmj16tw",
+    "advertiser_icon_128": "e944b63b238592e7_128.png",
+    "advertiser_category": "game_casino",
+    "advertiser_installs": 5056244,
+    "unique_creatives": 8,
+    "unique_publishers": 26,
+    "first_seen": "2026-10-01T16:35:57.808",
+    "last_seen": "2026-10-29T16:55:45.320",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 60549940.93548387,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "cb9db2c3566c29aca4fe2142c8c29910",
+      "fdd48d59278134929b2a37bdb6e0ff69",
+      "975acd1e3073d32cfa5198dfaf7e7b51",
+      "1c0fa0ed7b70ad5aee5663b45492c535",
+      "bb17e16faca006ee9c7ea463e89ef20c"
+    ],
+    "estimated_buying_size_score": 4,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "MapleStory Worlds",
+    "advertiser_store_id": "com.nexon.mod",
+    "advertiser_icon_128": "ee4c913b1a71658e_128.png",
+    "advertiser_category": "entertainment",
+    "advertiser_installs": 1441516,
+    "unique_creatives": 21,
+    "unique_publishers": 26,
+    "first_seen": "2026-10-01T16:45:19.264",
+    "last_seen": "2026-10-29T17:51:34.371",
+    "ad_network_domains": [
+      "appodeal.com",
+      "digitalturbine.com",
+      "google.com",
+      "liftoff.io",
+      "moloco.com",
+      "rtbhouse.com"
+    ],
+    "avg_publisher_installs": 34636146.836065575,
+    "mmp_domains": [
+      "abr.ge",
+      "adjust.com",
+      "airbridge.io"
+    ],
+    "top_md5_hashes": [
+      "85517a6b9ea2b5ce03432ea22c6ebe19",
+      "e51b6fc266ce29d1f6060ac3a16395bd",
+      "287e1024da69ee55c85afb9829d84a68",
+      "901e8cbf5dc5ae7e677abf890d0982f8",
+      "3c684d6fb4a48fb5cee2fbbfdfac5030"
+    ],
+    "estimated_buying_size_score": 14,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Simply Piano: Learn Piano Fast",
+    "advertiser_store_id": "com.joytunes.simplypiano",
+    "advertiser_icon_128": "90f06dcbb13c0773_128.png",
+    "advertiser_category": "education",
+    "advertiser_installs": 93157928,
+    "unique_creatives": 15,
+    "unique_publishers": 24,
+    "first_seen": "2026-10-10T23:25:33.486",
+    "last_seen": "2026-10-27T00:41:48.473",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 10465724.548387097,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "0e569cec573826bb2c7b89b54b68b523",
+      "ab3cdec9bcc628f264217dd7bc87dc23",
+      "ab3cdec9bcc628f264217dd7bc87dc23",
+      "34688a83baaacdd7c507d906290fe61c",
+      "6c22c63e7014f0f41f171af809bd5db9"
+    ],
+    "estimated_buying_size_score": 8,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Artmate: Drawing Together",
+    "advertiser_store_id": "com.trace.art.draw.drawing.paint",
+    "advertiser_icon_128": "eaeca513d63c6944_128.png",
+    "advertiser_category": "art_and_design",
+    "advertiser_installs": 18787742,
+    "unique_creatives": 10,
+    "unique_publishers": 24,
+    "first_seen": "2026-10-01T04:15:12.028",
+    "last_seen": "2026-10-31T22:45:32.145",
+    "ad_network_domains": [
+      "google.com",
+      "liftoff.io",
+      "mobvista.com"
+    ],
+    "avg_publisher_installs": 19429721.70967742,
+    "mmp_domains": [
+      "appmetrica.yandex.com",
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "600a0db136e4cb73610a9edf7f18f4eb",
+      "600a0db136e4cb73610a9edf7f18f4eb",
+      "600a0db136e4cb73610a9edf7f18f4eb",
+      "2b76f1d7fbb5f81b8f7a301cdc59af07",
+      "ca9b83d4454011af1833f8ac66809c11"
+    ],
+    "estimated_buying_size_score": 7,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Happy Color\u00ae: Color by Number",
+    "advertiser_store_id": "com.pixel.art.coloring.color.number",
+    "advertiser_icon_128": "f094cd1c9cfc318b_128.png",
+    "advertiser_category": "game_board",
+    "advertiser_installs": 348329512,
+    "unique_creatives": 17,
+    "unique_publishers": 23,
+    "first_seen": "2026-10-01T10:45:23.031",
+    "last_seen": "2026-10-31T14:28:51.045",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 4977877.357142857,
+    "mmp_domains": [
+      "adjust.com",
+      "appmetrica.yandex.com",
+      "metrica.yandex.com"
+    ],
+    "top_md5_hashes": [
+      "c00ca8d9d0997b27b548028619ea5b90",
+      "987d8c093831102e3c0d112f637707b9",
+      "987d8c093831102e3c0d112f637707b9",
+      "987d8c093831102e3c0d112f637707b9",
+      "4e8bfe7e3392245ca2dd631e17d0ef62"
+    ],
+    "estimated_buying_size_score": 8,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Zynga Poker- Texas Holdem Game",
+    "advertiser_store_id": "com.zynga.livepoker",
+    "advertiser_icon_128": "87d8686129973b97_128.png",
+    "advertiser_category": "game_card",
+    "advertiser_installs": 95502657,
+    "unique_creatives": 6,
+    "unique_publishers": 23,
+    "first_seen": "2026-10-29T08:05:47.739",
+    "last_seen": "2026-10-31T22:06:19.316",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 22834303.79310345,
+    "mmp_domains": [
+      "adjust.com",
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "f50f0b48b5d956b9ca676ca807805b06",
+      "39c5fd6d6f49c62d55de2cd0d821879a",
+      "39c5fd6d6f49c62d55de2cd0d821879a",
+      "39c5fd6d6f49c62d55de2cd0d821879a",
+      "be239c8b4cb981bf7a93be210a2330b6"
+    ],
+    "estimated_buying_size_score": 3,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Drivio: DMV Practice Test 2026",
+    "advertiser_store_id": "com.licency.driving.test",
+    "advertiser_icon_128": "b0b143434d8f5757_128.png",
+    "advertiser_category": "education",
+    "advertiser_installs": 94950,
+    "unique_creatives": 4,
+    "unique_publishers": 22,
+    "first_seen": "2026-10-27T04:57:45.195",
+    "last_seen": "2026-10-31T20:12:50.697",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 19683445.454545453,
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "top_md5_hashes": [
+      "17885bb48d394bf7bd058951185ced7f",
+      "19c66bb11580052ab760b9f6fe138f94",
+      "758fdb643a5e732f9b410e9a2bffb56f",
+      "758fdb643a5e732f9b410e9a2bffb56f",
+      "758fdb643a5e732f9b410e9a2bffb56f"
+    ],
+    "estimated_buying_size_score": 1,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Norton VPN \u2013 Fast & Secure",
+    "advertiser_store_id": "com.symantec.securewifi",
+    "advertiser_icon_128": "e1b49bc592cb9459_128.png",
+    "advertiser_category": "tools",
+    "advertiser_installs": 43213762,
+    "unique_creatives": 10,
+    "unique_publishers": 22,
+    "first_seen": "2026-10-01T04:12:31.046",
+    "last_seen": "2026-10-28T04:00:53.249",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 12131606.07142857,
+    "mmp_domains": [
+      "singular.net"
+    ],
+    "top_md5_hashes": [
+      "8252968434f5dcdb80afb3298485fc7e",
+      "8252968434f5dcdb80afb3298485fc7e",
+      "fb206a4e301c5cf3672c4ea80c56c4d4",
+      "fb206a4e301c5cf3672c4ea80c56c4d4",
+      "95d3565d97281c9be715ac2e9ec8b98e"
+    ],
+    "estimated_buying_size_score": 5,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Jackpot World\u2122 - Slots Casino",
+    "advertiser_store_id": "com.grandegames.slots.dafu.casino",
+    "advertiser_icon_128": "c8c8bb3f2ee0f8c0_128.png",
+    "advertiser_category": "game_casino",
+    "advertiser_installs": 38138936,
+    "unique_creatives": 16,
+    "unique_publishers": 22,
+    "first_seen": "2026-10-01T12:20:25.094",
+    "last_seen": "2026-10-20T11:39:09.826",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 45314931.733333334,
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "top_md5_hashes": [
+      "b927a2feee6adc179431b02f2d8d4aac",
+      "51c83ba07a3354eb128fccf9dc49cf07",
+      "51c83ba07a3354eb128fccf9dc49cf07",
+      "eb36813b437dc8711570d8c7f4953dbb",
+      "0641679eea82dd822158ceb36fcd6e52"
+    ],
+    "estimated_buying_size_score": 7,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Home Decor: House Makeover",
+    "advertiser_store_id": "com.decor.home.inspiration.design",
+    "advertiser_icon_128": "bc83e39c8b6b8c38_128.png",
+    "advertiser_category": "tools",
+    "advertiser_installs": 7513189,
+    "unique_creatives": 11,
+    "unique_publishers": 21,
+    "first_seen": "2026-10-01T08:27:39.866",
+    "last_seen": "2026-10-31T19:06:38.549",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 6981147.869565218,
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "top_md5_hashes": [
+      "940a8d904d2bcf18b265cbc1a38d6a6b",
+      "a1bc4175ac88e308428a77c6b889f39e",
+      "940a8d904d2bcf18b265cbc1a38d6a6b",
+      "940a8d904d2bcf18b265cbc1a38d6a6b",
+      "940a8d904d2bcf18b265cbc1a38d6a6b"
+    ],
+    "estimated_buying_size_score": 5,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "TikTok Lite - Faster TikTok",
+    "advertiser_store_id": "com.tiktok.lite.go",
+    "advertiser_icon_128": "c3332ccd268eb173_128.png",
+    "advertiser_category": "social networking",
+    "advertiser_installs": 22196488,
+    "unique_creatives": 16,
+    "unique_publishers": 21,
+    "first_seen": "2026-10-29T00:13:45.885",
+    "last_seen": "2026-10-31T20:25:57.384",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 19795865.35714286,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "73c3546a80d22bbe65a7b21595b00417",
+      "f5cfd77a3d22d01514913cfbd22729df",
+      "6a5f7d9bbb86892ff2a47aec5bfe30cd",
+      "5d1d1810e81a856631579c165324ccc3",
+      "5d1d1810e81a856631579c165324ccc3"
+    ],
+    "estimated_buying_size_score": 7,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Volume Booster - Sound Booster",
+    "advertiser_store_id": "volumebooster.soundspeaker.louder",
+    "advertiser_icon_128": "c527582c4bfa8567_128.png",
+    "advertiser_category": "music_and_audio",
+    "advertiser_installs": 72543418,
+    "unique_creatives": 15,
+    "unique_publishers": 21,
+    "first_seen": "2026-10-01T01:41:58.452",
+    "last_seen": "2026-10-28T19:33:42.007",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 55080595.43478261,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "374a07acfca44d6bc2d5cad35af99fd0",
+      "374a07acfca44d6bc2d5cad35af99fd0",
+      "c0c4763fada6f862e5a2add6c8e85442",
+      "374a07acfca44d6bc2d5cad35af99fd0",
+      "374a07acfca44d6bc2d5cad35af99fd0"
+    ],
+    "estimated_buying_size_score": 7,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "IPTV Smart Player - Live TV",
+    "advertiser_store_id": "com.iptv.live.tv.streaming.media.player",
+    "advertiser_icon_128": "d4952966977868c7_128.png",
+    "advertiser_category": "tools",
+    "advertiser_installs": 2185207,
+    "unique_creatives": 9,
+    "unique_publishers": 20,
+    "first_seen": "2026-10-01T08:27:39.866",
+    "last_seen": "2026-10-29T09:26:36.517",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 14891791.9,
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "top_md5_hashes": [
+      "b80696ecc747796dc7707e074ac95389",
+      "b80696ecc747796dc7707e074ac95389",
+      "a3e0ff4f34da9d89506f25f0c657b8c8",
+      "3ffd16082cbba4ed7864d637ee519b90",
+      "d74aef3838d5c84fcef0f9615f5f7ad4"
+    ],
+    "estimated_buying_size_score": 3,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "GPS Speedometer- Speed Tracker",
+    "advertiser_store_id": "com.gpsspeedometer.speedtracker.gpstracker",
+    "advertiser_icon_128": "d6c51582cb9b6a3c_128.png",
+    "advertiser_category": "maps_and_navigation",
+    "advertiser_installs": 122659,
+    "unique_creatives": 8,
+    "unique_publishers": 20,
+    "first_seen": "2026-10-03T10:57:40.521",
+    "last_seen": "2026-10-09T10:21:28.434",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 5319145.517241379,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "81bc43c27593ecada601def95226d1c2",
+      "c32901d78d69c5a975d939012bba5fd3",
+      "c32901d78d69c5a975d939012bba5fd3",
+      "81bc43c27593ecada601def95226d1c2",
+      "f129a725e5ead1216c9a6cc8000e9fe9"
+    ],
+    "estimated_buying_size_score": 2,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "GPS Speedometer -Speed meter",
+    "advertiser_store_id": "gps.speedometer.tripmeter.odometer.speedtracker.stepcounter",
+    "advertiser_icon_128": "85b43ab72f60bc1c_128.png",
+    "advertiser_category": "travel_and_local",
+    "advertiser_installs": 89407,
+    "unique_creatives": 4,
+    "unique_publishers": 20,
+    "first_seen": "2026-10-03T16:57:22.887",
+    "last_seen": "2026-10-06T20:13:31.117",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 3386242.0,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "be595178991f24c526e871a6060b7610",
+      "74713cef6436e063015143c87323eb35",
+      "be595178991f24c526e871a6060b7610",
+      "be595178991f24c526e871a6060b7610",
+      "be595178991f24c526e871a6060b7610"
+    ],
+    "estimated_buying_size_score": 0,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "\u91ce\u883b\u4e16\u754c-HUGA\u3001\u6355\u9b5a\u6a5f\u3001\u9ebb\u5c07",
+    "advertiser_store_id": "com.sayyo.huga",
+    "advertiser_icon_128": "c62b7f4019b50fb1_128.png",
+    "advertiser_category": "game_casino",
+    "advertiser_installs": 923338,
+    "unique_creatives": 8,
+    "unique_publishers": 20,
+    "first_seen": "2026-10-01T19:37:09.730",
+    "last_seen": "2026-10-29T22:34:56.895",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 14718017.961538462,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "8126b7f501b6fc17581220fa9e438645",
+      "8126b7f501b6fc17581220fa9e438645",
+      "6b1cfb6489e35050428dd44417b3e02a",
+      "50ee75b35490db7d250c5b172ada8845",
+      "50ee75b35490db7d250c5b172ada8845"
+    ],
+    "estimated_buying_size_score": 2,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Royal Kingdom",
+    "advertiser_store_id": "com.dreamgames.royalkingdom",
+    "advertiser_icon_128": "d8c51e2a559e307d_128.png",
+    "advertiser_category": "game_puzzle",
+    "advertiser_installs": 110112828,
+    "unique_creatives": 12,
+    "unique_publishers": 20,
+    "first_seen": "2026-10-09T21:38:49.319",
+    "last_seen": "2026-10-23T00:40:46.587",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 18663408.095238097,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "06b8a82c0daa225d4bd480fb308b7a2a",
+      "06b8a82c0daa225d4bd480fb308b7a2a",
+      "722d2b1e22a70064617f475de1119480",
+      "d177805bb826cfc17b066e47f59a63a7",
+      "41dd6d58eea268d7b9471a437a117b2d"
+    ],
+    "estimated_buying_size_score": 5,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "VivaVideo - Video Cut & Editor",
+    "advertiser_store_id": "com.quvideo.xiaoying",
+    "advertiser_icon_128": "c53f6a3669383531_128.png",
+    "advertiser_category": "video_players",
+    "advertiser_installs": 543547196,
+    "unique_creatives": 6,
+    "unique_publishers": 20,
+    "first_seen": "2026-10-03T12:11:42.580",
+    "last_seen": "2026-10-31T21:18:38.330",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 2565139.090909091,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "8d599bf5742e65d3675e8f34fcbfb0a7",
+      "c349be7cb3b57d85fb6d92f531d5862b",
+      "6c37141c004ce236a5b1e2d381c133cc",
+      "9be4033f161c8fb760283eb3a985d222",
+      "9be4033f161c8fb760283eb3a985d222"
+    ],
+    "estimated_buying_size_score": 3,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "\u6eff\u8cab\u5927\u4ea8 - \u5feb\u6253\u65cb\u98a8\u767b\u5834",
+    "advertiser_store_id": "com.igs.TMD",
+    "advertiser_icon_128": "c3cf6c386d0d34e4_128.png",
+    "advertiser_category": "game_casino",
+    "advertiser_installs": 2377435,
+    "unique_creatives": 13,
+    "unique_publishers": 19,
+    "first_seen": "2026-10-01T19:27:16.058",
+    "last_seen": "2026-10-11T07:56:47.234",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 4003391.44,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "0bbcc879ddccb84e1420af1e33c2b651",
+      "59918ad23d247c688f9d95b3bf431f17",
+      "59918ad23d247c688f9d95b3bf431f17",
+      "59918ad23d247c688f9d95b3bf431f17",
+      "59918ad23d247c688f9d95b3bf431f17"
+    ],
+    "estimated_buying_size_score": 5,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Weather Radar, Live Radar",
+    "advertiser_store_id": "com.accurate.weather.forecast.live",
+    "advertiser_icon_128": "90d3446eee487a9d_128.png",
+    "advertiser_category": "weather",
+    "advertiser_installs": 33181817,
+    "unique_creatives": 7,
+    "unique_publishers": 18,
+    "first_seen": "2026-10-01T07:10:17.938",
+    "last_seen": "2026-10-31T20:19:51.624",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 27401531.04761905,
+    "mmp_domains": [
+      "appsflyer.com",
+      "branch.io"
+    ],
+    "top_md5_hashes": [
+      "45a0807d7e2fd4dd5f65ca46198a7cba",
+      "e8d07e7a92f81ea463f28fe77cc771d5",
+      "e8d07e7a92f81ea463f28fe77cc771d5",
+      "74fe25f5a50ed87f906d0ff2e9c07ebf",
+      "45a0807d7e2fd4dd5f65ca46198a7cba"
+    ],
+    "estimated_buying_size_score": 2,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Cashman Casino Slots Games",
+    "advertiser_store_id": "com.productmadness.cashmancasino",
+    "advertiser_icon_128": "91f0e56f56464565_128.png",
+    "advertiser_category": "game_casino",
+    "advertiser_installs": 22217598,
+    "unique_creatives": 4,
+    "unique_publishers": 18,
+    "first_seen": "2026-10-25T17:05:26.877",
+    "last_seen": "2026-10-31T16:49:16.186",
+    "ad_network_domains": [
+      "bigabid.com",
+      "google.com",
+      "liftoff.io"
+    ],
+    "avg_publisher_installs": 55135839.52380952,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "410bf0d0e6542075a244d927a51df52e",
+      "00707bf7b0a90eb9e1d1978d99852e64",
+      "410bf0d0e6542075a244d927a51df52e",
+      "410bf0d0e6542075a244d927a51df52e",
+      "1dff4e8ea8cdc96534ffc67fe01bb931"
+    ],
+    "estimated_buying_size_score": 3,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Flightsky: Flight Tracker 3D",
+    "advertiser_store_id": "com.live.flight.tracker",
+    "advertiser_icon_128": "d29c64e319cdc636_128.png",
+    "advertiser_category": "travel_and_local",
+    "advertiser_installs": 1608154,
+    "unique_creatives": 5,
+    "unique_publishers": 18,
+    "first_seen": "2026-10-02T04:44:40.315",
+    "last_seen": "2026-10-29T06:18:41.363",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 14253006.736842105,
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "top_md5_hashes": [
+      "6a80cb9c0670ea141729d490baf2130f",
+      "a09870990365af0de81b8935eb5250dc",
+      "a09870990365af0de81b8935eb5250dc",
+      "a09870990365af0de81b8935eb5250dc",
+      "8874b359ca69a1ec549d8eb1ab0624b6"
+    ],
+    "estimated_buying_size_score": 1,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Spades: Classic Card Games",
+    "advertiser_store_id": "com.mobilityware.Spades",
+    "advertiser_icon_128": "95c0467b49b6276d_128.png",
+    "advertiser_category": "game_card",
+    "advertiser_installs": 14818224,
+    "unique_creatives": 8,
+    "unique_publishers": 18,
+    "first_seen": "2026-10-29T13:58:18.283",
+    "last_seen": "2026-10-31T10:42:37.381",
+    "ad_network_domains": [
+      "bigabid.com",
+      "unity.com"
+    ],
+    "avg_publisher_installs": 7791571.75,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "7b1088af39e59c86360ea6f046232352",
+      "34daf506ca61c90ad5d1783e384da850",
+      "c70315a14d06eb6cd0fe6f3bc59ae841",
+      "7b1088af39e59c86360ea6f046232352",
+      "486fc2ba6b66f03e949c2fb99bde4eff"
+    ],
+    "estimated_buying_size_score": 3,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Huuuge Casino 777 Slots Games",
+    "advertiser_store_id": "com.huuuge.casino.slots",
+    "advertiser_icon_128": "c056c01d77f07ee8_128.png",
+    "advertiser_category": "game_casino",
+    "advertiser_installs": 53294693,
+    "unique_creatives": 10,
+    "unique_publishers": 18,
+    "first_seen": "2026-10-01T01:58:43.014",
+    "last_seen": "2026-10-27T06:04:24.647",
+    "ad_network_domains": [
+      "bidease.com",
+      "digitalturbine.com",
+      "liftoff.io",
+      "unity.com",
+      "vk.com"
+    ],
+    "avg_publisher_installs": 23899931.777777776,
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "top_md5_hashes": [
+      "c1f9398da14f0b00cc762649a7fbab33",
+      "2619973f323ca0bf62433625ddb15785",
+      "64052f5706d88c12f4a38062b056a1ad",
+      "9d7a5da90f7555d3363072234f001960",
+      "59cf28ef874b9f1f70d5ec8aece2949b"
+    ],
+    "estimated_buying_size_score": 7,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Shopee PH: 11.11 Sale",
+    "advertiser_store_id": "com.shopee.ph",
+    "advertiser_icon_128": "d6396cc6319344db_128.png",
+    "advertiser_category": "shopping",
+    "advertiser_installs": 166847178,
+    "unique_creatives": 19,
+    "unique_publishers": 17,
+    "first_seen": "2026-10-11T09:21:59.760",
+    "last_seen": "2026-10-26T05:19:16.884",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 9158026.666666666,
+    "mmp_domains": [
+      "appsflyer.com",
+      "developer.huawei.com"
+    ],
+    "top_md5_hashes": [
+      "bab4b6a2019ef02e7e17caebb7c9e0a1",
+      "e3843400e4d82944036daeb3611eb8b1",
+      "f39a4aa3848ae264160c0a1e1ef8ad92",
+      "efc9d5587024460b0bca3ea6b88ffa96",
+      "f0be46809f2c7a7b2ec8eb7259adde2d"
+    ],
+    "estimated_buying_size_score": 8,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Weathernews Weather Forecast",
+    "advertiser_store_id": "wni.WeathernewsTouch.jp",
+    "advertiser_icon_128": "bc38c2878f6d6ac2_128.png",
+    "advertiser_category": "weather",
+    "advertiser_installs": 24839248,
+    "unique_creatives": 10,
+    "unique_publishers": 17,
+    "first_seen": "2026-10-05T05:56:04.296",
+    "last_seen": "2026-10-26T10:58:31.975",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 3994792.1304347827,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "9bb16d6e2b0b6b5915afe6e993461921",
+      "825102f8a547283dde8ccff9828b3ba7",
+      "53b653a804e51ed7f8666288b7234cbb",
+      "26525b95b5cbbf2a2c583717ad92f8c8",
+      "8924b51f40617e268f0ef3f6bafa8bf8"
+    ],
+    "estimated_buying_size_score": 3,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Fazee - Funny Face Filter",
+    "advertiser_store_id": "com.face.filters.funny.filter.timewarp.camera.prank",
+    "advertiser_icon_128": "bf3572e092c38b89_128.png",
+    "advertiser_category": "entertainment",
+    "advertiser_installs": 4581908,
+    "unique_creatives": 11,
+    "unique_publishers": 17,
+    "first_seen": "2026-10-01T06:17:07.377",
+    "last_seen": "2026-10-31T23:51:40.655",
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "avg_publisher_installs": 7188062.818181818,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "8f7517c2ccbf73d8327e434fc32f15c1",
+      "831da9994a86b297b5462d972c359eb6",
+      "8e821ca726e63bd30520342f260ae4c4",
+      "8e821ca726e63bd30520342f260ae4c4",
+      "f54be270dc6f2ccec4442411099a7b27"
+    ],
+    "estimated_buying_size_score": 3,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Pandora - Music & Podcasts",
+    "advertiser_store_id": "com.pandora.android",
+    "advertiser_icon_128": "b1659e92cfc93164_128.png",
+    "advertiser_category": "music_and_audio",
+    "advertiser_installs": 311819005,
+    "unique_creatives": 4,
+    "unique_publishers": 17,
+    "first_seen": "2026-10-02T10:29:29.716",
+    "last_seen": "2026-10-28T14:13:13.828",
+    "ad_network_domains": [
+      "digitalturbine.com",
+      "mobvista.com"
+    ],
+    "avg_publisher_installs": 4249010.3,
+    "mmp_domains": [
+      "branch.io"
+    ],
+    "top_md5_hashes": [
+      "154abc1b067470d2cde386c8a9e1c631",
+      "fb2445a8113dee8a663ea1212fd1c9e1",
+      "154abc1b067470d2cde386c8a9e1c631",
+      "3ab4ad96b083cfa029296baf8d659bd1",
+      "3ab4ad96b083cfa029296baf8d659bd1"
+    ],
+    "estimated_buying_size_score": 2,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Plex: Find Movies & TV Shows",
+    "advertiser_store_id": "com.plexapp.android",
+    "advertiser_icon_128": "808c3f7bd0876f68_128.png",
+    "advertiser_category": "entertainment",
+    "advertiser_installs": 116264152,
+    "unique_creatives": 13,
+    "unique_publishers": 16,
+    "first_seen": "2026-10-09T03:30:53.025",
+    "last_seen": "2026-10-31T22:06:19.316",
+    "ad_network_domains": [
+      "affle.com",
+      "appodeal.com",
+      "google.com",
+      "smadex.com",
+      "verve.com"
+    ],
+    "avg_publisher_installs": 62425868.3,
+    "mmp_domains": [
+      "kochava.com"
+    ],
+    "top_md5_hashes": [
+      "47f07c8d542a55517447389a65e2d7d0",
+      "8559abf68262fd2b97dc742f44109569",
+      "0960809ceeb2d4f5bc7af73f18071267",
+      "b7076c32403aecd3f2be2d939a7120d3",
+      "a076a86fd7b1436279842e258032e9db"
+    ],
+    "estimated_buying_size_score": 8,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "Marbel Airport Adventure",
+    "advertiser_store_id": "com.educastudio.marbelairportadventure",
+    "advertiser_icon_128": "cb7fbc41e2624998_128.png",
+    "advertiser_category": "game_educational",
+    "advertiser_installs": 307324,
+    "unique_creatives": 6,
+    "unique_publishers": 15,
+    "first_seen": "2026-10-01T20:09:58.122",
+    "last_seen": "2026-10-06T23:03:28.419",
+    "ad_network_domains": [
+      null
+    ],
+    "avg_publisher_installs": 1038054.3333333334,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "8da5cacb1499ee1ac616aa0e56c67ace",
+      "02aa0b22f2e8968dbb6c69ada4b675ee",
+      "fd8291117b9648ee9e4b8d9179bc9c81",
+      "94b5e77a2250c58cba7a4300a31fa95c",
+      "f3da996332f049aab731251345519987"
+    ],
+    "estimated_buying_size_score": 0,
+    "buying_size_tier": "Medium"
+  },
+  {
+    "advertiser_name": "NBA\u5dd4\u5cf0\u5c0d\u6c7a",
+    "advertiser_store_id": "com.wildcaly.b5.hmt",
+    "advertiser_icon_128": "d57e6ae02ab96162_128.png",
+    "advertiser_category": "game_sports",
+    "advertiser_installs": 204860,
+    "unique_creatives": 7,
+    "unique_publishers": 15,
+    "first_seen": "2026-10-29T16:32:50.092",
+    "last_seen": "2026-10-29T23:55:56.506",
+    "ad_network_domains": [
+      "google.com",
+      "unity.com"
+    ],
+    "avg_publisher_installs": 141799.75,
+    "mmp_domains": null,
+    "top_md5_hashes": [
+      "9de7e6d4ee26feb404fdc41c0ca34848",
+      "7fbcf3ec10bd1624c744c68d3b925c55",
+      "75ead0511d0a1dae6609f0514f270bd0",
+      "1e64d38e5ceb1562af8a79a43dfac4db",
+      "7fbcf3ec10bd1624c744c68d3b925c55"
+    ],
+    "estimated_buying_size_score": 1,
+    "buying_size_tier": "Medium"
+  }
+]

@@ -1,0 +1,1444 @@
+[
+  {
+    "name": "Fashion Arena: Dress Up Game",
+    "store_id": "com.RC58.fashion.arena.dressup.game",
+    "store": 1,
+    "category": "game_casual",
+    "installs": 1940518.0,
+    "rating": 3.6050725,
+    "rating_count": 9558.0,
+    "installs_sum_1w": 301022.0,
+    "installs_sum_4w": 1379934.0,
+    "installs_z_score_2w": 0.410073246,
+    "installs_z_score_4w": 0.6413586183,
+    "release_date": "2026-08-21T00:00:00.000",
+    "icon_128": "bd432e4abb6cb08c_128.png",
+    "developer_name": "Sprigame",
+    "developer_id": "Sprigame",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "VN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "creative_count": 1,
+    "md5_hashes": [
+      "6d37a47602631bf8c6a22978dca8491a"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "ORG Keyboard: Play & Tutorial",
+    "store_id": "com.play.org.piano.guitar.drum.keyboard",
+    "store": 1,
+    "category": "music_and_audio",
+    "installs": 1062197.0,
+    "rating": 4.7277775,
+    "rating_count": 6572.0,
+    "installs_sum_1w": 96961.0,
+    "installs_sum_4w": 896025.0,
+    "installs_z_score_2w": 0.6774925373,
+    "installs_z_score_4w": 1.411671007,
+    "release_date": "2026-08-30T00:00:00.000",
+    "icon_128": "972d959a45e372d0_128.png",
+    "developer_name": "SCA Software",
+    "developer_id": "SCA+Software",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "VN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "creative_count": 4,
+    "md5_hashes": [
+      "49001d9639f2259b522d11159a007083",
+      "53753cb85a86390f5d802457c5369552",
+      "8d5e4af8490766744568394c85b29803",
+      "9c6ef1cf1fca6e5f39a8fbc8785f465d"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Spooky Playground: Sandbox",
+    "store_id": "com.playground.sprunki.sandbox",
+    "store": 1,
+    "category": "game_simulation",
+    "installs": 906903.0,
+    "rating": 3.8545456,
+    "rating_count": 194.0,
+    "installs_sum_1w": 157844.0,
+    "installs_sum_4w": 805391.0,
+    "installs_z_score_2w": 2.2775421147,
+    "installs_z_score_4w": 2.1867642073,
+    "release_date": "2026-09-17T00:00:00.000",
+    "icon_128": "d8e38ecaa525d19a_128.png",
+    "developer_name": "Logic Apz",
+    "developer_id": "4892452792969495132",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "ID",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "creative_count": 1,
+    "md5_hashes": [
+      "58874c3030cb4cc8b17b9238f0e48a7c",
+      "7c8811b775c455ac0b4a28c05669a60a"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Draw Music: Sketch to Sound",
+    "store_id": "com.banix.drawsound.drawmusic",
+    "store": 1,
+    "category": "music_and_audio",
+    "installs": 874432.0,
+    "rating": 4.2251554,
+    "rating_count": 10412.0,
+    "installs_sum_1w": 581336.0,
+    "installs_sum_4w": 874432.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-10-02T00:00:00.000",
+    "icon_128": "ecd19666d9b0614e_128.png",
+    "developer_name": "Banix Studio",
+    "developer_id": "7601269604429330384",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "VN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "creative_count": 1,
+    "md5_hashes": [
+      "9f286a6bdb5c0d71ce428f1e43ba08ea"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "GlowUp Spa: ASMR Makeover",
+    "store_id": "com.gladys.glowup.spa.asmr.makeover",
+    "store": 1,
+    "category": "game_casual",
+    "installs": 810520.0,
+    "rating": 2.9967532,
+    "rating_count": 137.0,
+    "installs_sum_1w": 228992.0,
+    "installs_sum_4w": 783633.0,
+    "installs_z_score_2w": 4.2547260546,
+    "installs_z_score_4w": 2.6077291369,
+    "release_date": "2026-08-28T00:00:00.000",
+    "icon_128": "ec36433117cf681d_128.png",
+    "developer_name": "GLADYS GLOBAL",
+    "developer_id": "8967586321344952887",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "NG",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "creative_count": 2,
+    "md5_hashes": [
+      "32b4518f75db273835967861d2d67db8",
+      "a8c32d15b9ce0b3f228b9a124af1ea46"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Music Player: offline music",
+    "store_id": "com.musicplayer.player.mp3mp4avi.media",
+    "store": 1,
+    "category": "music_and_audio",
+    "installs": 738323.0,
+    "rating": 4.50239,
+    "rating_count": 2142.0,
+    "installs_sum_1w": 89172.0,
+    "installs_sum_4w": 695509.0,
+    "installs_z_score_2w": 0.5739459117,
+    "installs_z_score_4w": 1.3750612327,
+    "release_date": "2026-09-03T00:00:00.000",
+    "icon_128": "d4e76a9865c33266_128.png",
+    "developer_name": "ICC Tech",
+    "developer_id": "ICC+Tech",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "US",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "creative_count": 4,
+    "md5_hashes": [
+      "49efd114c1e347b5705b20757cf51494",
+      "580d848b152191d1ee95d18087c7698f",
+      "7770338eb2543d4a8e0a456f93e34019",
+      "ec96f40f79560d8654921c6e627a499f"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Piano Cat: Music Games",
+    "store_id": "com.piano.cat.rhythm.tiles.music.games",
+    "store": 1,
+    "category": "game_casual",
+    "installs": 715772.0,
+    "rating": 4.513584,
+    "rating_count": 1287.0,
+    "installs_sum_1w": 151526.0,
+    "installs_sum_4w": 476874.0,
+    "installs_z_score_2w": 5.3798241406,
+    "installs_z_score_4w": 4.3669062104,
+    "release_date": "2026-08-19T00:00:00.000",
+    "icon_128": "f51c59255966e19c_128.png",
+    "developer_name": "Agile Lion Games",
+    "developer_id": "Agile+Lion+Games",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "LU",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "adjust.com",
+      "appmetrica.yandex.com"
+    ],
+    "creative_count": 1,
+    "md5_hashes": [
+      "5eba0543b5a5d6022835182f67014fe4",
+      "6eb1890369420b2f8fb04397b09d0ad1"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Findy: Hidden Object Search",
+    "store_id": "findy.search.hidden.object",
+    "store": 1,
+    "category": "game_puzzle",
+    "installs": 582761.0,
+    "rating": 4.744102,
+    "rating_count": 2287.0,
+    "installs_sum_1w": 134511.0,
+    "installs_sum_4w": 532945.0,
+    "installs_z_score_2w": 1.554207374,
+    "installs_z_score_4w": 1.6431926744,
+    "release_date": "2026-09-10T00:00:00.000",
+    "icon_128": "85d2095b6e2d4f1d_128.png",
+    "developer_name": "Playful Bytes",
+    "developer_id": "Playful+Bytes",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "HK",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "creative_count": 1,
+    "md5_hashes": [
+      "67c964da29546b81d7d505e85f661273"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "ASMR Manicure: Nail Art Games",
+    "store_id": "com.casual.nail.asmr.salon.master",
+    "store": 1,
+    "category": "game_simulation",
+    "installs": 499630.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 121658.0,
+    "installs_sum_4w": 453198.0,
+    "installs_z_score_2w": 1.1507052386,
+    "installs_z_score_4w": 1.1805297117,
+    "release_date": "2026-08-25T00:00:00.000",
+    "icon_128": "8f521e27f08fa18d_128.png",
+    "developer_name": "smartsolution",
+    "developer_id": "smartsolution",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "EG",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "creative_count": 1,
+    "md5_hashes": [
+      "8869cd6538b0e99017690c1d6d44c38c"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Melozi: AI Song, Music Maker",
+    "store_id": "com.melozi.aimusic.aisong.musicmaker.generator",
+    "store": 1,
+    "category": "music_and_audio",
+    "installs": 454047.0,
+    "rating": 4.5491743,
+    "rating_count": 4271.0,
+    "installs_sum_1w": 91356.0,
+    "installs_sum_4w": 427288.0,
+    "installs_z_score_2w": 1.7978851845,
+    "installs_z_score_4w": 1.8770210937,
+    "release_date": "2026-08-27T00:00:00.000",
+    "icon_128": "d1b32ed87063cd8c_128.png",
+    "developer_name": "Mee Game Inc",
+    "developer_id": "Mee+Game+Inc",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "VN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "adjust.com",
+      "appsflyer.com"
+    ],
+    "creative_count": 5,
+    "md5_hashes": [
+      "4aec62367aa1be603b1fb32b18604ad0",
+      "4e08665215542a433efb5ad5dd5da3b6",
+      "cc9a86869490d7eaf148cc65eb89270a",
+      "d57a79645d6aa2ea101fe6e92abb0914",
+      "db84ab5a1ccbc15212e10d2d6403bd0b"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "TV Cast Screen Mirroring App",
+    "store_id": "tvcast.wireless.display.screenmirroring.screenshare",
+    "store": 1,
+    "category": "tools",
+    "installs": 415470.0,
+    "rating": 3.05,
+    "rating_count": 192.0,
+    "installs_sum_1w": 34786.0,
+    "installs_sum_4w": 168984.0,
+    "installs_z_score_2w": 0.4688519468,
+    "installs_z_score_4w": 0.783781257,
+    "release_date": "2026-09-03T00:00:00.000",
+    "icon_128": "d5942ee93066cd99_128.png",
+    "developer_name": "FunPeak",
+    "developer_id": "7691850368702937123",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "US",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 6,
+    "md5_hashes": [
+      "225e868c8137b2543ff734b66a92bb0b",
+      "67d86723814181cee119fcb143ada36d",
+      "91b850589337f592ee0dd434c6d73e6f",
+      "928a017c157dc798d9ede0a7b0995630",
+      "d4576790f73e711d1dd4d94f19159ad5",
+      "e06b1464157c07287cc481b9f2a199ea",
+      "ee8718d6e6f1e74b2a5a1a64b4e556be"
+    ],
+    "md5_file_extensions": [
+      "jpeg",
+      "mp4",
+      "webm"
+    ]
+  },
+  {
+    "name": "Phone Case DIY: ASMR Custom",
+    "store_id": "com.casual.phonecase.asmr",
+    "store": 1,
+    "category": "game_simulation",
+    "installs": 139259.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 53619.0,
+    "installs_sum_4w": 139259.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-04T00:00:00.000",
+    "icon_128": "9ad82fa7816a383d_128.png",
+    "developer_name": "Nirvana Studios",
+    "developer_id": "Nirvana+Studios",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "VN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "appsflyer.com"
+    ],
+    "creative_count": 1,
+    "md5_hashes": [
+      "0e34f5e3b736a20d21ca9361e6a75bc4"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Cat Vet: Animal Hospital",
+    "store_id": "com.mrxvip.cat.vet.doctor",
+    "store": 1,
+    "category": "game_simulation",
+    "installs": 121598.0,
+    "rating": null,
+    "rating_count": 99.0,
+    "installs_sum_1w": 7401.0,
+    "installs_sum_4w": 55920.0,
+    "installs_z_score_2w": -0.2663332163,
+    "installs_z_score_4w": 0.4163977359,
+    "release_date": "2026-09-03T00:00:00.000",
+    "icon_128": "d037521f590973ce_128.png",
+    "developer_name": "MR. PROXY CORE",
+    "developer_id": "MR.+PROXY+CORE",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "GB",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "954c3b6d3e0687c5690db18aaab1b10d"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "ORG: Real Music Keyboard",
+    "store_id": "com.music.organ.keyboard",
+    "store": 1,
+    "category": "music_and_audio",
+    "installs": 114283.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 45899.0,
+    "installs_sum_4w": 114283.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-20T00:00:00.000",
+    "icon_128": "da4ccc3365938b8d_128.png",
+    "developer_name": "Tokii Apps",
+    "developer_id": "Tokii+Apps",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "VN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "adjust.com"
+    ],
+    "creative_count": 5,
+    "md5_hashes": [
+      "43d9ce6cd7ebded19533c6efbcee929b",
+      "5b2fb483292aa0110e8c916591b9c3a8",
+      "6350bf98ba45df0ee40969d852693b76",
+      "8d5e4af8490766744568394c85b29803",
+      "a950af0ca576d257da9c20ed710d7dff",
+      "f9f70596d3a22b3b614d59096101d0ef"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Satisfying Clean ASMR Game",
+    "store_id": "com.candle.satisfying_makeover",
+    "store": 1,
+    "category": "game_puzzle",
+    "installs": 70989.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 16247.0,
+    "installs_sum_4w": 45413.0,
+    "installs_z_score_2w": 0.5232909272,
+    "installs_z_score_4w": 0.2635218056,
+    "release_date": "2026-10-21T00:00:00.000",
+    "icon_128": "85d25c322b0d733f_128.png",
+    "developer_name": "Match Xgame",
+    "developer_id": "Match+Xgame",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "CN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "3e2e03c0597ab2159815db4afaaead83"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Dollhouse Dream Town",
+    "store_id": "com.dollhousedreamtown.dollhousedreamtown",
+    "store": 1,
+    "category": "game_casual",
+    "installs": 40682.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 26402.0,
+    "installs_sum_4w": 40682.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-26T00:00:00.000",
+    "icon_128": "ede086aa396d2c96_128.png",
+    "developer_name": "kunping",
+    "developer_id": "kunping",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "CN",
+    "ad_network_names": [
+      "Mobvista"
+    ],
+    "ad_network_domains": [
+      "mobvista.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/mobvista.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "27c6cdef9f35071c5cd0a3c7470f058c"
+    ],
+    "md5_file_extensions": [
+      "jpeg"
+    ]
+  },
+  {
+    "name": "DMV Permit: Practice Test 2026",
+    "store_id": "com.mydmv.permit.practice",
+    "store": 1,
+    "category": "education",
+    "installs": 31710.0,
+    "rating": 4.437979,
+    "rating_count": 110.0,
+    "installs_sum_1w": 5762.0,
+    "installs_sum_4w": 31583.0,
+    "installs_z_score_2w": 20.3925000776,
+    "installs_z_score_4w": 19.1244304258,
+    "release_date": "2026-08-31T00:00:00.000",
+    "icon_128": "d40b79e5a9529d23_128.png",
+    "developer_name": "SHINK COMPANY",
+    "developer_id": "SHINK+COMPANY",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "VN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "8497b7057e033077d7e52a08078c469c"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Fluvsies Care: Mochi",
+    "store_id": "com.tutotoons.app.fluvsiescaremochi",
+    "store": 1,
+    "category": "game_educational",
+    "installs": 19365.0,
+    "rating": 4.8131146,
+    "rating_count": 255.0,
+    "installs_sum_1w": 19365.0,
+    "installs_sum_4w": 19365.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-10-19T00:00:00.000",
+    "icon_128": "d1df4118544f4fe1_128.png",
+    "developer_name": "TutoTOONS",
+    "developer_id": "6493980387780624296",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "GB",
+    "ad_network_names": [
+      "TutoADS"
+    ],
+    "ad_network_domains": [
+      "tutoads.tv"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/tutoads.tv/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 6,
+    "md5_hashes": [
+      "12cd2857c14b1663009e16f3d55f0476",
+      "1d789a4eabaf253b03c0e00ddf19e58e",
+      "7fa22650a9d5c6d26b9a7c6c289c059a",
+      "9da845ee8bd36bfdaa99002b5d312eb4",
+      "b38fa01cfc973f80392abec784123061",
+      "fdc0cf09708889854c3eff09e376c519"
+    ],
+    "md5_file_extensions": [
+      "jpeg",
+      "mp4"
+    ]
+  },
+  {
+    "name": "Block Puzzle Adventure & blast",
+    "store_id": "com.kingbrain.blockadventure",
+    "store": 1,
+    "category": "game_puzzle",
+    "installs": 18624.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 9612.0,
+    "installs_sum_4w": 18624.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-10T00:00:00.000",
+    "icon_128": "d786634e3e396232_128.png",
+    "developer_name": "Divine Memory Games\u2122",
+    "developer_id": "Divine+Memory+Games%E2%84%A2",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "IN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "cbbb422cf5855b3ee96a08ce29157e9d"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Magic Hand Card Control",
+    "store_id": "com.umaxtech.ar.hand.control.magic",
+    "store": 1,
+    "category": "entertainment",
+    "installs": 17441.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 368.0,
+    "installs_sum_4w": 2618.0,
+    "installs_z_score_2w": -0.4953448707,
+    "installs_z_score_4w": 0.564275171,
+    "release_date": "2026-10-21T00:00:00.000",
+    "icon_128": "853d68e34b60976b_128.png",
+    "developer_name": "UmaxTech Solution Pte. Ltd.",
+    "developer_id": "UmaxTech+Solution+Pte.+Ltd.",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "HK",
+    "ad_network_names": [
+      "Mobvista"
+    ],
+    "ad_network_domains": [
+      "mobvista.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/mobvista.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 2,
+    "md5_hashes": [
+      "9252bfedcf1dce8ede92be5e72d5725a",
+      "e0ce818fd150432aaaaa17fcd044cf91"
+    ],
+    "md5_file_extensions": [
+      "mp4",
+      "png"
+    ]
+  },
+  {
+    "name": "AI Room Design: Home Decor",
+    "store_id": "com.skyrocketmedia.room_designer",
+    "store": 1,
+    "category": "house_and_home",
+    "installs": 16665.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 7482.0,
+    "installs_sum_4w": 16665.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-18T00:00:00.000",
+    "icon_128": "dfb6388183db203e_128.png",
+    "developer_name": "SkyRocket Media B.V.",
+    "developer_id": "SkyRocket+Media+B.V.",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "NL",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "appmetrica.yandex.com"
+    ],
+    "creative_count": 1,
+    "md5_hashes": [
+      "498a99d223daee4701801750ba37f4a7"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Romantic Sticker - WAStickers",
+    "store_id": "com.mna.stickermaker",
+    "store": 1,
+    "category": "communication",
+    "installs": 15945.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 9491.0,
+    "installs_sum_4w": 15945.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-20T00:00:00.000",
+    "icon_128": "c0b76f412f383d92_128.png",
+    "developer_name": "Mobile Notepad Apps",
+    "developer_id": "Mobile+Notepad+Apps",
+    "ad_supported": false,
+    "in_app_purchases": true,
+    "advertiser_country": "PK",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "c65c0241e9d8cc3397bec0940dfda9c1"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Christmas Santa Coloring Book",
+    "store_id": "com.paint.by.number.game.coloring.book",
+    "store": 1,
+    "category": "game_board",
+    "installs": 9737.0,
+    "rating": 4.9060607,
+    "rating_count": 76.0,
+    "installs_sum_1w": 2487.0,
+    "installs_sum_4w": 8179.0,
+    "installs_z_score_2w": 0.481453842,
+    "installs_z_score_4w": 0.1822581432,
+    "release_date": "2026-09-16T00:00:00.000",
+    "icon_128": "a884d7114b37cb1f_128.png",
+    "developer_name": "Anime Color",
+    "developer_id": "9112796362561962768",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "HK",
+    "ad_network_names": null,
+    "ad_network_domains": null,
+    "ad_network_logo_urls": null,
+    "mmp_domains": [
+      "singular.net"
+    ],
+    "creative_count": 1,
+    "md5_hashes": [
+      "0bff462b997a28f513e435e7c8959634"
+    ],
+    "md5_file_extensions": [
+      "gif"
+    ]
+  },
+  {
+    "name": "Smash Academy - Cannon Fest",
+    "store_id": "games.realbigwin.magic",
+    "store": 1,
+    "category": "game_puzzle",
+    "installs": 8356.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 8356.0,
+    "installs_sum_4w": 8356.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-10-09T00:00:00.000",
+    "icon_128": "93992cfa68619736_128.png",
+    "developer_name": "RBW Game",
+    "developer_id": "5104251072618415143",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "NO",
+    "ad_network_names": [
+      "Google",
+      "Unity"
+    ],
+    "ad_network_domains": [
+      "google.com",
+      "unity.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg",
+      "company-logos/unity.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 2,
+    "md5_hashes": [
+      "3e1d4f0c27a388c0c8267265966ca531",
+      "e336f29c2e37adc76e471abb3fb4da4b"
+    ],
+    "md5_file_extensions": [
+      "mp4"
+    ]
+  },
+  {
+    "name": "Daily Diary: Private Journal",
+    "store_id": "com.blazingappstudio.daily_diary",
+    "store": 1,
+    "category": "lifestyle",
+    "installs": 7250.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 18.0,
+    "installs_sum_4w": 3048.0,
+    "installs_z_score_2w": -1.4393138106,
+    "installs_z_score_4w": -0.8623190274,
+    "release_date": "2026-08-28T00:00:00.000",
+    "icon_128": "9685699e61619d6e_128.png",
+    "developer_name": "Blazing App Studio",
+    "developer_id": "7646685335585635595",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "NL",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "1ebdb93eea6dae4f3f47cf4a887b503b"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "DogTalk Buddy: Pet Sounds",
+    "store_id": "com.hcx.dogtalkbuddy",
+    "store": 1,
+    "category": "tools",
+    "installs": 2060.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 850.0,
+    "installs_sum_4w": 2060.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-26T00:00:00.000",
+    "icon_128": "bb3cec43b1e0c4c3_128.png",
+    "developer_name": "HCX LOGISTICS LLC",
+    "developer_id": "HCX+LOGISTICS+LLC",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "US",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "6cec87339b7868908424dd1708a6d0fd"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "DateGlow: Chat & Date",
+    "store_id": "com.dateglow.app",
+    "store": 1,
+    "category": "social networking",
+    "installs": 1806.0,
+    "rating": 4.6668477,
+    "rating_count": 90.0,
+    "installs_sum_1w": 1311.0,
+    "installs_sum_4w": 1806.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-24T00:00:00.000",
+    "icon_128": "c1d9616614b4976f_128.png",
+    "developer_name": "ThrillSphere LLC",
+    "developer_id": "ThrillSphere+LLC",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "US",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "f19b659103ec4e6405c4ae4bd5958e24"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "\u0421\u041f\u041e\u0420\u0422\u0410: \u0424\u041d\u041b, \u0412\u0425\u041b, \u041b\u0438\u0433\u0430 \u0412\u0422\u0411",
+    "store_id": "ru.sporta.app",
+    "store": 1,
+    "category": "sports",
+    "installs": 1560.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 457.0,
+    "installs_sum_4w": 1560.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-08-21T00:00:00.000",
+    "icon_128": "ce96303967672c9a_128.png",
+    "developer_name": "LLC SPORTA SMI",
+    "developer_id": "LLC+SPORTA+SMI",
+    "ad_supported": false,
+    "in_app_purchases": false,
+    "advertiser_country": null,
+    "ad_network_names": [
+      "Yandex"
+    ],
+    "ad_network_domains": [
+      "yandex.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/yandex.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": [
+      "appmetrica.yandex.com"
+    ],
+    "creative_count": 2,
+    "md5_hashes": [
+      "a18bfad71f675e61442195fdd38895db",
+      "d1cf107f0e48f59dec4af8e908d2641b"
+    ],
+    "md5_file_extensions": [
+      "jpeg"
+    ]
+  },
+  {
+    "name": "Scrub & Restore: Cleaning ASMR",
+    "store_id": "com.simulator.cleaning.asmr",
+    "store": 1,
+    "category": "game_simulation",
+    "installs": 1349.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 1349.0,
+    "installs_sum_4w": 1349.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-10-11T00:00:00.000",
+    "icon_128": "93c646a96876627e_128.png",
+    "developer_name": "Moki Studio",
+    "developer_id": "Moki+Studio",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "VN",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "86e2da8c9a9572fb52fffffec149ab2c"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Taxi Rush",
+    "store_id": "com.kussstudio.taxirush",
+    "store": 1,
+    "category": "game_racing",
+    "installs": 1205.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 668.0,
+    "installs_sum_4w": 1205.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-10-09T00:00:00.000",
+    "icon_128": "e41a25fdc63915ca_128.png",
+    "developer_name": "KUSS",
+    "developer_id": "KUSS",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "MY",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "43958f3dd3aef3bf47a09bfc8ea31fb2"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "4K Camera - HD Selfie Cam",
+    "store_id": "com.hd.photo.camera.video.editor.app",
+    "store": 1,
+    "category": "tools",
+    "installs": 146.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 146.0,
+    "installs_sum_4w": 146.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-25T00:00:00.000",
+    "icon_128": "f0ecc5b3146d10cf_128.png",
+    "developer_name": "Alfredo Aviles",
+    "developer_id": "Alfredo+Aviles",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "NO",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "e050bdccca281ab06638f0f2a234855c"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Chaos Hold'Em",
+    "store_id": "com.codingnagger.chaos_hold_em",
+    "store": 1,
+    "category": "game_card",
+    "installs": 18.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 3.0,
+    "installs_sum_4w": 18.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-21T00:00:00.000",
+    "icon_128": "903f656c1bc23c9b_128.png",
+    "developer_name": "Chaos Hold'Em Ltd",
+    "developer_id": "4699987800764331266",
+    "ad_supported": false,
+    "in_app_purchases": true,
+    "advertiser_country": "GB",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "ed586213db54a107179f72ae81e2010c"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "OKINC Wallet",
+    "store_id": "com.OKINC.OKEX.GP",
+    "store": 1,
+    "category": "finance",
+    "installs": 14.0,
+    "rating": null,
+    "rating_count": 0.0,
+    "installs_sum_1w": 14.0,
+    "installs_sum_4w": 14.0,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-30T00:00:00.000",
+    "icon_128": "8a90357fd4606b6b_128.png",
+    "developer_name": "FOUNDATION CORPORATION",
+    "developer_id": "FOUNDATION+CORPORATION",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "BD",
+    "ad_network_names": [
+      "Amazon",
+      "LiftOff",
+      "Moloco"
+    ],
+    "ad_network_domains": [
+      "amazon.com",
+      "liftoff.io",
+      "moloco.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/amazon.com/logo_200x200.jpeg",
+      "company-logos/liftoff.io/logo_200x200.jpeg",
+      "company-logos/moloco.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "7bc622f72ca89fe74a1562c92397ad7a"
+    ],
+    "md5_file_extensions": [
+      "png"
+    ]
+  },
+  {
+    "name": "4K Wallpapers & HD Backgrounds",
+    "store_id": "com.wallpapers.hd.background.z",
+    "store": 1,
+    "category": "tools",
+    "installs": null,
+    "rating": null,
+    "rating_count": null,
+    "installs_sum_1w": null,
+    "installs_sum_4w": null,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-10-15T00:00:00.000",
+    "icon_128": "99a266597385d8b5_128.png",
+    "developer_name": "Atikapp881",
+    "developer_id": "Atikapp881",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "US",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "2c7fe09515f8349e205601b1efdc249d"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Match Muse: Dress & Decor",
+    "store_id": "com.hzmr.dragon",
+    "store": 1,
+    "category": "game_casual",
+    "installs": null,
+    "rating": null,
+    "rating_count": null,
+    "installs_sum_1w": null,
+    "installs_sum_4w": null,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-10-05T00:00:00.000",
+    "icon_128": "c1e4f29b039319ee_128.png",
+    "developer_name": "DRAGONIS PTE. LTD.",
+    "developer_id": "5584262646556399212",
+    "ad_supported": true,
+    "in_app_purchases": false,
+    "advertiser_country": "SG",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "c4295a7b9dc3596487107af5fb065ad2"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "PIXEL LINKS - Connect Puzzle",
+    "store_id": "com.gagame.pixellinks",
+    "store": 1,
+    "category": "game_puzzle",
+    "installs": null,
+    "rating": null,
+    "rating_count": null,
+    "installs_sum_1w": null,
+    "installs_sum_4w": null,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-12T00:00:00.000",
+    "icon_128": "c1363e693f957092_128.png",
+    "developer_name": "GAGame",
+    "developer_id": "8795831217097826232",
+    "ad_supported": true,
+    "in_app_purchases": true,
+    "advertiser_country": "TH",
+    "ad_network_names": [
+      "Google"
+    ],
+    "ad_network_domains": [
+      "google.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/google.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 2,
+    "md5_hashes": [
+      "231b98841ca558dece52170d3c8dfdb3",
+      "310a4a1615b138b6432f4bbdf2f332ad",
+      "a3f860ec11c412d30f5826225cc31ee8"
+    ],
+    "md5_file_extensions": [
+      "webm"
+    ]
+  },
+  {
+    "name": "Scryde",
+    "store_id": "game.scryde",
+    "store": 1,
+    "category": "tools",
+    "installs": null,
+    "rating": null,
+    "rating_count": null,
+    "installs_sum_1w": null,
+    "installs_sum_4w": null,
+    "installs_z_score_2w": null,
+    "installs_z_score_4w": null,
+    "release_date": "2026-09-22T00:00:00.000",
+    "icon_128": "d3b36c4d32386633_128.png",
+    "developer_name": "571160396",
+    "developer_id": "571160396",
+    "ad_supported": false,
+    "in_app_purchases": false,
+    "advertiser_country": "AE",
+    "ad_network_names": [
+      "Yandex"
+    ],
+    "ad_network_domains": [
+      "yandex.com"
+    ],
+    "ad_network_logo_urls": [
+      "company-logos/yandex.com/logo_200x200.jpeg"
+    ],
+    "mmp_domains": null,
+    "creative_count": 1,
+    "md5_hashes": [
+      "0f5cf51a66a26a8a58004abe6236fd50"
+    ],
+    "md5_file_extensions": [
+      "jpeg"
+    ]
+  }
+]
