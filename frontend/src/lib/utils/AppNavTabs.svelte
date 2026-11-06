@@ -15,6 +15,8 @@
 	import Shield from '@lucide/svelte/icons/shield';
 	import Search from '@lucide/svelte/icons/search';
 	import RadioReceiver from '@lucide/svelte/icons/radio-receiver';
+	import Table from '@lucide/svelte/icons/table';
+	import GitCompareArrows from '@lucide/svelte/icons/git-compare-arrows';
 
 	let { isAndroidApp, myapp }: { isAndroidApp: boolean; myapp: AppFullDetail } = $props();
 
@@ -146,7 +148,26 @@
 				label: 'Data & API Calls',
 				href: `/apps/${page.params.id}/data-flows`,
 				icon: FileText,
-				dimmed: isTabDimmed('data-flows')
+				dimmed: isTabDimmed('data-flows'),
+				matchSlugs: ['data-flows-details', 'data-flows-changes']
+			});
+
+			items.push({
+				slug: 'data-flows-details',
+				label: 'All API Calls',
+				href: `/apps/${page.params.id}/data-flows/details`,
+				icon: Table,
+				dimmed: isTabDimmed('data-flows'),
+				indent: true
+			});
+
+			items.push({
+				slug: 'data-flows-changes',
+				label: 'Data Flow Changes',
+				href: `/apps/${page.params.id}/data-flows/changes`,
+				icon: GitCompareArrows,
+				dimmed: isTabDimmed('data-flows'),
+				indent: true
 			});
 
 			if ((myapp.ad_creative_count ?? 0) > 0) {

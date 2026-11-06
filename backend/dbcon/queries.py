@@ -129,6 +129,18 @@ def get_growth_apps(
     return df
 
 
+def get_ctv_app_ranks(state: State, store: int, limit: int = 50) -> pd.DataFrame:
+    """Get the top CTV-supported apps for a store, ranked by monthly installs."""
+    df = pd.read_sql(
+        sql.ctv_app_ranks,
+        con=state.dbcon.engine,
+        params={"store": store, "mylimit": limit},
+    )
+    if not df.empty:
+        df["installs_z_score_2w"] = df["installs_z_score_2w"].round(2)
+    return df
+
+
 def get_companies_type_stats(
     state: State,
     type_slug: str,

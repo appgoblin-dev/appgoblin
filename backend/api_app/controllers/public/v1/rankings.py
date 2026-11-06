@@ -85,8 +85,7 @@ def _build_ctv_app_ranks_payload(state: State, store: int) -> PublicCtvAppRanks:
     store_name = STORE_NAMES.get(store)
     if store_name is None:
         msg = (
-            f"Unknown store: {store!r}. "
-            "Use 1 for Google Play or 2 for Apple App Store."
+            f"Unknown store: {store!r}. Use 1 for Google Play or 2 for Apple App Store."
         )
         raise NotFoundException(msg, status_code=404)
 
