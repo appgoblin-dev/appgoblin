@@ -58,13 +58,18 @@ from dbcon.queries import (
     query_apps_crossfilter,
     search_apps,
 )
-from dbcon.static import get_company_logos_df, get_total_counts
+from dbcon.static import (
+    get_company_categories,
+    get_company_logos_df,
+    get_total_counts,
+)
 
 logger = get_logger(__name__)
 
 # Constants for URL truncation
 MAX_URL_DISPLAY_LENGTH = 44
 TRUNCATED_LENGTH = 41
+MIN_SCANS_FOR_DIFF = 2
 
 
 def has_crossfilter_export_filters(payload: dict) -> bool:
@@ -120,6 +125,265 @@ def api_call_dfs(state: State, store_id: str) -> pd.DataFrame:
         r"\;.*$", "", regex=True
     )
     return df
+
+
+def _is_missing(value: object) -> bool:
+    """Return True for None/NaN/NaT scalars, without raising on containers."""
+    if value is None:
+        return True
+    try:
+        return bool(pd.isna(value))
+    except (TypeError, ValueError):
+        return False
+
+
+def _iso(value: object) -> str | None:
+    """Convert a pandas/datetime scalar to an ISO string, or None."""
+    if _is_missing(value):
+        return None
+    if isinstance(value, str):
+        return value
+    return pd.Timestamp(value).isoformat()
+
+
+def _scalar(value: object) -> object:
+    """Convert pandas scalars (NaN/NaT/numpy types) into JSON-safe values."""
+    if isinstance(value, (list, tuple, dict)):
+        return value
+    if _is_missing(value):
+        return None
+    if isinstance(value, (pd.Timestamp, datetime.datetime, datetime.date)):
+        return pd.Timestamp(value).isoformat()
+    if isinstance(value, np.bool_ | np.integer | np.floating):
+        return value.item()
+    return value
+
+
+def _records(df: pd.DataFrame) -> list[dict]:
+    """Convert a DataFrame to JSON-safe records."""
+    return [
+        {key: _scalar(value) for key, value in row.items()}
+        for row in df.to_dict(orient="records")
+    ]
+
+
+def _scan_sort_key(scan: dict) -> tuple[int, str]:
+    """Sort scans newest first, keeping scans without a timestamp last."""
+    run_at = scan.get("run_at")
+    return (0 if run_at else 1, run_at or "")
+
+
+def build_scan_overviews(df: pd.DataFrame) -> list[dict]:
+    """Summarize API calls per scan run."""
+    if df.empty:
+        return []
+
+    work = df.copy()
+    work["run_id"] = work["run_id"].astype("Int64")
+    scans: list[dict] = []
+    for run_id, group in work.groupby("run_id", dropna=False):
+        run_at = group["run_at"].dropna().max() if "run_at" in group else None
+        version_codes = (
+            group["version_code"].dropna() if "version_code" in group else []
+        )
+        scans.append(
+            {
+                "run_id": None if pd.isna(run_id) else int(run_id),
+                "run_at": _iso(run_at),
+                "version_code": str(version_codes.iloc[0])
+                if len(version_codes) > 0
+                else None,
+                "call_count": len(group),
+                "domain_count": int(group["tld_url"].nunique(dropna=True)),
+                "company_count": int(group["company_domain"].nunique(dropna=True)),
+                "creative_count": int(group["creative_md5_hash"].nunique(dropna=True)),
+                "countries": sorted(
+                    str(c) for c in group["country"].dropna().unique().tolist()
+                ),
+            }
+        )
+
+    scans.sort(key=_scan_sort_key, reverse=True)
+    return scans
+
+
+def build_category_overviews(state: State, df: pd.DataFrame) -> list[dict]:
+    """Summarize API calls by adtech company category."""
+    if df.empty:
+        return []
+
+    categories = get_company_categories(state)
+    category_names = (
+        categories.drop_duplicates("company_type_slug")
+        .set_index("company_type_slug")["company_type"]
+        .to_dict()
+    )
+    domain_categories: dict[str, list[str]] = {}
+    for row in categories.dropna(
+        subset=["company_domain", "company_type_slug"]
+    ).itertuples(index=False):
+        domain_categories.setdefault(str(row.company_domain), []).append(
+            str(row.company_type_slug)
+        )
+
+    work = df.copy()
+    work["category_slug"] = work["company_domain"].map(
+        lambda domain: (
+            domain_categories.get(str(domain), []) if pd.notna(domain) else []
+        )
+    )
+    work = work.explode("category_slug")
+    work["category_slug"] = work["category_slug"].fillna("unmapped")
+
+    overviews: list[dict] = []
+    for slug, group in work.groupby("category_slug"):
+        if slug == "unmapped":
+            # Unmapped traffic has no company, so group it by the called domain
+            # instead so users can see (and request mappings for) each domain.
+            companies = (
+                group.dropna(subset=["tld_url"])
+                .groupby("tld_url")
+                .agg(
+                    company_name=("company_name", "first"),
+                    company_logo_url=("company_logo_url", "first"),
+                    call_count=("url", "size"),
+                    domain_count=("tld_url", "nunique"),
+                )
+                .reset_index()
+                .rename(columns={"tld_url": "company_domain"})
+                .sort_values("call_count", ascending=False)
+            )
+        else:
+            companies = (
+                group.dropna(subset=["company_domain"])
+                .groupby("company_domain")
+                .agg(
+                    company_name=("company_name", "first"),
+                    company_logo_url=("company_logo_url", "first"),
+                    call_count=("url", "size"),
+                    domain_count=("tld_url", "nunique"),
+                )
+                .reset_index()
+                .sort_values("call_count", ascending=False)
+            )
+        overviews.append(
+            {
+                "category_slug": str(slug),
+                "category_name": category_names.get(
+                    str(slug), str(slug).replace("-", " ").title()
+                ),
+                "call_count": len(group),
+                "domain_count": int(group["tld_url"].nunique(dropna=True)),
+                "company_count": len(companies),
+                "companies": _records(companies),
+            }
+        )
+
+    overviews.sort(key=lambda item: item["call_count"], reverse=True)
+    return overviews
+
+
+def build_creative_overviews(df: pd.DataFrame) -> list[dict]:
+    """Summarize the ad creatives captured during API scans."""
+    if df.empty:
+        return []
+
+    creatives = df[df["creative_md5_hash"].notna()].copy()
+    if creatives.empty:
+        return []
+
+    creatives["called_at"] = pd.to_datetime(creatives["called_at"], errors="coerce")
+    grouped = (
+        creatives.groupby("creative_md5_hash")
+        .agg(
+            file_extension=("creative_file_extension", "first"),
+            first_seen=("called_at", "min"),
+            last_seen=("called_at", "max"),
+            scan_count=("run_id", "nunique"),
+            call_count=("url", "size"),
+            company_name=("company_name", "first"),
+            company_domain=("company_domain", "first"),
+            company_logo_url=("company_logo_url", "first"),
+            advertiser_store_id=("advertiser_store_id", "first"),
+            advertiser_icon_url_100=("advertiser_icon_url_100", "first"),
+        )
+        .reset_index()
+        .sort_values("last_seen", ascending=False)
+    )
+    grouped["first_seen"] = grouped["first_seen"].map(_iso)
+    grouped["last_seen"] = grouped["last_seen"].map(_iso)
+    return _records(grouped)
+
+
+def build_scan_diff(df: pd.DataFrame) -> dict | None:
+    """Compare the companies observed in the two most recent scans."""
+    scans = build_scan_overviews(df)
+    if len(scans) < MIN_SCANS_FOR_DIFF:
+        return None
+
+    latest, previous = scans[0], scans[1]
+    work = df.copy()
+    work["run_id"] = work["run_id"].astype("Int64")
+    work["vendor_key"] = work["company_domain"].fillna(work["tld_url"])
+
+    def vendors_for(run_id: int | None) -> dict[str, dict]:
+        if run_id is None:
+            subset = work[work["run_id"].isna()]
+        else:
+            subset = work[work["run_id"] == run_id]
+        vendors: dict[str, dict] = {}
+        for row in subset.itertuples(index=False):
+            key = row.vendor_key
+            if pd.isna(key):
+                continue
+            key = str(key)
+            if key in vendors:
+                continue
+            vendors[key] = {
+                "company_domain": _scalar(row.company_domain),
+                "company_name": _scalar(row.company_name),
+                "company_logo_url": _scalar(row.company_logo_url),
+                "tld_url": _scalar(row.tld_url),
+            }
+        return vendors
+
+    previous_vendors = vendors_for(previous["run_id"])
+    latest_vendors = vendors_for(latest["run_id"])
+
+    rows: list[dict] = []
+    for key in sorted(set(previous_vendors) | set(latest_vendors)):
+        in_previous = key in previous_vendors
+        in_latest = key in latest_vendors
+        if in_previous and in_latest:
+            status = "unchanged"
+        elif in_latest:
+            status = "new"
+        else:
+            status = "removed"
+        details = latest_vendors.get(key) or previous_vendors[key]
+        rows.append(
+            {
+                "vendor_key": key,
+                **details,
+                "previous": "Detected" if in_previous else "Not detected",
+                "latest": "Detected" if in_latest else "Not detected",
+                "status": status,
+            }
+        )
+
+    order = {"new": 0, "removed": 1, "unchanged": 2}
+    rows.sort(key=lambda row: (order[row["status"]], row["vendor_key"]))
+
+    return {
+        "previous_run_id": previous["run_id"],
+        "previous_run_at": previous["run_at"],
+        "latest_run_id": latest["run_id"],
+        "latest_run_at": latest["run_at"],
+        "new_count": sum(1 for row in rows if row["status"] == "new"),
+        "removed_count": sum(1 for row in rows if row["status"] == "removed"),
+        "unchanged_count": sum(1 for row in rows if row["status"] == "unchanged"),
+        "rows": rows,
+    }
 
 
 def get_search_results(state: State, search_term: str) -> AppGroupByStore:
@@ -1014,13 +1278,19 @@ class AppController(Controller):
 
         Returns
         -------
-            A list of API calls
+            A list of API calls plus scan, category and creative overviews
 
         """
         start = time.perf_counter() * 1000
         apis_df = api_call_dfs(state, store_id)
-        apis_list = apis_df.to_dict(orient="records")
-        apis_dict = {"apis": apis_list}
+        apis_list = _records(apis_df)
+        apis_dict = {
+            "apis": apis_list,
+            "scans": build_scan_overviews(apis_df),
+            "categories": build_category_overviews(state, apis_df),
+            "creatives": build_creative_overviews(apis_df),
+            "scan_diff": build_scan_diff(apis_df),
+        }
         duration = round((time.perf_counter() * 1000 - start), 2)
         logger.info(f"{self.path}/{store_id}/apis took {duration}ms")
         return apis_dict

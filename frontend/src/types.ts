@@ -196,6 +196,30 @@ export interface RankedApps {
 	tablet_image_url_1?: string;
 	featured_image_url?: string;
 }
+export interface CtvAppRank {
+	rank_num: number;
+	app_name: string;
+	store_id: string;
+	store: number;
+	app_category: string | null;
+	developer_name: string | null;
+	developer_id: string | null;
+	rating: number | null;
+	rating_count: number | null;
+	installs: number | null;
+	monthly_installs: number | null;
+	monthly_revenue: number | null;
+	installs_z_score_2w: number | null;
+	country_code: string | null;
+	app_icon_url: string | null;
+}
+
+export interface CtvAppRanksResponse {
+	apps: CtvAppRank[];
+	status?: number;
+	error?: string;
+}
+
 export interface AppRankDetail {
 	crawled_date: string;
 	current_rank: number;
@@ -840,10 +864,100 @@ export interface AppSDKsOverview {
 	};
 }
 
-export type AppAPIs = Array<{ tld_url: string; url: string }>;
+export type AppAPICall = {
+	called_at: string;
+	run_id: number | null;
+	run_at: string | null;
+	version_code: string | null;
+	company_name: string | null;
+	company_domain: string | null;
+	company_logo_url: string | null;
+	tld_url: string;
+	url: string;
+	country: string | null;
+	servers: string | null;
+	request_mime_type: string | null;
+	response_mime_type: string | null;
+	creative_md5_hash: string | null;
+	creative_file_extension: string | null;
+	advertiser_store_id: string | null;
+	advertiser_icon_url_100: string | null;
+};
+
+export type AppAPIs = AppAPICall[];
+
+export interface AppAPIScanOverview {
+	run_id: number | null;
+	run_at: string | null;
+	version_code: string | null;
+	call_count: number;
+	domain_count: number;
+	company_count: number;
+	creative_count: number;
+	countries: string[];
+}
+
+export interface AppAPICategoryCompany {
+	company_domain: string;
+	company_name: string | null;
+	company_logo_url: string | null;
+	call_count: number;
+	domain_count: number;
+}
+
+export interface AppAPICategoryOverview {
+	category_slug: string;
+	category_name: string;
+	call_count: number;
+	domain_count: number;
+	company_count: number;
+	companies: AppAPICategoryCompany[];
+}
+
+export interface AppAPICreativeOverview {
+	creative_md5_hash: string;
+	file_extension: string | null;
+	first_seen: string | null;
+	last_seen: string | null;
+	scan_count: number;
+	call_count: number;
+	company_name: string | null;
+	company_domain: string | null;
+	company_logo_url: string | null;
+	advertiser_store_id: string | null;
+	advertiser_icon_url_100: string | null;
+}
+
+export type AppAPIScanDiffStatus = 'new' | 'removed' | 'unchanged';
+
+export interface AppAPIScanDiffRow {
+	vendor_key: string;
+	company_domain: string | null;
+	company_name: string | null;
+	company_logo_url: string | null;
+	tld_url: string | null;
+	previous: string;
+	latest: string;
+	status: AppAPIScanDiffStatus;
+}
+
+export interface AppAPIScanDiff {
+	previous_run_id: number | null;
+	previous_run_at: string | null;
+	latest_run_id: number | null;
+	latest_run_at: string | null;
+	new_count: number;
+	removed_count: number;
+	unchanged_count: number;
+	rows: AppAPIScanDiffRow[];
+}
 
 export interface AppAPIsOverview {
-	apis: { apis: AppAPIs };
+	apis: AppAPIs;
+	scans: AppAPIScanOverview[];
+	categories: AppAPICategoryOverview[];
+	creatives: AppAPICreativeOverview[];
+	scan_diff: AppAPIScanDiff | null;
 }
 
 export interface AppSDKs {

@@ -283,6 +283,35 @@ class PublicKeywordRanks:
 
 
 @dataclass
+class PublicCtvAppRank:
+    """Public CTV app rank row returned by the v1 API."""
+
+    rank: int | None = None
+    name: str | None = None
+    store_id: str | None = None
+    store: str | None = None
+    category: str | None = None
+    developer_name: str | None = None
+    rating: float | None = None
+    rating_count: int | None = None
+    installs: int | None = None
+    monthly_installs: float | None = None
+    monthly_revenue: float | None = None
+    installs_z_score_2w: float | None = None
+    country: str | None = None
+    app_icon_url: str | None = None
+
+
+@dataclass
+class PublicCtvAppRanks:
+    """Public top CTV app ranks payload returned by the v1 API."""
+
+    store: str
+    country: str
+    apps: list[PublicCtvAppRank] = field(default_factory=list)
+
+
+@dataclass
 class PublicAdvertiserCreative:
     """Public advertiser creative row surfaced by host-domain lookup."""
 

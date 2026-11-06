@@ -28,7 +28,9 @@ from api_app.controllers.public.v1.apps import V1AppsController
 from api_app.controllers.public.v1.companies import V1CompaniesController
 from api_app.controllers.public.v1.docs import V1DocsController
 from api_app.controllers.public.v1.keywords import V1KeywordsController
+from api_app.controllers.public.v1.rankings import V1RankingsController
 from api_app.controllers.rankings import RankingsController
+from api_app.controllers.scan_progress import ScanProgressController
 from api_app.controllers.scry import ScryController
 from api_app.controllers.sdks import SdksController
 from api_app.mcp.controller import (
@@ -285,6 +287,7 @@ app = Litestar(
         DeveloperController,
         CategoryController,
         RankingsController,
+        ScanProgressController,
         CompaniesController,
         SdksController,
         KeywordsController,
@@ -297,6 +300,7 @@ app = Litestar(
         V1AdvertisersController,
         V1CompaniesController,
         V1KeywordsController,
+        V1RankingsController,
         V1DocsController,
         mcp_asgi_handler,
     ],

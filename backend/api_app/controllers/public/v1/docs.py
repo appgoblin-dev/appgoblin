@@ -187,6 +187,31 @@ KEYWORD_RANKS_EXAMPLE_RESPONSE = {
         }
     ],
 }
+CTV_APP_RANKS_EXAMPLE_RESPONSE = {
+    "store": "Google Play",
+    "country": "US",
+    "apps": [
+        {
+            "rank": 1,
+            "name": "YouTube",
+            "store_id": "com.google.android.youtube",
+            "store": "Google Play",
+            "category": "video_players",
+            "developer_name": "Google LLC",
+            "rating": 4.12,
+            "rating_count": 145_000_000,
+            "installs": 12_000_000_000,
+            "monthly_installs": 42_500_000.0,
+            "monthly_revenue": 8_250_000.0,
+            "installs_z_score_2w": 812.4,
+            "country": "US",
+            "app_icon_url": (
+                "https://media.appgoblin.info/app-icons/"
+                "com.google.android.youtube/icon.png"
+            ),
+        }
+    ],
+}
 APP_VERSION_TIMELINE_EXAMPLE_STORE_ID = "dev.thirdgate.appgoblin"
 APP_VERSION_TIMELINE_EXAMPLE_RESPONSE = [
     {
@@ -369,6 +394,19 @@ V1_OPERATION_DOCS = {
                 "Returns SDK additions and removals across app versions, along "
                 "with scan-status rows when a version had no detected SDK change. "
                 "Change rows include SDK and company metadata when available."
+            ),
+        }
+    },
+    "/api/v1/rankings/ctv/{store}": {
+        "get": {
+            "summary": "/rankings/ctv/{store}",
+            "description": (
+                "Endpoint: `GET /api/v1/rankings/ctv/{store}`\n\n"
+                "Returns the top 50 connected-TV (CTV) supported apps for a store, "
+                "ranked by estimated monthly installs. Use `store=1` for Google Play "
+                "or `store=2` for the Apple App Store. Rows include the app's rank, "
+                "category, developer, rating, total installs, monthly installs, "
+                "estimated monthly revenue, and 14-day installs growth score."
             ),
         }
     },
@@ -718,6 +756,38 @@ def _set_keyword_ranks_example(schema: dict[str, Any]) -> None:
     }
 
 
+def _set_ctv_app_ranks_example(schema: dict[str, Any]) -> None:
+    """Attach a concrete example to the public CTV app ranks endpoint."""
+    path_item = schema.get("paths", {}).get("/api/v1/rankings/ctv/{store}")
+    if not isinstance(path_item, dict):
+        return
+
+    get_operation = path_item.get("get")
+    if not isinstance(get_operation, dict):
+        return
+
+    for parameter in get_operation.get("parameters", []):
+        if parameter.get("name") == "store":
+            parameter["example"] = 1
+
+    responses = get_operation.get("responses", {})
+    response_200 = responses.get("200")
+    if not isinstance(response_200, dict):
+        return
+
+    content = response_200.get("content", {})
+    json_content = content.get("application/json")
+    if not isinstance(json_content, dict):
+        return
+
+    json_content["examples"] = {
+        "ctv_app_ranks": {
+            "summary": "Top CTV-supported Google Play apps by monthly installs",
+            "value": CTV_APP_RANKS_EXAMPLE_RESPONSE,
+        }
+    }
+
+
 def _set_advertiser_creatives_example(schema: dict[str, Any]) -> None:
     """Attach a concrete example to the public advertiser creatives endpoint."""
     path_item = schema.get("paths", {}).get(
@@ -839,6 +909,7 @@ def build_v1_openapi_schema(request: Request) -> dict[str, Any]:
     _set_company_app_changes_examples(schema)
     _set_keyword_metrics_example(schema)
     _set_keyword_ranks_example(schema)
+    _set_ctv_app_ranks_example(schema)
     _set_advertiser_creatives_example(schema)
     return schema
 

@@ -19,6 +19,21 @@ from dbcon.utils import cache_by_params, clean_app_df, sql
 logger = get_logger(__name__)
 
 
+def get_scan_progress(
+    state: State, store_id: str, requested_at: datetime.datetime
+) -> dict:
+    """Get version-specific events potentially associated with a scan request."""
+    with state.dbcon.engine.connect() as conn:
+        row = (
+            conn.execute(
+                sql.scan_progress, {"store_id": store_id, "requested_at": requested_at}
+            )
+            .mappings()
+            .one()
+        )
+    return dict(row)
+
+
 def get_recent_apps(
     state: State, collection: str, store: int, category: str | None, limit: int = 20
 ) -> pd.DataFrame:
@@ -111,6 +126,18 @@ def get_growth_apps(
         "installs_z_score_4w",
     ]
     df[decimal_cols] = df[decimal_cols].round(2)
+    return df
+
+
+def get_ctv_app_ranks(state: State, store: int, limit: int = 50) -> pd.DataFrame:
+    """Get the top CTV-supported apps for a store, ranked by monthly installs."""
+    df = pd.read_sql(
+        sql.ctv_app_ranks,
+        con=state.dbcon.engine,
+        params={"store": store, "mylimit": limit},
+    )
+    if not df.empty:
+        df["installs_z_score_2w"] = df["installs_z_score_2w"].round(2)
     return df
 
 

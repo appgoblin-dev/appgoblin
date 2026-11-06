@@ -22,6 +22,7 @@ from api_app.controllers.public.v1.companies import (
     V1CompaniesController,
 )
 from api_app.controllers.public.v1.keywords import V1KeywordsController
+from api_app.controllers.public.v1.rankings import V1RankingsController
 from api_app.controllers.public.v1.public_models import (
     CompanyDatasets,
     CompanyDatasetTarget,
@@ -62,7 +63,12 @@ async def _mock_lifespan(app: Litestar) -> AsyncGenerator[None]:
 
 def _make_test_app():
     return Litestar(
-        route_handlers=[V1CompaniesController, V1AppsController, V1KeywordsController],
+        route_handlers=[
+            V1CompaniesController,
+            V1AppsController,
+            V1KeywordsController,
+            V1RankingsController,
+        ],
         lifespan=[_mock_lifespan],
         middleware=[DefineMiddleware(RateLimitMiddleware)],
     )
@@ -75,6 +81,7 @@ def _make_docs_test_app():
             V1CompaniesController,
             V1AppsController,
             V1KeywordsController,
+            V1RankingsController,
             V1DocsController,
         ],
         lifespan=[_mock_lifespan],
@@ -244,6 +251,14 @@ def _patch_sdk_history(rows: list[dict]):
     return patch(
         "api_app.controllers.public.v1.apps.get_app_sdk_history",
         return_value=history_df,
+    )
+
+
+def _patch_ctv_app_ranks(rows: list[dict]):
+    ranks_df = pd.DataFrame(rows)
+    return patch(
+        "api_app.controllers.public.v1.rankings.get_ctv_app_ranks",
+        return_value=ranks_df,
     )
 
 
@@ -1663,6 +1678,130 @@ class TestV1Apps:
         }
 
 
+class TestV1CtvAppRanks:
+    def test_ctv_app_ranks_requires_api_key(self):
+        app = _make_test_app()
+        with TestClient(app=app, raise_server_exceptions=False) as client:
+            resp = client.get("/api/v1/rankings/ctv/1")
+
+        assert resp.status_code == 401
+
+    def test_ctv_app_ranks_returns_expected_shape(self):
+        app = _make_test_app()
+        rank_rows = [
+            {
+                "rank_num": 1,
+                "app_name": "Example TV App",
+                "store_id": "com.example.tv",
+                "store": 1,
+                "icon_64": "icon.png",
+                "app_category": "video_players",
+                "developer_name": "Example Dev",
+                "developer_id": "dev123",
+                "rating": 4.5,
+                "rating_count": 1000,
+                "installs": 500000,
+                "monthly_installs": 25000.0,
+                "monthly_revenue": 1200.5,
+                "installs_z_score_2w": 812.44,
+                "country_code": "US",
+            }
+        ]
+        with (
+            _patch_key_found("free"),
+            _patch_ctv_app_ranks(rank_rows),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/rankings/ctv/1",
+                headers={"X-API-Key": "ag_ctvranks"},
+            )
+
+        assert resp.status_code == 200
+        payload = resp.json()
+        assert payload["store"] == "Google Play"
+        assert payload["country"] == "US"
+        assert payload["apps"] == [
+            {
+                "rank": 1,
+                "name": "Example TV App",
+                "store_id": "com.example.tv",
+                "store": "Google Play",
+                "category": "video_players",
+                "developer_name": "Example Dev",
+                "rating": 4.5,
+                "rating_count": 1000,
+                "installs": 500000,
+                "monthly_installs": 25000.0,
+                "monthly_revenue": 1200.5,
+                "installs_z_score_2w": 812.44,
+                "country": "US",
+                "app_icon_url": (
+                    "https://media.appgoblin.info/app-icons/com.example.tv/icon.png"
+                ),
+            }
+        ]
+
+    def test_ctv_app_ranks_returns_empty_shape_when_missing(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            _patch_ctv_app_ranks([]),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/rankings/ctv/2",
+                headers={"X-API-Key": "ag_ctvranksempty"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == {
+            "store": "Apple App Store",
+            "country": "US",
+            "apps": [],
+        }
+
+    def test_ctv_app_ranks_rejects_unknown_store(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/rankings/ctv/9",
+                headers={"X-API-Key": "ag_ctvranksbadstore"},
+            )
+
+        assert resp.status_code == 404
+        assert "Unknown store" in resp.json()["detail"]
+
+    def test_ctv_app_ranks_logs_umami_page_view_with_user_id(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            _patch_ctv_app_ranks([]),
+            patch("api_app.analytics.log_umami_page") as log_umami_page,
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/rankings/ctv/1",
+                headers={
+                    "X-API-Key": "ag_ctvranksumami",
+                    "X-Forwarded-For": "203.0.113.10",
+                },
+            )
+
+        assert resp.status_code == 200
+        log_umami_page.assert_called_once_with(
+            url="/api/v1/rankings/ctv/1",
+            ip="203.0.113.10",
+            user_id=1,
+            page_title=None,
+            hostname=PUBLIC_API_HOSTNAME,
+            referrer=None,
+        )
+
+
 class TestV1Keywords:
     def test_keyword_metrics_logs_umami_page_view_with_user_id(self):
         app = _make_test_app()
@@ -1977,6 +2116,7 @@ class TestV1Docs:
             "/api/v1/companies/{company_domain}/app-changes",
             "/api/v1/keywords/{keyword}",
             "/api/v1/keywords/{keyword}/ranks",
+            "/api/v1/rankings/ctv/{store}",
         }
 
         expected_schema_fields = {
@@ -1993,6 +2133,8 @@ class TestV1Docs:
                 v1_public_models.PublicCompanyListItem,
                 v1_public_models.PublicCompanyOverview,
                 v1_public_models.PublicCompanyTrends,
+                v1_public_models.PublicCtvAppRank,
+                v1_public_models.PublicCtvAppRanks,
                 v1_public_models.PublicKeywordMetrics,
                 v1_public_models.PublicKeywordPlatformMetrics,
                 v1_public_models.PublicKeywordRankedApp,

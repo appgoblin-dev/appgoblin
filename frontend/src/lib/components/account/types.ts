@@ -36,6 +36,6 @@ export interface TrackedKeyword {
 export interface RequestedSdkScan {
 	id: number;
 	store_id: string;
-	created_at: string | Date;
+	created_at: string | Date | null;
 	app_name: string | null;
 }

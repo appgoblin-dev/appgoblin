@@ -2,11 +2,10 @@
 
 import time
 from collections.abc import Mapping
-
-import pandas as pd
 from typing import Self, SupportsFloat, SupportsIndex, SupportsInt, cast
 from urllib.parse import quote
 
+import pandas as pd
 from litestar import Controller, Request, Response, get
 from litestar.connection import ASGIConnection
 from litestar.datastructures import State
@@ -28,8 +27,8 @@ from api_app.controllers.public.v1.public_models import (
     PublicCompanyOverview,
     PublicCompanySdk,
     PublicCompanySdks,
-    PublicSdkCompanyOverview,
     PublicCompanyTrends,
+    PublicSdkCompanyOverview,
 )
 from api_app.guards import validate_api_key
 from api_app.models import (
@@ -395,9 +394,8 @@ def _build_public_company_sdks_payload(
         msg = f"Company domain not found: {company_domain!r}"
         raise NotFoundException(msg, status_code=404)
 
-    sdk_records = (
-        sdk_rows.drop_duplicates(subset=["sdk_slug"])
-        .sort_values("app_count", ascending=False, na_position="last")
+    sdk_records = sdk_rows.drop_duplicates(subset=["sdk_slug"]).sort_values(
+        "app_count", ascending=False, na_position="last"
     )
     return PublicCompanySdks(
         company_domain=company_domain,

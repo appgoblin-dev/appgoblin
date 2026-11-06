@@ -1,16 +1,9 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { createApiClient } from '#lib/server/api.js';
-import { getAnonymousSearchQuota } from '#lib/server/request-rate-limit.js';
 import { sanitizeSearchTerm } from '#lib/search.js';
 
-export const load: PageServerLoad = async ({
-	params,
-	fetch,
-	locals,
-	request,
-	getClientAddress
-}) => {
+export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const api = createApiClient(fetch);
 	const searchTerm = sanitizeSearchTerm(params.term);
 	if (!searchTerm) {
@@ -35,6 +28,6 @@ export const load: PageServerLoad = async ({
 	return {
 		appGroupByStore,
 		companiesResults,
-		searchQuota: getAnonymousSearchQuota({ locals, request, getClientAddress })
+		searchQuota: locals.anonymousSearchQuota ?? null
 	};
 };

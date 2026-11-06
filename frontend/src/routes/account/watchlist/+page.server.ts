@@ -1,6 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import { requireAuthOr401 } from '#lib/server/auth/auth.js';
 import { db } from '#lib/server/auth/db.js';
+import { addRequestedSdkScan } from '#lib/server/requested-scans/action.js';
 
 import type { Actions, PageServerLoadEvent, RequestEvent } from './$types';
 
@@ -43,23 +44,9 @@ export async function load(event: PageServerLoadEvent) {
 		created_at: Date;
 	}
 
-	interface RequestedSdkScan {
-		id: number;
-		store_id: string;
-		created_at: Date;
-		app_name: null;
-	}
-
-	interface RequestedSdkScanRow {
-		id: number;
-		store_id: string;
-		created_at: Date;
-	}
-
-	const [followedAppRows, followedCompanies, trackedKeywordRows, requestedSdkScanRows] =
-		await Promise.all([
-			db.query<FollowedAppRow>(
-				`SELECT
+	const [followedAppRows, followedCompanies, trackedKeywordRows] = await Promise.all([
+		db.query<FollowedAppRow>(
+			`SELECT
 				ufa.id,
 				ufa.store_id,
 				ufa.created_at
@@ -67,10 +54,10 @@ export async function load(event: PageServerLoadEvent) {
 			WHERE ufa.user_id = $1
 			ORDER BY ufa.created_at DESC
 			LIMIT 100`,
-				[user.id]
-			),
-			db.query<FollowedCompany>(
-				`SELECT
+			[user.id]
+		),
+		db.query<FollowedCompany>(
+			`SELECT
 				ufc.id,
 				ufc.company_id,
 				ufc.created_at,
@@ -80,10 +67,10 @@ export async function load(event: PageServerLoadEvent) {
 			WHERE ufc.user_id = $1
 			ORDER BY ufc.created_at DESC
 			LIMIT 100`,
-				[user.id]
-			),
-			db.query<TrackedKeywordRow>(
-				`SELECT
+			[user.id]
+		),
+		db.query<TrackedKeywordRow>(
+			`SELECT
 				utk.id,
 				utk.store_id,
 				utk.keyword_text,
@@ -92,36 +79,19 @@ export async function load(event: PageServerLoadEvent) {
 			WHERE utk.user_id = $1
 			ORDER BY utk.created_at DESC
 			LIMIT 200`,
-				[user.id]
-			),
-			db.query<RequestedSdkScanRow>(
-				`SELECT
-				urs.id,
-				urs.store_id,
-				urs.created_at
-			FROM public.user_requested_scan AS urs
-			WHERE urs.user_id = $1
-			ORDER BY urs.created_at DESC
-			LIMIT 100`,
-				[user.id]
-			)
-		]);
+			[user.id]
+		)
+	]);
 
 	const followedApps: FollowedApp[] = followedAppRows.map((app) => ({ ...app, app_name: null }));
 	const trackedKeywords: TrackedKeyword[] = trackedKeywordRows.map((keyword) => ({
 		...keyword,
 		app_name: null
 	}));
-	const requestedSdkScans: RequestedSdkScan[] = requestedSdkScanRows.map((scan) => ({
-		...scan,
-		app_name: null
-	}));
-
 	return {
 		followedApps,
 		followedCompanies,
-		trackedKeywords,
-		requestedSdkScans
+		trackedKeywords
 	};
 }
 
@@ -439,22 +409,5 @@ export const actions: Actions = {
 
 		return { section: 'tracked-keywords', success: true, message: 'Tracked keyword removed' };
 	},
-	addRequestedSdkScan: async (event: RequestEvent) => {
-		const { user } = requireAuthOr401(event);
-		const data = await event.request.formData();
-
-		let storeId = '';
-		try {
-			storeId = getRequiredString(data, 'store_id');
-		} catch {
-			return fail(400, { section: 'requested-scans', message: 'App store ID is required' });
-		}
-
-		await db.execute('INSERT INTO public.user_requested_scan (store_id, user_id) VALUES ($1, $2)', [
-			storeId,
-			user.id
-		]);
-
-		return { section: 'requested-scans', success: true, message: 'SDK scan request submitted' };
-	}
+	addRequestedSdkScan
 };

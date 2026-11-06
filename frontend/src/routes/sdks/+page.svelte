@@ -4,6 +4,7 @@
 	import WhiteCard from '#lib/WhiteCard.svelte';
 	import SDKOverview from '#lib/utils/SDKOverview.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { resolve } from '$app/paths';
 
 	let { data } = $props();
 </script>
@@ -46,6 +47,10 @@
 					SDK scans are automated and usually happen quickly (~1hr). The results will aggregate to
 					the dashboard in about a day. If you see that your request failed, please reach out on
 					Discord/Email as manual processing may be needed.
+				</p>
+				<p class="px-2 pb-4 text-sm md:px-4 md:text-base">
+					Visit <a class="anchor" href={resolve('/account/requested-scans')}>My SDK Scans</a>
+					in your account to request a scan, view your request history, and check progress for each app.
 				</p>
 				{#await data.sdksUserRequested}
 					loading

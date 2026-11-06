@@ -306,13 +306,7 @@
 											</div>
 										</a>
 									{:else if ['installs_z_score_2w', 'installs_z_score_4w'].includes(cell.column.id)}
-										<ZScoreMeter
-											value={cell.getValue() as number}
-											min={0}
-											max={1000}
-											size="sm"
-											showValue={false}
-										/>
+										<ZScoreMeter value={cell.getValue() as number} min={0} max={1000} size="sm" />
 									{:else if ['installs', 'rating_count', 'installs_sum_1w', 'ratings_sum_1w', 'installs_avg_2w', 'installs_sum_4w', 'monthly_active_users'].includes(cell.column.id)}
 										<p class="text-xs md:text-sm">
 											{#if (cell.getValue() ?? 0) === 0}

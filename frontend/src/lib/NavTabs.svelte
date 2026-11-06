@@ -113,6 +113,12 @@
 			>
 			<div class={myDivider}></div>
 			<a
+				href="/top-ctv-app-ranks/google"
+				class={isHighlighted('/top-ctv-app-ranks') ? topBarHighlightedFont : topBarFont}
+				>Top CTV Apps</a
+			>
+			<div class={myDivider}></div>
+			<a
 				href="/collections/new_monthly/google/overall"
 				class={isHighlighted('/collections') ? topBarHighlightedFont : topBarFont}>New Apps</a
 			>
@@ -258,6 +264,7 @@
 				class="flex items-center gap-0.5 {isHighlighted(
 					'/rankings',
 					'/fastest-growing-apps',
+					'/top-ctv-app-ranks',
 					'/collections'
 				)
 					? topBarHighlightedFont
@@ -281,6 +288,11 @@
 						href="/fastest-growing-apps/google/overall"
 						class={isHighlighted('/fastest-growing-apps') ? dropdownHighlightedItem : dropdownItem}
 						>Top Growth Apps</a
+					>
+					<a
+						href="/top-ctv-app-ranks/google"
+						class={isHighlighted('/top-ctv-app-ranks') ? dropdownHighlightedItem : dropdownItem}
+						>Top CTV Apps</a
 					>
 					<a
 						href="/collections/new_monthly/google/overall"
