@@ -19,6 +19,17 @@ from dbcon.utils import cache_by_params, clean_app_df, sql
 logger = get_logger(__name__)
 
 
+def get_scan_progress(
+    state: State, store_id: str, requested_at: datetime.datetime
+) -> dict:
+    """Get version-specific events potentially associated with a scan request."""
+    with state.dbcon.engine.connect() as conn:
+        row = conn.execute(
+            sql.scan_progress, {"store_id": store_id, "requested_at": requested_at}
+        ).mappings().one()
+    return dict(row)
+
+
 def get_recent_apps(
     state: State, collection: str, store: int, category: str | None, limit: int = 20
 ) -> pd.DataFrame:

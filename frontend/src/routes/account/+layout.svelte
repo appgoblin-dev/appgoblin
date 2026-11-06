@@ -7,6 +7,7 @@
 	import CreditCard from '@lucide/svelte/icons/credit-card';
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import ListTodo from '@lucide/svelte/icons/list-todo';
+	import ScanSearch from '@lucide/svelte/icons/scan-search';
 	import Code from '@lucide/svelte/icons/code';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Users from '@lucide/svelte/icons/users';
@@ -19,6 +20,7 @@
 	const navItems = [
 		{ href: '/account', label: 'Overview', icon: LayoutDashboard },
 		{ href: '/account/watchlist', label: 'Watchlists', icon: ListTodo },
+		{ href: '/account/requested-scans', label: 'My SDK Scans', icon: ScanSearch },
 		{ href: '/account/api-keys', label: 'API Keys', icon: Code },
 		{ href: '/account/reports', label: 'Generated Reports', icon: FileText },
 		{ href: '/account/team', label: 'Team', icon: Users },

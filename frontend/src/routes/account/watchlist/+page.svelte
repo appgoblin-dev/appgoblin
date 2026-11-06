@@ -4,7 +4,6 @@
 	import TrackedAppsSection from '#lib/components/account/TrackedAppsSection.svelte';
 	import TrackedCompaniesSection from '#lib/components/account/TrackedCompaniesSection.svelte';
 	import TrackedKeywordsSection from '#lib/components/account/TrackedKeywordsSection.svelte';
-	import RequestedSdkScansSection from '#lib/components/account/RequestedSdkScansSection.svelte';
 
 	let { data, form }: { data: PageData; form?: AccountFormResult | null } = $props();
 	let accountData = $derived(data);
@@ -20,7 +19,7 @@
 		<div class="border-b border-surface-300-700 pb-4">
 			<h1 class="text-2xl font-bold">Watchlists</h1>
 			<p class="text-sm text-surface-600-400">
-				Manage the apps, companies, keywords, and SDK scan requests tied to your account.
+				Manage the apps, companies, and keywords tied to your account.
 			</p>
 		</div>
 
@@ -31,10 +30,6 @@
 		/>
 		<TrackedKeywordsSection
 			keywords={accountData.trackedKeywords ?? []}
-			form={accountForm ?? undefined}
-		/>
-		<RequestedSdkScansSection
-			scans={accountData.requestedSdkScans ?? []}
 			form={accountForm ?? undefined}
 		/>
 	</div>
