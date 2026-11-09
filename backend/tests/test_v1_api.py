@@ -1968,6 +1968,26 @@ class TestV1Keywords:
             referrer=None,
         )
 
+    @pytest.mark.parametrize("limit, expected_status", [(200, 200), (201, 400)])
+    def test_keyword_ranks_limit_maximum(self, limit, expected_status):
+        app = _make_test_app()
+        rows = [{"name": "Example", "store": 1, "latest_app_rank": 1}]
+        with (
+            _patch_key_found("free"),
+            _patch_keyword_apps(rows) as get_apps,
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                f"/api/v1/keywords/app privacy/ranks?limit={limit}",
+                headers={"X-API-Key": "ag_keywordkey"},
+            )
+
+        assert resp.status_code == expected_status
+        if limit == 200:
+            assert get_apps.call_args.kwargs["rank"] == 201
+        else:
+            get_apps.assert_not_called()
+
     def test_keyword_ranks_returns_expected_fields(self):
         app = _make_test_app()
         rank_rows = [
@@ -2381,6 +2401,8 @@ class TestV1Docs:
         assert [
             parameter["name"] for parameter in keyword_ranks_operation["parameters"]
         ] == ["keyword", "limit"]
+        limit_parameter = keyword_ranks_operation["parameters"][1]
+        assert limit_parameter["schema"]["maximum"] == 200
         assert keyword_ranks_operation["summary"] == "/keywords/{keyword}/ranks"
         assert (
             keyword_ranks_operation["description"]

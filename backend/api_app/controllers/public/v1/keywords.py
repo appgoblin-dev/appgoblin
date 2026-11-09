@@ -6,6 +6,7 @@ from typing import Self, SupportsFloat, SupportsIndex, SupportsInt
 from litestar import Controller, Request, Response, get
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException
+from litestar.params import Parameter
 
 from api_app.analytics import PUBLIC_API_HOSTNAME, build_request_page_view_task
 from api_app.controllers.public.v1.apps import _api_key_guard
@@ -208,7 +209,7 @@ class V1KeywordsController(Controller):
         state: State,
         request: Request,
         keyword: str,
-        limit: int = 20,
+        limit: int = Parameter(default=20, le=200),
     ) -> PublicKeywordRanks:
         """Return grouped latest top-ranked apps for an exact keyword lookup."""
         start = time.perf_counter() * 1000

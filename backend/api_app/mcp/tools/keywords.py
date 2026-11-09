@@ -1,7 +1,4 @@
-"""MCP tools wrapping the public ``/api/v1/keywords/`` endpoints.
-
-Keyword tools are **paid-tier only**.
-"""
+"""MCP tools wrapping the public ``/api/v1/keywords/`` endpoints."""
 
 from __future__ import annotations
 
@@ -15,7 +12,7 @@ from api_app.controllers.public.v1.keywords import (
 )
 from api_app.mcp.serialize import to_json
 from api_app.mcp.server import mcp_server
-from api_app.mcp.state import assert_paid_tier, get_mcp_state
+from api_app.mcp.state import get_mcp_state
 from config import get_logger
 
 logger = get_logger(__name__)
@@ -27,7 +24,9 @@ logger = get_logger(__name__)
 
 
 @mcp_server.tool()
-async def get_keyword_metrics(keyword: str, ctx: Context) -> str:  # noqa: D417
+async def get_keyword_metrics(  # noqa: D417
+    keyword: str, ctx: Context  # noqa: ARG001
+) -> str:
     """Return keyword difficulty, competition, and opportunity scores.
 
     Parameters
@@ -35,12 +34,7 @@ async def get_keyword_metrics(keyword: str, ctx: Context) -> str:  # noqa: D417
     keyword : str
         The exact search term (e.g. 'app privacy', 'fitness tracker').
 
-    .. warning::
-       This tool is restricted to paid-tier subscribers.
-
     """
-    assert_paid_tier(ctx, "get_keyword_metrics")
-
     state = get_mcp_state()
     try:
         payload = _build_keyword_metrics_payload(state=state, keyword=keyword)
@@ -53,7 +47,9 @@ async def get_keyword_metrics(keyword: str, ctx: Context) -> str:  # noqa: D417
 
 @mcp_server.tool()
 async def get_keyword_ranks(  # noqa: D417
-    keyword: str, ctx: Context, limit: int = 20
+    keyword: str,
+    ctx: Context,  # noqa: ARG001
+    limit: int = 20,
 ) -> str:
     """Return the top-ranked apps for an exact keyword lookup, grouped by platform.
 
@@ -64,12 +60,7 @@ async def get_keyword_ranks(  # noqa: D417
     limit : int
         Maximum number of ranked apps to return per platform (default 20).
 
-    .. warning::
-       This tool is restricted to paid-tier subscribers.
-
     """
-    assert_paid_tier(ctx, "get_keyword_ranks")
-
     state = get_mcp_state()
     try:
         payload = _build_keyword_ranks_payload(
