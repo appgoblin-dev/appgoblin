@@ -183,8 +183,9 @@
 							<li class="flex justify-between gap-4 py-2">
 								<a
 									class="anchor"
-									href={resolve('/companies/[domain]/(categorical)', { domain: company.company_domain })}
-									>{company.company_name || company.company_domain}</a
+									href={resolve('/companies/[domain]/(categorical)', {
+										domain: company.company_domain
+									})}>{company.company_name || company.company_domain}</a
 								><span class="text-right text-sm text-surface-600-400"
 									>{[
 										...new Set([
