@@ -15,7 +15,7 @@
 
 - **[SDK Analysis](https://appgoblin.info/sdks)** — Detailed breakdown of SDKs found in decompiled 200k+ Android and iOS apps, including advertising, analytics, and open-source libraries
 
-- **[Companies Directory](https://appgoblin.info/companies)** — Rankings of mobile app companies based on SDK integration frequency, filterable by category
+- **[Companies Directory](https://appgoblin.info/companies)** — An introduction to mobile app companies, their roles, and the available SDK, API, and app-ads.txt signals. The [company data table](https://appgoblin.info/companies/browse-data) provides detailed rankings and filtering by category.
   - Example: [Most popular Ad Networks for Casino Games](https://appgoblin.info/companies/types/ad-networks/game_casino)
   - Example: [Most popular Product Analytics for Business Apps](https://appgoblin.info/companies/types/product-analytics/business)
 

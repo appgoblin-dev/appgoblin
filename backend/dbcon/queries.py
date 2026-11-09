@@ -424,6 +424,12 @@ def get_companies_stats(
     return df
 
 
+def get_companies_landing(state: State) -> dict:
+    """Return compact company-domain counts and examples for the landing page."""
+    with state.dbcon.engine.connect() as conn:
+        return dict(conn.execute(sql.companies_landing).mappings().one())
+
+
 def get_company_directory(state: State) -> pd.DataFrame:
     """Get the mapped company IDs and names used by App Explorer selectors."""
     return pd.read_sql(sql.company_directory, state.dbcon.engine)

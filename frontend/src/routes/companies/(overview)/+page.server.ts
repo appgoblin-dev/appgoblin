@@ -1,11 +1,12 @@
-import type { PageServerLoad } from '../../$types';
+import type { PageServerLoad } from './$types';
 import { createApiClient } from '#lib/server/api.js';
 
-export const csr = true;
-export const ssr = true;
-
 export const load: PageServerLoad = async ({ fetch }) => {
-	const api = createApiClient(fetch);
-	const companiesOverview = await api.get('/companies', 'Companies Overview');
-	return { companiesOverview };
+	try {
+		const summary = await createApiClient(fetch).get('/companies/summary', 'Company Summary');
+		return { summary };
+	} catch (error) {
+		console.error('Unable to load company summary', error);
+		return { summary: null };
+	}
 };
