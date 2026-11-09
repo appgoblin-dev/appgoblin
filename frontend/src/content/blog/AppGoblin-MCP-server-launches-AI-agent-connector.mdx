@@ -95,21 +95,11 @@ https://appgoblin.info/api/v1/mcp
 **Or test with curl:**
 
 ```bash
-# Initialize a session
-SESSION=$(curl -s -D - -o /dev/null \
-  -X POST https://appgoblin.info/api/v1/mcp \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -H "Authorization: Bearer YOUR_KEY" \
-  -d '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"curl","version":"1.0"}},"id":1}' \
-  | grep -i 'mcp-session-id' | awk '{print $2}' | tr -d '\r')
-
 # List available tools
 curl -s -X POST https://appgoblin.info/api/v1/mcp \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
   -H "Authorization: Bearer YOUR_KEY" \
-  -H "mcp-session-id: $SESSION" \
   -d '{"jsonrpc":"2.0","method":"tools/list","params":{},"id":1}'
 ```
 

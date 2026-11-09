@@ -71,8 +71,8 @@ async def _build_tools_docs() -> dict:
             "description": (
                 "Connect MCP clients (Claude Code, Cursor, etc.) to this "
                 "Streamable HTTP endpoint. The server authenticates on every "
-                "request via the `Authorization: Bearer` header and supports "
-                "long-lived sessions for tool call sequences. The legacy "
+                "request via the `Authorization: Bearer` header and runs "
+                "statelessly, with no sessions between requests. The legacy "
                 "`X-API-Key` header is also accepted."
             ),
         },

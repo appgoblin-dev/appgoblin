@@ -23,6 +23,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from litestar.exceptions import ServiceUnavailableException
+from mcp.server.transport_security import TransportSecuritySettings
 
 # Import the MCP package first — the __init__.py registers all tools.
 # Then pull the server instance and shared authentication primitives.
@@ -266,6 +267,24 @@ class AuthenticatedMCPMiddleware:
             )
             return
 
+        # --- Stateless mode has no server-initiated messages to stream ---
+        if scope["method"] == "GET":
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": 405,
+                    "headers": [(b"allow", b"POST")],
+                }
+            )
+            await send(
+                {
+                    "type": "http.response.body",
+                    "body": b"",
+                    "more_body": False,
+                }
+            )
+            return
+
         # --- Inject user into scope ---
         scope["user"] = user_ctx
 
@@ -277,5 +296,15 @@ class AuthenticatedMCPMiddleware:
 # Pre-wired ASGI app (imported by app.py)
 # ---------------------------------------------------------------------------
 
-mcp_asgi_app = mcp_server.streamable_http_app(streamable_http_path="/")
+# Public endpoint behind a reverse proxy. Every request needs an API key and no
+# cookie auth is accepted, so the SDK's localhost-only Host and Origin checks are
+# not needed.
+# Stateless because uvicorn runs several workers and sessions are per-process.
+mcp_asgi_app = mcp_server.streamable_http_app(
+    streamable_http_path="/",
+    stateless_http=True,
+    transport_security=TransportSecuritySettings(
+        enable_dns_rebinding_protection=False,
+    ),
+)
 protected_mcp_app = AuthenticatedMCPMiddleware(mcp_asgi_app)
