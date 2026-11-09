@@ -3,6 +3,8 @@
 	import type { Row } from '@tanstack/table-core';
 	let { table, filename } = $props();
 
+	const excludedFields = new Set(['company_logo_url', 'parent_company_logo_url']);
+
 	const csvConfig = $derived(
 		mkConfig({
 			fieldSeparator: ',',
@@ -12,8 +14,30 @@
 		})
 	);
 
-	const exportDataCSV = (rows: Row<any, any>[]) => {
-		const rowData = rows.map((row) => row.original);
+	function toCsvValue(value: unknown): string | number | boolean | null | undefined {
+		if (
+			value === null ||
+			typeof value === 'string' ||
+			typeof value === 'number' ||
+			typeof value === 'boolean' ||
+			typeof value === 'undefined'
+		) {
+			return value;
+		}
+		if (typeof value !== 'object') {
+			return String(value);
+		}
+		return JSON.stringify(value) ?? String(value);
+	}
+
+	const exportDataCSV = (rows: Row<Record<string, unknown>, unknown>[]) => {
+		const rowData = rows.map((row) =>
+			Object.fromEntries(
+				Object.entries(row.original)
+					.filter(([key]) => !excludedFields.has(key))
+					.map(([key, value]) => [key, toCsvValue(value)])
+			)
+		);
 		const csv = generateCsv(csvConfig)(rowData);
 		download(csvConfig)(csv);
 	};

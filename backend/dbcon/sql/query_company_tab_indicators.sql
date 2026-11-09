@@ -6,6 +6,8 @@ SELECT
     co.logo_url,
     co.country,
     co.country_direct,
+    co.tickers_direct,
+    co.company_tickers,
     co.parent_domain_id,
     co.parent_company_id,
     co.parent_domain,

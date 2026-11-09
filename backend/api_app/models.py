@@ -294,6 +294,8 @@ class CompanyTabIndicators:
     # Effective indicators (child → parent → 0)
     country: str | None = None
     country_direct: str | None = None
+    tickers_direct: list[str] | None = None
+    company_tickers: list[str] | None = None
     creatives_app_count: int = 0
     has_trends: int = 0
     apps_sdk_added_count: int = 0

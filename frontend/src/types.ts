@@ -272,6 +272,8 @@ export interface CompaniesOverviewEntries {
 	company_logo_url?: string | null;
 	parent_company_logo_url?: string | null;
 	country?: string | null;
+	tickers_direct?: string[] | null;
+	company_tickers?: string[] | null;
 	total_app_count?: number | null;
 	google_app_count?: number | null;
 	apple_app_count?: number | null;
@@ -575,6 +577,8 @@ export interface CompanyTabIndicators {
 	has_app_ads_reseller: boolean;
 	country: string | null;
 	country_direct: string | null;
+	tickers_direct: string[] | null;
+	company_tickers: string[] | null;
 	creatives_app_count: number;
 	has_trends: number;
 	apps_sdk_added_count: number;

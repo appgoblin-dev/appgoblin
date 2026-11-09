@@ -91,6 +91,7 @@
 				{ title: 'Country', accessorKey: 'country', isSortable: true },
 				{ title: 'Company', accessorKey: 'company_name', isSortable: true },
 				{ title: 'Parent Company', accessorKey: 'parent_company_name', isSortable: true },
+				{ title: 'Tickers', accessorKey: 'company_tickers', isSortable: false },
 				{ title: 'Total Apps', accessorKey: 'total_app_count', isSortable: true },
 				{ title: 'Android Apps', accessorKey: 'google_app_count', isSortable: true },
 				{ title: 'iOS Apps', accessorKey: 'apple_app_count', isSortable: true },
@@ -141,6 +142,7 @@
 			{ title: 'Country', accessorKey: 'country', isSortable: true },
 			{ title: 'Company', accessorKey: 'company_name', isSortable: true },
 			{ title: 'Parent Company', accessorKey: 'parent_company_name', isSortable: true },
+			{ title: 'Tickers', accessorKey: 'company_tickers', isSortable: false },
 			{ title: 'Total Apps', accessorKey: 'total_app_count', isSortable: true },
 			// App counts
 			...sdkMetricColDefs.filter((c) => c.accessorKey.endsWith('_app_count')),
@@ -211,17 +213,33 @@
 		return genericColumns(rawCols);
 	});
 
+	function getCompanyTickers(company: unknown): string[] {
+		if (typeof company !== 'object' || company === null) return [];
+		const companyTickers =
+			'company_tickers' in company && Array.isArray(company.company_tickers)
+				? company.company_tickers
+				: [];
+		const directTickers =
+			'tickers_direct' in company && Array.isArray(company.tickers_direct)
+				? company.tickers_direct
+				: [];
+		const tickers: unknown[] = [...companyTickers, ...directTickers];
+		return [...new Set(tickers.filter((ticker): ticker is string => typeof ticker === 'string'))];
+	}
+
 	const globalFilterFn = (row: any, columnId: string, filterValue: string) => {
 		const name = row.original.company_name?.toLowerCase() ?? '';
 		const domain = row.original.company_domain?.toLowerCase() ?? '';
 		const parentName = row.original.parent_company_name?.toLowerCase() ?? '';
 		const parentDomain = row.original.parent_company_domain?.toLowerCase() ?? '';
 		const query = filterValue.toLowerCase();
+		const tickers = getCompanyTickers(row.original);
 		return (
 			name.includes(query) ||
 			domain.includes(query) ||
 			parentName.includes(query) ||
-			parentDomain.includes(query)
+			parentDomain.includes(query) ||
+			tickers.some((ticker: string) => ticker.toLowerCase().includes(query))
 		);
 	};
 
@@ -353,7 +371,8 @@
 		'percent_open_source',
 		'country',
 		'company_name',
-		'parent_company_name'
+		'parent_company_name',
+		'company_tickers'
 	]);
 
 	const COLUMN_GROUPS = [
@@ -571,6 +590,11 @@
 							{:else}
 								<span class="text-xs text-surface-500-400">-</span>
 							{/if}
+						</td>
+						<td class="text-xs md:text-sm" class:hidden={!isColumnVisible('company_tickers')}>
+							{#each getCompanyTickers(row.original) as ticker (ticker)}
+								<span class="badge preset-filled-surface-200-800 mr-1">{ticker}</span>
+							{/each}
 						</td>
 						{#if showsApiColumns}
 							<td class="table-cell-fit" class:hidden={!isColumnVisible('total_app_count')}>

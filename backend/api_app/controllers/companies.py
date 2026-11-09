@@ -2022,6 +2022,19 @@ class CompaniesController(Controller):
             def _nan_str(val: object) -> str | None:
                 return None if pd.isna(val) else str(val)
 
+            def _nan_str_list(val: object) -> list[str] | None:
+                if val is None:
+                    return None
+                if isinstance(val, (list, tuple)):
+                    return [
+                        str(item)
+                        for item in val
+                        if item is not None and not pd.isna(item)
+                    ]
+                if pd.isna(val):
+                    return None
+                return [str(val)]
+
             result = CompanyTabIndicators(
                 company_domain=str(row.company_domain),
                 domain_id=_nan(row.domain_id),
@@ -2038,6 +2051,8 @@ class CompaniesController(Controller):
                 has_app_ads_reseller=bool(row.has_app_ads_reseller),
                 country=_nan_str(row.country),
                 country_direct=_nan_str(row.country_direct),
+                tickers_direct=_nan_str_list(row.tickers_direct),
+                company_tickers=_nan_str_list(row.company_tickers),
                 creatives_app_count=int(row.creatives_app_count),
                 has_trends=int(row.has_trends),
                 apps_sdk_added_count=int(row.apps_sdk_added_count),
