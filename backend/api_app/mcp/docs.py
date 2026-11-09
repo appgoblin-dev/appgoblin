@@ -196,11 +196,7 @@ def _render_html(docs: dict) -> str:
 def _render_tool_row(tool: dict) -> str:
     """Render a single tool as an HTML card."""
     params = tool.get("parameters", {})
-    tier = (
-        "paid"
-        if tool["name"].startswith(("get_company", "list_"))
-        else "free"
-    )
+    tier = "paid" if tool["name"].startswith(("get_company", "list_")) else "free"
     badge_class = "badge-paid" if tier == "paid" else "badge-free"
 
     params_html = ""

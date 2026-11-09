@@ -1,9 +1,8 @@
 """Lightweight Litestar ``State`` surrogate + auth helpers for MCP tools.
 
-All existing ``dbcon/queries.py`` helpers accept ``litestar.datastructures.State``
-and access ``state.dbcon.engine``.  Instead of rewriting every query call, this
-module provides a ``State``-compatible proxy that wraps the same module-level
-engine reference injected by ``set_mcp_engine()``.
+Shared query helpers use the Litestar application state, including its read
+and write connections and preloaded static data. The application lifespan
+injects that same state for MCP tools.
 
 Usage::
 
@@ -17,50 +16,25 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from api_app.mcp.engine import get_engine
-
 if TYPE_CHECKING:
+    from litestar.datastructures import State
     from mcp.server.mcpserver import Context
-    from sqlalchemy import Engine
 
 
-class _MCPState:
-    """Minimal ``litestar.datastructures.State`` look-alike.
-
-    Only exposes the attributes that the shared query layer uses::
-
-        state.dbcon.engine  # read connection
-        state.dbconwrite.engine  # write connection (same engine in MCP context)
-    """
-
-    def __init__(self, engine: Engine) -> None:
-        self.dbcon = _DBAlias(engine)
-        self.dbconwrite = _DBAlias(engine)
+_mcp_state: State | None = None
 
 
-class _DBAlias:
-    """Holds a single ``engine`` attribute."""
-
-    def __init__(self, engine: Engine) -> None:
-        self.engine = engine
-
-
-# ---------------------------------------------------------------------------
-# Module-level cached proxy (lazily initialised)
-# ---------------------------------------------------------------------------
-
-_mcp_state: _MCPState | None = None
-
-
-def get_mcp_state() -> _MCPState:
-    """Return a cached ``State``-like proxy backed by the MCP engine.
-
-    Raises ``RuntimeError`` if ``set_mcp_engine()`` has not been called yet
-    (i.e. the Litestar lifespan has not started).
-    """
+def set_mcp_state(state: State | None) -> None:
+    """Set or clear the application state used by MCP tools."""
     global _mcp_state  # noqa: PLW0603
+    _mcp_state = state
+
+
+def get_mcp_state() -> State:
+    """Return the application state injected during lifespan startup."""
     if _mcp_state is None:
-        _mcp_state = _MCPState(get_engine())
+        msg = "MCP application state not initialised - start the application lifespan"
+        raise RuntimeError(msg)
     return _mcp_state
 
 

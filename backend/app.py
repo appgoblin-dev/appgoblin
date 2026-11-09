@@ -33,11 +33,9 @@ from api_app.controllers.rankings import RankingsController
 from api_app.controllers.scan_progress import ScanProgressController
 from api_app.controllers.scry import ScryController
 from api_app.controllers.sdks import SdksController
-from api_app.mcp.controller import (
-    mcp_server,
-    protected_mcp_app,
-    set_mcp_engine,
-)
+from api_app.mcp.controller import mcp_server, protected_mcp_app
+from api_app.mcp.engine import set_mcp_engine
+from api_app.mcp.state import set_mcp_state
 from dbcon.connections import get_db_connection
 from dbcon.static import load_static_data
 
@@ -227,11 +225,11 @@ async def db_lifespan(app: Litestar) -> AsyncGenerator[None]:
             logger.exception("Failed to connect to goblinadmin-write")
             app.state.dbconwrite = None
 
-        # Inject the write engine into the MCP module so its ASGI
-        # middleware and tools can authenticate & query without coupling
-        # to app.state.
-        if app.state.dbconwrite is not None:
-            set_mcp_engine(app.state.dbconwrite.engine)
+        # Authentication uses the write database; tools use the same state as REST.
+        set_mcp_state(app.state)
+        set_mcp_engine(
+            app.state.dbconwrite.engine if app.state.dbconwrite is not None else None
+        )
     except Exception:
         logger.exception("Failed to initialize database connections")
         raise
@@ -243,6 +241,8 @@ async def db_lifespan(app: Litestar) -> AsyncGenerator[None]:
             yield
     finally:
         # Cleanup - always runs, even if there's an error
+        set_mcp_state(None)
+        set_mcp_engine(None)
         logger.info("Closing database connections...")
 
         if hasattr(app.state, "dbcon") and app.state.dbcon:

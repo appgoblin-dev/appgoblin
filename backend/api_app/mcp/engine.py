@@ -1,13 +1,4 @@
-"""Module-level database engine reference for the MCP server.
-
-Exists as a separate module to avoid circular imports:
-- ``controller.py`` imports from ``engine.py``
-- ``state.py`` imports from ``engine.py``
-- ``controller.py`` also triggers tool registrations (via ``import api_app.mcp``)
-  which in turn load ``state.py`` — if ``state.py`` tried to import from
-  ``controller.py`` directly, it would fail because the module is still being
-  evaluated.
-"""
+"""Module-level authentication database engine reference for the MCP server."""
 
 from __future__ import annotations
 
@@ -23,16 +14,16 @@ logger = get_logger(__name__)
 _engine: Engine | None = None
 
 
-def set_mcp_engine(engine: Engine) -> None:
-    """Inject the write-capable engine into the MCP module.
-
-    Called during the Litestar ``db_lifespan`` startup so that the ASGI
-    authentication layer and tool functions can access the database without
-    coupling to ``app.state``.
-    """
+def set_mcp_engine(engine: Engine | None) -> None:
+    """Set or clear the write engine used for API-key authentication."""
     global _engine  # noqa: PLW0603
     _engine = engine
-    logger.info("MCP server received database engine reference")
+    if engine is not None:
+        logger.info("MCP server received authentication engine reference")
+
+
+class MCPDatabaseUnavailableError(RuntimeError):
+    """Raised when the authentication database is unavailable."""
 
 
 def get_engine() -> Engine:
@@ -42,5 +33,5 @@ def get_engine() -> Engine:
             "MCP database engine not initialised - call set_mcp_engine()"
             " during lifespan"
         )
-        raise RuntimeError(msg)
+        raise MCPDatabaseUnavailableError(msg)
     return _engine
