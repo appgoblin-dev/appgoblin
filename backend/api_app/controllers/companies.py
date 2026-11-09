@@ -60,6 +60,7 @@ from config import get_logger
 from dbcon.queries import (
     get_category_type_stats,
     get_combined_companies_history,
+    get_companies_landing,
     get_companies_stats,
     get_companies_top,
     get_companies_type_stats,
@@ -1921,6 +1922,11 @@ class CompaniesController(Controller):
         logger.info(f"GET /api/companies took {duration}ms")
         return overview
 
+    @get(path="/companies/summary", cache=86400)
+    async def companies_summary(self: Self, state: State) -> dict:
+        """Return compact counts and examples without loading the company table."""
+        return get_companies_landing(state)
+
     @get(path="/companies/list", cache=86400)
     async def companies_list(self: Self, state: State) -> list[CompanyDirectoryEntry]:
         """Handle GET request for a slim cached companies directory."""
@@ -2022,6 +2028,19 @@ class CompaniesController(Controller):
             def _nan_str(val: object) -> str | None:
                 return None if pd.isna(val) else str(val)
 
+            def _nan_str_list(val: object) -> list[str] | None:
+                if val is None:
+                    return None
+                if isinstance(val, (list, tuple)):
+                    return [
+                        str(item)
+                        for item in val
+                        if item is not None and not pd.isna(item)
+                    ]
+                if pd.isna(val):
+                    return None
+                return [str(val)]
+
             result = CompanyTabIndicators(
                 company_domain=str(row.company_domain),
                 domain_id=_nan(row.domain_id),
@@ -2038,6 +2057,8 @@ class CompaniesController(Controller):
                 has_app_ads_reseller=bool(row.has_app_ads_reseller),
                 country=_nan_str(row.country),
                 country_direct=_nan_str(row.country_direct),
+                tickers_direct=_nan_str_list(row.tickers_direct),
+                company_tickers=_nan_str_list(row.company_tickers),
                 creatives_app_count=int(row.creatives_app_count),
                 has_trends=int(row.has_trends),
                 apps_sdk_added_count=int(row.apps_sdk_added_count),

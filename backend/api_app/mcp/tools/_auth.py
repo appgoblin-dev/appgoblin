@@ -1,8 +1,6 @@
 """Shared authentication helpers for MCP tools.
 
-Provides a single ``assert_paid_tier()`` function used by both
-``companies.py`` and ``keywords.py`` to enforce paid-tier gating
-without duplicating the logic.
+Provides an ``assert_paid_tier()`` function for enforcing paid-tier gating.
 """
 
 from __future__ import annotations

@@ -16,8 +16,8 @@
 				newUrl = `/companies/types/${parts[2]}`;
 			}
 		} else if (parts[0] === 'companies') {
-			if (parts.length == 1) {
-				// This triggers on /companies
+			if (parts.length == 1 || (parts.length == 2 && parts[1] === 'browse-data')) {
+				// All-company table and category routes share the same category base.
 				// console.log("newURL hardcoded");
 				newUrl = '/companies/categories';
 			} else if (parts.length == 2) {
@@ -63,7 +63,7 @@
 							<SideBarCatsListBoxItem {values} {selectedCategory} />
 						</a>
 					{:else if baseUrl == '/companies/categories' && values.id == 'overall'}
-						<a href="/companies" class="text-tertiary-900-100 hover:underline">
+						<a href="/companies/browse-data" class="text-tertiary-900-100 hover:underline">
 							<SideBarCatsListBoxItem {values} {selectedCategory} />
 						</a>
 					{:else}

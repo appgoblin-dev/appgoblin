@@ -73,6 +73,12 @@
 	);
 	let isSecondaryDomain = $derived(Boolean(data.companyTree?.is_secondary_domain));
 	let isStubDomain = $derived(Boolean(data.companyTree?.is_orphan));
+	let companyTickers = $derived(
+		[
+			...(data.tabIndicators?.company_tickers ?? []),
+			...(data.tabIndicators?.tickers_direct ?? [])
+		].filter((ticker, index, tickers) => tickers.indexOf(ticker) === index)
+	);
 
 	let selectedCategoryName = $derived(
 		categoryName && categoryName.trim() ? categoryName : 'All Apps'
@@ -420,6 +426,14 @@
 												{countryCodeToEmoji(data.tabIndicators.api_ip_resolved_country)}
 											</span>
 										{/if}
+									</span>
+								{/if}
+								{#if companyTickers.length > 0}
+									<span class="inline-flex flex-wrap items-center gap-1">
+										<span class="text-[10px] font-medium text-gray-600">Tickers:</span>
+										{#each companyTickers as ticker (ticker)}
+											<span class="badge preset-filled-surface-200-800 text-xs">{ticker}</span>
+										{/each}
 									</span>
 								{/if}
 								{#if data.tabIndicators?.linkedin_url}

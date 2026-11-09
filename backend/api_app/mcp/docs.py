@@ -87,7 +87,7 @@ async def _build_tools_docs() -> dict:
         "tier_access": {
             "apps": "All tiers (free and paid).",
             "companies": "Paid tiers only (b2b_sdk, b2b_appads, b2b_premium).",
-            "keywords": "Paid tiers only (b2b_sdk, b2b_appads, b2b_premium).",
+            "keywords": "All tiers (free and paid).",
         },
         "tools": tools_docs,
         "servers": MCP_DOCS_SERVERS,
@@ -196,11 +196,7 @@ def _render_html(docs: dict) -> str:
 def _render_tool_row(tool: dict) -> str:
     """Render a single tool as an HTML card."""
     params = tool.get("parameters", {})
-    tier = (
-        "paid"
-        if tool["name"].startswith(("get_company", "get_keyword", "list_"))
-        else "free"
-    )
+    tier = "paid" if tool["name"].startswith(("get_company", "list_")) else "free"
     badge_class = "badge-paid" if tier == "paid" else "badge-free"
 
     params_html = ""

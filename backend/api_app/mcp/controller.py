@@ -10,9 +10,8 @@ layer *before* requests reach any tool handler.
 
 Engine injection
 ----------------
-The Litestar ``db_lifespan`` callback calls ``set_mcp_engine()`` after
-creating database connections, so the MCP middleware and tools can query the
-same connection pool without depending on ``app.state``.
+The Litestar ``db_lifespan`` callback injects the write engine for API-key
+authentication and application state for tool queries.
 """
 
 from __future__ import annotations
@@ -35,7 +34,7 @@ from api_app.guards import (
     _rate_limit_key,
     get_tier_limits,
 )
-from api_app.mcp.engine import get_engine, set_mcp_engine  # noqa: F401
+from api_app.mcp.engine import MCPDatabaseUnavailableError, get_engine
 from api_app.mcp.server import mcp_server
 from config import get_logger
 
@@ -210,6 +209,22 @@ class AuthenticatedMCPMiddleware:
         # --- Authenticate ---
         try:
             user_ctx = _authenticate(scope)
+        except MCPDatabaseUnavailableError:
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": 503,
+                    "headers": [(b"content-type", b"application/json")],
+                }
+            )
+            await send(
+                {
+                    "type": "http.response.body",
+                    "body": b'{"error":"API key validation unavailable"}',
+                    "more_body": False,
+                }
+            )
+            return
         except ServiceUnavailableException:
             await send(
                 {

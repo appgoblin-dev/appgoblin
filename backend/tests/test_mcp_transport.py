@@ -1,5 +1,7 @@
 """Regression tests for the mounted MCP transport (no database or Redis)."""
 
+import asyncio
+import json
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -9,6 +11,7 @@ from litestar.testing import TestClient
 
 from api_app.guards import _CachedKey
 from api_app.mcp import controller
+from api_app.mcp.docs import _build_tools_docs, _render_tool_row
 from app import mcp_asgi_handler
 
 MCP_PATH = "/api/v1/mcp"
@@ -36,6 +39,20 @@ async def _mcp_lifespan(_app: Litestar) -> AsyncGenerator[None]:
         yield
 
 
+def test_keyword_tool_docs_show_free_tier() -> None:
+    docs = asyncio.run(_build_tools_docs())
+    assert docs["tier_access"]["keywords"] == "All tiers (free and paid)."
+    tools = {tool["name"]: tool for tool in docs["tools"]}
+    for name in ("get_keyword_metrics", "get_keyword_ranks"):
+        assert "paid-tier" not in tools[name]["description"]
+        assert '<span class="badge badge-free">free</span>' in _render_tool_row(
+            tools[name]
+        )
+    assert '<span class="badge badge-paid">paid</span>' in _render_tool_row(
+        tools["get_company_overview"]
+    )
+
+
 def test_mcp_serves_any_host_without_a_session(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -52,6 +69,16 @@ def test_mcp_serves_any_host_without_a_session(
     )
     monkeypatch.setattr("api_app.guards._KEY_CACHE", {})
 
+    monkeypatch.setattr("api_app.mcp.tools.keywords.get_mcp_state", lambda: None)
+    monkeypatch.setattr(
+        "api_app.mcp.tools.keywords._build_keyword_metrics_payload",
+        lambda **_: {"keyword": "test"},
+    )
+    monkeypatch.setattr(
+        "api_app.mcp.tools.keywords._build_keyword_ranks_payload",
+        lambda **_: {"keyword": "test", "android": [], "ios": []},
+    )
+
     app = Litestar(route_handlers=[mcp_asgi_handler], lifespan=[_mcp_lifespan])
     with TestClient(app=app) as client:
         for host in ("appgoblin.info", "appgoblin_api", "127.0.0.1:8000"):
@@ -62,4 +89,24 @@ def test_mcp_serves_any_host_without_a_session(
         assert (
             client.post(MCP_PATH, json=LIST_TOOLS, headers=HEADERS).status_code == 200
         )
+        for name in ("get_keyword_metrics", "get_keyword_ranks"):
+            response = client.post(
+                MCP_PATH,
+                headers=HEADERS,
+                json={
+                    "jsonrpc": "2.0",
+                    "id": 3,
+                    "method": "tools/call",
+                    "params": {"name": name, "arguments": {"keyword": "test"}},
+                },
+            )
+            assert response.status_code == 200
+            data = next(
+                line[6:]
+                for line in response.text.splitlines()
+                if line.startswith("data: ")
+            )
+            result = json.loads(data)["result"]
+            assert not result.get("isError", False)
+            assert json.loads(result["content"][0]["text"])["keyword"] == "test"
         assert client.get(MCP_PATH, headers=HEADERS).status_code == 405

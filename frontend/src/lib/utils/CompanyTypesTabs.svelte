@@ -6,6 +6,7 @@
 		if (tab === 'all') {
 			if (
 				page.url.pathname === '/companies' ||
+				page.url.pathname === '/companies/browse-data' ||
 				page.url.pathname.startsWith('/companies/categories')
 			) {
 				return true;
