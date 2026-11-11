@@ -17,7 +17,7 @@ SELECT
         icon_64
     ) AS app_icon_url
 FROM
-    frontend.store_app_ranks_latest
+    frontend.app_ranks_latest
 WHERE
     store_collection = :collection_id
     AND store_category = :category_id

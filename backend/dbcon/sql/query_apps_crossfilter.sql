@@ -58,7 +58,7 @@ WHERE
             :ranking_country = 'overall'
             AND EXISTS (
                 SELECT 1
-                FROM frontend.store_app_ranks_latest AS sar
+                FROM frontend.app_ranks_latest AS sar
                 WHERE sar.store_id = sao.store_id
             )
         )
@@ -66,7 +66,7 @@ WHERE
             :ranking_country <> 'overall'
             AND EXISTS (
                 SELECT 1
-                FROM frontend.store_app_ranks_latest AS sar
+                FROM frontend.app_ranks_latest AS sar
                 WHERE
                     sar.store_id = sao.store_id
                     AND sar.country = :ranking_country
