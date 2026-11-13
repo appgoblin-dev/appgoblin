@@ -82,7 +82,8 @@ export async function load(event: PageServerLoadEvent) {
 				event.locals.user.id,
 				event.locals.user.email,
 				subscribe as StripePriceKey,
-				billingCycle
+				billingCycle,
+				event.url.origin
 			);
 		} catch (e) {
 			console.error(e);
@@ -197,7 +198,13 @@ export const actions: Actions = {
 
 		let url;
 		try {
-			url = await createCheckoutSession(user.id, user.email, normalizedKey, billingCycle);
+			url = await createCheckoutSession(
+				user.id,
+				user.email,
+				normalizedKey,
+				billingCycle,
+				event.url.origin
+			);
 		} catch (e) {
 			console.error(e);
 			return fail(500, { message: 'An error occurred' });

@@ -22,7 +22,8 @@ export async function createCheckoutSession(
 	userId: number,
 	email: string,
 	priceKey: StripePriceKey,
-	billingCycle: BillingCycle = 'monthly'
+	billingCycle: BillingCycle,
+	origin: string
 ) {
 	try {
 		// Create or get customer
@@ -91,8 +92,8 @@ export async function createCheckoutSession(
 					}
 				: {}),
 			mode: 'subscription',
-			success_url: `${APPGOBLIN_ENDPOINT_URL}/account?success=true`,
-			cancel_url: `${APPGOBLIN_ENDPOINT_URL}/pricing?canceled=true`
+			success_url: `${origin}/account?success=true`,
+			cancel_url: `${origin}/pricing?canceled=true`
 		});
 
 		return session.url;
