@@ -48,14 +48,14 @@ class PostgresCon:
             self.engine = sqlalchemy.create_engine(
                 db_uri,
                 pool_pre_ping=True,
-                pool_recycle=300,  # 5 minutes for better connection health
-                pool_size=5,  # Reduced pool size
-                max_overflow=10,  # Reduced overflow
-                pool_timeout=30,  # Timeout waiting for connection from pool
+                pool_recycle=1000,
+                pool_size=10,
+                max_overflow=5,
+                pool_timeout=20,
                 connect_args={
                     "connect_timeout": 15,
                     "application_name": "appgoblin",
-                    "options": "-c lock_timeout=10000 -c statement_timeout=90000",  # 90s statement timeout
+                    "options": "-c lock_timeout=5000 -c statement_timeout=60000",
                     "keepalives": 1,
                     "keepalives_idle": 30,
                     "keepalives_interval": 10,
@@ -152,7 +152,7 @@ def get_db_connection(server_name: str = "madrone") -> PostgresCon:
 def get_host_ip(hostname: str) -> str:
     """Convert hostname to IPv4 address if needed."""
     # Check if hostname is already an IPv4 address
-    if all(part.isdigit() and 0 <= int(part) <= 255 for part in hostname.split(".")):  # noqa: PLR2004
+    if all(part.isdigit() and 0 <= int(part) <= 255 for part in hostname.split(".")):
         return hostname
     ip_address = gethostbyname(hostname)
     logger.info(f"Resolved {hostname} to {ip_address}")
