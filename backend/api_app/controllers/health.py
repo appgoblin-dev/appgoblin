@@ -109,7 +109,7 @@ def _check_ranks_freshness(
                 conn.execute(
                     text(
                         "SELECT max(crawled_date) AS last_ranks_crawled_date "
-                        "FROM frontend.store_app_ranks_weekly"
+                        "FROM frontend.app_ranks_weekly"
                     )
                 )
                 .mappings()

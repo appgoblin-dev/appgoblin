@@ -51,7 +51,7 @@ def _b2b_sdk_guard(request: Request, route_handler) -> None:
         context = validate_api_key(request, request.app.state)
     if context.tier not in {"b2b_sdk", "b2b_premium"}:
         raise PermissionDeniedException(
-            detail="SDK history requires a B2B SDK or B2B Premium subscription tier"
+            detail="Requires B2B SDK or B2B Premium paid tier"
         )
 
 

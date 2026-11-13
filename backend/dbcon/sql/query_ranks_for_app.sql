@@ -5,7 +5,7 @@ SELECT
     sc.collection,
     sca.category
 FROM
-    frontend.store_app_ranks_weekly AS sar
+    frontend.app_ranks_weekly AS sar
 LEFT JOIN countries AS c
     ON sar.country = c.id
 LEFT JOIN store_apps AS sa

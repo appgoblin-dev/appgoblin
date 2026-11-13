@@ -157,7 +157,7 @@ jobs:
                     detail+="apps_freshness (frontend.store_apps_overview); "
                     ;;
                   ranks_freshness)
-                    detail+="ranks_freshness (frontend.store_app_ranks_weekly); "
+                    detail+="ranks_freshness (frontend.app_ranks_weekly); "
                     ;;
                   db_connection)
                     detail+="db_connection (database connectivity); "
