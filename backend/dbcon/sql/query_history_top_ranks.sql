@@ -1,7 +1,7 @@
 WITH top_apps AS (
     -- First identify all apps that were ever in top 10 during the period
     SELECT DISTINCT ar.store_app
-    FROM frontend.store_app_ranks_weekly AS ar
+    FROM frontend.app_ranks_weekly AS ar
     WHERE
         ar.store_collection = :collection_id
         AND ar.store_category = :category_id
