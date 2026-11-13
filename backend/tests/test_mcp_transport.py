@@ -53,6 +53,32 @@ def test_keyword_tool_docs_show_free_tier() -> None:
     )
 
 
+def test_search_tools_are_registered_with_access_and_limits() -> None:
+    docs = asyncio.run(_build_tools_docs())
+    tools = {tool["name"]: tool for tool in docs["tools"]}
+    for name in ("search_apps", "search_developer_apps", "search_companies"):
+        assert tools[name]["parameters"]["q"]["required"]
+        assert tools[name]["parameters"]["limit"]["default"] == 20
+    assert '<span class="badge badge-paid">paid</span>' in _render_tool_row(
+        tools["search_companies"]
+    )
+
+
+def test_company_search_tool_paid_access(monkeypatch: pytest.MonkeyPatch) -> None:
+    from api_app.mcp.tools import companies
+
+    seen = []
+    monkeypatch.setattr(companies, "assert_paid_tier", lambda ctx, name: seen.append(name))
+    monkeypatch.setattr(companies, "get_mcp_state", lambda: None)
+    monkeypatch.setattr(
+        companies, "_search_companies_payload",
+        lambda state, term, limit: [{"term": term, "limit": limit}],
+    )
+    payload = asyncio.run(companies.search_companies("example", object(), 7))
+    assert seen == ["search_companies"]
+    assert json.loads(payload) == [{"term": "example", "limit": 7}]
+
+
 def test_mcp_serves_any_host_without_a_session(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -77,6 +103,19 @@ def test_mcp_serves_any_host_without_a_session(
     monkeypatch.setattr(
         "api_app.mcp.tools.keywords._build_keyword_ranks_payload",
         lambda **_: {"keyword": "test", "android": [], "ios": []},
+    )
+
+    monkeypatch.setattr("api_app.mcp.tools.apps.get_mcp_state", lambda: None)
+    monkeypatch.setattr(
+        "api_app.mcp.tools.apps._search_apps_payload",
+        lambda state, term, limit, **kwargs: [
+            {"term": term, "developer": kwargs.get("developer", False)}
+        ],
+    )
+    monkeypatch.setattr("api_app.mcp.tools.companies.get_mcp_state", lambda: None)
+    monkeypatch.setattr(
+        "api_app.mcp.tools.companies._search_companies_payload",
+        lambda state, term, limit: [{"term": term}],
     )
 
     app = Litestar(route_handlers=[mcp_asgi_handler], lifespan=[_mcp_lifespan])
@@ -109,4 +148,29 @@ def test_mcp_serves_any_host_without_a_session(
             result = json.loads(data)["result"]
             assert not result.get("isError", False)
             assert json.loads(result["content"][0]["text"])["keyword"] == "test"
+        for name in ("search_apps", "search_developer_apps", "search_companies"):
+            response = client.post(
+                MCP_PATH,
+                headers=HEADERS,
+                json={
+                    "jsonrpc": "2.0",
+                    "id": 4,
+                    "method": "tools/call",
+                    "params": {"name": name, "arguments": {"q": "example"}},
+                },
+            )
+            data = next(
+                line[6:]
+                for line in response.text.splitlines()
+                if line.startswith("data: ")
+            )
+            result = json.loads(data)["result"]
+            if name == "search_companies":
+                assert result.get("isError") is True
+            else:
+                assert not result.get("isError", False)
+                assert json.loads(result["content"][0]["text"])[0] == {
+                    "term": "example",
+                    "developer": name == "search_developer_apps",
+                }
         assert client.get(MCP_PATH, headers=HEADERS).status_code == 405

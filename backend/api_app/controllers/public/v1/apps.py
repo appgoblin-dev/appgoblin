@@ -7,7 +7,12 @@ from typing import Self
 import pandas as pd
 from litestar import Controller, Request, Response, get
 from litestar.datastructures import State
-from litestar.exceptions import NotFoundException, PermissionDeniedException
+from litestar.exceptions import (
+    ClientException,
+    NotFoundException,
+    PermissionDeniedException,
+)
+from litestar.params import Parameter
 
 from api_app.analytics import PUBLIC_API_HOSTNAME, build_request_page_view_task
 from api_app.controllers.public.v1.public_models import (
@@ -16,6 +21,7 @@ from api_app.controllers.public.v1.public_models import (
     PublicAppMappedSdks,
     PublicAppSdkDetails,
     PublicAppSdkHistory,
+    PublicAppSearchResult,
 )
 from api_app.guards import validate_api_key
 from config import get_logger
@@ -26,8 +32,11 @@ from dbcon.queries import (
     get_app_version_timeline,
     get_ranks_for_app_overview,
     get_single_app,
+    search_v1_apps,
+    search_v1_developer_apps,
 )
 from dbcon.static import get_company_logos_df
+from dbcon.utils import clean_app_df
 
 logger = get_logger(__name__)
 
@@ -251,11 +260,77 @@ def _build_app_sdk_history_payload(state: State, store_id: str) -> PublicAppSdkH
     return PublicAppSdkHistory(history=history_df.to_dict(orient="records"))
 
 
+def _build_search_results(df: pd.DataFrame) -> list[PublicAppSearchResult]:
+    """Normalize search records into the public app search contract."""
+    if df.empty:
+        return []
+    df = clean_app_df(df)
+    df = df.astype(object).where(pd.notna(df), None)
+    fields = {field.name for field in dataclass_fields(PublicAppSearchResult)}
+    return [
+        PublicAppSearchResult(
+            **{key: value for key, value in row.items() if key in fields}
+        )
+        for row in df.to_dict(orient="records")
+    ]
+
+
+def _validate_search_term(term: str) -> str:
+    """Reject empty search terms for REST and MCP callers."""
+    term = term.strip()
+    if not term:
+        raise ClientException(status_code=400, detail="Search term must not be blank")
+    return term
+
+
+def _search_apps_payload(
+    state: State, term: str, limit: int, *, developer: bool = False
+) -> list[PublicAppSearchResult]:
+    query = search_v1_developer_apps if developer else search_v1_apps
+    return _build_search_results(query(state, _validate_search_term(term), limit))
+
+
 class V1AppsController(Controller):
     """Public API v1 — app endpoints (API key required)."""
 
     path = "/api/v1/"
     guards = [_api_key_guard]
+
+    @get(path="/apps/search")
+    async def search_apps(
+        self: Self,
+        state: State,
+        request: Request,
+        q: str,
+        limit: int = Parameter(default=20, ge=1, le=100),
+    ) -> list[PublicAppSearchResult]:
+        """Search app names and identifiers, ordered by store and popularity."""
+        payload = _search_apps_payload(state, q, limit)
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request, url="/api/v1/apps/search", hostname=PUBLIC_API_HOSTNAME
+            ),
+        )
+
+    @get(path="/apps/search/developers")
+    async def search_developer_apps(
+        self: Self,
+        state: State,
+        request: Request,
+        q: str,
+        limit: int = Parameter(default=20, ge=1, le=100),
+    ) -> list[PublicAppSearchResult]:
+        """Search apps by developer name, ordered by installs."""
+        payload = _search_apps_payload(state, q, limit, developer=True)
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request,
+                url="/api/v1/apps/search/developers",
+                hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
 
     @get(path="/apps/{store_id:str}", cache=3600)
     async def app_basics(

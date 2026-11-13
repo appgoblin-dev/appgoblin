@@ -268,6 +268,33 @@ ADVERTISER_CREATIVES_EXAMPLE_RESPONSE = {
     ],
 }
 V1_OPERATION_DOCS = {
+    "/api/v1/apps/search": {
+        "get": {
+            "summary": "Search apps",
+            "description": (
+                "Search app names and identifiers with `q`. Results are limited "
+                "by `limit` (1-100, default 20)."
+            ),
+        }
+    },
+    "/api/v1/apps/search/developers": {
+        "get": {
+            "summary": "Search apps by developer",
+            "description": (
+                "Find apps by developer name with `q`. Results are limited "
+                "by `limit` (1-100, default 20)."
+            ),
+        }
+    },
+    "/api/v1/companies/search": {
+        "get": {
+            "summary": "[Paid] Search companies",
+            "description": (
+                "Search company names and domains with `q`. Paid tiers only. "
+                "Results are limited by `limit` (1-100, default 20)."
+            ),
+        }
+    },
     "/api/v1/companies": {
         "get": {
             "summary": "[Paid] /companies",

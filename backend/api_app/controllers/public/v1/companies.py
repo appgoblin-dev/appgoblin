@@ -11,6 +11,7 @@ from litestar.connection import ASGIConnection
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException, PermissionDeniedException
 from litestar.handlers import BaseRouteHandler
+from litestar.params import Parameter
 
 from api_app.analytics import PUBLIC_API_HOSTNAME, build_request_page_view_task
 from api_app.controllers.companies import (
@@ -18,6 +19,7 @@ from api_app.controllers.companies import (
     get_company_app_change_store_ids_by_platform,
     get_overviews,
 )
+from api_app.controllers.public.v1.apps import _validate_search_term
 from api_app.controllers.public.v1.public_models import (
     CompanyDatasets,
     CompanyDatasetTarget,
@@ -27,6 +29,7 @@ from api_app.controllers.public.v1.public_models import (
     PublicCompanyOverview,
     PublicCompanySdk,
     PublicCompanySdks,
+    PublicCompanySearchResult,
     PublicCompanyTrends,
     PublicSdkCompanyOverview,
 )
@@ -40,7 +43,12 @@ from api_app.models import (
 )
 from api_app.s3_downloads import get_signed_download_url
 from config import get_logger
-from dbcon.queries import get_company_s3_reports, get_company_sdks, get_sdk_companies
+from dbcon.queries import (
+    get_company_s3_reports,
+    get_company_sdks,
+    get_sdk_companies,
+    search_v1_companies,
+)
 
 logger = get_logger(__name__)
 
@@ -468,6 +476,15 @@ def _build_public_company_app_change_payload(
     )
 
 
+def _search_companies_payload(
+    state: State, term: str, limit: int
+) -> list[PublicCompanySearchResult]:
+    """Return company search results for REST and MCP."""
+    df = search_v1_companies(state, _validate_search_term(term), limit)
+    df = df.astype(object).where(pd.notna(df), None)
+    return [PublicCompanySearchResult(**row) for row in df.to_dict(orient="records")]
+
+
 class V1CompaniesController(Controller):
     """Public API v1 — companies endpoints (API key required)."""
 
@@ -498,6 +515,23 @@ class V1CompaniesController(Controller):
                 request,
                 url="/api/v1/companies",
                 hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
+
+    @get(path="/companies/search")
+    async def search_companies(
+        self: Self,
+        state: State,
+        request: Request,
+        q: str,
+        limit: int = Parameter(default=20, ge=1, le=100),
+    ) -> list[PublicCompanySearchResult]:
+        """Search company names and domains, ordered by available signals."""
+        payload = _search_companies_payload(state, q, limit)
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request, url="/api/v1/companies/search", hostname=PUBLIC_API_HOSTNAME
             ),
         )
 
