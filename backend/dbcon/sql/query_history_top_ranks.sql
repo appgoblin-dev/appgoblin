@@ -15,7 +15,7 @@ SELECT
     ar.rank,
     sa.name,
     sa.store_id
-FROM frontend.store_app_ranks_weekly AS ar
+FROM frontend.app_ranks_weekly AS ar
 INNER JOIN top_apps AS ta
     ON ar.store_app = ta.store_app
 LEFT JOIN store_apps AS sa
