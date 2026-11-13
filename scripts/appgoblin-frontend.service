@@ -13,6 +13,7 @@ UMask=0007
 RuntimeDirectory=appgoblin
 
 Environment=NODE_ENV=production
+Environment=ORIGIN=https://appgoblin.info
 Environment=SOCKET_PATH=/run/appgoblin/frontend.sock
 
 WorkingDirectory=/home/goblin/appgoblin/frontend
