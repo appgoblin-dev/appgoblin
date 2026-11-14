@@ -278,6 +278,144 @@ def _patch_keyword_apps(rows: list[dict]):
     )
 
 
+class TestV1Search:
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "/api/v1/apps/search",
+            "/api/v1/apps/search/developers",
+            "/api/v1/companies/search",
+        ],
+    )
+    def test_search_requires_api_key(self, path):
+        with TestClient(app=_make_test_app(), raise_server_exceptions=False) as client:
+            assert client.get(path, params={"q": "example"}).status_code == 401
+
+    @pytest.mark.parametrize(
+        ("path", "query"),
+        [
+            ("/api/v1/apps/search", "search_v1_apps"),
+            ("/api/v1/apps/search/developers", "search_v1_developer_apps"),
+        ],
+    )
+    def test_app_searches_use_separate_queries(self, path, query):
+        rows = pd.DataFrame(
+            [
+                {
+                    "store": 1,
+                    "store_id": "com.example",
+                    "name": "Example",
+                    "icon_128": "icon.png",
+                    "installs": 100,
+                    "rating": 4.5,
+                    "rating_count": 10,
+                }
+            ]
+        )
+        with (
+            _patch_key_found(),
+            patch(
+                f"api_app.controllers.public.v1.apps.{query}", return_value=rows
+            ) as search,
+            TestClient(app=_make_test_app(), raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                path,
+                params={"q": " Example+App ", "limit": 5},
+                headers={"X-API-Key": "ag_test"},
+            )
+        assert resp.status_code == 200, resp.text
+        search.assert_called_once()
+        assert search.call_args.args[1:] == ("Example+App", 5)
+        assert resp.json()[0]["store_id"] == "com.example"
+        assert resp.json()[0]["store"] == "Google Play"
+        assert "app_icon_url" not in resp.json()[0]
+
+    def test_company_search_and_paid_guard(self):
+        rows = pd.DataFrame(
+            [
+                {
+                    "company_domain": "example.com",
+                    "company_name": "Example",
+                    "has_sdk_signal": True,
+                }
+            ]
+        )
+        with (
+            _patch_key_found("b2b_premium"),
+            patch(
+                "api_app.controllers.public.v1.companies.search_v1_companies",
+                return_value=rows,
+            ) as search,
+            TestClient(app=_make_test_app(), raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/companies/search",
+                params={"q": "example"},
+                headers={"X-API-Key": "ag_test"},
+            )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()[0]["company_domain"] == "example.com"
+        assert search.call_args.args[1:] == ("example", 20)
+        with (
+            _patch_key_found(),
+            TestClient(app=_make_test_app(), raise_server_exceptions=False) as client,
+        ):
+            assert (
+                client.get(
+                    "/api/v1/companies/search",
+                    params={"q": "example"},
+                    headers={"X-API-Key": "ag_free"},
+                ).status_code
+                == 403
+            )
+
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "/api/v1/apps/search",
+            "/api/v1/apps/search/developers",
+            "/api/v1/companies/search",
+        ],
+    )
+    @pytest.mark.parametrize(
+        "params", [{"q": " "}, {"q": "abc", "limit": 0}, {"q": "abc", "limit": 101}]
+    )
+    def test_search_rejects_invalid_parameters(self, path, params):
+        with (
+            _patch_key_found("b2b_premium"),
+            TestClient(app=_make_test_app(), raise_server_exceptions=False) as client,
+        ):
+            assert (
+                client.get(
+                    path, params=params, headers={"X-API-Key": "ag_test"}
+                ).status_code
+                == 400
+            )
+
+
+def test_v1_search_queries_are_independent_and_parameterized():
+    from dbcon import queries
+    from dbcon.utils import sql
+
+    state = MagicMock()
+    with patch("dbcon.queries.pd.read_sql", return_value=pd.DataFrame()) as read_sql:
+        queries.search_v1_apps(state, "rock & roll", 4)
+        queries.search_v1_developer_apps(state, "rock & roll", 4)
+        queries.search_v1_companies(state, "rock & roll", 4)
+    assert [call.args[0] for call in read_sql.call_args_list] == [
+        sql.v1_search_apps,
+        sql.v1_search_devs,
+        sql.v1_search_companies,
+    ]
+    assert all(
+        call.kwargs["params"] == {"searchinput": "rock & roll", "mylimit": 4}
+        for call in read_sql.call_args_list
+    )
+    assert "plainto_tsquery" in str(sql.v1_search_apps)
+    assert "plainto_tsquery" in str(sql.v1_search_devs)
+
+
 class TestV1CompaniesAuth:
     def test_no_api_key_returns_401(self):
         app = _make_test_app()
@@ -2122,6 +2260,9 @@ class TestV1Docs:
         data = resp.json()
 
         assert set(data["paths"]) == {
+            "/api/v1/apps/search",
+            "/api/v1/apps/search/developers",
+            "/api/v1/companies/search",
             "/api/v1/apps/{store_id}",
             "/api/v1/apps/{store_id}/ranks",
             "/api/v1/apps/{store_id}/mapped-sdks",

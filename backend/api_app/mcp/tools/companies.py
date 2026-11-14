@@ -9,11 +9,13 @@ from __future__ import annotations
 # `Context` must be importable at runtime — the framework
 # uses it for dependency injection into tool functions, not just typing.
 from mcp.server.mcpserver import Context  # noqa: TC002
+from pydantic import Field
 
 from api_app.controllers.companies import get_overviews
 from api_app.controllers.public.v1.companies import (
     _build_public_company_app_change_payload,
     _build_public_company_overview_payload,
+    _search_companies_payload,
     _to_public_company_list_item,
 )
 from api_app.mcp.serialize import to_json
@@ -27,6 +29,15 @@ logger = get_logger(__name__)
 # ---------------------------------------------------------------------------
 # Tools
 # ---------------------------------------------------------------------------
+
+
+@mcp_server.tool()
+async def search_companies(
+    q: str, ctx: Context, limit: int = Field(default=20, ge=1, le=100)
+) -> str:
+    """Search company names and domains. Paid-tier only; maximum limit 100."""
+    assert_paid_tier(ctx, "search_companies")
+    return to_json(_search_companies_payload(get_mcp_state(), q, limit))
 
 
 @mcp_server.tool()

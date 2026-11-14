@@ -9,10 +9,12 @@ from __future__ import annotations
 # `Context` must be importable at runtime — the framework
 # uses it for dependency injection into tool functions, not just typing.
 from mcp.server.mcpserver import Context  # noqa: TC002
+from pydantic import Field
 
 from api_app.controllers.public.v1.apps import (
     _build_app_basics_payload,
     _build_app_sdk_details_payload,
+    _search_apps_payload,
 )
 from api_app.controllers.public.v1.public_models import PublicAppBestRank
 from api_app.mcp.serialize import to_json
@@ -27,6 +29,26 @@ logger = get_logger(__name__)
 # ---------------------------------------------------------------------------
 # Tools
 # ---------------------------------------------------------------------------
+
+
+@mcp_server.tool()
+async def search_apps(
+    q: str,
+    ctx: Context,  # noqa: ARG001
+    limit: int = Field(default=20, ge=1, le=100),
+) -> str:
+    """Search app names and identifiers. Limit defaults to 20, maximum 100."""
+    return to_json(_search_apps_payload(get_mcp_state(), q, limit))
+
+
+@mcp_server.tool()
+async def search_developer_apps(
+    q: str,
+    ctx: Context,  # noqa: ARG001
+    limit: int = Field(default=20, ge=1, le=100),
+) -> str:
+    """Search apps by developer name. Limit defaults to 20, maximum 100."""
+    return to_json(_search_apps_payload(get_mcp_state(), q, limit, developer=True))
 
 
 @mcp_server.tool()

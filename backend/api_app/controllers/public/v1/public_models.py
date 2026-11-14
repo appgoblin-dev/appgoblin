@@ -13,6 +13,34 @@ AppSdkUnmappedEvidence: TypeAlias = dict[str, AppSdkEvidenceByPath]
 
 
 @dataclass
+class PublicAppSearchResult:
+    """An app matching a public app or developer search."""
+
+    store: str
+    store_id: str
+    name: str | None = None
+    developer_name: str | None = None
+    featured_image_url: str | None = None
+    installs: int | None = None
+    rating: float | None = None
+    rating_count: int | None = None
+    store_link: str | None = None
+
+
+@dataclass
+class PublicCompanySearchResult:
+    """A company matching a public company search."""
+
+    company_domain: str
+    company_name: str | None = None
+    has_api_signal: bool | None = None
+    has_sdk_signal: bool | None = None
+    has_publisher_signal: bool | None = None
+    has_app_ads_direct: bool | None = None
+    has_app_ads_reseller: bool | None = None
+
+
+@dataclass
 class PublicCompanyListItem:
     """Minimal company entry returned by the public companies index."""
 

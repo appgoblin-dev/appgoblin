@@ -15,7 +15,7 @@ import { STRIPE_PLAN_LABELS, type BillingCycle, type StripePriceKey } from '#lib
 export { STRIPE_PLAN_LABELS, type BillingCycle, type StripePriceKey } from '#lib/plans.js';
 
 export const stripe = new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2026-08-26.dahlia'
+	apiVersion: '2026-10-28.endive'
 });
 
 export async function createCheckoutSession(

@@ -1162,6 +1162,37 @@ def get_topapps_for_company(
     return df
 
 
+def search_v1_apps(state: State, search_input: str, limit: int = 20) -> pd.DataFrame:
+    """Search app names and identifiers without developer matches."""
+    return pd.read_sql(
+        sql.v1_search_apps,
+        state.dbcon.engine,
+        params={"searchinput": search_input, "mylimit": limit},
+    )
+
+
+def search_v1_developer_apps(
+    state: State, search_input: str, limit: int = 20
+) -> pd.DataFrame:
+    """Search apps belonging to developers matching the search term."""
+    return pd.read_sql(
+        sql.v1_search_devs,
+        state.dbcon.engine,
+        params={"searchinput": search_input, "mylimit": limit},
+    )
+
+
+def search_v1_companies(
+    state: State, search_input: str, limit: int = 20
+) -> pd.DataFrame:
+    """Search company names and domains for the public API."""
+    return pd.read_sql(
+        sql.v1_search_companies,
+        state.dbcon.engine,
+        params={"searchinput": search_input, "mylimit": limit},
+    )
+
+
 def search_companies(state: State, search_input: str, limit: int = 10) -> pd.DataFrame:
     """Search companies by term in database."""
     logger.info(f"Company search: {search_input=}")
