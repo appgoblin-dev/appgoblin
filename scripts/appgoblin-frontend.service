@@ -18,7 +18,7 @@ Environment=SOCKET_PATH=/run/appgoblin/frontend.sock
 
 WorkingDirectory=/home/goblin/appgoblin/frontend
 # /usr/bin/node is a sym link for nvm latest
-ExecStart=/usr/bin/node build
+ExecStart=/usr/bin/node --env-file=.env build
 
 Restart=on-failure
 RestartSec=10   
