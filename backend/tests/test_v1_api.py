@@ -254,6 +254,22 @@ def _patch_sdk_history(rows: list[dict]):
     )
 
 
+def _patch_global_metrics_history(rows: list[dict]):
+    history_df = pd.DataFrame(rows)
+    return patch(
+        "api_app.controllers.public.v1.apps.get_app_global_metrics_history",
+        return_value=history_df,
+    )
+
+
+def _patch_country_metrics_history(rows: list[dict]):
+    history_df = pd.DataFrame(rows)
+    return patch(
+        "api_app.controllers.public.v1.apps.get_app_country_metrics_history",
+        return_value=history_df,
+    )
+
+
 def _patch_ctv_app_ranks(rows: list[dict]):
     ranks_df = pd.DataFrame(rows)
     return patch(
@@ -1428,6 +1444,134 @@ class TestV1Apps:
             ]
         }
 
+    def test_app_global_metrics_history_returns_private_endpoint_shape(self):
+        app = _make_test_app()
+        history_rows = [
+            {
+                "week_start": "2026-01-05",
+                "weekly_installs": 10,
+                "weekly_ratings": 2,
+                "weekly_active_users": 20,
+                "weekly_ad_revenue": 5.0,
+                "weekly_iap_revenue": 1.0,
+                "cumulative_installs": 100,
+                "cumulative_ratings": 20,
+                "rating": 4.0,
+                "one_star": 1,
+                "two_star": 1,
+                "three_star": 2,
+                "four_star": 6,
+                "five_star": 10,
+            },
+            {
+                "week_start": "2026-01-12",
+                "weekly_installs": 20,
+                "weekly_ratings": 4,
+                "weekly_active_users": 30,
+                "weekly_ad_revenue": 10.0,
+                "weekly_iap_revenue": 2.0,
+                "cumulative_installs": 120,
+                "cumulative_ratings": 24,
+                "rating": 4.2,
+                "one_star": 1,
+                "two_star": 2,
+                "three_star": 3,
+                "four_star": 7,
+                "five_star": 11,
+            },
+        ]
+        with (
+            _patch_key_found(),
+            _patch_global_metrics_history(history_rows),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/apps/com.example.app/global-metrics-history",
+                headers={"X-API-Key": "ag_global_history"},
+            )
+
+        assert resp.status_code == 200
+        rows = resp.json()
+        assert len(rows) == 1
+        assert rows[0]["week_start"] == "2026-01-12T00:00:00"
+        assert rows[0]["weekly_installs"] == 20
+        assert rows[0]["weekly_installs_rate_of_change"] == 200.0
+        assert rows[0]["weekly_installs_avg_per_day"] == 20 / 7
+
+    def test_app_country_metrics_history_returns_private_endpoint_shape(self):
+        app = _make_test_app()
+        history_rows = [
+            {
+                "week_start": "2026-01-05",
+                "country": "US",
+                "rating": 4.0,
+                "installs": 100,
+                "rating_count": 20,
+                "one_star": 1,
+                "two_star": 1,
+                "three_star": 2,
+                "four_star": 6,
+                "five_star": 10,
+            },
+            {
+                "week_start": "2026-01-12",
+                "country": "US",
+                "rating": 4.2,
+                "installs": 150,
+                "rating_count": 25,
+                "one_star": 1,
+                "two_star": 2,
+                "three_star": 3,
+                "four_star": 8,
+                "five_star": 11,
+            },
+        ]
+        with (
+            _patch_key_found(),
+            _patch_country_metrics_history(history_rows),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/apps/com.example.app/country-metrics-history",
+                headers={"X-API-Key": "ag_country_history"},
+            )
+
+        assert resp.status_code == 200
+        rows = resp.json()
+        assert len(rows) == 2
+        assert rows[0]["country"] == "US"
+        assert rows[1]["country"] == "US"
+        assert rows[1]["cumulative_installs"] == 150
+        assert rows[1]["weekly_installs"] == 50.0
+        assert rows[1]["weekly_installs_rate_of_change"] == 50.0
+
+    @pytest.mark.parametrize(
+        ("path", "patch_history"),
+        [
+            (
+                "/api/v1/apps/com.example.app/global-metrics-history",
+                _patch_global_metrics_history,
+            ),
+            (
+                "/api/v1/apps/com.example.app/country-metrics-history",
+                _patch_country_metrics_history,
+            ),
+        ],
+    )
+    def test_app_metrics_history_returns_empty_object_when_no_data(
+        self, path, patch_history
+    ):
+        app = _make_test_app()
+        with (
+            _patch_key_found(),
+            patch_history([]),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(path, headers={"X-API-Key": "ag_empty_history"})
+
+        assert resp.status_code == 200
+        assert resp.json() == {}
+
     def test_app_basics_logs_umami_page_view_with_user_id(self):
         app = _make_test_app()
         app_row = {
@@ -2269,7 +2413,8 @@ class TestV1Docs:
             "/api/v1/apps/{store_id}/sdks",
             "/api/v1/apps/{store_id}/versions",
             "/api/v1/apps/{store_id}/sdks/history",
-            "/api/v1/apps/{store_id}/sdks/history",
+            "/api/v1/apps/{store_id}/global-metrics-history",
+            "/api/v1/apps/{store_id}/country-metrics-history",
             "/api/v1/companies",
             "/api/v1/companies/{company_domain}/sdks",
             "/api/v1/sdks/{sdk_slug}",
@@ -2348,6 +2493,20 @@ class TestV1Docs:
         history_operation = data["paths"]["/api/v1/apps/{store_id}/sdks/history"]["get"]
         assert history_operation["summary"] == "[Paid] /apps/{store_id}/sdks/history"
         assert "B2B SDK and B2B Premium tiers only" in history_operation["description"]
+        global_history_operation = data["paths"][
+            "/api/v1/apps/{store_id}/global-metrics-history"
+        ]["get"]
+        global_history_example = global_history_operation["responses"]["200"][
+            "content"
+        ]["application/json"]["examples"]["app_global_metrics_history"]["value"]
+        assert global_history_example[0]["weekly_installs"] == 1200
+        country_history_operation = data["paths"][
+            "/api/v1/apps/{store_id}/country-metrics-history"
+        ]["get"]
+        country_history_example = country_history_operation["responses"]["200"][
+            "content"
+        ]["application/json"]["examples"]["app_country_metrics_history"]["value"]
+        assert country_history_example[0]["country"] == "US"
         app_basics_operation = data["paths"]["/api/v1/apps/{store_id}"]["get"]
         store_id_parameter = next(
             parameter

@@ -15,6 +15,10 @@ from litestar.exceptions import (
 from litestar.params import Parameter
 
 from api_app.analytics import PUBLIC_API_HOSTNAME, build_request_page_view_task
+from api_app.controllers.apps import (
+    create_app_country_plot_dict,
+    create_app_plot_df,
+)
 from api_app.controllers.public.v1.public_models import (
     PublicAppBasics,
     PublicAppBestRank,
@@ -26,6 +30,8 @@ from api_app.controllers.public.v1.public_models import (
 from api_app.guards import validate_api_key
 from config import get_logger
 from dbcon.queries import (
+    get_app_country_metrics_history,
+    get_app_global_metrics_history,
     get_app_mapped_sdks,
     get_app_sdk_details,
     get_app_sdk_history,
@@ -260,6 +266,26 @@ def _build_app_sdk_history_payload(state: State, store_id: str) -> PublicAppSdkH
     return PublicAppSdkHistory(history=history_df.to_dict(orient="records"))
 
 
+def _build_app_global_metrics_history_payload(
+    state: State, store_id: str
+) -> list[dict] | dict:
+    """Return the private app global-metrics history payload."""
+    history_df = get_app_global_metrics_history(state=state, store_id=store_id)
+    if history_df.empty:
+        return {}
+    return create_app_plot_df(history_df).to_dict(orient="records")
+
+
+def _build_app_country_metrics_history_payload(
+    state: State, store_id: str
+) -> list[dict] | dict:
+    """Return the private app country-metrics history payload."""
+    history_df = get_app_country_metrics_history(state=state, store_id=store_id)
+    if history_df.empty:
+        return {}
+    return create_app_country_plot_dict(history_df).to_dict(orient="records")
+
+
 def _build_search_results(df: pd.DataFrame) -> list[PublicAppSearchResult]:
     """Normalize search records into the public app search contract."""
     if df.empty:
@@ -448,6 +474,56 @@ class V1AppsController(Controller):
             background=build_request_page_view_task(
                 request,
                 url=f"/api/v1/apps/{store_id}/sdks/history",
+                hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
+
+    @get(
+        path="/apps/{store_id:str}/global-metrics-history",
+        cache=3600,
+    )
+    async def app_global_metrics_history(
+        self: Self, state: State, request: Request, store_id: str
+    ) -> list[dict] | dict:
+        """Return the app's global metrics history with weekly trend calculations."""
+        start = time.perf_counter() * 1000
+        payload = _build_app_global_metrics_history_payload(
+            state=state, store_id=store_id
+        )
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(
+            f"GET /api/v1/apps/{store_id}/global-metrics-history took {duration}ms"
+        )
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request,
+                url=f"/api/v1/apps/{store_id}/global-metrics-history",
+                hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
+
+    @get(
+        path="/apps/{store_id:str}/country-metrics-history",
+        cache=3600,
+    )
+    async def app_country_metrics_history(
+        self: Self, state: State, request: Request, store_id: str
+    ) -> list[dict] | dict:
+        """Return the app's country-specific metrics history."""
+        start = time.perf_counter() * 1000
+        payload = _build_app_country_metrics_history_payload(
+            state=state, store_id=store_id
+        )
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(
+            f"GET /api/v1/apps/{store_id}/country-metrics-history took {duration}ms"
+        )
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request,
+                url=f"/api/v1/apps/{store_id}/country-metrics-history",
                 hostname=PUBLIC_API_HOSTNAME,
             ),
         )

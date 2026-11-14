@@ -16,6 +16,7 @@ PUBLIC_OPENAPI_JSON_URL = f"{PUBLIC_API_SERVER_URL}{V1_OPENAPI_JSON_PATH}"
 SCALAR_CSS_URL = "data:text/css,"
 APP_BASICS_EXAMPLE_STORE_ID = "dev.thirdgate.appgoblin"
 KEYWORD_OVERVIEW_EXAMPLE_KEYWORD = "app privacy"
+APP_METRICS_HISTORY_EXAMPLE_STORE_ID = APP_BASICS_EXAMPLE_STORE_ID
 APP_BASICS_EXAMPLE_RESPONSE = {
     "name": "AppGoblin: Scan Trackers & SDK",
     "store_id": APP_BASICS_EXAMPLE_STORE_ID,
@@ -43,6 +44,34 @@ APP_BASICS_EXAMPLE_RESPONSE = {
         "https://play.google.com/store/apps/details?id=dev.thirdgate.appgoblin"
     ),
 }
+APP_GLOBAL_METRICS_HISTORY_EXAMPLE_RESPONSE = [
+    {
+        "week_start": "2026-03-08T00:00:00",
+        "weekly_installs": 1200,
+        "weekly_ratings": 45,
+        "weekly_active_users": 42000,
+        "weekly_ad_revenue": 320.5,
+        "weekly_iap_revenue": 81.25,
+        "cumulative_installs": 120000,
+        "cumulative_ratings": 7200,
+        "rating": 4.6,
+        "weekly_installs_rate_of_change": 12.5,
+        "weekly_installs_avg_per_day": 171.42857142857142,
+    }
+]
+APP_COUNTRY_METRICS_HISTORY_EXAMPLE_RESPONSE = [
+    {
+        "week_start": "2026-03-08T00:00:00",
+        "country": "US",
+        "rating": 4.6,
+        "cumulative_installs": 85000,
+        "cumulative_ratings": 4200,
+        "weekly_installs": 500,
+        "weekly_rating_count": 21,
+        "weekly_installs_rate_of_change": 8.0,
+        "weekly_rating_count_rate_of_change": 5.3,
+    }
+]
 COMPANIES_INDEX_EXAMPLE_RESPONSE = [
     {
         "name": "Unity",
@@ -424,6 +453,26 @@ V1_OPERATION_DOCS = {
             ),
         }
     },
+    "/api/v1/apps/{store_id}/global-metrics-history": {
+        "get": {
+            "summary": "/apps/{store_id}/global-metrics-history",
+            "description": (
+                "Endpoint: `GET /api/v1/apps/{store_id}/global-metrics-history`\n\n"
+                "Returns weekly global installs, ratings, active-user, and revenue "
+                "history with derived weekly changes and rates."
+            ),
+        }
+    },
+    "/api/v1/apps/{store_id}/country-metrics-history": {
+        "get": {
+            "summary": "/apps/{store_id}/country-metrics-history",
+            "description": (
+                "Endpoint: `GET /api/v1/apps/{store_id}/country-metrics-history`\n\n"
+                "Returns weekly installs, ratings, and rating-count history grouped "
+                "by country, including interpolated weeks and derived changes."
+            ),
+        }
+    },
     "/api/v1/rankings/ctv/{store}": {
         "get": {
             "summary": "/rankings/ctv/{store}",
@@ -631,6 +680,50 @@ def _set_app_sdk_history_examples(schema: dict[str, Any]) -> None:
                         "value": APP_SDK_HISTORY_EXAMPLE_RESPONSE,
                     }
                 }
+
+
+def _set_app_metrics_history_examples(schema: dict[str, Any]) -> None:
+    """Attach example responses to the public app metrics-history endpoints."""
+    examples = (
+        (
+            "/api/v1/apps/{store_id}/global-metrics-history",
+            "app_global_metrics_history",
+            "Weekly global app metrics",
+            APP_GLOBAL_METRICS_HISTORY_EXAMPLE_RESPONSE,
+        ),
+        (
+            "/api/v1/apps/{store_id}/country-metrics-history",
+            "app_country_metrics_history",
+            "Weekly app metrics by country",
+            APP_COUNTRY_METRICS_HISTORY_EXAMPLE_RESPONSE,
+        ),
+    )
+    for path, name, summary, value in examples:
+        path_item = schema.get("paths", {}).get(path)
+        if not isinstance(path_item, dict):
+            continue
+
+        operation = path_item.get("get")
+        if not isinstance(operation, dict):
+            continue
+
+        for parameter in operation.get("parameters", []):
+            if parameter.get("name") == "store_id":
+                parameter["example"] = APP_METRICS_HISTORY_EXAMPLE_STORE_ID
+
+        content = (
+            operation.get("responses", {})
+            .get("200", {})
+            .get("content", {})
+            .get("application/json")
+        )
+        if isinstance(content, dict):
+            content["examples"] = {
+                name: {
+                    "summary": summary,
+                    "value": value,
+                }
+            }
 
 
 def _set_company_overview_example(schema: dict[str, Any]) -> None:
@@ -932,6 +1025,7 @@ def build_v1_openapi_schema(request: Request) -> dict[str, Any]:
     _set_companies_index_example(schema)
     _set_app_basics_example(schema)
     _set_app_sdk_history_examples(schema)
+    _set_app_metrics_history_examples(schema)
     _set_company_overview_example(schema)
     _set_company_app_changes_examples(schema)
     _set_keyword_metrics_example(schema)

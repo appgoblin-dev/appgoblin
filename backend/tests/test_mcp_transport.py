@@ -64,6 +64,50 @@ def test_search_tools_are_registered_with_access_and_limits() -> None:
     )
 
 
+def test_app_metrics_history_tools_are_registered_for_all_tiers() -> None:
+    docs = asyncio.run(_build_tools_docs())
+    tools = {tool["name"]: tool for tool in docs["tools"]}
+    assert docs["tier_access"]["apps"] == "All tiers (free and paid)."
+    for name in (
+        "get_app_global_metrics_history",
+        "get_app_country_metrics_history",
+    ):
+        assert tools[name]["parameters"]["store_id"]["required"]
+        assert "paid-tier" not in tools[name]["description"]
+
+
+def test_app_metrics_history_tools_return_shared_payloads(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from api_app.mcp.tools import apps
+
+    monkeypatch.setattr(apps, "get_mcp_state", lambda: None)
+    monkeypatch.setattr(
+        apps,
+        "_build_app_global_metrics_history_payload",
+        lambda state, store_id: [{"store_id": store_id, "scope": "global"}],
+    )
+    monkeypatch.setattr(
+        apps,
+        "_build_app_country_metrics_history_payload",
+        lambda state, store_id: [{"store_id": store_id, "scope": "country"}],
+    )
+
+    global_result = asyncio.run(
+        apps.get_app_global_metrics_history("com.example.app", object())
+    )
+    country_result = asyncio.run(
+        apps.get_app_country_metrics_history("com.example.app", object())
+    )
+
+    assert json.loads(global_result) == [
+        {"store_id": "com.example.app", "scope": "global"}
+    ]
+    assert json.loads(country_result) == [
+        {"store_id": "com.example.app", "scope": "country"}
+    ]
+
+
 def test_company_search_tool_paid_access(monkeypatch: pytest.MonkeyPatch) -> None:
     from api_app.mcp.tools import companies
 
