@@ -1,16 +1,17 @@
 import crypto from 'node:crypto';
 import {
 	AfterSettleAbortError,
-	HTTPFacilitatorClient,
 	x402HTTPResourceServer,
 	x402ResourceServer
 } from '@x402/core/server';
-import { createFacilitatorConfig } from '@coinbase/x402';
+import { createCdpFacilitatorClient } from '@coinbase/cdp-sdk/x402';
 import { ExactEvmScheme } from '@x402/evm/exact/server';
+import { bazaarResourceServerExtension, declareDiscoveryExtension } from '@x402/extensions/bazaar';
 import { isAddress } from 'viem';
 import { Mppx, Store } from 'mppx/server';
 import { stripe as mppStripe } from 'mppx/stripe/server';
 import {
+	BLOCKCHAIN_NETWORK,
 	CDP_API_KEY_ID,
 	CDP_API_KEY_SECRET,
 	STRIPE_BASE_DEPOSIT_ADDRESS,
@@ -20,13 +21,13 @@ import {
 } from '$app/env/private';
 
 import { stripe } from './stripe.js';
+import { machineJsonExample, machineJsonKind, wantsMachineJson } from './machine-json.js';
+import { getMachinePaymentNetwork } from './machine-payment-network.js';
 
-const BASE_NETWORK = 'eip155:8453';
 const BASE_PAYMENT_INTENT_NETWORK = 'base';
 const DEFAULT_MACHINE_PAYMENT_AMOUNT = '0.10';
 const STRIPE_API_VERSION = '2026-05-27.preview';
 const BASE_USDC_ATOMIC_UNITS_PER_CENT = 10_000n;
-const BASE_USDC_TOKEN_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
 interface MachinePageOffer {
 	amount: string;
@@ -163,13 +164,19 @@ const tempoDepositAddress = STRIPE_TEMPO_DEPOSIT_ADDRESS?.trim();
 const baseDepositAddress = STRIPE_BASE_DEPOSIT_ADDRESS?.trim() ?? '';
 const cdpApiKeyId = CDP_API_KEY_ID?.trim() ?? '';
 const cdpApiKeySecret = CDP_API_KEY_SECRET?.trim() ?? '';
+const paymentNetwork = BLOCKCHAIN_NETWORK?.trim()
+	? getMachinePaymentNetwork(BLOCKCHAIN_NETWORK, STRIPE_SECRET_KEY)
+	: null;
 
-const missingConfiguration = [
-	['STRIPE_SECRET_KEY', STRIPE_SECRET_KEY],
-	['STRIPE_BASE_DEPOSIT_ADDRESS', baseDepositAddress],
-	['CDP_API_KEY_ID', cdpApiKeyId],
-	['CDP_API_KEY_SECRET', cdpApiKeySecret]
-]
+const missingConfiguration = (
+	[
+		['STRIPE_SECRET_KEY', STRIPE_SECRET_KEY],
+		['BLOCKCHAIN_NETWORK', BLOCKCHAIN_NETWORK],
+		['STRIPE_BASE_DEPOSIT_ADDRESS', baseDepositAddress],
+		['CDP_API_KEY_ID', cdpApiKeyId],
+		['CDP_API_KEY_SECRET', cdpApiKeySecret]
+	] satisfies Array<[string, string | undefined]>
+)
 	.filter(([, value]) => !value?.trim())
 	.map(([name]) => name);
 
@@ -189,11 +196,12 @@ if (missingConfiguration.length === 0 && paymentAddress === null) {
 }
 
 const resourceServer =
-	paymentAddress !== null
+	paymentAddress !== null && paymentNetwork !== null
 		? new x402ResourceServer(
-				new HTTPFacilitatorClient(createFacilitatorConfig(cdpApiKeyId, cdpApiKeySecret))
+				createCdpFacilitatorClient({ apiKeyId: cdpApiKeyId, apiKeySecret: cdpApiKeySecret })
 			)
-				.register(BASE_NETWORK, new ExactEvmScheme())
+				.register(paymentNetwork.network, new ExactEvmScheme())
+				.registerExtension(bazaarResourceServerExtension)
 				.onAfterSettle(async ({ result, requirements }) => {
 					if (!result.success) return;
 					if (!result.transaction) {
@@ -214,10 +222,17 @@ const resourceServer =
 						}
 
 						if (
-							requirements.network !== BASE_NETWORK ||
-							requirements.asset.toLowerCase() !== BASE_USDC_TOKEN_ADDRESS.toLowerCase()
+							requirements.network !== paymentNetwork.network ||
+							requirements.asset.toLowerCase() !== paymentNetwork.usdcAddress.toLowerCase()
 						) {
-							throw new Error('Stripe transaction verification requires Base USDC');
+							throw new Error('x402 settlement requires USDC on the configured Base network');
+						}
+
+						if (!paymentNetwork.recordInStripe) {
+							console.info(
+								'[MachinePayments] Base Sepolia settlement completed; Stripe recording is disabled for testnet'
+							);
+							return;
 						}
 
 						const paymentIntent = await stripe.rawRequest(
@@ -251,7 +266,7 @@ const resourceServer =
 					} catch (error) {
 						const message = error instanceof Error ? error.message : String(error);
 						console.error(
-							`[MachinePayments] Failed to record x402 transaction ${result.transaction} with Stripe: ${message}`
+							`[MachinePayments] Failed to process x402 settlement ${result.transaction}: ${message}`
 						);
 						throw new AfterSettleAbortError('stripe_payment_intent_failed', message);
 					}
@@ -296,10 +311,15 @@ let resourceServerInitialization: Promise<void> | null = null;
 async function initializeResourceServer(): Promise<void> {
 	if (resourceServer === null) return;
 	if (resourceServerInitialization === null) {
-		resourceServerInitialization = resourceServer.initialize().catch((error: unknown) => {
-			resourceServerInitialization = null;
-			throw error;
-		});
+		resourceServerInitialization = resourceServer
+			.initialize()
+			.then(() => {
+				console.info('[MachinePayments] x402 facilitator initialized successfully');
+			})
+			.catch((error: unknown) => {
+				resourceServerInitialization = null;
+				throw error;
+			});
 	}
 	await resourceServerInitialization;
 }
@@ -315,6 +335,11 @@ export function getMachinePaymentResources(origin: string): string[] {
 // Match SvelteKit data requests to their page routes.
 function pagePath(pathname: string): string {
 	return pathname.replace(/\/__data\.json$/, '');
+}
+
+export function machinePaymentRoutePattern(resource: string, pathname: string): string {
+	const route = resource.replace(/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g, ':$1');
+	return `${route}${pathname.endsWith('/__data.json') ? '/__data.json' : ''}`;
 }
 
 export function isMachinePayablePath(pathname: string): boolean {
@@ -348,6 +373,21 @@ function responseFromInstructions(instructions: {
 	});
 }
 
+export function machinePaymentOutput(request: Request): {
+	mimeType: string;
+	extensions?: Record<string, unknown>;
+} {
+	const url = new URL(request.url);
+	const kind = machineJsonKind(url.pathname);
+	if (!kind || !wantsMachineJson(request)) return { mimeType: 'text/html' };
+	return {
+		mimeType: 'application/json',
+		extensions: declareDiscoveryExtension({
+			output: { example: machineJsonExample(kind, url.pathname) }
+		})
+	};
+}
+
 function mergePaymentChallenges(mppChallenge: Response, x402Challenge: Response): Response {
 	const headers = new Headers(x402Challenge.headers);
 	const challenge = mppChallenge.headers.get('WWW-Authenticate');
@@ -360,12 +400,56 @@ function mergePaymentChallenges(mppChallenge: Response, x402Challenge: Response)
 	});
 }
 
+export async function initializePaymentFacilitator(
+	initialize: () => Promise<void>,
+	request: Request,
+	mppChallenge: Response | null
+): Promise<Response | null> {
+	try {
+		await initialize();
+		return null;
+	} catch (error) {
+		console.error(
+			'[MachinePayments] x402 facilitator initialization failed; x402 is unavailable',
+			error
+		);
+		if (
+			!request.headers.has('payment-signature') &&
+			!request.headers.has('x-payment') &&
+			mppChallenge
+		) {
+			console.warn('[MachinePayments] Returning an MPP-only challenge because x402 is unavailable');
+			return mppChallenge;
+		}
+		return new Response(JSON.stringify({ error: 'x402_facilitator_unavailable' }), {
+			status: 503,
+			headers: {
+				'Content-Type': 'application/json',
+				'Cache-Control': 'no-store',
+				'Retry-After': '60'
+			}
+		});
+	}
+}
+
+export function unavailableX402Challenge(
+	challenge: Response | null,
+	missing: string[]
+): Response | null {
+	console.error(
+		`[MachinePayments] x402 is not configured; missing configuration: ${missing.join(', ') || 'x402 resource server or payment address'}. ${challenge ? 'Returning an MPP-only challenge.' : 'No MPP challenge is available.'}`
+	);
+	return challenge;
+}
+
 async function chargePage(
 	request: Request,
 	resolve: () => Promise<Response>,
 	offer: MachinePageOffer
 ): Promise<Response | null> {
-	if (resourceServer === null && mppx === null) return null;
+	if (resourceServer === null && mppx === null) {
+		return unavailableX402Challenge(null, missingConfiguration);
+	}
 
 	const mppPayment = mppx
 		? await mppx.charge({
@@ -378,17 +462,23 @@ async function chargePage(
 		return mppPayment.withReceipt(await resolve());
 	}
 
-	if (resourceServer === null || paymentAddress === null) {
-		return mppPayment?.challenge ?? null;
+	if (resourceServer === null || paymentAddress === null || paymentNetwork === null) {
+		return unavailableX402Challenge(mppPayment?.challenge ?? null, missingConfiguration);
 	}
 
-	await initializeResourceServer();
+	const initializationFailure = await initializePaymentFacilitator(
+		initializeResourceServer,
+		request,
+		mppPayment?.challenge ?? null
+	);
+	if (initializationFailure) return initializationFailure;
 
 	const requestUrl = new URL(request.url);
+	const routePattern = machinePaymentRoutePattern(offer.resource, requestUrl.pathname);
 	const adapter = {
 		getHeader: (name: string) => request.headers.get(name) ?? undefined,
 		getMethod: () => request.method,
-		getPath: () => requestUrl.pathname,
+		getPath: () => requestUrl.pathname.replace(/\/$/, ''),
 		getUrl: () => request.url,
 		getAcceptHeader: () => request.headers.get('accept') ?? '',
 		getUserAgent: () => request.headers.get('user-agent') ?? ''
@@ -401,16 +491,16 @@ async function chargePage(
 			request.headers.get('payment-signature') ?? request.headers.get('x-payment') ?? undefined
 	};
 	const httpServer = new x402HTTPResourceServer(resourceServer, {
-		'*': {
+		[routePattern]: {
 			accepts: {
 				scheme: 'exact',
-				network: BASE_NETWORK,
+				network: paymentNetwork.network,
 				price: `$${offer.amount}`,
 				payTo: paymentAddress
 			},
 			resource: request.url,
 			description: offer.description,
-			mimeType: 'text/html',
+			...machinePaymentOutput(request),
 			unpaidResponseBody: () => ({
 				contentType: 'application/json',
 				body: { error: 'payment_required' }
@@ -419,7 +509,13 @@ async function chargePage(
 	});
 
 	const payment = await httpServer.processHTTPRequest(requestContext);
-	if (payment.type === 'no-payment-required') return resolve();
+	if (payment.type === 'no-payment-required') {
+		console.error('[MachinePayments] x402 route did not match the requested resource');
+		return new Response(JSON.stringify({ error: 'payment_configuration_error' }), {
+			status: 503,
+			headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+		});
+	}
 	if (payment.type === 'payment-error') {
 		const x402Response = responseFromInstructions(payment.response);
 		return mppPayment?.challenge

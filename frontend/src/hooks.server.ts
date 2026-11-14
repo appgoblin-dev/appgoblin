@@ -25,6 +25,11 @@ import {
 	machineSearchPayment,
 	isMachinePayablePath
 } from '#lib/server/machine-payment.js';
+import {
+	machineJsonKind,
+	machineJsonResponse,
+	wantsMachineJson
+} from '#lib/server/machine-json.js';
 
 // Static assets, the live-session probe (the header calls /auth/me on every SPA
 // navigation, so a 429 would blank it) and the health check.
@@ -62,12 +67,18 @@ const preAuthRateLimitHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
+function isMachinePaymentClient(event: RequestEvent): boolean {
+	return !event.isDataRequest && machineJsonKind(event.url.pathname) !== null
+		? wantsMachineJson(event.request)
+		: isMachineClient(event);
+}
+
 // Offer payment before auth and rate limiting on eligible pages.
 const machinePagePaymentHandle: Handle = async ({ event, resolve }) => {
 	if (
 		event.locals.user !== null ||
 		!isMachinePayablePath(event.url.pathname) ||
-		!isMachineClient(event)
+		!isMachinePaymentClient(event)
 	) {
 		return resolve(event);
 	}
@@ -103,7 +114,7 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 			result.reason === 'searchQuota' &&
 			isSearchResultsPath(event.url.pathname) &&
 			!event.request.headers.has('cookie') &&
-			isMachineClient(event)
+			isMachinePaymentClient(event)
 		) {
 			const paymentResponse = await machineSearchPayment(event.request, () => {
 				event.locals.machinePaid = true;
@@ -239,13 +250,25 @@ const cacheAndRoutingHandle: Handle = async ({ event, resolve }) => {
 		}
 	}
 
-	const response = await resolve(event);
+	const jsonKind =
+		!event.isDataRequest && (event.request.method === 'GET' || event.request.method === 'HEAD')
+			? machineJsonKind(route)
+			: null;
+	const response =
+		jsonKind && wantsMachineJson(event.request)
+			? event.request.method === 'HEAD'
+				? new Response(null, {
+						headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' }
+					})
+				: await machineJsonResponse(event, jsonKind)
+			: await resolve(event);
 
 	const isStaticAssetRequest = route.startsWith('/_app') || route.startsWith('/favicon');
 
 	if (!isStaticAssetRequest) {
 		appendVaryHeader(response, 'Cookie');
 	}
+	if (machineJsonKind(route)) appendVaryHeader(response, 'Accept');
 
 	if (event.isDataRequest && isNoindexPath(route)) {
 		response.headers.set('X-Robots-Tag', 'noindex, nofollow');

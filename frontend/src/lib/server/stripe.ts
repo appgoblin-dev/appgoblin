@@ -15,7 +15,7 @@ import { STRIPE_PLAN_LABELS, type BillingCycle, type StripePriceKey } from '#lib
 export { STRIPE_PLAN_LABELS, type BillingCycle, type StripePriceKey } from '#lib/plans.js';
 
 export const stripe = new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2026-08-26.dahlia'
+	apiVersion: '2026-10-28.endive'
 });
 
 export async function createCheckoutSession(
@@ -82,14 +82,14 @@ export async function createCheckoutSession(
 			line_items: [{ price: priceId, quantity: 1 }],
 			...(seatPriceId
 				? {
-						optional_items: [
-							{
-								price: seatPriceId,
-								quantity: 1,
-								adjustable_quantity: { enabled: true, minimum: 1, maximum: 100 }
-							}
-						]
-					}
+					optional_items: [
+						{
+							price: seatPriceId,
+							quantity: 1,
+							adjustable_quantity: { enabled: true, minimum: 1, maximum: 100 }
+						}
+					]
+				}
 				: {}),
 			mode: 'subscription',
 			success_url: `${origin}/account?success=true`,

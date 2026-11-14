@@ -17,8 +17,13 @@ export const variables = defineEnvVars({
 	STRIPE_PROFILE_ID: { static: true, schema: (value) => value },
 	STRIPE_TEMPO_DEPOSIT_ADDRESS: { static: true, schema: (value) => value },
 	STRIPE_BASE_DEPOSIT_ADDRESS: { static: true, schema: (value) => value },
-	CDP_API_KEY_ID: { static: true, schema: (value) => value },
-	CDP_API_KEY_SECRET: { static: true, schema: (value) => value },
+	BLOCKCHAIN_NETWORK: {
+		schema: (value) => value,
+		description:
+			'x402 network: eip155:8453 (Base) or eip155:84532 (Base Sepolia, Stripe test key required)'
+	},
+	CDP_API_KEY_ID: { schema: (value) => value },
+	CDP_API_KEY_SECRET: { schema: (value) => value },
 	PGHOST: { static: true },
 	PGPORT: { static: true },
 	PGDATABASE: { static: true },
