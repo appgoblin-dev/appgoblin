@@ -82,14 +82,14 @@ export async function createCheckoutSession(
 			line_items: [{ price: priceId, quantity: 1 }],
 			...(seatPriceId
 				? {
-					optional_items: [
-						{
-							price: seatPriceId,
-							quantity: 1,
-							adjustable_quantity: { enabled: true, minimum: 1, maximum: 100 }
-						}
-					]
-				}
+						optional_items: [
+							{
+								price: seatPriceId,
+								quantity: 1,
+								adjustable_quantity: { enabled: true, minimum: 1, maximum: 100 }
+							}
+						]
+					}
 				: {}),
 			mode: 'subscription',
 			success_url: `${origin}/account?success=true`,
