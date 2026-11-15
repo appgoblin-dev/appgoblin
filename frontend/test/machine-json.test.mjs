@@ -287,7 +287,7 @@ test('facilitator failure preserves MPP and fails x402 attempts closed', async (
 		};
 		assert.equal(
 			await payment.initializePaymentFacilitator(
-				async () => {},
+				async () => { },
 				request('application/json'),
 				challenge
 			),
@@ -343,7 +343,7 @@ test('x402 challenge advertises the negotiated JSON example', async () => {
 			payTo: '0x0000000000000000000000000000000000000001'
 		},
 		resource: req.url,
-		...payment.machinePaymentOutput(req)
+		...payment.machinePaymentOutput(req, '/apps/{id}/sdks/permissions')
 	};
 	const http = new x402HTTPResourceServer(resourceServer, {
 		[payment.machinePaymentRoutePattern('/apps/{id}/sdks/permissions', new URL(req.url).pathname)]:
@@ -366,6 +366,18 @@ test('x402 challenge advertises the negotiated JSON example', async () => {
 		).toString()
 	);
 	assert.equal(required.resource.mimeType, 'application/json');
+	assert.equal(required.resource.serviceName, 'AppGoblin');
+	assert.deepEqual(required.resource.tags, ['mobile apps', 'app analytics', 'sdk']);
+	assert.equal(required.resource.iconUrl, 'https://appgoblin.info/favicon-32x32.png');
+	assert.equal(
+		required.extensions.bazaar.schema.properties.input.properties.pathParams.properties.id
+			.description,
+		'App store id, eg. android com.example.app or ios 1234567890'
+	);
+	assert.equal(
+		required.extensions.bazaar.schema.properties.output.properties.example.properties.sdk.type,
+		'object'
+	);
 	assert.deepEqual(required.extensions.bazaar.info.output, {
 		type: 'json',
 		example: machine.machineJsonExample('sdks', '/permissions')
@@ -425,7 +437,7 @@ test('payment route patterns match advertised resources, including encoded and d
 				payTo: '0x0000000000000000000000000000000000000001'
 			},
 			resource: req.url,
-			...payment.machinePaymentOutput(req)
+			...payment.machinePaymentOutput(req, resource)
 		};
 		const http = new x402HTTPResourceServer(resourceServer, {
 			[payment.machinePaymentRoutePattern(resource, path)]: route
@@ -444,7 +456,7 @@ test('payment route patterns match advertised resources, including encoded and d
 			const required = JSON.parse(
 				Buffer.from(
 					result.response.headers['PAYMENT-REQUIRED'] ??
-						result.response.headers['payment-required'],
+					result.response.headers['payment-required'],
 					'base64'
 				).toString()
 			);
@@ -452,6 +464,91 @@ test('payment route patterns match advertised resources, including encoded and d
 			assert.deepEqual(required.extensions.bazaar.info.input.pathParams, params);
 		}
 	}
+});
+
+test('all advertised paid resources declare valid Bazaar metadata', async () => {
+	const facilitator = {
+		getSupported: async () => ({
+			kinds: [{ x402Version: 2, network: 'eip155:8453', scheme: 'exact' }],
+			extensions: ['bazaar'],
+			signers: {}
+		})
+	};
+	const resourceServer = new x402ResourceServer(facilitator)
+		.register('eip155:8453', new ExactEvmScheme())
+		.registerExtension(bazaarResourceServerExtension);
+	await resourceServer.initialize();
+	for (const advertised of payment.getMachinePaymentResources('https://example.com')) {
+		const resource = decodeURIComponent(new URL(advertised).pathname);
+		const path = resource.replace(/\{[^}]+\}/g, 'example');
+		const req = new Request(`https://example.com${path}`, {
+			headers: { accept: 'application/json' }
+		});
+		const offer = resource === '/search/{term}' ? payment.SEARCH_OFFER : payment.findPageOffer(path);
+		assert.ok(offer, resource);
+		assert.ok(offer.description.length > 60, resource);
+		const route = {
+			accepts: {
+				scheme: 'exact',
+				network: 'eip155:8453',
+				price: '$0.10',
+				payTo: '0x0000000000000000000000000000000000000001'
+			},
+			resource: req.url,
+			description: offer.description,
+			...payment.machinePaymentOutput(req, resource)
+		};
+		const http = new x402HTTPResourceServer(resourceServer, {
+			[payment.machinePaymentRoutePattern(resource, path)]: route
+		});
+		const adapter = {
+			getHeader: (name) => req.headers.get(name) ?? undefined,
+			getMethod: () => 'GET',
+			getPath: () => path,
+			getUrl: () => req.url,
+			getAcceptHeader: () => 'application/json',
+			getUserAgent: () => ''
+		};
+		const result = await http.processHTTPRequest({ adapter, path, method: 'GET' });
+		assert.equal(result.type, 'payment-error', resource);
+		const required = JSON.parse(
+			Buffer.from(
+				result.response.headers['PAYMENT-REQUIRED'] ?? result.response.headers['payment-required'],
+				'base64'
+			).toString()
+		);
+		const bazaar = required.extensions.bazaar;
+		assert.equal(validateAndExtract(bazaar).valid, true, resource);
+		assert.equal(bazaar.info.input.method, 'GET');
+		assert.equal(required.resource.serviceName, 'AppGoblin');
+		assert.equal(required.resource.description, offer.description);
+		if (bazaar.info.output) {
+			const properties = bazaar.schema.properties.output.properties.example.properties;
+			for (const name of Object.keys(bazaar.info.output.example)) {
+				assert.ok(properties[name]?.description, `${resource}: ${name}`);
+			}
+		}
+		for (const [, name] of resource.matchAll(/\{([^}]+)\}/g)) {
+			assert.equal(bazaar.info.input.pathParams[name], 'example');
+			assert.ok(bazaar.schema.properties.input.properties.pathParams.properties[name].description);
+		}
+		if (resource.includes('/reports/')) assert.equal(required.resource.mimeType, 'text/csv');
+		if (!machine.machineJsonKind(path)) assert.equal(bazaar.info.output, undefined);
+	}
+	const compare = payment.machinePaymentOutput(
+		new Request('https://example.com/apps/example/keywords/compare?k=music'),
+		'/apps/{id}/keywords/compare'
+	);
+	assert.ok(
+		compare.extensions.bazaar.schema.properties.input.properties.queryParams.properties.k
+			.description
+	);
+	const html = payment.machinePaymentOutput(
+		new Request('https://example.com/apps/example/sdks', { headers: { accept: 'text/html' } }),
+		'/apps/{id}/sdks'
+	);
+	assert.equal(html.mimeType, 'text/html');
+	assert.equal(html.extensions.bazaar.info.output, undefined);
 });
 
 test('discovery metadata contains examples and current prices', async () => {

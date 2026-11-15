@@ -15,7 +15,13 @@ from litestar.exceptions import (
 from litestar.params import Parameter
 
 from api_app.analytics import PUBLIC_API_HOSTNAME, build_request_page_view_task
+from api_app.controllers.apps import (
+    create_app_country_plot_dict,
+    create_app_plot_df,
+    create_app_ranks_history_dict,
+)
 from api_app.controllers.public.v1.public_models import (
+    PublicAppAdsTxtEntries,
     PublicAppBasics,
     PublicAppBestRank,
     PublicAppMappedSdks,
@@ -26,12 +32,17 @@ from api_app.controllers.public.v1.public_models import (
 from api_app.guards import validate_api_key
 from config import get_logger
 from dbcon.queries import (
+    get_app_adstxt_overview,
+    get_app_country_metrics_history,
+    get_app_global_metrics_history,
     get_app_mapped_sdks,
     get_app_sdk_details,
     get_app_sdk_history,
     get_app_version_timeline,
+    get_ranks_for_app,
     get_ranks_for_app_overview,
     get_single_app,
+    get_single_apps_adstxt_by_relationship,
     search_v1_apps,
     search_v1_developer_apps,
 )
@@ -100,6 +111,41 @@ def _build_app_ranks_payload(state: State, store_id: str) -> list[PublicAppBestR
         )
         for row in overview_df.to_dict(orient="records")
     ]
+
+
+def _build_app_rank_history_payload(
+    state: State, store_id: str, country: str = "US"
+) -> dict:
+    """Return the private app rank-history response for one country."""
+    ranks_df = get_ranks_for_app(state, store_id=store_id, country=country, days=90)
+    if ranks_df.empty:
+        return {"history": {}}
+    return {"history": create_app_ranks_history_dict(ranks_df, country)}
+
+
+def _build_app_adstxt_payload(adstxt_df: pd.DataFrame) -> PublicAppAdsTxtEntries:
+    """Split app-ads.txt records into direct and reseller entries."""
+    if adstxt_df.empty:
+        return PublicAppAdsTxtEntries()
+
+    direct_entries = adstxt_df[
+        adstxt_df["relationship"].str.upper() == "DIRECT"
+    ].to_dict(orient="records")
+    reseller_entries = adstxt_df[
+        adstxt_df["relationship"].str.upper() == "RESELLER"
+    ].to_dict(orient="records")
+    return PublicAppAdsTxtEntries(
+        direct_entries=direct_entries,
+        reseller_entries=reseller_entries,
+    )
+
+
+def _build_app_adstxt_export_payload(
+    state: State, store_id: str, relationship: str
+) -> list[dict]:
+    """Return full app-ads.txt records for one relationship type."""
+    adstxt_df = get_single_apps_adstxt_by_relationship(state, store_id, relationship)
+    return adstxt_df.to_dict(orient="records")
 
 
 def _build_app_mapped_sdks_payload(state: State, store_id: str) -> PublicAppMappedSdks:
@@ -260,6 +306,26 @@ def _build_app_sdk_history_payload(state: State, store_id: str) -> PublicAppSdkH
     return PublicAppSdkHistory(history=history_df.to_dict(orient="records"))
 
 
+def _build_app_global_metrics_history_payload(
+    state: State, store_id: str
+) -> list[dict] | dict:
+    """Return the private app global-metrics history payload."""
+    history_df = get_app_global_metrics_history(state=state, store_id=store_id)
+    if history_df.empty:
+        return {}
+    return create_app_plot_df(history_df).to_dict(orient="records")
+
+
+def _build_app_country_metrics_history_payload(
+    state: State, store_id: str
+) -> list[dict] | dict:
+    """Return the private app country-metrics history payload."""
+    history_df = get_app_country_metrics_history(state=state, store_id=store_id)
+    if history_df.empty:
+        return {}
+    return create_app_country_plot_dict(history_df).to_dict(orient="records")
+
+
 def _build_search_results(df: pd.DataFrame) -> list[PublicAppSearchResult]:
     """Normalize search records into the public app search contract."""
     if df.empty:
@@ -368,6 +434,84 @@ class V1AppsController(Controller):
             ),
         )
 
+    @get(path="/apps/{store_id:str}/ranks/history", cache=3600)
+    async def app_rank_history(
+        self: Self,
+        state: State,
+        request: Request,
+        store_id: str,
+        country: str = "US",
+    ) -> dict:
+        """Return the app's chart-ready ranking history for a country."""
+        start = time.perf_counter() * 1000
+        payload = _build_app_rank_history_payload(
+            state=state, store_id=store_id, country=country
+        )
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(f"GET /api/v1/apps/{store_id}/ranks/history took {duration}ms")
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request,
+                url=f"/api/v1/apps/{store_id}/ranks/history",
+                hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
+
+    @get(path="/apps/{store_id:str}/adstxt/overview", cache=3600)
+    async def app_adstxt_overview(
+        self: Self, state: State, request: Request, store_id: str
+    ) -> PublicAppAdsTxtEntries:
+        """Return summarized app-ads.txt records from the app developer's domain."""
+        start = time.perf_counter() * 1000
+        payload = _build_app_adstxt_payload(get_app_adstxt_overview(state, store_id))
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(f"GET /api/v1/apps/{store_id}/adstxt/overview took {duration}ms")
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request,
+                url=f"/api/v1/apps/{store_id}/adstxt/overview",
+                hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
+
+    @get(path="/apps/{store_id:str}/adstxt/direct", cache=3600)
+    async def app_adstxt_direct(
+        self: Self, state: State, request: Request, store_id: str
+    ) -> list[dict]:
+        """Return direct app-ads.txt records from the app developer's domain."""
+        start = time.perf_counter() * 1000
+        payload = _build_app_adstxt_export_payload(state, store_id, "DIRECT")
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(f"GET /api/v1/apps/{store_id}/adstxt/direct took {duration}ms")
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request,
+                url=f"/api/v1/apps/{store_id}/adstxt/direct",
+                hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
+
+    @get(path="/apps/{store_id:str}/adstxt/reseller", cache=3600)
+    async def app_adstxt_reseller(
+        self: Self, state: State, request: Request, store_id: str
+    ) -> list[dict]:
+        """Return reseller app-ads.txt records from the app developer's domain."""
+        start = time.perf_counter() * 1000
+        payload = _build_app_adstxt_export_payload(state, store_id, "RESELLER")
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(f"GET /api/v1/apps/{store_id}/adstxt/reseller took {duration}ms")
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request,
+                url=f"/api/v1/apps/{store_id}/adstxt/reseller",
+                hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
+
     @get(
         path="/apps/{store_id:str}/mapped-sdks",
         cache=3600,
@@ -448,6 +592,56 @@ class V1AppsController(Controller):
             background=build_request_page_view_task(
                 request,
                 url=f"/api/v1/apps/{store_id}/sdks/history",
+                hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
+
+    @get(
+        path="/apps/{store_id:str}/global-metrics-history",
+        cache=3600,
+    )
+    async def app_global_metrics_history(
+        self: Self, state: State, request: Request, store_id: str
+    ) -> list[dict] | dict:
+        """Return the app's global metrics history with weekly trend calculations."""
+        start = time.perf_counter() * 1000
+        payload = _build_app_global_metrics_history_payload(
+            state=state, store_id=store_id
+        )
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(
+            f"GET /api/v1/apps/{store_id}/global-metrics-history took {duration}ms"
+        )
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request,
+                url=f"/api/v1/apps/{store_id}/global-metrics-history",
+                hostname=PUBLIC_API_HOSTNAME,
+            ),
+        )
+
+    @get(
+        path="/apps/{store_id:str}/country-metrics-history",
+        cache=3600,
+    )
+    async def app_country_metrics_history(
+        self: Self, state: State, request: Request, store_id: str
+    ) -> list[dict] | dict:
+        """Return the app's country-specific metrics history."""
+        start = time.perf_counter() * 1000
+        payload = _build_app_country_metrics_history_payload(
+            state=state, store_id=store_id
+        )
+        duration = round((time.perf_counter() * 1000 - start), 2)
+        logger.info(
+            f"GET /api/v1/apps/{store_id}/country-metrics-history took {duration}ms"
+        )
+        return Response(
+            payload,
+            background=build_request_page_view_task(
+                request,
+                url=f"/api/v1/apps/{store_id}/country-metrics-history",
                 hostname=PUBLIC_API_HOSTNAME,
             ),
         )

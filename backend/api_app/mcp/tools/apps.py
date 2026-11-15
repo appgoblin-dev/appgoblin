@@ -13,6 +13,9 @@ from pydantic import Field
 
 from api_app.controllers.public.v1.apps import (
     _build_app_basics_payload,
+    _build_app_country_metrics_history_payload,
+    _build_app_global_metrics_history_payload,
+    _build_app_rank_history_payload,
     _build_app_sdk_details_payload,
     _search_apps_payload,
 )
@@ -128,3 +131,59 @@ async def get_app_sdk_details(  # noqa: D417
         logger.exception("Error fetching SDK details for %r", store_id)
         msg = f"Error fetching SDK details for {store_id!r}: {exc}"
         raise RuntimeError(msg) from exc
+
+
+@mcp_server.tool()
+async def get_app_global_metrics_history(  # noqa: D417
+    store_id: str,
+    ctx: Context,  # noqa: ARG001
+) -> str:
+    """Return an app's weekly global installs, ratings, usage, and revenue history.
+
+    Parameters
+    ----------
+    store_id : str
+        The app's store identifier.
+
+    """
+    payload = _build_app_global_metrics_history_payload(get_mcp_state(), store_id)
+    return to_json(payload)
+
+
+@mcp_server.tool()
+async def get_app_country_metrics_history(  # noqa: D417
+    store_id: str,
+    ctx: Context,  # noqa: ARG001
+) -> str:
+    """Return an app's weekly ratings and installs history by country.
+
+    Parameters
+    ----------
+    store_id : str
+        The app's store identifier.
+
+    """
+    payload = _build_app_country_metrics_history_payload(get_mcp_state(), store_id)
+    return to_json(payload)
+
+
+@mcp_server.tool()
+async def get_app_rank_history(  # noqa: D417
+    store_id: str,
+    ctx: Context,  # noqa: ARG001
+    country: str = "US",
+) -> str:
+    """Return an app's rank history for a country over the past 90 days.
+
+    Parameters
+    ----------
+    store_id : str
+        The app's store identifier.
+    country : str
+        Two-letter country code (default ``US``).
+
+    """
+    payload = _build_app_rank_history_payload(
+        get_mcp_state(), store_id, country=country
+    )
+    return to_json(payload)

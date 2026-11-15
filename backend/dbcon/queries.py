@@ -1029,6 +1029,18 @@ def get_single_apps_adstxt(state: State, store_id: str) -> pd.DataFrame:
     return df
 
 
+def get_single_apps_adstxt_by_relationship(
+    state: State, store_id: str, relationship: str
+) -> pd.DataFrame:
+    """Get one relationship type from a single developer's app-ads.txt records."""
+    logger.info(f"Query app's app-ads-txt: {store_id=}, {relationship=}")
+    return pd.read_sql(
+        sql.single_app_adstxt_by_relationship,
+        con=state.dbcon.engine,
+        params={"store_id": store_id, "relationship": relationship.upper()},
+    )
+
+
 def get_topapps_for_company_secondary(
     state: State,
     company_domain: str,

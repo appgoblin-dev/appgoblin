@@ -41,7 +41,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/[^/]+\/keywords\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app keywords page',
+			description:
+				'App details and keyword scores, including ranked and description-derived keywords, for ASO research and competitor keyword analysis.',
 			resource: '/apps/{id}/keywords'
 		}
 	},
@@ -49,7 +50,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/[^/]+\/keywords\/discovery\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app keyword discovery page',
+			description:
+				'App details and description-derived keyword suggestions not currently marked as ranking, for finding ASO opportunities and competitor ideas.',
 			resource: '/apps/{id}/keywords/discovery'
 		}
 	},
@@ -57,7 +59,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/[^/]+\/keywords\/ranking\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app keyword ranking page',
+			description:
+				'App details and currently ranked keywords with scores, for assessing search visibility and benchmarking competitor ASO.',
 			resource: '/apps/{id}/keywords/ranking'
 		}
 	},
@@ -65,7 +68,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/[^/]+\/keywords\/compare\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app keyword compare page',
+			description:
+				'HTML comparison of selected keyword ranking histories for an app, useful for monitoring ASO performance over time.',
 			resource: '/apps/{id}/keywords/compare'
 		}
 	},
@@ -73,7 +77,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/[^/]+\/sdks\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app SDK page',
+			description:
+				'App details and detected SDKs, company categories, permissions, app queries and SKAdNetwork identifiers, for competitor technology and advertising analysis.',
 			resource: '/apps/{id}/sdks'
 		}
 	},
@@ -81,7 +86,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/[^/]+\/sdks\/permissions\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app permissions page',
+			description:
+				"App details and detected permissions, useful for comparing competitors' requested device capabilities.",
 			resource: '/apps/{id}/sdks/permissions'
 		}
 	},
@@ -89,7 +95,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/[^/]+\/sdks\/queries\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app queries page',
+			description:
+				'App details and other apps queried for availability, offering clues for researching competitor integrations and ecosystem dependencies.',
 			resource: '/apps/{id}/sdks/queries'
 		}
 	},
@@ -97,7 +104,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/[^/]+\/sdks\/skadnetwork\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app SKAdNetwork page',
+			description:
+				"App details and detected SKAdNetwork identifiers, useful for investigating an iOS app's advertising attribution ecosystem.",
 			resource: '/apps/{id}/sdks/skadnetwork'
 		}
 	},
@@ -105,7 +113,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/[^/]+\/sdks\/unknowns\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app unmapped SDK page',
+			description:
+				'App details and unmapped package or path patterns detected in an app, useful for further SDK and competitor technology research.',
 			resource: '/apps/{id}/sdks/unknowns'
 		}
 	},
@@ -113,7 +122,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/comparison\/[^/]+\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app comparison page',
+			description:
+				'HTML overview of an app, including metrics history, ratings and SDKs, for competitor benchmarking and selecting another app to compare.',
 			resource: '/apps/comparison/{id}'
 		}
 	},
@@ -121,7 +131,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/apps\/comparison\/[^/]+\/[^/]+\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app comparison page',
+			description:
+				"HTML comparison of two apps' metrics histories, ratings and SDKs, for competitor benchmarking.",
 			resource: '/apps/comparison/{id1}/{id2}'
 		}
 	},
@@ -129,7 +140,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/sdks\/[^/]+\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin SDK pattern page',
+			description:
+				'Apps and companies associated with an SDK package or path pattern, for investigating technology adoption and competitor app stacks.',
 			resource: '/sdks/{pattern}'
 		}
 	},
@@ -137,7 +149,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/sdks\/mapped\/[^/]+\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin SDK details page',
+			description:
+				'SDK details, owner, mapped patterns and associated apps, for researching vendors and comparing SDK adoption across apps.',
 			resource: '/sdks/mapped/{sdkSlug}'
 		}
 	},
@@ -145,7 +158,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/developers\/[^/]+\/sdks\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin developer SDK page',
+			description:
+				"HTML overview of SDKs detected across a developer's apps, for researching a competitor's portfolio and technology stack.",
 			resource: '/developers/{developer}/sdks'
 		}
 	},
@@ -153,7 +167,8 @@ const PAGE_OFFERS: Array<{ pattern: RegExp; offer: MachinePageOffer }> = [
 		pattern: /^\/reports\/app-ecosystem-report-Q2-2026\/download\/?$/,
 		offer: {
 			amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-			description: 'AppGoblin app ecosystem report download',
+			description:
+				'CSV from the Q2 2026 mobile app ecosystem report, covering SDK and app-ads.txt company adoption and trends for market and competitor analysis.',
 			resource: '/reports/app-ecosystem-report-Q2-2026/download'
 		}
 	}
@@ -347,7 +362,7 @@ export function isMachinePayablePath(pathname: string): boolean {
 	return PAGE_OFFERS.some(({ pattern }) => pattern.test(path));
 }
 
-function findPageOffer(pathname: string): MachinePageOffer | null {
+export function findPageOffer(pathname: string): MachinePageOffer | null {
 	const path = pagePath(pathname);
 	return PAGE_OFFERS.find(({ pattern }) => pattern.test(path))?.offer ?? null;
 }
@@ -373,17 +388,134 @@ function responseFromInstructions(instructions: {
 	});
 }
 
-export function machinePaymentOutput(request: Request): {
+const PATH_PARAMETER_DESCRIPTIONS: Record<string, string> = {
+	term: 'Search term for apps and companies',
+	id: 'App store id, eg. android com.example.app or ios 1234567890',
+	id1: 'First app store id',
+	id2: 'Second app store id',
+	pattern: 'SDK package or path pattern',
+	sdkSlug: 'AppGoblin SDK slug',
+	developer: 'Developer identifier'
+};
+
+const JSON_OUTPUT_PROPERTIES: Record<string, Record<string, unknown>> = {
+	search: {
+		apps: {
+			type: 'object',
+			description: 'Matching apps grouped by Apple and Google stores, for identifying competitors.'
+		},
+		companies: {
+			type: 'array',
+			description: 'Companies matching the search term, for ecosystem and vendor research.'
+		}
+	},
+	keywords: {
+		app: { type: 'object', description: 'App details identifying the keyword subject.' },
+		keywords: {
+			type: ['object', 'string'],
+			description:
+				'Keyword terms and scores for ASO research; a message is returned when keyword data is unavailable.',
+			properties: {
+				keywords: { type: 'array', description: 'Keyword terms for the requested view.' },
+				keyword_scores: {
+					type: 'array',
+					description: 'Keyword score records, including ranking and discovery indicators.'
+				}
+			}
+		}
+	},
+	sdks: {
+		app: { type: 'object', description: 'App details identifying the analyzed app.' },
+		sdk: {
+			type: 'object',
+			description:
+				'Detected SDK and package information, or the requested subsection, for technology analysis.',
+			properties: {
+				permissions: { description: 'Detected permissions requested by the app.' },
+				company_categories: { description: 'Detected companies grouped by category.' },
+				leftovers: { description: 'Unmapped package or path patterns for further investigation.' },
+				app_queries: { description: 'Other apps queried for availability.' },
+				skadnetwork: {
+					description: 'Detected SKAdNetwork identifiers for advertising attribution research.'
+				},
+				company_details: { description: 'Details of companies associated with detected SDKs.' }
+			}
+		}
+	},
+	pattern: {
+		apps: { type: 'object', description: 'Apps associated with the specified SDK pattern.' },
+		companies: {
+			type: 'object',
+			description: 'Companies associated with the specified SDK pattern.'
+		}
+	},
+	mapped: {
+		sdk_id: { type: ['integer', 'null'], description: 'AppGoblin SDK identifier, if mapped.' },
+		sdk_name: { type: 'string', description: 'Name of the SDK.' },
+		apps: { type: 'array', description: 'Associated apps for researching SDK adoption.' },
+		owner: { type: 'object', description: 'SDK owner details, when available.' },
+		patterns: {
+			type: 'object',
+			description: 'Mapped package, path and mediation patterns used to identify the SDK.'
+		}
+	}
+};
+
+export function machinePaymentOutput(
+	request: Request,
+	resource: string
+): {
 	mimeType: string;
-	extensions?: Record<string, unknown>;
+	serviceName: string;
+	tags: string[];
+	iconUrl: string;
+	extensions: Record<string, unknown>;
 } {
 	const url = new URL(request.url);
 	const kind = machineJsonKind(url.pathname);
-	if (!kind || !wantsMachineJson(request)) return { mimeType: 'text/html' };
+	const isJson = kind !== null && wantsMachineJson(request);
+	const isCsv = resource === '/reports/app-ecosystem-report-Q2-2026/download';
+	const isDataRequest = url.pathname.endsWith('/__data.json');
+	const pathProperties = Object.fromEntries(
+		[...resource.matchAll(/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g)].map(([, name]) => [
+			name,
+			{ type: 'string', description: PATH_PARAMETER_DESCRIPTIONS[name] }
+		])
+	);
+	const queryProperties: Record<string, unknown> = resource.endsWith('/keywords/compare')
+		? { k: { type: 'string', description: 'Keywords to compare, separated by commas' } }
+		: resource.startsWith('/apps/comparison/')
+			? {
+					search1: { type: 'string', description: 'Search term for the first app selector' },
+					search2: { type: 'string', description: 'Search term for the second app selector' }
+				}
+			: {};
 	return {
-		mimeType: 'application/json',
+		mimeType: isDataRequest
+			? 'application/json'
+			: isCsv
+				? 'text/csv'
+				: isJson
+					? 'application/json'
+					: 'text/html',
+		serviceName: 'AppGoblin',
+		tags: ['mobile apps', 'app analytics', 'sdk'],
+		iconUrl: 'https://appgoblin.info/favicon-32x32.png',
 		extensions: declareDiscoveryExtension({
-			output: { example: machineJsonExample(kind, url.pathname) }
+			inputSchema: { properties: queryProperties },
+			...(Object.keys(pathProperties).length
+				? {
+						pathParamsSchema: { properties: pathProperties, required: Object.keys(pathProperties) }
+					}
+				: {}),
+			...(isJson
+				? {
+						output: {
+							example: machineJsonExample(kind, url.pathname),
+							schema: { type: 'object', properties: JSON_OUTPUT_PROPERTIES[kind] }
+						}
+					}
+				: {})
 		})
 	};
 }
@@ -500,7 +632,7 @@ async function chargePage(
 			},
 			resource: request.url,
 			description: offer.description,
-			...machinePaymentOutput(request),
+			...machinePaymentOutput(request, offer.resource),
 			unpaidResponseBody: () => ({
 				contentType: 'application/json',
 				body: { error: 'payment_required' }
@@ -562,15 +694,18 @@ async function chargePage(
 	});
 }
 
+export const SEARCH_OFFER: MachinePageOffer = {
+	amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
+	description:
+		'Search results for apps across Apple and Google stores and matching companies, useful for identifying competitors and researching the app ecosystem.',
+	resource: '/search/{term}'
+};
+
 export async function machineSearchPayment(
 	request: Request,
 	resolve: () => Promise<Response>
 ): Promise<Response | null> {
-	return chargePage(request, resolve, {
-		amount: DEFAULT_MACHINE_PAYMENT_AMOUNT,
-		description: 'AppGoblin search page',
-		resource: '/search/{term}'
-	});
+	return chargePage(request, resolve, SEARCH_OFFER);
 }
 
 export async function machinePagePayment(
