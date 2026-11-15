@@ -17,6 +17,7 @@ SCALAR_CSS_URL = "data:text/css,"
 APP_BASICS_EXAMPLE_STORE_ID = "dev.thirdgate.appgoblin"
 KEYWORD_OVERVIEW_EXAMPLE_KEYWORD = "app privacy"
 APP_METRICS_HISTORY_EXAMPLE_STORE_ID = APP_BASICS_EXAMPLE_STORE_ID
+APP_RANK_HISTORY_EXAMPLE_STORE_ID = APP_BASICS_EXAMPLE_STORE_ID
 APP_BASICS_EXAMPLE_RESPONSE = {
     "name": "AppGoblin: Scan Trackers & SDK",
     "store_id": APP_BASICS_EXAMPLE_STORE_ID,
@@ -70,6 +71,54 @@ APP_COUNTRY_METRICS_HISTORY_EXAMPLE_RESPONSE = [
         "weekly_rating_count": 21,
         "weekly_installs_rate_of_change": 8.0,
         "weekly_rating_count_rate_of_change": 5.3,
+    }
+]
+APP_RANK_HISTORY_EXAMPLE_RESPONSE = {
+    "history": [
+        {
+            "crawled_date": "2026-03-01",
+            "GROSSING: GAME_STRATEGY": 12,
+        },
+        {
+            "crawled_date": "2026-03-08",
+            "GROSSING: GAME_STRATEGY": 8,
+        },
+    ]
+}
+APP_ADSTXT_OVERVIEW_EXAMPLE_RESPONSE = {
+    "direct_entries": [
+        {
+            "company_domain": "google.com",
+            "company_name": "Google",
+            "relationship": "DIRECT",
+            "count": 38,
+        }
+    ],
+    "reseller_entries": [
+        {
+            "company_domain": "example.com",
+            "company_name": "Example Ads",
+            "relationship": "RESELLER",
+            "count": 12,
+        }
+    ],
+}
+APP_ADSTXT_DIRECT_EXAMPLE_RESPONSE = [
+    {
+        "company_name": "Google",
+        "ad_domain_url": "google.com",
+        "publisher_id": "pub-1234567890123456",
+        "relationship": "DIRECT",
+        "developer_domain_crawled_at": "2026-03-14T00:00:00",
+    }
+]
+APP_ADSTXT_RESELLER_EXAMPLE_RESPONSE = [
+    {
+        "company_name": "Example Ads",
+        "ad_domain_url": "example.com",
+        "publisher_id": "pub-9876543210987654",
+        "relationship": "RESELLER",
+        "developer_domain_crawled_at": "2026-03-14T00:00:00",
     }
 ]
 COMPANIES_INDEX_EXAMPLE_RESPONSE = [
@@ -241,6 +290,36 @@ CTV_APP_RANKS_EXAMPLE_RESPONSE = {
         }
     ],
 }
+RANKING_COLLECTIONS_EXAMPLE_RESPONSE = [
+    {
+        "store": "google-play",
+        "store_name": "Google Play",
+        "collection": "TOP_FREE",
+    }
+]
+RANKING_CATEGORIES_EXAMPLE_RESPONSE = [
+    {
+        "store": "google-play",
+        "store_name": "Google Play",
+        "category": "GAME_STRATEGY",
+    }
+]
+RANKS_EXAMPLE_RESPONSE = {
+    "ranks": [
+        {
+            "crawled_date": "2026-11-15",
+            "rank": 1,
+            "name": "Example Strategy Game",
+            "store_id": "com.example.strategy",
+            "store": "Google Play",
+            "installs": 1_000_000,
+            "rating_count": 25000,
+            "rating": 4.7,
+            "installs_week": 12000,
+            "installs_month": 47000,
+        }
+    ]
+}
 APP_VERSION_TIMELINE_EXAMPLE_STORE_ID = "dev.thirdgate.appgoblin"
 APP_VERSION_TIMELINE_EXAMPLE_RESPONSE = [
     {
@@ -409,6 +488,50 @@ V1_OPERATION_DOCS = {
             ),
         }
     },
+    "/api/v1/apps/{store_id}/ranks/history": {
+        "get": {
+            "summary": "/apps/{store_id}/ranks/history",
+            "description": (
+                "Endpoint: `GET /api/v1/apps/{store_id}/ranks/history`\n\n"
+                "Returns chart-ready app rankings for the past 90 days. Use the "
+                "`country` query parameter to select a two-letter country code "
+                "(defaults to `US`)."
+            ),
+        }
+    },
+    "/api/v1/apps/{store_id}/adstxt/overview": {
+        "get": {
+            "summary": "/apps/{store_id}/adstxt/overview",
+            "description": (
+                "Endpoint: `GET /api/v1/apps/{store_id}/adstxt/overview`\n\n"
+                "Returns summarized app-ads.txt records from the app developer's "
+                "domain, grouped into DIRECT and RESELLER entries. These records "
+                "are associated with the developer domain and are not app-specific."
+            ),
+        }
+    },
+    "/api/v1/apps/{store_id}/adstxt/direct": {
+        "get": {
+            "summary": "/apps/{store_id}/adstxt/direct",
+            "description": (
+                "Endpoint: `GET /api/v1/apps/{store_id}/adstxt/direct`\n\n"
+                "Returns full app-ads.txt records from the app developer's domain, "
+                "limited to DIRECT entries. These records are associated with the "
+                "developer domain and are not app-specific."
+            ),
+        }
+    },
+    "/api/v1/apps/{store_id}/adstxt/reseller": {
+        "get": {
+            "summary": "/apps/{store_id}/adstxt/reseller",
+            "description": (
+                "Endpoint: `GET /api/v1/apps/{store_id}/adstxt/reseller`\n\n"
+                "Returns full app-ads.txt records from the app developer's domain, "
+                "limited to RESELLER entries. These records are associated with the "
+                "developer domain and are not app-specific."
+            ),
+        }
+    },
     "/api/v1/apps/{store_id}/mapped-sdks": {
         "get": {
             "summary": "[Paid] /apps/{store_id}/mapped-sdks",
@@ -479,10 +602,43 @@ V1_OPERATION_DOCS = {
             "description": (
                 "Endpoint: `GET /api/v1/rankings/ctv/{store}`\n\n"
                 "Returns the top 50 connected-TV (CTV) supported apps for a store, "
-                "ranked by estimated monthly installs. Use `store=1` for Google Play "
-                "or `store=2` for the Apple App Store. Rows include the app's rank, "
+                "ranked by estimated monthly installs. Use `google-play` or "
+                "`apple-app-store` for the store path segment. Rows include the app's rank, "
                 "category, developer, rating, total installs, monthly installs, "
                 "estimated monthly revenue, and 14-day installs growth score."
+            ),
+        }
+    },
+    "/api/v1/rankings/collections": {
+        "get": {
+            "summary": "/rankings/collections",
+            "description": (
+                "Endpoint: `GET /api/v1/rankings/collections`\n\n"
+                "Lists the ranking collections available for each app store, "
+                "using public store slugs and collection names."
+            ),
+        }
+    },
+    "/api/v1/rankings/categories": {
+        "get": {
+            "summary": "/rankings/categories",
+            "description": (
+                "Endpoint: `GET /api/v1/rankings/categories`\n\n"
+                "Lists the ranking categories available for each app store, "
+                "using public store slugs and category names."
+            ),
+        }
+    },
+    "/api/v1/rankings/{store}/{collection}/{category}": {
+        "get": {
+            "summary": "/rankings/{store}/{collection}/{category}",
+            "description": (
+                "Endpoint: `GET /api/v1/rankings/{store}/{collection}/{category}`\n\n"
+                "Returns the latest ranked apps for a collection and category. "
+                "Use public store slugs (`google-play` or `apple-app-store`), "
+                "collection names such as `TOP_FREE`, and category names such as "
+                "`GAME_STRATEGY`. The `country` query parameter defaults to `US`. "
+                "The response contains up to 200 apps."
             ),
         }
     },
@@ -726,6 +882,87 @@ def _set_app_metrics_history_examples(schema: dict[str, Any]) -> None:
             }
 
 
+def _set_app_rank_history_example(schema: dict[str, Any]) -> None:
+    """Attach an example response to the public app rank-history endpoint."""
+    path_item = schema.get("paths", {}).get("/api/v1/apps/{store_id}/ranks/history")
+    if not isinstance(path_item, dict):
+        return
+
+    operation = path_item.get("get")
+    if not isinstance(operation, dict):
+        return
+
+    for parameter in operation.get("parameters", []):
+        if parameter.get("name") == "store_id":
+            parameter["example"] = APP_RANK_HISTORY_EXAMPLE_STORE_ID
+        elif parameter.get("name") == "country":
+            parameter["example"] = "US"
+
+    content = (
+        operation.get("responses", {})
+        .get("200", {})
+        .get("content", {})
+        .get("application/json")
+    )
+    if isinstance(content, dict):
+        content["examples"] = {
+            "app_rank_history": {
+                "summary": "Recent US app ranking history",
+                "value": APP_RANK_HISTORY_EXAMPLE_RESPONSE,
+            }
+        }
+
+
+def _set_app_adstxt_examples(schema: dict[str, Any]) -> None:
+    """Attach examples to the public app-ads.txt endpoints."""
+    examples = (
+        (
+            "/api/v1/apps/{store_id}/adstxt/overview",
+            "app_adstxt_overview",
+            "Summarized app-ads.txt entries",
+            APP_ADSTXT_OVERVIEW_EXAMPLE_RESPONSE,
+        ),
+        (
+            "/api/v1/apps/{store_id}/adstxt/direct",
+            "app_adstxt_direct",
+            "Full DIRECT app-ads.txt entries",
+            APP_ADSTXT_DIRECT_EXAMPLE_RESPONSE,
+        ),
+        (
+            "/api/v1/apps/{store_id}/adstxt/reseller",
+            "app_adstxt_reseller",
+            "Full RESELLER app-ads.txt entries",
+            APP_ADSTXT_RESELLER_EXAMPLE_RESPONSE,
+        ),
+    )
+    for path, name, summary, value in examples:
+        path_item = schema.get("paths", {}).get(path)
+        if not isinstance(path_item, dict):
+            continue
+
+        operation = path_item.get("get")
+        if not isinstance(operation, dict):
+            continue
+
+        for parameter in operation.get("parameters", []):
+            if parameter.get("name") == "store_id":
+                parameter["example"] = APP_BASICS_EXAMPLE_STORE_ID
+
+        content = (
+            operation.get("responses", {})
+            .get("200", {})
+            .get("content", {})
+            .get("application/json")
+        )
+        if isinstance(content, dict):
+            content["examples"] = {
+                name: {
+                    "summary": summary,
+                    "value": value,
+                }
+            }
+
+
 def _set_company_overview_example(schema: dict[str, Any]) -> None:
     """Attach a concrete example to the public company detail endpoint."""
     path_item = schema.get("paths", {}).get("/api/v1/companies/{company_domain}")
@@ -888,7 +1125,7 @@ def _set_ctv_app_ranks_example(schema: dict[str, Any]) -> None:
 
     for parameter in get_operation.get("parameters", []):
         if parameter.get("name") == "store":
-            parameter["example"] = 1
+            parameter["example"] = "google-play"
 
     responses = get_operation.get("responses", {})
     response_200 = responses.get("200")
@@ -906,6 +1143,76 @@ def _set_ctv_app_ranks_example(schema: dict[str, Any]) -> None:
             "value": CTV_APP_RANKS_EXAMPLE_RESPONSE,
         }
     }
+
+
+def _set_rankings_examples(schema: dict[str, Any]) -> None:
+    """Attach examples to ranking directory and rank-list endpoints."""
+    examples = (
+        (
+            "/api/v1/rankings/collections",
+            "ranking_collections",
+            "Available Google Play ranking collections",
+            RANKING_COLLECTIONS_EXAMPLE_RESPONSE,
+        ),
+        (
+            "/api/v1/rankings/categories",
+            "ranking_categories",
+            "Available Google Play ranking categories",
+            RANKING_CATEGORIES_EXAMPLE_RESPONSE,
+        ),
+    )
+    for path, name, summary, value in examples:
+        path_item = schema.get("paths", {}).get(path)
+        if not isinstance(path_item, dict):
+            continue
+        operation = path_item.get("get")
+        if not isinstance(operation, dict):
+            continue
+        content = (
+            operation.get("responses", {})
+            .get("200", {})
+            .get("content", {})
+            .get("application/json")
+        )
+        if isinstance(content, dict):
+            content["examples"] = {
+                name: {
+                    "summary": summary,
+                    "value": value,
+                }
+            }
+
+    rank_path = schema.get("paths", {}).get(
+        "/api/v1/rankings/{store}/{collection}/{category}"
+    )
+    if not isinstance(rank_path, dict):
+        return
+    operation = rank_path.get("get")
+    if not isinstance(operation, dict):
+        return
+    for parameter in operation.get("parameters", []):
+        if parameter.get("name") == "collection":
+            parameter["example"] = "TOP_FREE"
+        elif parameter.get("name") == "category":
+            parameter["example"] = "GAME_STRATEGY"
+        elif parameter.get("name") == "store":
+            parameter["example"] = "google-play"
+        elif parameter.get("name") == "country":
+            parameter["example"] = "US"
+
+    content = (
+        operation.get("responses", {})
+        .get("200", {})
+        .get("content", {})
+        .get("application/json")
+    )
+    if isinstance(content, dict):
+        content["examples"] = {
+            "app_ranks": {
+                "summary": "Top Google Play apps in a category",
+                "value": RANKS_EXAMPLE_RESPONSE,
+            }
+        }
 
 
 def _set_advertiser_creatives_example(schema: dict[str, Any]) -> None:
@@ -1026,11 +1333,14 @@ def build_v1_openapi_schema(request: Request) -> dict[str, Any]:
     _set_app_basics_example(schema)
     _set_app_sdk_history_examples(schema)
     _set_app_metrics_history_examples(schema)
+    _set_app_rank_history_example(schema)
+    _set_app_adstxt_examples(schema)
     _set_company_overview_example(schema)
     _set_company_app_changes_examples(schema)
     _set_keyword_metrics_example(schema)
     _set_keyword_ranks_example(schema)
     _set_ctv_app_ranks_example(schema)
+    _set_rankings_examples(schema)
     _set_advertiser_creatives_example(schema)
     return schema
 

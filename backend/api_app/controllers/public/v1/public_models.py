@@ -238,6 +238,14 @@ class PublicAppMappedSdks:
 
 
 @dataclass
+class PublicAppAdsTxtEntries:
+    """App-ads.txt records grouped by relationship."""
+
+    direct_entries: list[dict] = field(default_factory=list)
+    reseller_entries: list[dict] = field(default_factory=list)
+
+
+@dataclass
 class PublicAppSdkDetails:
     """Detailed SDK and manifest findings for a single app.
 
@@ -308,6 +316,24 @@ class PublicKeywordRanks:
     country: str
     android: list[PublicKeywordRankedApp] = field(default_factory=list)
     ios: list[PublicKeywordRankedApp] = field(default_factory=list)
+
+
+@dataclass
+class PublicRankCollection:
+    """A store's ranking collection for the public rankings directory."""
+
+    store: str
+    store_name: str
+    collection: str
+
+
+@dataclass
+class PublicRankCategory:
+    """A store's ranking category for the public rankings directory."""
+
+    store: str
+    store_name: str
+    category: str
 
 
 @dataclass

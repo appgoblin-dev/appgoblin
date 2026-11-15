@@ -35,6 +35,7 @@ from api_app.controllers.public.v1.docs import V1DocsController
 from api_app.guards import _CachedKey
 from api_app.models import CategoryCompanyStats
 from app import RateLimitMiddleware
+from dbcon.queries import get_single_apps_adstxt_by_relationship
 
 
 @dataclass
@@ -206,6 +207,30 @@ def _patch_ranks(rows: list[dict]):
     )
 
 
+def _patch_app_rank_history(rows: list[dict]):
+    ranks_df = pd.DataFrame(rows)
+    return patch(
+        "api_app.controllers.public.v1.apps.get_ranks_for_app",
+        return_value=ranks_df,
+    )
+
+
+def _patch_app_adstxt_overview(rows: list[dict]):
+    adstxt_df = pd.DataFrame(rows)
+    return patch(
+        "api_app.controllers.public.v1.apps.get_app_adstxt_overview",
+        return_value=adstxt_df,
+    )
+
+
+def _patch_app_adstxt_by_relationship(rows: list[dict]):
+    adstxt_df = pd.DataFrame(rows)
+    return patch(
+        "api_app.controllers.public.v1.apps.get_single_apps_adstxt_by_relationship",
+        return_value=adstxt_df,
+    )
+
+
 def _patch_mapped_sdks(rows: list[dict]):
     mapped_sdks_df = pd.DataFrame(rows)
     return patch(
@@ -274,6 +299,22 @@ def _patch_ctv_app_ranks(rows: list[dict]):
     ranks_df = pd.DataFrame(rows)
     return patch(
         "api_app.controllers.public.v1.rankings.get_ctv_app_ranks",
+        return_value=ranks_df,
+    )
+
+
+def _patch_ranking_directory(rows: list[dict]):
+    directory_df = pd.DataFrame(rows)
+    return patch(
+        "api_app.controllers.public.v1.rankings.get_store_collection_category_map",
+        return_value=directory_df,
+    )
+
+
+def _patch_most_recent_top_ranks(rows: list[dict]):
+    ranks_df = pd.DataFrame(rows)
+    return patch(
+        "api_app.controllers.public.v1.rankings.get_most_recent_top_ranks",
         return_value=ranks_df,
     )
 
@@ -1784,6 +1825,59 @@ class TestV1Apps:
         assert resp.status_code == 200
         assert resp.json() == []
 
+    def test_app_rank_history_matches_private_response_and_country_filter(self):
+        app = _make_test_app()
+        rank_rows = [
+            {
+                "country": "GB",
+                "crawled_date": "2026-03-08",
+                "rank": 8,
+                "collection": "TOP_FREE",
+                "category": "GAME_STRATEGY",
+            },
+            {
+                "country": "GB",
+                "crawled_date": "2026-03-01",
+                "rank": 12,
+                "collection": "TOP_FREE",
+                "category": "GAME_STRATEGY",
+            },
+        ]
+        with (
+            _patch_key_found("free"),
+            _patch_app_rank_history(rank_rows) as get_app_rank_history,
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/apps/com.example.app/ranks/history?country=GB",
+                headers={"X-API-Key": "ag_app_rank_history"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == {
+            "history": [
+                {"crawled_date": "2026-03-01", "TOP_FREE: GAME_STRATEGY": 12},
+                {"crawled_date": "2026-03-08", "TOP_FREE: GAME_STRATEGY": 8},
+            ]
+        }
+        assert get_app_rank_history.call_args.kwargs["country"] == "GB"
+        assert get_app_rank_history.call_args.kwargs["days"] == 90
+
+    def test_app_rank_history_returns_empty_shape_when_missing(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            _patch_app_rank_history([]),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/apps/com.example.app/ranks/history",
+                headers={"X-API-Key": "ag_app_rank_history_empty"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == {"history": {}}
+
     def test_company_list_logs_umami_page_view_with_user_id(self):
         app = _make_test_app()
 
@@ -1960,11 +2054,139 @@ class TestV1Apps:
         }
 
 
+class TestV1AppAdsTxt:
+    def test_relationship_query_uses_separate_filtered_query(self):
+        state = MagicMock()
+        with patch("dbcon.queries.pd.read_sql", return_value=pd.DataFrame()) as read_sql:
+            result = get_single_apps_adstxt_by_relationship(
+                state, "com.example.app", "direct"
+            )
+
+        assert result.empty
+        query = str(read_sql.call_args.args[0])
+        assert "UPPER(aae.relationship) = :relationship" in query
+        assert read_sql.call_args.kwargs["params"] == {
+            "store_id": "com.example.app",
+            "relationship": "DIRECT",
+        }
+
+    def test_app_adstxt_endpoints_require_api_key(self):
+        app = _make_test_app()
+        with TestClient(app=app, raise_server_exceptions=False) as client:
+            for path in (
+                "/api/v1/apps/com.example.app/adstxt/overview",
+                "/api/v1/apps/com.example.app/adstxt/direct",
+                "/api/v1/apps/com.example.app/adstxt/reseller",
+            ):
+                resp = client.get(path)
+                assert resp.status_code == 401
+
+    def test_app_adstxt_overview_groups_direct_and_reseller_entries(self):
+        app = _make_test_app()
+        rows = [
+            {
+                "company_domain": "google.com",
+                "company_name": "Google",
+                "relationship": "direct",
+                "count": 38,
+            },
+            {
+                "company_domain": "example.com",
+                "company_name": "Example Ads",
+                "relationship": "RESELLER",
+                "count": 12,
+            },
+        ]
+        with (
+            _patch_key_found("free"),
+            _patch_app_adstxt_overview(rows) as get_overview,
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/apps/com.example.app/adstxt/overview",
+                headers={"X-API-Key": "ag_adstxt_overview"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == {
+            "direct_entries": [rows[0]],
+            "reseller_entries": [rows[1]],
+        }
+        assert get_overview.call_args.args[1] == "com.example.app"
+
+    @pytest.mark.parametrize(
+        ("relationship", "path"),
+        [
+            ("DIRECT", "/api/v1/apps/com.example.app/adstxt/direct"),
+            ("RESELLER", "/api/v1/apps/com.example.app/adstxt/reseller"),
+        ],
+    )
+    def test_app_adstxt_returns_full_records_for_relationship(self, relationship, path):
+        app = _make_test_app()
+        rows = [
+            {
+                "company_name": "Google",
+                "ad_domain_url": "google.com",
+                "publisher_id": "pub-1234567890123456",
+                "relationship": relationship,
+                "developer_domain_crawled_at": "2026-03-14T00:00:00",
+            }
+        ]
+        with (
+            _patch_key_found("free"),
+            _patch_app_adstxt_by_relationship(rows) as get_adstxt,
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                path,
+                headers={"X-API-Key": "ag_adstxt_export"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == rows
+        assert get_adstxt.call_args.args[1] == "com.example.app"
+        assert get_adstxt.call_args.args[2] == relationship
+
+    @pytest.mark.parametrize(
+        ("path", "patch_data"),
+        [
+            (
+                "/api/v1/apps/com.example.app/adstxt/overview",
+                _patch_app_adstxt_overview,
+            ),
+            (
+                "/api/v1/apps/com.example.app/adstxt/direct",
+                _patch_app_adstxt_by_relationship,
+            ),
+            (
+                "/api/v1/apps/com.example.app/adstxt/reseller",
+                _patch_app_adstxt_by_relationship,
+            ),
+        ],
+    )
+    def test_app_adstxt_returns_empty_groups_when_missing(self, path, patch_data):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            patch_data([]),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(path, headers={"X-API-Key": "ag_adstxt_empty"})
+
+        assert resp.status_code == 200
+        expected = (
+            {"direct_entries": [], "reseller_entries": []}
+            if path.endswith("/overview")
+            else []
+        )
+        assert resp.json() == expected
+
+
 class TestV1CtvAppRanks:
     def test_ctv_app_ranks_requires_api_key(self):
         app = _make_test_app()
         with TestClient(app=app, raise_server_exceptions=False) as client:
-            resp = client.get("/api/v1/rankings/ctv/1")
+            resp = client.get("/api/v1/rankings/ctv/google-play")
 
         assert resp.status_code == 401
 
@@ -1991,15 +2213,16 @@ class TestV1CtvAppRanks:
         ]
         with (
             _patch_key_found("free"),
-            _patch_ctv_app_ranks(rank_rows),
+            _patch_ctv_app_ranks(rank_rows) as get_ctv_app_ranks,
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
             resp = client.get(
-                "/api/v1/rankings/ctv/1",
+                "/api/v1/rankings/ctv/google-play",
                 headers={"X-API-Key": "ag_ctvranks"},
             )
 
         assert resp.status_code == 200
+        assert get_ctv_app_ranks.call_args.kwargs["store"] == 1
         payload = resp.json()
         assert payload["store"] == "Google Play"
         assert payload["country"] == "US"
@@ -2032,7 +2255,7 @@ class TestV1CtvAppRanks:
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
             resp = client.get(
-                "/api/v1/rankings/ctv/2",
+                "/api/v1/rankings/ctv/apple-app-store",
                 headers={"X-API-Key": "ag_ctvranksempty"},
             )
 
@@ -2050,7 +2273,7 @@ class TestV1CtvAppRanks:
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
             resp = client.get(
-                "/api/v1/rankings/ctv/9",
+                "/api/v1/rankings/ctv/1",
                 headers={"X-API-Key": "ag_ctvranksbadstore"},
             )
 
@@ -2066,7 +2289,7 @@ class TestV1CtvAppRanks:
             TestClient(app=app, raise_server_exceptions=False) as client,
         ):
             resp = client.get(
-                "/api/v1/rankings/ctv/1",
+                "/api/v1/rankings/ctv/google-play",
                 headers={
                     "X-API-Key": "ag_ctvranksumami",
                     "X-Forwarded-For": "203.0.113.10",
@@ -2075,13 +2298,246 @@ class TestV1CtvAppRanks:
 
         assert resp.status_code == 200
         log_umami_page.assert_called_once_with(
-            url="/api/v1/rankings/ctv/1",
+            url="/api/v1/rankings/ctv/google-play",
             ip="203.0.113.10",
             user_id=1,
             page_title=None,
             hostname=PUBLIC_API_HOSTNAME,
             referrer=None,
         )
+
+
+class TestV1Rankings:
+    def test_ranking_directory_endpoints_require_api_key(self):
+        app = _make_test_app()
+        with TestClient(app=app, raise_server_exceptions=False) as client:
+            for path in (
+                "/api/v1/rankings/collections",
+                "/api/v1/rankings/categories",
+                "/api/v1/rankings/google-play/TOP_FREE/GAME_ACTION",
+            ):
+                resp = client.get(path)
+                assert resp.status_code == 401
+
+    def test_ranking_collections_are_unique_per_store(self):
+        app = _make_test_app()
+        directory_rows = [
+            {
+                "store_id": 1,
+                "store_name": "Google Play",
+                "collection_id": 10,
+                "collection_name": "TOP_FREE",
+                "category_id": 3,
+                "category_name": "GAME_ACTION",
+            },
+            {
+                "store_id": 1,
+                "store_name": "Google Play",
+                "collection_id": 10,
+                "collection_name": "TOP_FREE",
+                "category_id": 4,
+                "category_name": "GAME_ADVENTURE",
+            },
+            {
+                "store_id": 1,
+                "store_name": "Google Play",
+                "collection_id": 11,
+                "collection_name": "TOP_PAID",
+                "category_id": 3,
+                "category_name": "GAME_ACTION",
+            },
+            {
+                "store_id": 2,
+                "store_name": "Apple App Store",
+                "collection_id": 12,
+                "collection_name": "TOP_FREE",
+                "category_id": 20,
+                "category_name": "GAMES",
+            },
+        ]
+        with (
+            _patch_key_found("free"),
+            _patch_ranking_directory(directory_rows),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/rankings/collections",
+                headers={"X-API-Key": "ag_rank_collections"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == [
+            {
+                "store": "google-play",
+                "store_name": "Google Play",
+                "collection": "TOP_FREE",
+            },
+            {
+                "store": "google-play",
+                "store_name": "Google Play",
+                "collection": "TOP_PAID",
+            },
+            {
+                "store": "apple-app-store",
+                "store_name": "Apple App Store",
+                "collection": "TOP_FREE",
+            },
+        ]
+
+    def test_ranking_categories_are_unique_per_store(self):
+        app = _make_test_app()
+        directory_rows = [
+            {
+                "store_id": 1,
+                "store_name": "Google Play",
+                "collection_id": 10,
+                "collection_name": "TOP_FREE",
+                "category_id": 3,
+                "category_name": "GAME_ACTION",
+            },
+            {
+                "store_id": 1,
+                "store_name": "Google Play",
+                "collection_id": 11,
+                "collection_name": "TOP_PAID",
+                "category_id": 3,
+                "category_name": "GAME_ACTION",
+            },
+            {
+                "store_id": 2,
+                "store_name": "Apple App Store",
+                "collection_id": 12,
+                "collection_name": "TOP_FREE",
+                "category_id": 20,
+                "category_name": "GAMES",
+            },
+        ]
+        with (
+            _patch_key_found("free"),
+            _patch_ranking_directory(directory_rows),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/rankings/categories",
+                headers={"X-API-Key": "ag_rank_categories"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == [
+            {
+                "store": "google-play",
+                "store_name": "Google Play",
+                "category": "GAME_ACTION",
+            },
+            {
+                "store": "apple-app-store",
+                "store_name": "Apple App Store",
+                "category": "GAMES",
+            },
+        ]
+
+    def test_ranks_for_category_returns_latest_rank_rows(self):
+        app = _make_test_app()
+        rank_rows = [
+            {
+                "crawled_date": pd.Timestamp("2026-11-15"),
+                "rank": 1,
+                "name": "Example Game",
+                "store_id": "com.example.game",
+                "store": "Google Play",
+                "installs": 1_000_000,
+                "developer_name": "Private Developer",
+                "app_icon_url": "private-icon.png",
+                "ratings_sum_1w": 42,
+                "best_rank_d30": 3,
+                "installs_sum_1w": 12000,
+                "installs_sum_4w": 47000,
+            }
+        ]
+        with (
+            _patch_key_found("free"),
+            _patch_ranking_directory(
+                [
+                    {
+                        "store_id": 1,
+                        "store_name": "Google Play",
+                        "collection_id": 10,
+                        "collection_name": "TOP_FREE",
+                        "category_id": 3,
+                        "category_name": "GAME_ACTION",
+                    }
+                ]
+            ),
+            _patch_most_recent_top_ranks(rank_rows) as get_ranks,
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/rankings/google-play/TOP_FREE/GAME_ACTION?country=GB",
+                headers={"X-API-Key": "ag_rank_list"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == {
+            "ranks": [
+                {
+                    "crawled_date": "2026-11-15",
+                    "rank": 1,
+                    "name": "Example Game",
+                    "store_id": "com.example.game",
+                    "store": "Google Play",
+                    "installs": 1_000_000,
+                    "installs_week": 12000,
+                    "installs_month": 47000,
+                }
+            ]
+        }
+        assert get_ranks.call_args.kwargs == {
+            "collection_id": 10,
+            "category_id": 3,
+            "country": "GB",
+            "limit": 200,
+        }
+
+    def test_ranks_for_category_returns_empty_list_when_missing(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            _patch_ranking_directory(
+                [
+                    {
+                        "store_id": 1,
+                        "store_name": "Google Play",
+                        "collection_id": 10,
+                        "collection_name": "TOP_FREE",
+                        "category_id": 3,
+                        "category_name": "GAME_ACTION",
+                    }
+                ]
+            ),
+            _patch_most_recent_top_ranks([]),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/rankings/google-play/TOP_FREE/GAME_ACTION",
+                headers={"X-API-Key": "ag_rank_list_empty"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json() == {"ranks": []}
+
+    def test_ranks_for_category_rejects_unknown_public_names(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            _patch_ranking_directory([]),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/rankings/google-play/UNKNOWN/GAME_ACTION",
+                headers={"X-API-Key": "ag_rank_list_unknown"},
+            )
+
+        assert resp.status_code == 404
 
 
 class TestV1Keywords:
@@ -2409,6 +2865,10 @@ class TestV1Docs:
             "/api/v1/companies/search",
             "/api/v1/apps/{store_id}",
             "/api/v1/apps/{store_id}/ranks",
+            "/api/v1/apps/{store_id}/ranks/history",
+            "/api/v1/apps/{store_id}/adstxt/overview",
+            "/api/v1/apps/{store_id}/adstxt/direct",
+            "/api/v1/apps/{store_id}/adstxt/reseller",
             "/api/v1/apps/{store_id}/mapped-sdks",
             "/api/v1/apps/{store_id}/sdks",
             "/api/v1/apps/{store_id}/versions",
@@ -2422,6 +2882,9 @@ class TestV1Docs:
             "/api/v1/companies/{company_domain}/app-changes",
             "/api/v1/keywords/{keyword}",
             "/api/v1/keywords/{keyword}/ranks",
+            "/api/v1/rankings/collections",
+            "/api/v1/rankings/categories",
+            "/api/v1/rankings/{store}/{collection}/{category}",
             "/api/v1/rankings/ctv/{store}",
         }
 
@@ -2432,6 +2895,7 @@ class TestV1Docs:
                 v1_public_models.CompanyDatasets,
                 v1_public_models.PublicAppBasics,
                 v1_public_models.PublicAppBestRank,
+                v1_public_models.PublicAppAdsTxtEntries,
                 v1_public_models.PublicAppSdkDetails,
                 v1_public_models.PublicAppSdkHistory,
                 v1_public_models.PublicCategoryCompanyStats,
@@ -2445,6 +2909,8 @@ class TestV1Docs:
                 v1_public_models.PublicKeywordPlatformMetrics,
                 v1_public_models.PublicKeywordRankedApp,
                 v1_public_models.PublicKeywordRanks,
+                v1_public_models.PublicRankCategory,
+                v1_public_models.PublicRankCollection,
             )
         }
         actual_schema_fields = {
@@ -2484,6 +2950,70 @@ class TestV1Docs:
         assert data["paths"]
         assert all(path.startswith("/api/v1/") for path in data["paths"])
         assert "PublicAppSdkOverview" not in data["components"]["schemas"]
+        overview_example = data["paths"][
+            "/api/v1/apps/{store_id}/adstxt/overview"
+        ]["get"]["responses"]["200"]["content"][
+            "application/json"
+        ]["examples"]["app_adstxt_overview"]["value"]
+        assert overview_example["direct_entries"]
+        assert overview_example["reseller_entries"]
+        for path, example_name, relationship in (
+            (
+                "/api/v1/apps/{store_id}/adstxt/direct",
+                "app_adstxt_direct",
+                "DIRECT",
+            ),
+            (
+                "/api/v1/apps/{store_id}/adstxt/reseller",
+                "app_adstxt_reseller",
+                "RESELLER",
+            ),
+        ):
+            example = data["paths"][path]["get"]["responses"]["200"]["content"][
+                "application/json"
+            ]["examples"][example_name]["value"]
+            assert example[0]["relationship"] == relationship
+        for path, example_name in (
+            ("/api/v1/rankings/collections", "ranking_collections"),
+            ("/api/v1/rankings/categories", "ranking_categories"),
+        ):
+            examples = data["paths"][path]["get"]["responses"]["200"]["content"][
+                "application/json"
+            ]["examples"]
+            assert examples[example_name]["value"]
+            assert "store_id" not in examples[example_name]["value"][0]
+            assert "collection_id" not in examples[example_name]["value"][0]
+            assert "category_id" not in examples[example_name]["value"][0]
+        ranks_operation = data["paths"][
+            "/api/v1/rankings/{store}/{collection}/{category}"
+        ]["get"]
+        rank_example = ranks_operation["responses"]["200"]["content"][
+            "application/json"
+        ]["examples"]["app_ranks"]["value"]["ranks"][0]
+        assert rank_example["crawled_date"] == "2026-11-15"
+        assert rank_example["installs_week"] == 12000
+        assert rank_example["installs_month"] == 47000
+        assert {
+            "developer_name",
+            "app_icon_url",
+            "ratings_sum_1w",
+        }.isdisjoint(rank_example)
+        assert {
+            parameter["name"]: parameter["example"]
+            for parameter in ranks_operation["parameters"]
+        } == {
+            "store": "google-play",
+            "collection": "TOP_FREE",
+            "category": "GAME_STRATEGY",
+            "country": "US",
+        }
+        ctv_operation = data["paths"]["/api/v1/rankings/ctv/{store}"]["get"]
+        ctv_store_parameter = next(
+            parameter
+            for parameter in ctv_operation["parameters"]
+            if parameter["name"] == "store"
+        )
+        assert ctv_store_parameter["example"] == "google-play"
         versions_operation = data["paths"]["/api/v1/apps/{store_id}/versions"]["get"]
         assert versions_operation["summary"] == "[Paid] /apps/{store_id}/versions"
         assert "B2B SDK and B2B Premium tiers only" in versions_operation["description"]
@@ -2549,6 +3079,23 @@ class TestV1Docs:
             "for the last 90 days."
         )
         assert "/api/v1/apps/{store_id}/ranks/overview" not in data["paths"]
+        app_rank_history_operation = data["paths"][
+            "/api/v1/apps/{store_id}/ranks/history"
+        ]["get"]
+        assert app_rank_history_operation["summary"] == (
+            "/apps/{store_id}/ranks/history"
+        )
+        country_parameter = next(
+            parameter
+            for parameter in app_rank_history_operation["parameters"]
+            if parameter["name"] == "country"
+        )
+        assert country_parameter["example"] == "US"
+        assert app_rank_history_operation["responses"]["200"]["content"][
+            "application/json"
+        ]["examples"]["app_rank_history"]["value"]["history"][0]["crawled_date"] == (
+            "2026-03-01"
+        )
         company_overview_operation = data["paths"][
             "/api/v1/companies/{company_domain}"
         ]["get"]

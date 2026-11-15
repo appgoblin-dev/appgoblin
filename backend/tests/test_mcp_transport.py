@@ -71,9 +71,11 @@ def test_app_metrics_history_tools_are_registered_for_all_tiers() -> None:
     for name in (
         "get_app_global_metrics_history",
         "get_app_country_metrics_history",
+        "get_app_rank_history",
     ):
         assert tools[name]["parameters"]["store_id"]["required"]
         assert "paid-tier" not in tools[name]["description"]
+    assert tools["get_app_rank_history"]["parameters"]["country"]["default"] == "US"
 
 
 def test_app_metrics_history_tools_return_shared_payloads(
@@ -92,12 +94,22 @@ def test_app_metrics_history_tools_return_shared_payloads(
         "_build_app_country_metrics_history_payload",
         lambda state, store_id: [{"store_id": store_id, "scope": "country"}],
     )
+    monkeypatch.setattr(
+        apps,
+        "_build_app_rank_history_payload",
+        lambda state, store_id, country="US": {
+            "history": [{"store_id": store_id, "country": country}]
+        },
+    )
 
     global_result = asyncio.run(
         apps.get_app_global_metrics_history("com.example.app", object())
     )
     country_result = asyncio.run(
         apps.get_app_country_metrics_history("com.example.app", object())
+    )
+    rank_result = asyncio.run(
+        apps.get_app_rank_history("com.example.app", object(), country="GB")
     )
 
     assert json.loads(global_result) == [
@@ -106,6 +118,9 @@ def test_app_metrics_history_tools_return_shared_payloads(
     assert json.loads(country_result) == [
         {"store_id": "com.example.app", "scope": "country"}
     ]
+    assert json.loads(rank_result) == {
+        "history": [{"store_id": "com.example.app", "country": "GB"}]
+    }
 
 
 def test_company_search_tool_paid_access(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -412,6 +412,26 @@ def get_search_results(state: State, search_term: str) -> AppGroupByStore:
     return app_group
 
 
+def create_app_ranks_history_dict(app_ranks: pd.DataFrame, country: str) -> list[dict]:
+    """Create the chart-ready rank history for one country."""
+    app_ranks["rank_group"] = app_ranks["collection"] + ": " + app_ranks["category"]
+    app_ranks["crawled_date"] = pd.to_datetime(app_ranks["crawled_date"]).dt.strftime(
+        "%Y-%m-%d"
+    )
+    ranks_by_date = app_ranks[app_ranks["country"] == country][
+        ["crawled_date", "rank", "rank_group"]
+    ].sort_values("crawled_date")
+    return (
+        ranks_by_date.pivot_table(
+            columns=["rank_group"],
+            index=["crawled_date"],
+            values="rank",
+        )
+        .reset_index()
+        .to_dict(orient="records")
+    )
+
+
 def create_app_country_plot_dict(app_hist: pd.DataFrame) -> pd.DataFrame:
     """Create plot dicts for the app country history with linear interpolation.
 
@@ -1104,21 +1124,7 @@ class AppController(Controller):
         if df.empty:
             logger.info(f"No ranks found for {store_id!r}")
             return AppRank(history={})
-        df["rank_group"] = df["collection"] + ": " + df["category"]
-        df["crawled_date"] = pd.to_datetime(df["crawled_date"]).dt.strftime("%Y-%m-%d")
-        pdf = df[df["country"] == country][
-            ["crawled_date", "rank", "rank_group"]
-        ].sort_values("crawled_date")
-        # This format is for echarts, expects data series as columns
-        hist_dict = (
-            pdf.pivot_table(
-                columns=["rank_group"],
-                index=["crawled_date"],
-                values="rank",
-            )
-            .reset_index()
-            .to_dict(orient="records")
-        )
+        hist_dict = create_app_ranks_history_dict(df, country)
         rank_dict = AppRank(history=hist_dict)
         duration = round((time.perf_counter() * 1000 - start), 2)
         logger.info(f"{self.path}/{store_id}/ranks took {duration}ms")

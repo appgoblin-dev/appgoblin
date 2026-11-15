@@ -1,4 +1,5 @@
 SELECT
+    crawled_date,
     rank,
     name,
     store_id,
