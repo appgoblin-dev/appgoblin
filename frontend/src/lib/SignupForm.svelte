@@ -20,6 +20,7 @@
 
 <h2 class="text-2xl font-bold">Create an account</h2>
 <p>Name must be at least 2 characters long and password must be at least 8 characters long.</p>
+
 <form class="space-y-1" method="post" use:enhance>
 	{#if redirectTo}
 		<input type="hidden" name="redirectTo" value={redirectTo} />
@@ -75,3 +76,8 @@
 <a class="btn preset-tonal" href="/auth/login?redirectTo={encodeURIComponent(redirectTo)}"
 	>Already have an account? Sign in</a
 >
+
+<p>
+	Trouble signing up? Email
+	<a class="underline" href="mailto:contact@appgoblin.info">contact@appgoblin.info</a> for help.
+</p>
