@@ -1,0 +1,77 @@
+---
+title: 'New free APIs for search, rankings, app history, and app-ads.txt'
+description: 'Discover apps, research market rankings, track app performance over time, and explore advertising seller data with AppGoblin’s free API.'
+pubDate: 'November 15 2026'
+heroImage: '/blog-images/2026_appgoblin_aso_api_release.png'
+---
+
+## Better app research
+
+AppGoblin released a huge batch of new free API endpoints to help app developers and marketers understand which apps are gaining ground, where they are growing, and how their publishers work with advertising partners.
+
+We've added free API endpoints that make that research easier to bring into scripts, notebooks, dashboards, and internal tools. Search for apps and developers, explore store charts, follow historical performance, and inspect app-ads.txt records. App search, metrics history, and rank history are also available as free MCP tools for AI-assisted research.
+
+## 1. Find apps and developers
+
+Start with a name instead of a store ID:
+
+- `GET /api/v1/apps/search` searches app names and identifiers.
+- `GET /api/v1/apps/search/developers` finds apps by developer name.
+
+Both accept a `q` parameter and an optional `limit` from 1 to 100, with 20 results by default. Use the results to build a competitor list, investigate a developer's portfolio, or find store IDs for deeper research.
+
+For example:
+
+```bash
+curl -G 'https://appgoblin.info/api/v1/apps/search' \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  --data-urlencode 'q=fitness tracker' \
+  --data-urlencode 'limit=10'
+```
+
+## 2. Explore app store rankings
+
+Charts offer a starting point for finding the apps that are visible in a category and market:
+
+- `GET /api/v1/rankings/collections` lists the available chart collections by store.
+- `GET /api/v1/rankings/categories` lists the available categories by store.
+- `GET /api/v1/rankings/{store}/{collection}/{category}` returns up to 200 apps in the latest chart.
+
+Choose `google-play` or `apple-app-store`, a supported collection and category, and an optional two-letter `country` code. Country defaults to `US`. For example, the Google Play `TOP_FREE` chart for `GAME_STRATEGY` can help a game developer identify category leaders to study, while a marketer can use it to build a list for creative and positioning research.
+
+For an individual app, `GET /api/v1/apps/{store_id}/ranks/history` returns chart-ready ranking history for the past 90 days in a selected country, defaulting to `US`. Follow changes over time rather than relying on one chart snapshot.
+
+## 3. Track global and country-level performance
+
+Two history endpoints help put an app's current position in context:
+
+- `GET /api/v1/apps/{store_id}/global-metrics-history` returns weekly global installs, ratings, active-user and revenue history, along with derived changes and rates.
+- `GET /api/v1/apps/{store_id}/country-metrics-history` returns weekly installs, ratings and rating-count history by country, including interpolated weeks and derived changes.
+
+Developers can compare growth trends across competing apps. Marketers can investigate which markets show momentum and use that research to prioritize localization or campaign ideas. Metrics such as installs, usage and revenue can be estimates; interpolated country weeks are not direct observations. Trends are useful signals, not proof that a specific campaign caused a change.
+
+## 4. Research advertising relationships with app-ads.txt
+
+For apps that monetize with advertising, app-ads.txt can provide useful context about authorized sellers:
+
+- `GET /api/v1/apps/{store_id}/adstxt/overview` summarizes DIRECT and RESELLER entries.
+- `GET /api/v1/apps/{store_id}/adstxt/direct` returns the full DIRECT records.
+- `GET /api/v1/apps/{store_id}/adstxt/reseller` returns the full RESELLER records.
+
+Use the overview to understand a publisher's declared advertising relationships, then inspect the individual records for more detail. These records come from the app developer's domain: they are **domain-level records, not proof that a seller is used by a particular app**.
+
+## Use the free MCP tools for research with an AI agent
+
+The search and history endpoints also have free MCP tools: `search_apps`, `search_developer_apps`, `get_app_global_metrics_history`, `get_app_country_metrics_history`, and `get_app_rank_history`.
+
+For example, ask an agent to find apps from a developer, compare their weekly growth, and summarize recent ranking changes in the US. The agent can use the returned store IDs to move from discovery to historical research without copying data between pages.
+
+The chart directory, chart lists, and app-ads.txt endpoints are currently available through the API; corresponding MCP tools are not yet available.
+
+## Get started
+
+Create a free [API key](/account/api-keys), then explore the [API docs](/api-docs) for parameters and response examples. Free access is subject to API rate limits.
+
+Need more capacity or company-level research? Our paid tiers offer higher API rate limits and access to company and apps added/lost endpoints. Compare plans on the [pricing page](/pricing).
+
+To connect an agent, point your MCP client at `https://appgoblin.info/api/v1/mcp` with your API key. The [MCP launch guide](/blog/AppGoblin-MCP-server-launches-AI-agent-connector) has setup examples.
