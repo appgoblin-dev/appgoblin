@@ -2,6 +2,7 @@ import { redirect, type RequestEvent } from '@sveltejs/kit';
 
 import { ANONYMOUS_SEARCHES_PER_DAY, RedisRateLimiter } from './redis-rate-limit.js';
 import { getClientIP } from './request.js';
+import { crawlerRateMultiplier } from './crawler-ip.js';
 
 const limiter = new RedisRateLimiter();
 
@@ -86,19 +87,22 @@ export async function checkPreAuthRateLimit(event: RequestEvent): Promise<RateLi
 	if (event.cookies.get('session') === undefined) {
 		return { allowed: true, limit: 600, remaining: 600, retryAfterSeconds: 0 };
 	}
-	return limiter.checkPreAuth(clientKey(event));
+	const ip = clientKey(event);
+	return limiter.checkPreAuth(ip, crawlerRateMultiplier(ip));
 }
 
 export async function checkRateLimit(event: RequestEvent): Promise<RateLimitResult> {
 	const user = event.locals.user;
-	const identity = user !== null ? `user:${user.id}` : `ip:${clientKey(event)}`;
+	const ip = clientKey(event);
+	const multiplier = crawlerRateMultiplier(ip);
+	const identity = user !== null ? `user:${user.id}` : `ip:${ip}`;
 	const search =
 		user === null && isSearchResultsPath(event.url.pathname) && !isBlockedDataRequest(event);
-	const result = await limiter.check(identity, search);
+	const result = await limiter.check(identity, search, multiplier);
 	if (result.searchRemaining !== undefined) {
 		event.locals.anonymousSearchQuota = {
 			remaining: result.searchRemaining,
-			limit: ANONYMOUS_SEARCHES_PER_DAY
+			limit: ANONYMOUS_SEARCHES_PER_DAY * multiplier
 		};
 	}
 	return result;

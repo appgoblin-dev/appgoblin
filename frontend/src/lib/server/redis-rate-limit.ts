@@ -57,12 +57,13 @@ const PRE_AUTH_SCRIPT = `
 local clock = redis.call('TIME')
 local now = tonumber(clock[1]) + tonumber(clock[2]) / 1000000
 local state = redis.call('HMGET', KEYS[1], 'tokens', 'last')
-local tokens = math.min(600, (tonumber(state[1]) or 600) + math.max(0, now - (tonumber(state[2]) or now)))
+local limit = tonumber(ARGV[1])
+local tokens = math.min(limit, (tonumber(state[1]) or limit) + math.max(0, now - (tonumber(state[2]) or now)) * limit / 600)
 local allowed = tokens >= 1
 if allowed then tokens = tokens - 1 end
 redis.call('HSET', KEYS[1], 'tokens', string.format('%.17g', tokens), 'last', string.format('%.6f', now))
 redis.call('EXPIRE', KEYS[1], 600)
-return {allowed and 1 or 0, math.floor(tokens), allowed and 0 or math.max(1, math.ceil(1 - tokens))}
+return {allowed and 1 or 0, math.floor(tokens), allowed and 0 or math.max(1, math.ceil((1 - tokens) * 600 / limit))}
 `;
 
 export interface RedisLimitResult {
@@ -127,15 +128,15 @@ export class RedisRateLimiter {
 		}
 	}
 
-	async check(identity: string, search: boolean): Promise<RedisLimitResult> {
+	async check(identity: string, search: boolean, multiplier = 1): Promise<RedisLimitResult> {
 		const [allowed, limit, remaining, retry, reason, searchRemaining] = await this.eval(
 			REQUEST_SCRIPT,
 			[this.key('client', identity), this.key('search', identity)],
 			[
-				REQUESTS_PER_MINUTE.toString(),
-				REQUESTS_PER_DAY.toString(),
+				(REQUESTS_PER_MINUTE * multiplier).toString(),
+				(REQUESTS_PER_DAY * multiplier).toString(),
 				search ? '1' : '0',
-				ANONYMOUS_SEARCHES_PER_DAY.toString(),
+				(ANONYMOUS_SEARCHES_PER_DAY * multiplier).toString(),
 				SEARCH_WINDOW_SECONDS.toString()
 			]
 		);
@@ -149,13 +150,14 @@ export class RedisRateLimiter {
 		};
 	}
 
-	async checkPreAuth(ip: string): Promise<RedisLimitResult> {
+	async checkPreAuth(ip: string, multiplier = 1): Promise<RedisLimitResult> {
+		const limit = 600 * multiplier;
 		const [allowed, remaining, retry] = await this.eval(
 			PRE_AUTH_SCRIPT,
 			[this.key('preauth', ip)],
-			[]
+			[limit.toString()]
 		);
-		return { allowed: allowed === 1, limit: 600, remaining, retryAfterSeconds: retry };
+		return { allowed: allowed === 1, limit, remaining, retryAfterSeconds: retry };
 	}
 
 	close(): void {
