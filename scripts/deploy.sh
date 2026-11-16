@@ -40,6 +40,15 @@ rm -rf "$NEW_BUILD"
 # Build to build_tmp
 npm run build
 
+if curl -fsSL --connect-timeout 5 --max-time 30 \
+    https://raw.githubusercontent.com/ipverse/bot-ip-blocks/master/crawlers.json \
+    -o "$NEW_BUILD/crawlers.json"; then
+    echo "Downloaded crawler IP ranges"
+else
+    rm -f "$NEW_BUILD/crawlers.json"
+    echo "Crawler IP ranges unavailable; using normal rate limits" >&2
+fi
+
 # Atomic swap
 rm -rf build_old
 if [ -d "$NEW_BUILD" ]; then
