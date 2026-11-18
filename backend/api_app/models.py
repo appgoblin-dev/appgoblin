@@ -469,6 +469,9 @@ class CategoryCompanyStats:
     sdk_ios_total_apps: int = 0
     sdk_android_total_apps: int = 0
     sdk_total_apps: int = 0
+    sdk_adapter_ios_total_apps: int = 0
+    sdk_adapter_android_total_apps: int = 0
+    sdk_adapter_total_apps: int = 0
     api_ios_total_apps: int = 0
     api_android_total_apps: int = 0
     api_total_apps: int = 0

@@ -39,6 +39,7 @@
 		if (pathname.includes('/apps-lost')) return 'apps-lost';
 		if (pathname.includes('/creatives')) return 'creatives';
 		if (pathname.includes('/data-exports')) return 'data-exports';
+		if (pathname.includes('/mediation/partners')) return 'mediation-partners';
 		if (pathname.includes('/mediation')) return 'mediation';
 		if (pathname.includes('/trends')) return 'trends';
 		if (pathname.includes('/sdks')) return 'sdks';
@@ -105,6 +106,8 @@
 				return `${companyDisplayName} SDK Intelligence for ${categoryContext} | AppGoblin`;
 			case 'mediation':
 				return `${companyDisplayName} Mediation Adapter Coverage | AppGoblin`;
+			case 'mediation-partners':
+				return `${companyDisplayName} Adapter Mediation Partners | AppGoblin`;
 			case 'creatives':
 				return `${companyDisplayName} Ad Creatives and Campaign Signals | AppGoblin`;
 			case 'app-adstxt':
@@ -133,7 +136,9 @@
 			case 'sdks':
 				return `Review the SDK footprint for ${companyDisplayName} across ${categoryContext}, including adtech, analytics, and developer tooling integrations.`;
 			case 'mediation':
-				return `Analyze mediation adapters used by ${companyDisplayName} and evaluate monetization stack coverage across real mobile apps.`;
+				return `Explore adapters integrated with ${companyDisplayName} as a mediation platform across mobile apps.`;
+			case 'mediation-partners':
+				return `Explore mediation platforms where ${companyDisplayName} is detected as an adapter across mobile apps.`;
 			case 'creatives':
 				return `Browse recent creatives linked to ${companyDisplayName} to monitor ad campaign activity, placement signals, and market behavior.`;
 			case 'app-adstxt':
@@ -281,7 +286,12 @@
 {/if}
 
 <div class="grid grid-cols-1 gap-6 md:grid-cols-[minmax(180px,260px)_1fr]">
-	<CompanyNavTabs tabIndicators={data.tabIndicators} {companyDomain} {companyDisplayName} />
+	<CompanyNavTabs
+		tabIndicators={data.tabIndicators}
+		mediationPartnerCount={data.mediationPartners?.length ?? null}
+		{companyDomain}
+		{companyDisplayName}
+	/>
 
 	<MainContent class="min-w-0 pl-1 md:pl-4">
 		<div class="mb-4">

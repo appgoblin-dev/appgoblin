@@ -8,11 +8,9 @@
 	import CompanyButton from './CompanyButton.svelte';
 
 	interface MediationAdapter {
-		adapter_string: string;
 		adapter_company_domain: string;
-		adapter_company_name: string;
-		adapter_logo_url: string;
-		app_category: string;
+		adapter_company_name?: string | null;
+		adapter_logo_url?: string | null;
 		app_count: number;
 	}
 
@@ -75,7 +73,7 @@
 								<CompanyButton
 									companyName={row.original.adapter_company_name}
 									companyDomain={row.original.adapter_company_domain}
-									companyLogoUrl={row.original.adapter_logo_url}
+									companyLogoUrl={row.original.adapter_logo_url ?? undefined}
 									size="md"
 								/>
 							{:else}
@@ -94,7 +92,7 @@
 				<Pagination tableModel={table} />
 				<ExportAsCSV {table} filename="mediation_adapters" />
 				<span class="text-xs md:text-sm text-gray-500">
-					Mediation adapters used by this company's apps.
+					Adapters detected with this company's mediation platform.
 				</span>
 			</div>
 		</footer>

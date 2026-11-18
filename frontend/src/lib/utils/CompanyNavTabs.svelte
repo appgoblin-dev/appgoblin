@@ -16,10 +16,12 @@
 
 	let {
 		tabIndicators,
+		mediationPartnerCount,
 		companyDomain,
 		companyDisplayName
 	}: {
-		tabIndicators: CompanyTabIndicators;
+		tabIndicators: CompanyTabIndicators | null;
+		mediationPartnerCount: number | null;
 		companyDomain: string;
 		companyDisplayName: string;
 	} = $props();
@@ -33,6 +35,7 @@
 		if (pathname.includes('/apps-lost')) return 'apps-lost';
 		if (pathname.includes('/creatives')) return 'creatives';
 		if (pathname.includes('/data-exports')) return 'data-exports';
+		if (pathname.includes('/mediation/partners')) return 'mediation-partners';
 		if (pathname.includes('/mediation')) return 'mediation';
 		if (pathname.includes('/trends')) return 'trends';
 		if (pathname.includes('/sdks')) return 'sdks';
@@ -168,14 +171,6 @@
 				dimmed: isParentOnlyData('sdks')
 			},
 			{
-				slug: 'mediation',
-				label: 'Mediation Adapters',
-				href: `/companies/${companyDomain}/mediation`,
-				icon: Puzzle,
-				count: tabIndicators?.mediation_adapter_count ?? null,
-				dimmed: isParentOnlyData('mediation')
-			},
-			{
 				slug: 'app-adstxt',
 				label: 'App-ads.txt',
 				href: `/companies/${companyDomain}/app-adstxt`,
@@ -195,6 +190,36 @@
 		].filter((l) => tabHasData(l.slug));
 
 		const bottomSections: SubNavTabItem[] = [
+			...(tabHasData('mediation') || (mediationPartnerCount ?? 0) > 0
+				? [
+						{ sectionLabel: 'Mediation' } as SubNavTabItem,
+						...(tabHasData('mediation')
+							? [
+									{
+										slug: 'mediation',
+										label: 'As Mediation Partner',
+										href: `/companies/${companyDomain}/mediation`,
+										icon: Puzzle,
+										count: tabIndicators?.mediation_adapter_count ?? null,
+										dimmed: isParentOnlyData('mediation'),
+										indent: true
+									}
+								]
+							: []),
+						...((mediationPartnerCount ?? 0) > 0
+							? [
+									{
+										slug: 'mediation-partners',
+										label: 'As Adapter',
+										href: `/companies/${companyDomain}/mediation/partners`,
+										icon: Puzzle,
+										count: mediationPartnerCount,
+										indent: true
+									}
+								]
+							: [])
+					]
+				: []),
 			...(hasAnyAppsAdded
 				? [
 						{ sectionLabel: 'Apps Recently Added' } as SubNavTabItem,
