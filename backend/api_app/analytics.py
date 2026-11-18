@@ -9,6 +9,13 @@ from litestar.background_tasks import BackgroundTask
 
 from config import CONFIG, get_logger
 
+try:
+    import umami
+except ModuleNotFoundError as exc:
+    if exc.name != "umami":
+        raise
+    umami = None
+
 logger = get_logger(__name__)
 
 REQUEST_ANALYTICS_CONTEXT_KEY = "_analytics_context"
@@ -71,9 +78,10 @@ def log_umami_page(
     referrer: str | None = None,
 ) -> None:
     """Log a page view to Umami without surfacing analytics failures."""
-    try:
-        import umami
+    if umami is None:
+        return
 
+    try:
         normalized_hostname = (
             hostname.strip() if hostname and hostname.strip() else None
         )
