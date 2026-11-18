@@ -33,7 +33,7 @@ export const machineJsonExamples = {
 		sdk_name: 'Example SDK',
 		apps: [],
 		owner: {},
-		patterns: { package_patterns: [], paths: [], mediation_patterns: [] }
+		patterns: { package_patterns: [], paths: [], mediation_patterns: [], adapter_patterns: [] }
 	}
 } as const;
 

@@ -179,6 +179,7 @@ class SdksController(Controller):
                 "package_patterns": pattern_rows("package"),
                 "paths": pattern_rows("path"),
                 "mediation_patterns": pattern_rows("mediation"),
+                "adapter_patterns": pattern_rows("adapter"),
             },
         }
 

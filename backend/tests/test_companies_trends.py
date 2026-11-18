@@ -7,6 +7,7 @@ import pandas as pd
 import pytest
 from litestar import Litestar
 from litestar.testing import TestClient
+from sqlalchemy import create_engine, text
 
 from api_app.controllers.companies import (
     CompaniesController,
@@ -14,6 +15,7 @@ from api_app.controllers.companies import (
     build_company_overview_base,
     build_company_trends_payload,
     get_company_directory,
+    make_company_stats,
     prep_companies_overview_df,
 )
 from api_app.models import (
@@ -23,8 +25,9 @@ from api_app.models import (
     PlatformCompanies,
     TopCompaniesShort,
 )
-from dbcon.queries import get_companies_stats
+from dbcon.queries import get_companies_stats, get_company_stats
 from dbcon.static import build_company_trends_static_data
+from dbcon.utils import sql
 
 
 def test_company_trend_queries_filter_to_2025_q2_and_later_history():
@@ -88,6 +91,121 @@ def test_get_companies_stats_caches_by_params_across_state_instances():
     assert mock_read_sql.call_count == 1
     assert list(first["store"]) == ["Google Play"]
     assert list(second["store"]) == ["Google Play"]
+
+
+def test_company_adapter_counts_by_store_and_category_do_not_change_sdk_totals():
+    rows = [
+        ("Google Play", "games", "sdk", 10),
+        ("Apple App Store", "games", "sdk", 5),
+        ("Google Play", "games", "sdk_adapter", 4),
+        ("Apple App Store", "games", "sdk_adapter", 2),
+        ("Google Play", "tools", "sdk_adapter", 3),
+        ("Google Play", "tools", "api_call", 7),
+    ]
+    df = pd.DataFrame(
+        rows, columns=["store", "app_category", "tag_source", "app_count"]
+    )
+    df["installs_d30"] = 10
+    stats = make_company_stats(df).categories
+    baseline = make_company_stats(df[df.tag_source != "sdk_adapter"]).categories
+
+    assert (
+        stats["all"].sdk_adapter_android_total_apps,
+        stats["all"].sdk_adapter_ios_total_apps,
+        stats["all"].sdk_adapter_total_apps,
+    ) == (7, 2, 9)
+    assert (
+        stats["games"].sdk_adapter_android_total_apps,
+        stats["games"].sdk_adapter_ios_total_apps,
+        stats["games"].sdk_adapter_total_apps,
+    ) == (4, 2, 6)
+    assert stats["tools"].sdk_adapter_total_apps == 3
+    assert stats["all"].sdk_total_apps == baseline["all"].sdk_total_apps == 15
+    assert stats["all"].total_apps == baseline["all"].total_apps
+    assert baseline["all"].sdk_adapter_total_apps == 0
+
+
+@pytest.mark.parametrize("scope", ["domain", "parent", "secondary"])
+def test_get_company_stats_games_aggregates_adapter_rows_for_each_scope(scope):
+    state = MagicMock()
+    df = pd.DataFrame(
+        [
+            ("example.com", "Example", 1, "sdk_adapter", "game_action", 2, 20, 10),
+            ("example.com", "Example", 1, "sdk_adapter", "game_casual", 3, 30, 15),
+        ],
+        columns=[
+            "company_domain",
+            "company_name",
+            "store",
+            "tag_source",
+            "app_category",
+            "app_count",
+            "installs_total",
+            "installs_d30",
+        ],
+    )
+    with (
+        patch(
+            "dbcon.queries.get_parent_companies",
+            return_value=["example.com"] if scope == "parent" else [],
+        ),
+        patch(
+            "dbcon.queries.get_company_secondary_domains",
+            return_value=["example.com"] if scope == "secondary" else [],
+        ),
+        patch("dbcon.queries.pd.read_sql", return_value=df) as read_sql,
+    ):
+        result = get_company_stats(state, "example.com", app_category="games")
+
+    expected = {
+        "domain": sql.company_category_tag_stats,
+        "parent": sql.company_parent_category_tag_stats,
+        "secondary": sql.company_secondary_category_tag_stats,
+    }
+    assert read_sql.call_args.args[0] == expected[scope]
+    assert (
+        make_company_stats(result).categories["games"].sdk_adapter_android_total_apps
+        == 5
+    )
+
+
+def test_companies_ranking_excludes_adapter_only_install_overlap():
+    query = str(sql.companies_tag_stats).replace("frontend.", "").replace("adtech.", "")
+    engine = create_engine("sqlite://")
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                "CREATE TABLE companies_category_tag_stats (company_domain TEXT, company_name TEXT, store INT, app_category TEXT, tag_source TEXT, app_count INT, installs_d30 INT)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE TABLE companies_parent_category_tag_stats (company_domain TEXT, company_name TEXT, store INT, app_category TEXT, tag_source TEXT, app_count INT, installs_d30 INT)"
+            )
+        )
+        conn.execute(text("CREATE TABLE domains (id INT, domain_name TEXT)"))
+        conn.execute(
+            text("CREATE TABLE company_domain_mapping (domain_id INT, company_id INT)")
+        )
+        conn.execute(
+            text(
+                "CREATE TABLE companies (id INT, domain_id INT, parent_company_id INT, name TEXT)"
+            )
+        )
+        conn.execute(
+            text(
+                "INSERT INTO companies_category_tag_stats VALUES ('a.com', 'A', 1, 'games', 'sdk', 1, 10), ('a.com', 'A', 1, 'games', 'sdk_adapter', 1, 100), ('b.com', 'B', 1, 'games', 'sdk', 1, 20)"
+            )
+        )
+        conn.execute(
+            text(
+                "INSERT INTO companies_parent_category_tag_stats VALUES ('p.com', 'P', 1, 'games', 'sdk', 1, 5), ('p.com', 'P', 1, 'games', 'sdk_adapter', 1, 200), ('b.com', 'B', 1, 'games', 'sdk_adapter', 1, 300)"
+            )
+        )
+        rows = conn.execute(text(query), {"app_category": None}).mappings().all()
+    assert [
+        (row["company_domain"], row["company_rank"], row["tag_source"]) for row in rows
+    ] == [("b.com", 1, "sdk"), ("a.com", 2, "sdk"), ("p.com", 3, "sdk")]
 
 
 def _make_history_df() -> pd.DataFrame:
@@ -409,6 +527,14 @@ def test_build_company_overview_base_exposes_domain_and_parent_scopes():
     mediation_companies_df = pd.DataFrame(columns=["company_domain"])
     domain_stats_df = _make_parent_company_stats_df(total_apps=12)
     parent_stats_df = _make_parent_company_stats_df(total_apps=120)
+    domain_adapter = domain_stats_df.iloc[[0]].copy()
+    domain_adapter["tag_source"] = "sdk_adapter"
+    domain_adapter["app_count"] = 3
+    parent_adapter = parent_stats_df.iloc[[0]].copy()
+    parent_adapter["tag_source"] = "sdk_adapter"
+    parent_adapter["app_count"] = 30
+    domain_stats_df = pd.concat([domain_stats_df, domain_adapter], ignore_index=True)
+    parent_stats_df = pd.concat([parent_stats_df, parent_adapter], ignore_index=True)
     domain_adstxt_df = _make_ad_domain_overview_df(app_count=6)
     parent_adstxt_df = _make_ad_domain_overview_df(app_count=60)
     domain_publishers_df = _make_publishers_overview_df(app_count=6)
@@ -443,6 +569,10 @@ def test_build_company_overview_base_exposes_domain_and_parent_scopes():
             side_effect=_stats_side_effect,
         ),
         patch(
+            "api_app.controllers.companies.get_tag_source_category_totals",
+            return_value=pd.DataFrame(),
+        ),
+        patch(
             "api_app.controllers.companies.get_company_adstxt_ad_domain_overview",
             side_effect=_adstxt_side_effect,
         ),
@@ -470,6 +600,8 @@ def test_build_company_overview_base_exposes_domain_and_parent_scopes():
     assert overview.categories["all"].sdk_android_total_apps == 120
     assert overview.parent_overview.categories["all"].sdk_android_total_apps == 120
     assert overview.domain_overview.categories["all"].sdk_android_total_apps == 12
+    assert overview.parent_overview.categories["all"].sdk_adapter_total_apps == 30
+    assert overview.domain_overview.categories["all"].sdk_adapter_total_apps == 3
     assert (
         overview.adstxt_ad_domain_overview
         == overview.parent_overview.adstxt_ad_domain_overview
@@ -772,7 +904,13 @@ def test_prep_companies_overview_df_skips_static_trends_for_category_views():
         patch(
             "api_app.controllers.companies.get_company_countries",
             return_value=pd.DataFrame(
-                [{"company_domain": "google.com", "hq_country": "US", "api_ip_resolved_country": "US"}]
+                [
+                    {
+                        "company_domain": "google.com",
+                        "hq_country": "US",
+                        "api_ip_resolved_country": "US",
+                    }
+                ]
             ),
         ),
         patch(
@@ -831,7 +969,13 @@ def test_prep_companies_overview_df_adds_company_category_without_mediation():
         patch(
             "api_app.controllers.companies.get_company_countries",
             return_value=pd.DataFrame(
-                [{"company_domain": "google.com", "hq_country": "US", "api_ip_resolved_country": "US"}]
+                [
+                    {
+                        "company_domain": "google.com",
+                        "hq_country": "US",
+                        "api_ip_resolved_country": "US",
+                    }
+                ]
             ),
         ),
         patch(

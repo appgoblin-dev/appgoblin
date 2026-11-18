@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { mkConfig, generateCsv, download } from 'export-to-csv';
-	import type { Row } from '@tanstack/table-core';
 	let { table, filename } = $props();
 
 	const excludedFields = new Set(['company_logo_url', 'parent_company_logo_url']);
@@ -30,7 +29,7 @@
 		return JSON.stringify(value) ?? String(value);
 	}
 
-	const exportDataCSV = (rows: Row<Record<string, unknown>, unknown>[]) => {
+	const exportDataCSV = (rows: { original: Record<string, unknown> }[]) => {
 		const rowData = rows.map((row) =>
 			Object.fromEntries(
 				Object.entries(row.original)

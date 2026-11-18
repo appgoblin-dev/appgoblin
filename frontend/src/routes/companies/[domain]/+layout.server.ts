@@ -31,16 +31,17 @@ export const load: LayoutServerLoad = async ({ fetch, params, parent, locals, ur
 
 	const companyTree = await api.get(`/companies/${companyDomain}/tree`, 'Company Tree');
 
-	let tabIndicators = null;
-	try {
-		tabIndicators = await api.get(`/companies/${companyDomain}/tabs`, 'Company Tab Indicators');
-	} catch {
-		tabIndicators = null;
-	}
+	const [mediationPartners, tabIndicators] = await Promise.all([
+		api
+			.get(`/companies/${companyDomain}/mediation-partners`, 'Mediation Partners')
+			.catch(() => null),
+		api.get(`/companies/${companyDomain}/tabs`, 'Company Tab Indicators').catch(() => null)
+	]);
 
 	return {
 		companyDetails,
 		companyTree,
+		mediationPartners,
 		tabIndicators
 	};
 };

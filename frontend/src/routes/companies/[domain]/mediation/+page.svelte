@@ -11,14 +11,14 @@
 </script>
 
 <section class="mb-4 space-y-2">
-	<h2 class="text-xl font-semibold">Mediation Adapters</h2>
+	<h2 class="text-xl font-semibold">As a Mediation Partner: Top Adapters</h2>
 	<p class="text-sm mb-3">
-		Mediation adapters reveal monetization connectivity between ad networks and apps. Use this table
-		to assess adapter breadth, potential demand paths, and stack overlap with competitors.
+		These adapters are detected in apps where this company acts as the mediation partner. Counts
+		show the apps associated with each adapter.
 	</p>
 </section>
 
-{#if data.companyDetails && data.companyDetails.mediation_adapters}
+{#if data.companyDetails?.mediation_adapters?.length}
 	<WhiteCard>
 		{#snippet title()}
 			<span

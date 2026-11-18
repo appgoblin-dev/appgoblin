@@ -497,7 +497,6 @@ def get_company_stats(
         df = (
             df.groupby(
                 [
-                    "company_id",
                     "company_domain",
                     "company_name",
                     "store",
@@ -1502,6 +1501,15 @@ def get_mediation_adapters(state: State, company_domain: str) -> pd.DataFrame:
         params={"company_domain": company_domain},
     )
     return df
+
+
+def get_mediation_partners(state: State, company_domain: str) -> pd.DataFrame:
+    """Get mediation platforms associated with an adapter company domain."""
+    return pd.read_sql(
+        sql.mediation_partners,
+        state.dbcon.engine,
+        params={"company_domain": company_domain},
+    )
 
 
 def insert_sdk_scan_request(

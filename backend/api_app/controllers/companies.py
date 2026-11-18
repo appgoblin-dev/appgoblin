@@ -80,6 +80,7 @@ from dbcon.queries import (
     get_company_tree_related_domains,
     get_company_type_country_stats,
     get_mediation_adapters,
+    get_mediation_partners,
     get_tag_source_category_totals,
     get_tag_source_company_counts,
     get_topapps_for_company,
@@ -1144,6 +1145,10 @@ def make_company_stats(
         "sdk_ios": (df["store"].str.contains("Apple")) & (df["tag_source"] == "sdk"),
         "sdk_android": (df["store"].str.contains("Google"))
         & (df["tag_source"] == "sdk"),
+        "sdk_adapter_ios": (df["store"].str.contains("Apple"))
+        & (df["tag_source"] == "sdk_adapter"),
+        "sdk_adapter_android": (df["store"].str.contains("Google"))
+        & (df["tag_source"] == "sdk_adapter"),
         "api_android": (df["store"].str.contains("Google"))
         & (df["tag_source"] == "api_call"),
         "api_ios": (df["store"].str.contains("Apple"))
@@ -1270,6 +1275,11 @@ def make_company_stats(
         sdk_ios_total_apps=int(sdk_ios_total_apps),
         sdk_android_total_apps=int(sdk_android_total_apps),
         sdk_total_apps=int(sdk_total_apps),
+        sdk_adapter_ios_total_apps=int(res_app_counts["sdk_adapter_ios"]),
+        sdk_adapter_android_total_apps=int(res_app_counts["sdk_adapter_android"]),
+        sdk_adapter_total_apps=int(
+            res_app_counts["sdk_adapter_ios"] + res_app_counts["sdk_adapter_android"]
+        ),
         sdk_android_installs_d30=int(sdk_android_installs_d30),
         sdk_ios_installs_d30=int(sdk_ios_installs_d30),
         api_ios_total_apps=int(api_ios_total_apps),
@@ -1294,6 +1304,12 @@ def make_company_stats(
             & (df["app_category"] == cat),
             "sdk_android": (df["store"].str.contains("Google"))
             & (df["tag_source"] == "sdk")
+            & (df["app_category"] == cat),
+            "sdk_adapter_ios": (df["store"].str.contains("Apple"))
+            & (df["tag_source"] == "sdk_adapter")
+            & (df["app_category"] == cat),
+            "sdk_adapter_android": (df["store"].str.contains("Google"))
+            & (df["tag_source"] == "sdk_adapter")
             & (df["app_category"] == cat),
             "api_ios": (df["store"].str.contains("Apple"))
             & (df["tag_source"] == "api_call")
@@ -1425,6 +1441,12 @@ def make_company_stats(
             sdk_ios_total_apps=int(sdk_ios_total_apps),
             sdk_android_total_apps=int(sdk_android_total_apps),
             sdk_total_apps=int(sdk_total_apps),
+            sdk_adapter_ios_total_apps=int(res_app_counts["sdk_adapter_ios"]),
+            sdk_adapter_android_total_apps=int(res_app_counts["sdk_adapter_android"]),
+            sdk_adapter_total_apps=int(
+                res_app_counts["sdk_adapter_ios"]
+                + res_app_counts["sdk_adapter_android"]
+            ),
             api_ios_total_apps=int(api_ios_total_apps),
             api_android_total_apps=int(api_android_total_apps),
             api_total_apps=int(api_total_apps),
@@ -1991,6 +2013,20 @@ class CompaniesController(Controller):
         logger.info(f"GET /api/companies/{company_domain} took {duration}ms")
         return overview
 
+    @get(path="/companies/{company_domain:str}/mediation-partners", cache=86400)
+    async def company_mediation_partners(
+        self: Self, state: State, company_domain: str
+    ) -> list[dict[str, str | int]]:
+        """Return mediation partners for this exact adapter domain."""
+        partners = get_mediation_partners(state, company_domain)
+        return [
+            {
+                "mediation_domain": str(row.mediation_domain),
+                "app_count": int(row.app_count),
+            }
+            for row in partners.itertuples(index=False)
+        ]
+
     @get(path="/companies/{company_domain:str}/tabs", cache=86400)
     async def company_tabs(
         self: Self,
@@ -2534,6 +2570,7 @@ class CompaniesController(Controller):
                 "package_patterns": _pattern_rows(group, "package"),
                 "paths": _pattern_rows(group, "path"),
                 "mediation_patterns": _pattern_rows(group, "mediation"),
+                "adapter_patterns": _pattern_rows(group, "adapter"),
             }
         mydict = CompanyPatternsDict(
             companies=company_sdks,

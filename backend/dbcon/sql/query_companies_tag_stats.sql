@@ -31,6 +31,7 @@ WITH all_company_stats AS (
         ON parent_company.domain_id = parent_domain.id
     WHERE
         ccts.store IN (1, 2)
+        AND ccts.tag_source IS DISTINCT FROM 'sdk_adapter'
         -- Pass NULL to get all categories, or 'game%' etc for filtered view
         AND (
             CAST(:app_category AS text) IS NULL
@@ -62,6 +63,7 @@ parent_stats AS (
     FROM frontend.companies_parent_category_tag_stats
     WHERE
         store IN (1, 2)
+        AND tag_source IS DISTINCT FROM 'sdk_adapter'
         AND (
             CAST(:app_category AS text) IS NULL
             OR app_category LIKE :app_category
@@ -72,6 +74,7 @@ parent_stats AS (
 parent_domains AS (
     SELECT DISTINCT company_domain
     FROM frontend.companies_parent_category_tag_stats
+    WHERE tag_source IS DISTINCT FROM 'sdk_adapter'
 ),
 
 unioned AS (

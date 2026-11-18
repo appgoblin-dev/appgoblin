@@ -493,6 +493,9 @@ export interface CategoryAppStats {
 	sdk_ios_total_apps: number;
 	sdk_android_total_apps: number;
 	sdk_total_apps: number;
+	sdk_adapter_ios_total_apps: number;
+	sdk_adapter_android_total_apps: number;
+	sdk_adapter_total_apps: number;
 	api_ios_total_apps: number;
 	api_android_total_apps: number;
 	api_total_apps: number;
@@ -603,10 +606,16 @@ export interface CompanyTabIndicators {
 	api_ip_resolved_country?: string | null;
 }
 
+export interface MediationPartner {
+	mediation_domain: string;
+	app_count: number;
+}
+
 export interface CompanyLayoutDetails {
 	companyDetails: CompanyCategoryOverview;
 	companyTree: CompanyTree;
-	tabIndicators: CompanyTabIndicators;
+	tabIndicators: CompanyTabIndicators | null;
+	mediationPartners: MediationPartner[] | null;
 }
 
 export interface CompanyPatterns {
@@ -620,6 +629,7 @@ export interface SDKPatterns {
 	package_patterns: CompanyPatterns[];
 	paths: CompanyPatterns[];
 	mediation_patterns: CompanyPatterns[];
+	adapter_patterns: CompanyPatterns[];
 }
 
 export interface CompanySDKs {
@@ -678,11 +688,9 @@ export interface CompanyCategoryOverview {
 	parent_overview?: CompanyOverviewScope | null;
 	mediation_adapters:
 		| {
-				adapter_string: string;
 				adapter_company_domain: string;
-				adapter_company_name: string;
-				adapter_logo_url: string;
-				app_category: string;
+				adapter_company_name: string | null;
+				adapter_logo_url: string | null;
 				app_count: number;
 		  }[]
 		| null;

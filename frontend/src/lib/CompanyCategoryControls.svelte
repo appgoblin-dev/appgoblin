@@ -47,7 +47,10 @@
 			.map(([id, stats]) => ({
 				value: id === 'all' ? 'overall' : id,
 				label: getCategoryName(id),
-				total: stats.sdk_android_total_apps + stats.sdk_ios_total_apps,
+				total: Math.max(
+					stats.sdk_android_total_apps + stats.sdk_ios_total_apps,
+					stats.sdk_adapter_total_apps ?? 0
+				),
 				locked: !['all', 'games'].includes(id) && !hasB2BAccess
 			}))
 			.filter((option) => option.value === 'overall' || option.total > 0)

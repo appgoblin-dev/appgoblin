@@ -538,7 +538,8 @@ V1_OPERATION_DOCS = {
             "description": (
                 "Endpoint: `GET /api/v1/apps/{store_id}/mapped-sdks`\n\n"
                 "Access: B2B SDK and B2B Premium tiers only.\n\n"
-                "Returns mapped SDK slugs grouped by company domain for a single app."
+                "Returns mapped SDK slugs for the latest app version, grouped by "
+                "company domain for a single app."
             ),
         }
     },

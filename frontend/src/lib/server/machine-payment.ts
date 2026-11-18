@@ -23,6 +23,16 @@ import {
 import { stripe } from './stripe.js';
 import { machineJsonExample, machineJsonKind, wantsMachineJson } from './machine-json.js';
 import { getMachinePaymentNetwork } from './machine-payment-network.js';
+import { createX402Analytics } from './x402-analytics.js';
+
+type X402Analytics = ReturnType<typeof createX402Analytics>;
+
+function settlementAnalytics(transportContext: unknown): X402Analytics {
+	return (
+		(transportContext as { request?: { analytics?: X402Analytics } } | undefined)?.request
+			?.analytics ?? null
+	);
+}
 
 const BASE_PAYMENT_INTENT_NETWORK = 'base';
 const DEFAULT_MACHINE_PAYMENT_AMOUNT = '0.10';
@@ -217,9 +227,12 @@ const resourceServer =
 			)
 				.register(paymentNetwork.network, new ExactEvmScheme())
 				.registerExtension(bazaarResourceServerExtension)
-				.onAfterSettle(async ({ result, requirements }) => {
+				.onAfterSettle(async ({ result, requirements, transportContext }) => {
 					if (!result.success) return;
+					const analytics = settlementAnalytics(transportContext);
 					if (!result.transaction) {
+						analytics?.settled('failed');
+						analytics?.failed('stripe_recording');
 						throw new AfterSettleAbortError(
 							'stripe_transaction_hash_missing',
 							'The facilitator settled the payment without returning a transaction hash'
@@ -244,6 +257,7 @@ const resourceServer =
 						}
 
 						if (!paymentNetwork.recordInStripe) {
+							analytics?.settled('disabled');
 							console.info(
 								'[MachinePayments] Base Sepolia settlement completed; Stripe recording is disabled for testnet'
 							);
@@ -275,10 +289,13 @@ const resourceServer =
 							}
 						);
 
+						analytics?.settled('recorded');
 						console.log(
 							`[MachinePayments] Recorded Stripe PaymentIntent ${paymentIntent.id} for x402 transaction ${result.transaction}`
 						);
 					} catch (error) {
+						analytics?.settled('failed');
+						analytics?.failed('stripe_recording');
 						const message = error instanceof Error ? error.message : String(error);
 						console.error(
 							`[MachinePayments] Failed to process x402 settlement ${result.transaction}: ${message}`
@@ -579,22 +596,32 @@ async function chargePage(
 	resolve: () => Promise<Response>,
 	offer: MachinePageOffer
 ): Promise<Response | null> {
+	const analytics = createX402Analytics(request, offer.resource);
+	analytics?.attempt();
 	if (resourceServer === null && mppx === null) {
+		analytics?.failed('configuration');
 		return unavailableX402Challenge(null, missingConfiguration);
 	}
 
-	const mppPayment = mppx
-		? await mppx.charge({
-				amount: offer.amount,
-				description: offer.description
-			})(request)
-		: null;
+	let mppPayment: Awaited<ReturnType<ReturnType<NonNullable<typeof mppx>['charge']>>> | null;
+	try {
+		mppPayment = mppx
+			? await mppx.charge({
+					amount: offer.amount,
+					description: offer.description
+				})(request)
+			: null;
+	} catch (error) {
+		analytics?.failed('verification');
+		throw error;
+	}
 
 	if (mppPayment !== null && mppPayment.status !== 402) {
 		return mppPayment.withReceipt(await resolve());
 	}
 
 	if (resourceServer === null || paymentAddress === null || paymentNetwork === null) {
+		analytics?.failed('configuration');
 		return unavailableX402Challenge(mppPayment?.challenge ?? null, missingConfiguration);
 	}
 
@@ -603,7 +630,10 @@ async function chargePage(
 		request,
 		mppPayment?.challenge ?? null
 	);
-	if (initializationFailure) return initializationFailure;
+	if (initializationFailure) {
+		analytics?.failed('initialization');
+		return initializationFailure;
+	}
 
 	const requestUrl = new URL(request.url);
 	const routePattern = machinePaymentRoutePattern(offer.resource, requestUrl.pathname);
@@ -617,6 +647,7 @@ async function chargePage(
 	};
 	const requestContext = {
 		adapter,
+		analytics,
 		path: requestUrl.pathname,
 		method: request.method,
 		paymentHeader:
@@ -640,8 +671,15 @@ async function chargePage(
 		}
 	});
 
-	const payment = await httpServer.processHTTPRequest(requestContext);
+	let payment: Awaited<ReturnType<typeof httpServer.processHTTPRequest>>;
+	try {
+		payment = await httpServer.processHTTPRequest(requestContext);
+	} catch (error) {
+		analytics?.failed('verification');
+		throw error;
+	}
 	if (payment.type === 'no-payment-required') {
+		analytics?.failed('configuration');
 		console.error('[MachinePayments] x402 route did not match the requested resource');
 		return new Response(JSON.stringify({ error: 'payment_configuration_error' }), {
 			status: 503,
@@ -649,6 +687,7 @@ async function chargePage(
 		});
 	}
 	if (payment.type === 'payment-error') {
+		analytics?.failed('verification');
 		const x402Response = responseFromInstructions(payment.response);
 		return mppPayment?.challenge
 			? mergePaymentChallenges(mppPayment.challenge, x402Response)
@@ -659,11 +698,13 @@ async function chargePage(
 	try {
 		response = await resolve();
 	} catch (error) {
+		analytics?.failed('handler');
 		await payment.cancellationDispatcher.cancel({ reason: 'handler_threw', error });
 		throw error;
 	}
 
 	if (response.status >= 400) {
+		analytics?.failed('handler');
 		await payment.cancellationDispatcher.cancel({
 			reason: 'handler_failed',
 			responseStatus: response.status
@@ -671,16 +712,30 @@ async function chargePage(
 		return response;
 	}
 
-	const settlement = await httpServer.processSettlement(
-		payment.paymentPayload,
-		payment.paymentRequirements,
-		payment.declaredExtensions,
-		{ request: requestContext, responseHeaders: Object.fromEntries(response.headers.entries()) },
-		undefined,
-		payment.beforeHandlerSettlement
-	);
+	let settlement: Awaited<ReturnType<typeof httpServer.processSettlement>>;
+	try {
+		settlement = await httpServer.processSettlement(
+			payment.paymentPayload,
+			payment.paymentRequirements,
+			payment.declaredExtensions,
+			{ request: requestContext, responseHeaders: Object.fromEntries(response.headers.entries()) },
+			undefined,
+			payment.beforeHandlerSettlement
+		);
+	} catch (error) {
+		analytics?.failed('settlement');
+		throw error;
+	}
 
-	if (!settlement.success) return responseFromInstructions(settlement.response);
+	if (!settlement.success) {
+		if (
+			settlement.errorReason !== 'stripe_payment_intent_failed' &&
+			settlement.errorReason !== 'stripe_transaction_hash_missing'
+		) {
+			analytics?.failed('settlement');
+		}
+		return responseFromInstructions(settlement.response);
+	}
 
 	const headers = new Headers(response.headers);
 	for (const [name, value] of Object.entries(settlement.headers)) {

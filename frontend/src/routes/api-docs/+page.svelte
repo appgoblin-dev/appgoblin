@@ -3,7 +3,7 @@
 
 	const title = 'API Docs | AppGoblin Public API';
 	const description =
-		'Generated OpenAPI reference for the AppGoblin public v1 API, including API token authentication, schemas, and interactive endpoint browsing.';
+		'AppGoblin API docs for free and paid users, including API token auth, schemas, and interactive endpoint browsing.';
 	const keywords =
 		'api docs, openapi, appgoblin api, public api, api token, scalar api reference, api reference';
 
@@ -61,12 +61,9 @@
 	</div>
 
 	<div class="px-4 md:px-6">
-		<h2 class="mb-2 text-lg font-semibold">B2B SDK Intelligence</h2>
+		<h2 class="mb-2 text-lg font-semibold">B2B SDK and Premium Intelligence</h2>
 		<p class="text-sm md:text-base">
-			The public API also exposes app version timelines and SDK change history through
-			<code class="px-1">/api/v1/apps/{'{store_id}'}/versions</code> and
-			<code class="px-1">/api/v1/apps/{'{store_id}'}/sdks/history</code>. These endpoints require a
-			B2B SDK or B2B Premium API token.
+			Some endpoints are marked as B2B and require a B2B subscription.
 		</p>
 		<div class="mt-3 flex flex-wrap items-center gap-3">
 			<a href="/pricing" class="btn preset-filled-primary-500 p-2 text-sm font-semibold">

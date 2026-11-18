@@ -138,6 +138,20 @@
 								{/each}
 							</ul>
 						{/if}
+
+						{#if patterns?.adapter_patterns?.length > 0}
+							<h4 class="font-medium uppercase tracking-wider mt-3 mb-1">Adapter Patterns</h4>
+							<ul class="list-disc list-inside space-y-0.5">
+								{#each truncateList(patterns.adapter_patterns) as adapter, index (index)}
+									<li>
+										{adapter.pattern}
+										{#if adapter.app_count !== null}
+											<span class="text-gray-500">({formatNumber(adapter.app_count)} apps)</span>
+										{/if}
+									</li>
+								{/each}
+							</ul>
+						{/if}
 					</div>
 				</WhiteCard>
 			</div>

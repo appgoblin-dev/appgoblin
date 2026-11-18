@@ -7,18 +7,30 @@ WITH target_app AS (
 ),
 
 versions AS (
-    SELECT DISTINCT
-        ap.version_code_id,
-        ap.version_code_created_at,
+    SELECT
+        vc.id AS version_code_id,
+        vc.created_at AS version_code_created_at,
         DENSE_RANK() OVER (
-            ORDER BY
-                ap.version_code_created_at,
-                ap.version_code_id
+            ORDER BY vc.created_at, vc.id
         ) AS version_seq
-    FROM
-        adtech.app_sdks AS ap
-    INNER JOIN target_app AS ta ON
-        ap.store_app = ta.store_app
+    FROM version_codes AS vc
+    INNER JOIN target_app AS ta ON vc.store_app = ta.store_app
+    WHERE
+        EXISTS (
+            SELECT 1
+            FROM adtech.app_sdks AS ap
+            WHERE ap.store_app = ta.store_app AND ap.version_code_id = vc.id
+        )
+        OR (
+            vc.version_code != '-1'
+            AND EXISTS (
+                SELECT 1
+                FROM version_code_sdk_scan_results AS vcssr
+                WHERE
+                    vcssr.version_code_id = vc.id
+                    AND vcssr.scan_result = 1
+            )
+        )
 ),
 
 all_versions AS (

@@ -31,7 +31,6 @@
 	const titleFont = 'text-xl  tracking-wide';
 	const subTitleFont = 'text-large -200 tracking-wide';
 	const rowTitleFont = 'text-sm -200 tracking-wide';
-	const greyFont = 'text-xs text-surface-500';
 
 	const formatTrimmed = (value: number, digits: number): string =>
 		value.toFixed(digits).replace(/\.0+$|(?<=\.[0-9]*[1-9])0+$/, '');
@@ -154,7 +153,7 @@
 			</tbody>
 		</table>
 	</div>
-{:else if !isSecondaryDomain}
+{:else}
 	<!-- === SDK SECTION === -->
 	<div class="table-container p-4">
 		<div class={titleFont}>
@@ -163,16 +162,37 @@
 				Verified SDK counts are based on apps decompiled by AppGoblin.
 			</p>
 		</div>
-		{#if (safeTotals.sdk_android_total_apps ?? 0) === 0 && (safeTotals.sdk_ios_total_apps ?? 0) === 0}
-			<p class={greyFont}>
-				No apps with {companyName} SDKs found. Please feel free to contact if you would like this mapped.
-			</p>
-		{:else}
-			<p class="text-xs text-surface-500 mb-2">
-				Apps using {companyName} SDKs based on static analysis by AppGoblin:
-				{formatNumberLocale(safeTotals.sdk_android_total_apps ?? 0)} Android apps and
-				{formatNumberLocale(safeTotals.sdk_ios_total_apps ?? 0)} iOS apps.
-			</p>
+		<table class="table w-full">
+			<thead>
+				<tr>
+					<th class="text-left py-2 px-1"></th>
+					<th class="text-left py-2 px-1">Android</th>
+					<th class="text-left py-2 px-1">iOS</th>
+					<th class="text-left py-2 px-1">Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td class="py-2 px-1 {rowTitleFont}">SDK integrations</td>
+					<td class="py-2 px-1">{formatNumberLocale(safeTotals.sdk_android_total_apps ?? 0)}</td>
+					<td class="py-2 px-1">{formatNumberLocale(safeTotals.sdk_ios_total_apps ?? 0)}</td>
+					<td class="py-2 px-1">{formatNumberLocale(safeTotals.sdk_total_apps ?? 0)}</td>
+				</tr>
+				<tr>
+					<td class="py-2 px-1 {rowTitleFont}">SDK adapter integrations</td>
+					<td class="py-2 px-1"
+						>{formatNumberLocale(safeTotals.sdk_adapter_android_total_apps ?? 0)}</td
+					>
+					<td class="py-2 px-1">{formatNumberLocale(safeTotals.sdk_adapter_ios_total_apps ?? 0)}</td
+					>
+					<td class="py-2 px-1">{formatNumberLocale(safeTotals.sdk_adapter_total_apps ?? 0)}</td>
+				</tr>
+			</tbody>
+		</table>
+		<p class="text-xs text-surface-500 mb-2">
+			Counts are apps with each signal. SDK and adapter counts can overlap.
+		</p>
+		{#if !isSecondaryDomain && ((safeTotals.sdk_android_total_apps ?? 0) > 0 || (safeTotals.sdk_ios_total_apps ?? 0) > 0)}
 			<table class="table w-full">
 				<thead>
 					<tr>
