@@ -154,12 +154,13 @@ class SDKPattern:
 
 @dataclass
 class SDKPatterns:
-    """Holds package, path, and mediation patterns for a company SDK."""
+    """Holds package, path, mediation, and adapter patterns for a company SDK."""
 
     sdk_name: str
     package_patterns: list[SDKPattern]
     paths: list[SDKPattern]
     mediation_patterns: list[SDKPattern]
+    adapter_patterns: list[SDKPattern] = field(default_factory=list)
 
 
 @dataclass

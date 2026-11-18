@@ -2570,6 +2570,7 @@ class CompaniesController(Controller):
                 "package_patterns": _pattern_rows(group, "package"),
                 "paths": _pattern_rows(group, "path"),
                 "mediation_patterns": _pattern_rows(group, "mediation"),
+                "adapter_patterns": _pattern_rows(group, "adapter"),
             }
         mydict = CompanyPatternsDict(
             companies=company_sdks,

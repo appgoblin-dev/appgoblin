@@ -629,6 +629,7 @@ export interface SDKPatterns {
 	package_patterns: CompanyPatterns[];
 	paths: CompanyPatterns[];
 	mediation_patterns: CompanyPatterns[];
+	adapter_patterns: CompanyPatterns[];
 }
 
 export interface CompanySDKs {

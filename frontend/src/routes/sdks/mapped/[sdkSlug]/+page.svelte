@@ -28,7 +28,10 @@
 		<WhiteCard>
 			{#snippet title()}SDK information{/snippet}
 			<div class="p-4 space-y-2 text-sm">
-				<p>This SDK is mapped from package, path, and mediation patterns found in mobile apps.</p>
+				<p>
+					This SDK is mapped from package, path, mediation, and adapter patterns found in mobile
+					apps.
+				</p>
 				{#if data.owner?.company_domain}
 					<CompanyButton
 						companyName={data.owner.company_name}
@@ -42,7 +45,7 @@
 		<WhiteCard>
 			{#snippet title()}SDK patterns{/snippet}
 			<div class="p-4 text-xs space-y-3">
-				{#each [['Package patterns', data.patterns.package_patterns], ['Path patterns', data.patterns.paths], ['Mediation patterns', data.patterns.mediation_patterns]] as [title, patterns]}
+				{#each [['Package patterns', data.patterns.package_patterns], ['Path patterns', data.patterns.paths], ['Mediation patterns', data.patterns.mediation_patterns], ['Adapter patterns', data.patterns.adapter_patterns ?? []]] as [title, patterns]}
 					{#if patterns.length}
 						<div>
 							<h3 class="font-medium uppercase tracking-wider mb-1">{title}</h3>
