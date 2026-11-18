@@ -1,14 +1,3 @@
-WITH latest_app_sdks AS (
-    SELECT DISTINCT ON (asd.store_app)
-        asd.store_app,
-        asd.sdk_id,
-        asd.version_code_id,
-        asd.version_code_created_at
-    FROM adtech.app_sdks AS asd
-    WHERE asd.sdk_id = :sdk_id
-    ORDER BY asd.store_app ASC, asd.version_code_id DESC NULLS LAST
-)
-
 SELECT
     sd.sdk_name,
     sa.store,
@@ -19,6 +8,7 @@ SELECT
     sa.developer_name,
     sa.installs,
     sa.installs_sum_4w
-FROM latest_app_sdks AS asd
+FROM adtech.app_sdks_latest AS asd
 INNER JOIN adtech.sdks AS sd ON asd.sdk_id = sd.id
-LEFT JOIN frontend.store_apps_overview AS sa ON asd.store_app = sa.id;
+LEFT JOIN frontend.store_apps_overview AS sa ON asd.store_app = sa.id
+WHERE asd.sdk_id = :sdk_id;
