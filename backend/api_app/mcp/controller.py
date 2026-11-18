@@ -17,6 +17,7 @@ authentication and application state for tool queries.
 from __future__ import annotations
 
 import hashlib
+import threading
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -27,6 +28,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 # Import the MCP package first — the __init__.py registers all tools.
 # Then pull the server instance and shared authentication primitives.
 import api_app.mcp  # noqa: F401  # triggers tool registration
+from api_app.analytics import PUBLIC_API_HOSTNAME, get_forwarded_ip, log_umami_page
 from api_app.guards import (
     _check_daily_quota,
     _check_minute_limit,
@@ -42,6 +44,43 @@ if TYPE_CHECKING:
     from litestar.types import ASGIApp, Receive, Scope, Send
 
 logger = get_logger(__name__)
+
+_ANALYTICS_SLOTS = threading.BoundedSemaphore(50)
+
+
+def _track_mcp_request(scope: Scope, user_id: int) -> None:
+    """Schedule a best-effort page view without holding up the MCP request."""
+    acquired = False
+    try:
+        acquired = _ANALYTICS_SLOTS.acquire(blocking=False)
+        if not acquired:
+            return
+        forwarded_for = _normalise_header(scope, b"x-forwarded-for")
+        ip = (
+            get_forwarded_ip({"x-forwarded-for": forwarded_for})
+            if forwarded_for
+            else None
+        )
+        if not ip:
+            client = scope.get("client")
+            ip = client[0] if client else None
+
+        def send_page_view() -> None:
+            try:
+                log_umami_page(
+                    url="/api/v1/mcp",
+                    hostname=PUBLIC_API_HOSTNAME,
+                    ip=ip,
+                    user_id=user_id,
+                )
+            finally:
+                _ANALYTICS_SLOTS.release()
+
+        threading.Thread(target=send_page_view, daemon=True).start()
+    except Exception:
+        if acquired:
+            _ANALYTICS_SLOTS.release()
+        logger.exception("Unable to schedule MCP page view")
 
 
 # ---------------------------------------------------------------------------
@@ -121,6 +160,7 @@ def _authenticate(scope: Scope) -> MCPAuthContext | None:
     daily_ok, daily_limit, daily_remaining = _check_daily_quota(
         rate_key, limits.requests_per_day
     )
+    _track_mcp_request(scope, user_id)
     if not daily_ok:
         logger.warning(
             "MCP daily quota exceeded",

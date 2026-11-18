@@ -2,6 +2,9 @@
 
 import asyncio
 import json
+import sys
+import threading
+import types
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -37,6 +40,168 @@ async def _mcp_lifespan(_app: Litestar) -> AsyncGenerator[None]:
     # session_manager.run() can only be entered once per process.
     async with controller.mcp_server.session_manager.run():
         yield
+
+
+@pytest.mark.parametrize(
+    ("daily_ok", "minute_ok", "expected_status"),
+    [(True, True, 200), (False, True, 429), (True, False, 429)],
+)
+def test_quota_checked_requests_schedule_umami_page_view(
+    monkeypatch, daily_ok, minute_ok, expected_status
+) -> None:
+    monkeypatch.setattr("api_app.guards._KEY_CACHE", {})
+    monkeypatch.setattr(controller, "get_engine", lambda: None)
+    monkeypatch.setattr(controller, "_query_key", lambda *_: _CachedKey(7, "free", 9e12))
+    monkeypatch.setattr(
+        controller, "_check_daily_quota", lambda _key, limit: (daily_ok, limit, 0)
+    )
+    monkeypatch.setattr(
+        controller,
+        "_check_minute_limit",
+        lambda _key, limit: (minute_ok, limit, 0, 1),
+    )
+    views = []
+    completed = threading.Event()
+
+    def capture_page_view(**kwargs):
+        views.append(kwargs)
+        completed.set()
+
+    monkeypatch.setattr(controller, "log_umami_page", capture_page_view)
+
+    async def exercise():
+        messages = []
+
+        async def send(message):
+            messages.append(message)
+
+        async def downstream(scope, receive, send):
+            await send({"type": "http.response.start", "status": 200, "headers": []})
+
+        scope = {
+            "type": "http",
+            "method": "POST",
+            "headers": [
+                (b"x-api-key", b"ag_analytics"),
+                (b"x-forwarded-for", b"203.0.113.1, 10.0.0.1"),
+            ],
+            "client": ("127.0.0.1", 1234),
+        }
+        await controller.AuthenticatedMCPMiddleware(downstream)(scope, None, send)
+        return messages[0]["status"]
+
+    assert asyncio.run(exercise()) == expected_status
+    assert completed.wait(2)
+    assert views == [{
+        "url": "/api/v1/mcp",
+        "hostname": "appgoblin.info",
+        "ip": "203.0.113.1",
+        "user_id": 7,
+    }]
+
+
+def test_invalid_key_does_not_schedule_umami(monkeypatch) -> None:
+    monkeypatch.setattr("api_app.guards._KEY_CACHE", {})
+    monkeypatch.setattr(controller, "get_engine", lambda: None)
+    monkeypatch.setattr(controller, "_query_key", lambda *_: None)
+    views = []
+    monkeypatch.setattr(controller, "_track_mcp_request", lambda *args: views.append(args))
+    assert controller._authenticate({"headers": [(b"x-api-key", b"bad")]}) is None
+    assert views == []
+
+
+def test_redis_failure_does_not_schedule_umami(monkeypatch) -> None:
+    from litestar.exceptions import ServiceUnavailableException
+
+    monkeypatch.setattr("api_app.guards._KEY_CACHE", {})
+    monkeypatch.setattr(controller, "get_engine", lambda: None)
+    monkeypatch.setattr(controller, "_query_key", lambda *_: _CachedKey(7, "free", 9e12))
+    views = []
+    monkeypatch.setattr(controller, "_track_mcp_request", lambda *args: views.append(args))
+
+    def fail_daily_quota(*args):
+        raise ServiceUnavailableException(detail="Rate limiting unavailable")
+
+    monkeypatch.setattr(controller, "_check_daily_quota", fail_daily_quota)
+    with pytest.raises(ServiceUnavailableException):
+        controller._authenticate({"headers": [(b"x-api-key", b"ag_redis")]})
+    assert views == []
+
+
+def test_umami_failure_does_not_block_mcp_response(monkeypatch) -> None:
+    monkeypatch.setattr("api_app.guards._KEY_CACHE", {})
+    monkeypatch.setattr(controller, "get_engine", lambda: None)
+    monkeypatch.setattr(controller, "_query_key", lambda *_: _CachedKey(7, "free", 9e12))
+    monkeypatch.setattr(controller, "_check_daily_quota", lambda _key, limit: (True, limit, 1))
+    monkeypatch.setattr(controller, "_check_minute_limit", lambda _key, limit: (True, limit, 1, 0))
+    started = threading.Event()
+    release = threading.Event()
+    semaphore = threading.BoundedSemaphore(1)
+    monkeypatch.setattr(controller, "_ANALYTICS_SLOTS", semaphore)
+    from api_app import analytics
+
+    monkeypatch.setitem(analytics.CONFIG, "umami", {"base_url": "test", "site_id": "test"})
+
+    def failing_page_view(**kwargs):
+        started.set()
+        if not release.wait(5):
+            raise TimeoutError("test did not release analytics")
+        raise OSError("Umami unavailable")
+
+    monkeypatch.setitem(
+        sys.modules,
+        "umami",
+        types.SimpleNamespace(
+            set_url_base=lambda _: None,
+            set_website_id=lambda _: None,
+            new_page_view=failing_page_view,
+        ),
+    )
+
+    async def exercise():
+        messages = []
+
+        async def send(message):
+            messages.append(message)
+
+        async def downstream(scope, receive, send):
+            await send({"type": "http.response.start", "status": 200, "headers": []})
+
+        await controller.AuthenticatedMCPMiddleware(downstream)(
+            {"type": "http", "method": "POST", "headers": [(b"x-api-key", b"ag_slow")]},
+            None,
+            send,
+        )
+        return messages[0]["status"]
+
+    try:
+        assert asyncio.run(exercise()) == 200
+        assert started.wait(2)
+        assert not semaphore.acquire(blocking=False)
+        controller._track_mcp_request({}, 7)
+    finally:
+        release.set()
+        assert semaphore.acquire(timeout=2)
+        semaphore.release()
+
+
+def test_analytics_scheduling_failure_does_not_break_authentication(monkeypatch):
+    monkeypatch.setattr("api_app.guards._KEY_CACHE", {})
+    monkeypatch.setattr(controller, "get_engine", lambda: None)
+    monkeypatch.setattr(controller, "_query_key", lambda *_: _CachedKey(7, "free", 9e12))
+    monkeypatch.setattr(controller, "_check_daily_quota", lambda _key, limit: (True, limit, 1))
+    monkeypatch.setattr(controller, "_check_minute_limit", lambda _key, limit: (True, limit, 1, 0))
+
+    semaphore = threading.BoundedSemaphore(1)
+    monkeypatch.setattr(controller, "_ANALYTICS_SLOTS", semaphore)
+
+    def fail(*args, **kwargs):
+        raise RuntimeError("scheduling failure")
+
+    monkeypatch.setattr(controller.threading.Thread, "start", fail)
+    assert controller._authenticate({"headers": [(b"x-api-key", b"ag_fail")]}).user_id == 7
+    assert semaphore.acquire(blocking=False)
+    semaphore.release()
 
 
 def test_keyword_tool_docs_show_free_tier() -> None:
@@ -153,6 +318,10 @@ def test_mcp_serves_any_host_without_a_session(
         controller, "_check_minute_limit", lambda _k, limit: (True, limit, limit, 0)
     )
     monkeypatch.setattr("api_app.guards._KEY_CACHE", {})
+    tracked_users = []
+    monkeypatch.setattr(
+        controller, "_track_mcp_request", lambda _scope, user: tracked_users.append(user)
+    )
 
     monkeypatch.setattr("api_app.mcp.tools.keywords.get_mcp_state", lambda: None)
     monkeypatch.setattr(
@@ -233,3 +402,4 @@ def test_mcp_serves_any_host_without_a_session(
                     "developer": name == "search_developer_apps",
                 }
         assert client.get(MCP_PATH, headers=HEADERS).status_code == 405
+    assert tracked_users == [1] * 10
