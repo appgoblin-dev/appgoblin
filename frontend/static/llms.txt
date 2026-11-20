@@ -1,6 +1,6 @@
 # AppGoblin
 
-> AppGoblin indexes 6M+ mobile apps, SDK usage, app-store rankings, company relationships, and ad-tech supply-chain data.
+> AppGoblin is a mobile app intelligence tool covering Google Play and Apple App Store data, including 6M+ apps, SDK usage, app-store rankings, company relationships, and ad-tech supply-chain data.
 
 - Homepage: https://appgoblin.info
 - OpenAPI: https://appgoblin.info/openapi.json

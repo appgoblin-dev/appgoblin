@@ -5,49 +5,52 @@ const APP_PAGE_OFFERS = [
 	{
 		summary: 'Get app keyword intelligence',
 		description:
-			'App details and ranked or description-derived keyword scores for ASO research and competitor keyword analysis.'
+			'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: app details and ranked or description-derived keyword scores for ASO research and competitor keyword analysis.'
 	},
 	{
 		summary: 'Discover app keyword opportunities',
 		description:
-			'Description-derived keyword suggestions that are not currently ranked, useful for finding ASO opportunities.'
+			'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: description-derived keyword suggestions that are not currently ranked, useful for finding ASO opportunities.'
 	},
 	{
 		summary: 'Get currently ranked app keywords',
 		description:
-			'App details and currently ranked keyword scores for search visibility analysis and competitor benchmarking.'
+			'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: app details and currently ranked keyword scores for search visibility analysis and competitor benchmarking.'
 	},
 	{
 		summary: 'Compare app keyword ranking histories',
-		description: 'HTML comparison of selected keyword ranking histories for one app over time.'
+		description:
+			'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: HTML comparison of selected keyword ranking histories for one app over time.'
 	},
 	{
 		summary: 'Get app SDK intelligence',
 		description:
-			'App details and detected SDKs, categories, permissions, app queries, and SKAdNetwork identifiers.'
+			'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: app details and detected SDKs, categories, permissions, app queries, and SKAdNetwork identifiers.'
 	},
 	{
 		summary: 'Get app permissions',
 		description:
-			'App details and detected Android permissions and iOS usage declarations for competitor capability analysis.'
+			'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: detected Android permissions and iOS usage declarations for competitor capability analysis.'
 	},
 	{
 		summary: 'Get app query declarations',
 		description:
-			'App details and package or URL schemes queried for availability, indicating possible integrations and dependencies.'
+			'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: package or URL schemes queried for availability, indicating possible integrations and dependencies.'
 	},
 	{
 		summary: 'Get app SKAdNetwork identifiers',
 		description:
-			'App details and detected iOS SKAdNetwork identifiers for advertising attribution ecosystem research.'
+			'AppGoblin mobile app intelligence for Apple App Store apps: detected iOS SKAdNetwork identifiers for advertising attribution ecosystem research.'
 	},
 	{
 		summary: 'Get unmapped app SDK patterns',
-		description: 'App details and unmapped package or path patterns detected during SDK analysis.'
+		description:
+			'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: unmapped package or path patterns detected during SDK analysis.'
 	},
 	{
 		summary: 'Get app comparison overview',
-		description: 'App metrics history, ratings, and SDK signals for competitor benchmarking.'
+		description:
+			'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: app metrics history, ratings, and SDK signals for competitor benchmarking.'
 	}
 ];
 
@@ -117,7 +120,7 @@ export const GET = () =>
 			title: 'AppGoblin Machine-Readable Pages',
 			version: '1.1.0',
 			description:
-				'Machine-readable HTML and JSON endpoints for AppGoblin app, SDK, developer, search, and comparison intelligence. Non-browser clients can pay $0.10 using x402 or MPP. Browser requests require account sign-in.'
+				'AppGoblin is a mobile app intelligence tool covering Google Play and Apple App Store app data, SDK usage, keyword rankings, app-store trends, and developer ecosystems. This catalog exposes machine-readable HTML and JSON endpoints for search and competitive intelligence. Non-browser clients can pay $0.10 using x402 or MPP; browser requests require account sign-in.'
 		},
 		'x-service-info': {
 			categories: ['search', 'mobile-app-intelligence', 'sdk-intelligence'],
@@ -133,7 +136,7 @@ export const GET = () =>
 				get: {
 					summary: 'Search AppGoblin apps and companies',
 					description:
-						'Search matching app-store listings and company domains. Machine clients receive JSON with Accept: application/json; otherwise the page may return HTML.',
+						'Search AppGoblin mobile app intelligence across Google Play and Apple App Store listings and matching company domains. Machine clients receive JSON with Accept: application/json; otherwise the page may return HTML.',
 					parameters: [
 						{
 							name: 'term',
@@ -161,7 +164,7 @@ export const GET = () =>
 				get: {
 					summary: 'Download the Q2 2026 app ecosystem CSV',
 					description:
-						'CSV containing SDK and app-ads.txt company adoption and trends for market and competitor analysis.',
+						'AppGoblin mobile app intelligence for Google Play and Apple App Store data: CSV containing SDK and app-ads.txt company adoption and trends for market and competitor analysis.',
 					'x-payment-info': paymentInfo(
 						'Q2 2026 mobile app ecosystem report CSV',
 						undefined,
@@ -238,7 +241,7 @@ export const GET = () =>
 				APP_PAGE_OFFERS[9].summary
 			),
 			'/apps/comparison/{storeId1}/{storeId2}': appPagePath(
-				'Side-by-side app metrics, ratings, and SDK comparison for two app-store identifiers.',
+				'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: side-by-side metrics, ratings, and SDK comparison for two app-store identifiers.',
 				undefined,
 				'',
 				'Compare two apps',
@@ -262,7 +265,7 @@ export const GET = () =>
 				]
 			),
 			'/sdks/{pattern}': appPagePath(
-				'Apps and companies associated with an SDK package or path pattern.',
+				'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: apps and companies associated with an SDK package or path pattern.',
 				'pattern',
 				'',
 				'Get SDK pattern adoption',
@@ -276,7 +279,7 @@ export const GET = () =>
 				}
 			),
 			'/sdks/mapped/{sdkSlug}': appPagePath(
-				'SDK details, owner, mapped package patterns, and associated apps.',
+				'AppGoblin mobile app intelligence for Google Play and Apple App Store apps: SDK details, owner, mapped package patterns, and associated apps.',
 				'mapped',
 				'',
 				'Get mapped SDK details',
@@ -290,7 +293,7 @@ export const GET = () =>
 				}
 			),
 			'/developers/{developer}/sdks': appPagePath(
-				"SDKs detected across a developer's app portfolio.",
+				"AppGoblin mobile app intelligence for Google Play and Apple App Store apps: SDKs detected across a developer's app portfolio.",
 				undefined,
 				'',
 				'Get developer SDK portfolio',
