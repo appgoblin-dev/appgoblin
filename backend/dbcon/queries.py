@@ -1040,6 +1040,47 @@ def get_single_apps_adstxt_by_relationship(
     )
 
 
+def get_company_recent_api_activity(
+    state: State, company_domain: str
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Fetch bounded recent calls and scans for the same company scope as top apps."""
+    is_secondary = company_domain in get_company_secondary_domains(state)
+    params = {
+        "company_domain": company_domain,
+        "is_secondary": is_secondary,
+        "is_parent": not is_secondary and company_domain in get_parent_companies(state),
+        "sample_limit": 1000,
+    }
+    calls = pd.read_sql(sql.company_recent_api_calls, state.dbcon.engine, params=params)
+    scans = pd.read_sql(sql.company_recent_api_scans, state.dbcon.engine, params=params)
+    return calls, scans
+
+
+def get_api_apps_for_company(
+    state: State, company_domain: str, limit: int = 10
+) -> pd.DataFrame:
+    """Return API-using apps ranked within each store for the company scope."""
+    if company_domain in get_company_secondary_domains(state):
+        query = sql.company_api_apps_secondary
+    elif company_domain in get_parent_companies(state):
+        query = sql.company_api_apps_parent
+    else:
+        query = sql.company_api_apps_company
+
+    df = pd.read_sql(
+        query,
+        con=state.dbcon.engine,
+        params={"company_domain": company_domain, "mylimit": limit},
+    )
+    if not df.empty:
+        df["rating"] = 5
+        df["installs"] = 0
+        df["rating_count"] = 0
+        df = clean_app_df(df)
+        df = df.sort_values(by="rank", ascending=True)
+    return df
+
+
 def get_topapps_for_company_secondary(
     state: State,
     company_domain: str,
@@ -1288,6 +1329,16 @@ def get_sdk_pattern(state: State, value_pattern: str) -> pd.DataFrame:
     )
     df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
     return df
+
+
+def get_sdk_pattern_count(state: State, value_pattern: str) -> int:
+    """Get the matching row count from refreshed SDK string statistics."""
+    with state.dbcon.engine.connect() as conn:
+        return int(
+            conn.execute(
+                sql.sdk_pattern_count, {"value_pattern": value_pattern}
+            ).scalar_one()
+        )
 
 
 def get_sdk_pattern_export(state: State, value_pattern: str) -> pd.DataFrame:

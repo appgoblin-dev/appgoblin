@@ -5,6 +5,7 @@
 /companies/{company_domain}/apps-added returns recently added apps for a specific company.
 /companies/{company_domain}/apps-lost returns recently lost apps for a specific company.
 /companies/{company_domain}/topapps returns top apps for a specific company.
+/companies/{company_domain}/api-apps returns top API-using apps for a company.
 /companies/{company_domain}/tree returns parent/child company tree for a specific company.
 /companies/categories/{category} returns list of top companies for a specific category.
 # /companies/countries returns list of countries where companies are located.
@@ -32,6 +33,7 @@ from api_app.models import (
     ChildCompany,
     CompaniesCategoryOverview,
     CompaniesOverview,
+    CompanyApiAppsOverview,
     CompanyAppChangesOverview,
     CompanyCategoryOverview,
     CompanyDetail,
@@ -58,6 +60,7 @@ from api_app.models import (
 )
 from config import get_logger
 from dbcon.queries import (
+    get_api_apps_for_company,
     get_category_type_stats,
     get_combined_companies_history,
     get_companies_landing,
@@ -72,6 +75,7 @@ from dbcon.queries import (
     get_company_categories_counts,
     get_company_country_apps,
     get_company_follow_lookup,
+    get_company_recent_api_activity,
     get_company_s3_reports,
     get_company_sdks,
     get_company_stats,
@@ -239,6 +243,11 @@ def get_company_apps(
             limit=limit,
         )
 
+    return _group_company_apps(df, company_domain)
+
+
+def _group_company_apps(df: pd.DataFrame, company_domain: str) -> CompanyPlatformOverview:
+    """Group company apps by platform using the existing top-apps response shape."""
     df = df[~df["store"].isna()]
 
     android_df = df[(df["store"].str.startswith("Google"))]
@@ -255,6 +264,81 @@ def get_company_apps(
         ),
     )
     return results
+
+
+_RECENT_API_ACTIVITY_LIMIT = 20
+_SAFE_API_PATH_SEGMENTS = frozenset(
+    {"api", "v1", "v2", "v3", "v4", "events", "event", "collect", "config", "sdk"}
+)
+
+
+def _safe_observed_endpoint(url: object, domain: object) -> tuple[str, str] | None:
+    """Reduce an observed URL to a mapped domain and conservatively redacted path."""
+    if not isinstance(url, str) or not isinstance(domain, str):
+        return None
+    if not re.fullmatch(r"[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?", domain):
+        return None
+    try:
+        parsed = urllib.parse.urlsplit(url if "://" in url else f"//{url}")
+        host = parsed.hostname
+        if (
+            parsed.scheme not in ("", "http", "https")
+            or parsed.username is not None
+            or parsed.password is not None
+            or host is None
+            or (host != domain and not host.endswith(f".{domain}"))
+        ):
+            return None
+    except ValueError:
+        return None
+    segments = [segment for segment in parsed.path.split("/") if segment]
+    path = "/" + "/".join(
+        segment if segment in _SAFE_API_PATH_SEGMENTS else "{redacted}"
+        for segment in segments
+    )
+    return domain, path
+
+
+def _build_company_recent_api_activity(
+    calls: pd.DataFrame, scans: pd.DataFrame
+) -> tuple[list[dict[str, str]], list[dict[str, str | None]]]:
+    """Deduplicate the bounded, newest-first samples without exposing raw URLs."""
+    endpoints: list[dict[str, str]] = []
+    endpoint_keys: set[tuple[str, str]] = set()
+    for row in calls.itertuples(index=False):
+        key = _safe_observed_endpoint(row.url, row.tld_url)
+        if key is None or key in endpoint_keys or pd.isna(row.called_at):
+            continue
+        endpoint_keys.add(key)
+        endpoints.append(
+            {
+                "host": key[0],
+                "path": key[1],
+                "last_seen": pd.Timestamp(row.called_at).isoformat(),
+            }
+        )
+        if len(endpoints) == _RECENT_API_ACTIVITY_LIMIT:
+            break
+
+    apps: list[dict[str, str | None]] = []
+    app_keys: set[tuple[object, object]] = set()
+    for row in scans.itertuples(index=False):
+        key = (row.store, row.store_id)
+        if key in app_keys or row.store not in (1, 2) or pd.isna(row.scanned_at):
+            continue
+        app_keys.add(key)
+        apps.append(
+            {
+                "store": "Google Play" if row.store == 1 else "Apple App Store",
+                "store_id": row.store_id,
+                "name": None if pd.isna(row.name) else row.name,
+                "icon_64": None if pd.isna(row.icon_64) else row.icon_64,
+                "scanned_at": pd.Timestamp(row.scanned_at).isoformat(),
+            }
+        )
+        if len(apps) == _RECENT_API_ACTIVITY_LIMIT:
+            break
+    return endpoints, apps
 
 
 def _parse_company_trends_period(latest_period: str | None) -> tuple[int, int] | None:
@@ -2290,6 +2374,22 @@ class CompaniesController(Controller):
             f"GET /api/companies/{company_domain}/topapps {category=} took {duration}ms"
         )
         return results
+
+    @get(path="/companies/{company_domain:str}/api-apps", cache=86400)
+    async def company_api_apps(
+        self: Self, state: State, company_domain: str
+    ) -> CompanyApiAppsOverview:
+        """Return top apps and recent bounded API activity for the company scope."""
+        df = get_api_apps_for_company(state=state, company_domain=company_domain)
+        groups = _group_company_apps(df, company_domain)
+        calls, scans = get_company_recent_api_activity(state, company_domain)
+        endpoints, apps = _build_company_recent_api_activity(calls, scans)
+        return CompanyApiAppsOverview(
+            android=groups.android,
+            ios=groups.ios,
+            recent_endpoints=endpoints,
+            recent_scanned_apps=apps,
+        )
 
     @get(
         path="/companies/{company_domain:str}/parentcategories",

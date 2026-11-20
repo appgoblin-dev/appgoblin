@@ -33,6 +33,7 @@ from dbcon.queries import (
     get_sdk_companies,
     get_sdk_pattern,
     get_sdk_pattern_companies,
+    get_sdk_pattern_count,
     get_sdk_patterns,
     get_user_requested_latest_sdks,
 )
@@ -127,7 +128,10 @@ class SdksController(Controller):
 
         overview = get_sdk_pattern(state, value_pattern)
 
-        overview_resp = SdkOverview(apps=overview.to_dict(orient="records"))
+        overview_resp = SdkOverview(
+            apps=overview.to_dict(orient="records"),
+            total_count=get_sdk_pattern_count(state, value_pattern),
+        )
 
         duration = round((time.perf_counter() * 1000 - start), 2)
         logger.info(f"{self.path}/{value_pattern} took {duration}ms")

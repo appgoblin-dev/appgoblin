@@ -32,6 +32,7 @@ SELECT
     tablet_image_url_3,
     description,
     description_short,
+    icon_url_512 AS original_icon_url,
     developer_id,
     developer_name,
     developer_url,

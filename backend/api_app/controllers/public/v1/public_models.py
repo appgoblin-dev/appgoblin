@@ -198,6 +198,7 @@ class PublicAppBasics:
     store_id: str | None = None
     store: str | None = None
     category: str | None = None
+    original_icon_url: str | None = None
     rating: float | None = None
     rating_count: int | None = None
     installs: int | None = None

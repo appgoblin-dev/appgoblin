@@ -652,6 +652,16 @@ class CompanyPlatformOverview:
 
 
 @dataclass
+class CompanyApiAppsOverview:
+    """API-using apps and bounded recent observed activity."""
+
+    ios: AppGroup
+    android: AppGroup
+    recent_endpoints: list[dict[str, str]]
+    recent_scanned_apps: list[dict[str, str | None]]
+
+
+@dataclass
 class CompanyAppChangesOverview:
     """Quarterly added/lost apps for a company split by platform."""
 
@@ -761,9 +771,10 @@ class SdksUserRequested:
 
 @dataclass
 class SdkOverview:
-    """Contains a list of sdk overview objects."""
+    """Contains a preview of SDK matches and the last refreshed matching row count."""
 
     apps: list[dict]
+    total_count: int
 
 
 @dataclass
