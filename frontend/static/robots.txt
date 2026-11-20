@@ -20,6 +20,8 @@ Disallow: /companies/*/app-adstxt/
 Allow: /
 Allow: /.well-known/
 Allow: /api-docs
+Allow: /llms.txt
+Allow: /openapi.json
 
 # MCP server discovery
 Mcp-Server-Card: https://appgoblin.info/.well-known/mcp/server-card.json
