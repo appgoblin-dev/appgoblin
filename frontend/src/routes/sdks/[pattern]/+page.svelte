@@ -7,8 +7,11 @@
 	let pattern = page.params.pattern;
 	import SDKOverviewTable from '#lib/SDKOverviewTable.svelte';
 	import SDKPatternCompany from '#lib/SDKPatternCompany.svelte';
+	import RequestMappingButton from '#lib/RequestMappingButton.svelte';
+	import { resolve } from '$app/paths';
 	let { data, form } = $props();
 	import WhiteCard from '#lib/WhiteCard.svelte';
+	const countFormatter = new Intl.NumberFormat('en-US');
 	let isExporting = $state(false);
 	let exportMessage = $derived(typeof form?.exportMessage === 'string' ? form.exportMessage : '');
 	let exportError = $derived(typeof form?.error === 'string' ? form.error : '');
@@ -41,10 +44,18 @@
 			{#if myMatchedCompanies.companies.length > 0}
 				<SDKPatternCompany matches={myMatchedCompanies.companies} />
 			{:else}
-				<p class="p-2 md:p-4 text-sm md:text-base">
-					No companies matched this string, if you know how to match this string, please contact us
-					on Discord.
-				</p>
+				<div class="p-2 md:p-4 space-y-3 text-sm md:text-base">
+					<p>
+						No companies matched this string. If you know how to map it, please
+						<a href={resolve('/contact')} class="underline hover:text-primary-600-400">contact us</a
+						>.
+					</p>
+					<RequestMappingButton
+						mapType="app_sdk"
+						valueToBeMapped={pattern}
+						label="Request SDK mapping"
+					/>
+				</div>
 			{/if}
 		{/await}
 	</div>
@@ -55,10 +66,22 @@
 		<section class="px-2 md:px-4">
 			<WhiteCard>
 				{#snippet title()}
-					Matching Apps <span class="text-sm font-normal text-surface-600-400"
-						>({myMatchedApps.apps.length})</span
+					Matched Apps <span
+						class="text-sm font-normal text-surface-600-400"
+						>({countFormatter.format(myMatchedApps.total_count)})</span
 					>
 				{/snippet}
+				<p class="px-2 md:px-4 pt-2 text-sm text-surface-600-400">
+					{#if data.hasB2BSdkAccess}
+						Showing {countFormatter.format(myMatchedApps.apps.length)} matching records (up to 100 in
+						the table).
+					{:else}
+						Showing {countFormatter.format(Math.min(3, myMatchedApps.apps.length))} matching records in
+						the preview.
+					{/if}
+					The total is based on the last statistics refresh. The full report exports all current matching
+					records; an app may appear more than once.
+				</p>
 				{#if !data.hasB2BSdkAccess}
 					<div
 						class="mx-2 md:mx-4 mt-2 p-3 bg-warning-50-950/20 rounded-lg border border-warning-800-200"
@@ -109,6 +132,7 @@
 					<SDKOverviewTable
 						entries_table={myMatchedApps.apps}
 						previewMode={!data.hasB2BSdkAccess}
+						showMatchPath
 					/>
 				{:else}
 					<p class="p-4 text-sm md:text-base">No matching apps found.</p>
