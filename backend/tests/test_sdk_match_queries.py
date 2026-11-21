@@ -67,7 +67,7 @@ def test_latest_sdk_queries_filter_to_requested_sdk(database, filename):
 
 
 @pytest.mark.parametrize("pattern", ["com.example", "COM.EXAMPLE", "missing"])
-def test_pattern_preview_count_matches_unlimited_export(database, pattern):
+def test_pattern_preview_count_are_exact_while_export_is_prefix(database, pattern):
     database.executescript("""
         CREATE TABLE version_strings (id INT, xml_path TEXT, value_name TEXT);
         CREATE TABLE adtech.app_sdk_strings (store_app INT, string_id INT, sdk_id INT);
@@ -75,9 +75,10 @@ def test_pattern_preview_count_matches_unlimited_export(database, pattern):
         INSERT INTO version_strings VALUES
             (1, 'manifest', 'com.example.sdk'),
             (2, 'file', 'com.example.adapter'),
-            (3, 'file', 'other.sdk');
+            (3, 'file', 'other.sdk'),
+            (4, 'manifest', 'com.example');
         INSERT INTO adtech.app_sdk_strings VALUES
-            (1, 1, 10), (1, 2, 10), (2, 3, 10), (99, 1, 20);
+            (1, 1, 10), (1, 2, 10), (2, 3, 10), (99, 1, 20), (2, 4, 10);
     """)
     database.executemany(
         "INSERT INTO adtech.app_sdk_strings VALUES (?, 1, 10)", [(1,)] * 105
@@ -90,9 +91,12 @@ def test_pattern_preview_count_matches_unlimited_export(database, pattern):
     preview = query(database, "query_sdk_pattern.sql", value_pattern=pattern)
     export = query(database, "query_sdk_pattern_export.sql", value_pattern=pattern)
     count = query(database, "query_sdk_pattern_count.sql", value_pattern=pattern)
-    assert len(preview) == min(100, len(export))
-    assert count == [{"total_count": len(export)}]
-    assert len(export) == (0 if pattern == "missing" else 108)
+    expected_exact_count = 1 if pattern.lower() == "com.example" else 0
+    assert len(preview) == expected_exact_count
+    if preview:
+        assert preview[0]["store_id"] == "app.two"
+    assert count == [{"total_count": expected_exact_count}]
+    assert len(export) == (0 if pattern == "missing" else 109)
     assert all("total_count" not in row for row in preview)
 
 
@@ -112,6 +116,21 @@ def test_pattern_endpoint_returns_stats_count_independently_of_preview(rows, tot
         "apps": [{"store_id": "app.one"}] if rows else [],
         "total_count": total,
     }
+
+
+def test_pattern_count_endpoint_returns_only_exact_match_count():
+    app = Litestar(route_handlers=[SdksController])
+    with (
+        patch(
+            "api_app.controllers.sdks.get_sdk_pattern_count", return_value=7
+        ) as count,
+        TestClient(app=app, raise_server_exceptions=False) as client,
+    ):
+        response = client.get("/api/sdks/com.example/count")
+    assert response.status_code == 200
+    count.assert_called_once()
+    assert count.call_args.args[1] == "com.example"
+    assert response.json() == {"total_count": 7}
 
 
 def test_pattern_company_query_returns_sdk_slug(database):

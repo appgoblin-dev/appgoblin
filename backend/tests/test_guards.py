@@ -8,9 +8,11 @@ from litestar.exceptions import TooManyRequestsException
 import pytest
 
 from api_app.guards import (
+    SCRY_APP_DAILY_LIMITS,
     TIER_LIMITS,
     ApiKeyContext,
     TierLimits,
+    _AmountDailyQuotaTracker,
     _DailyQuotaTracker,
     _RateLimiter,
     _query_key,
@@ -38,8 +40,8 @@ class TestTierConfig:
 
     def test_get_tier_limits_known(self):
         limits = get_tier_limits("b2b_premium")
-        assert limits.requests_per_minute == 10_000
-        assert limits.requests_per_day == 500_000
+        assert limits.requests_per_minute == 150
+        assert limits.requests_per_day == 100_000
 
     def test_get_tier_limits_unknown_defaults_to_free(self):
         limits = get_tier_limits("nonexistent_tier")
@@ -255,6 +257,27 @@ class TestDailyQuotaTracker:
         assert tracker.check("midnight", 1) == (True, 1, 0)
 
 
+@pytest.mark.usefixtures("isolated_guards")
+class TestAmountDailyQuotaTracker:
+    def test_counts_apps_not_requests(self, redis_client):
+        tracker = _AmountDailyQuotaTracker(redis_client)
+        assert tracker.check("sdk", 60, 100) == (True, 100, 40)
+        assert tracker.check("sdk", 40, 100) == (True, 100, 0)
+        assert tracker.check("sdk", 1, 100) == (False, 100, 0)
+
+    def test_rejected_request_does_not_consume_partial_quota(self, redis_client):
+        tracker = _AmountDailyQuotaTracker(redis_client)
+        assert tracker.check("premium", 190, 200) == (True, 200, 10)
+        assert tracker.check("premium", 20, 200) == (False, 200, 10)
+        assert tracker.check("premium", 10, 200) == (True, 200, 0)
+
+    def test_tier_scan_limits(self):
+        assert SCRY_APP_DAILY_LIMITS == {
+            "b2b_sdk": 100,
+            "b2b_premium": 200,
+        }
+
+
 # ---------------------------------------------------------------------------
 # API key validation (validate_api_key)
 # ---------------------------------------------------------------------------
@@ -338,7 +361,7 @@ class TestValidateApiKey:
         ctx = validate_api_key(request, state)
         assert ctx.user_id == 42
         assert ctx.tier == "free"  # no price_id maps to free
-        assert ctx.limits.requests_per_minute == 30
+        assert ctx.limits.requests_per_minute == 60
         assert ctx.limits.requests_per_day == 1000
 
     def test_paid_tier_lookup(self, mock_state, monkeypatch):
@@ -353,7 +376,7 @@ class TestValidateApiKey:
 
         ctx = validate_api_key(request, state)
         assert ctx.tier == "b2b_premium"
-        assert ctx.limits.requests_per_minute == 10_000
+        assert ctx.limits.requests_per_minute == 150
 
     def test_direct_tier_label_lookup(self, mock_state, monkeypatch):
         from api_app import guards as guards_mod
@@ -365,7 +388,7 @@ class TestValidateApiKey:
 
         ctx = validate_api_key(request, state)
         assert ctx.tier == "b2b_sdk"
-        assert ctx.limits.requests_per_minute == 2_000
+        assert ctx.limits.requests_per_minute == 100
 
     def test_no_goblinadmin_connection_raises(self):
         from litestar.exceptions import NotAuthorizedException
@@ -400,7 +423,7 @@ class TestValidateApiKey:
         state = mock_state(row=row)
 
         # Use a different key so daily quota doesn't interfere
-        for _ in range(30):  # free = 30/min
+        for _ in range(60):  # free = 60/min
             req = _make_request(api_key="ag_minutetest")
             validate_api_key(req, state)
 
@@ -416,8 +439,8 @@ class TestValidateApiKey:
         validate_api_key(request, state)
 
         info = request.scope["_rate_limit_info"]
-        assert info["minute_limit"] == 30
-        assert info["minute_remaining"] == 29
+        assert info["minute_limit"] == 60
+        assert info["minute_remaining"] == 59
         assert info["daily_limit"] == 1000
         assert info["daily_remaining"] == 999
 

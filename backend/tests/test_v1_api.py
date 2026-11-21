@@ -766,8 +766,8 @@ class TestV1CompaniesRateLimitHeaders:
             )
 
         assert resp.status_code == 200
-        assert resp.headers["x-ratelimit-limit"] == "200"
-        assert resp.headers["x-ratelimit-remaining"] == "199"
+        assert resp.headers["x-ratelimit-limit"] == "100"
+        assert resp.headers["x-ratelimit-remaining"] == "99"
 
     def test_daily_quota_headers_present(self):
         app = _make_test_app()
@@ -934,9 +934,9 @@ class TestV1CompaniesTierRateLimits:
     @pytest.mark.parametrize(
         "tier,expected_minute",
         [
-            ("premium_access", "200"),
-            ("b2b_sdk", "2000"),
-            ("b2b_premium", "10000"),
+            ("premium_access", "100"),
+            ("b2b_sdk", "100"),
+            ("b2b_premium", "150"),
         ],
     )
     def test_tier_minute_limit_in_header(self, tier, expected_minute):
@@ -1308,6 +1308,67 @@ class TestV1CompanyAppChanges:
 
 
 class TestV1Apps:
+    def test_sdk_scan_request_requires_paid_tier(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.post(
+                "/api/v1/apps/request-sdk-scans",
+                json={"store_ids": ["com.example.app"]},
+                headers={"X-API-Key": "ag_scan_free"},
+            )
+
+        assert resp.status_code == 403
+
+    def test_sdk_scan_request_counts_unique_apps(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("b2b_sdk"),
+            patch(
+                "api_app.controllers.public.v1.apps.insert_sdk_scan_request"
+            ) as insert_request,
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.post(
+                "/api/v1/apps/request-sdk-scans",
+                json={
+                    "store_ids": [
+                        "com.example.app",
+                        "com.example.app",
+                        "com.other.app",
+                    ]
+                },
+                headers={"X-API-Key": "ag_scan_sdk"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.text == ""
+        assert resp.headers["X-Scan-Quota-Limit"] == "100"
+        assert resp.headers["X-Scan-Quota-Remaining"] == "98"
+        assert insert_request.called
+        assert insert_request.call_args.args[1] == [
+            "com.example.app",
+            "com.other.app",
+        ]
+
+    def test_sdk_scan_request_rejects_over_tier_app_limit(self):
+        app = _make_test_app()
+        store_ids = [f"com.example.app{i}" for i in range(101)]
+        with (
+            _patch_key_found("b2b_sdk"),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.post(
+                "/api/v1/apps/request-sdk-scans",
+                json={"store_ids": store_ids},
+                headers={"X-API-Key": "ag_scan_too_many"},
+            )
+
+        assert resp.status_code == 429
+        assert "quota" in resp.json()["detail"].lower()
+
     def test_mapped_sdks_requires_b2b_sdk_tier(self):
         app = _make_test_app()
         with (

@@ -69,8 +69,10 @@ def isolated_guards(redis_client, monkeypatch):
 
     limiter = guards._RateLimiter(redis_client)
     quota = guards._DailyQuotaTracker(redis_client)
+    scry_quota = guards._AmountDailyQuotaTracker(redis_client)
     monkeypatch.setattr(guards, "_rate_limiter", limiter)
     monkeypatch.setattr(guards, "_daily_quota", quota)
+    monkeypatch.setattr(guards, "_scry_app_quota", scry_quota)
     guards._KEY_CACHE.clear()
     guards._LAST_USED_UPDATES.clear()
     yield

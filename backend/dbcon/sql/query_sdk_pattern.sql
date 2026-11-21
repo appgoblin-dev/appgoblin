@@ -4,7 +4,7 @@ WITH matching_strings AS MATERIALIZED (
         xml_path,
         value_name
     FROM version_strings
-    WHERE LOWER(value_name) LIKE LOWER(:value_pattern) || '%'
+    WHERE LOWER(value_name) = LOWER(:value_pattern)
 )
 
 SELECT

@@ -198,9 +198,7 @@ class _AmountDailyQuotaTracker:
     def __init__(self, client: redis.Redis = _redis_client) -> None:
         self._client = client
 
-    def check(
-        self, key: str, amount: int, daily_limit: int
-    ) -> tuple[bool, int, int]:
+    def check(self, key: str, amount: int, daily_limit: int) -> tuple[bool, int, int]:
         """Reserve amount units only if the complete reservation fits the limit."""
         allowed, count, remaining = self._client.eval(
             _AMOUNT_DAILY_QUOTA_SCRIPT,
@@ -255,9 +253,7 @@ def check_scry_app_quota(
 
     key = _rate_limit_key(context.user_id, context.organization_id)
     try:
-        allowed, limit, remaining = _scry_app_quota.check(
-            key, app_count, daily_limit
-        )
+        allowed, limit, remaining = _scry_app_quota.check(key, app_count, daily_limit)
     except redis.exceptions.RedisError as exc:
         logger.exception("Redis Scry app quota check failed")
         raise ServiceUnavailableException(detail="SDK scan quota unavailable") from exc

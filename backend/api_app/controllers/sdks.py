@@ -3,6 +3,7 @@
 /sdks/overview returns list of all sdks.
 /sdks/user_requested returns list of user requested sdks.
 /sdks/{value_pattern} returns list of sdks for a given pattern.
+/sdks/{value_pattern}/count returns an exact-match count for a pattern.
 /sdks/{value_pattern}/companies returns list of companies for a given pattern.
 """
 
@@ -40,6 +41,66 @@ from dbcon.queries import (
 from dbcon.static import get_company_logos_df
 
 logger = get_logger(__name__)
+
+
+def _build_sdk_detail_response(
+    state: State, sdk_slug: str, *, include_apps: bool
+) -> dict:
+    """Build mapped SDK detail data for the full and metadata routes."""
+    companies = get_sdk_companies(state, sdk_slug)
+    sdk_id = (
+        int(companies.iloc[0]["sdk_id"])
+        if not companies.empty and pd.notna(companies.iloc[0]["sdk_id"])
+        else None
+    )
+    apps = (
+        get_sdk(state, sdk_id, limit=10)
+        if include_apps and sdk_id is not None
+        else pd.DataFrame()
+    )
+    patterns = get_sdk_patterns(state, sdk_slug)
+    if not companies.empty and "company_domain" in companies.columns:
+        company_logos = get_company_logos_df(state).drop_duplicates(
+            subset=["company_domain"], keep="first"
+        )
+        companies = companies.merge(
+            company_logos[["company_domain", "company_logo_url"]],
+            on="company_domain",
+            how="left",
+            validate="m:1",
+        )
+    owner = companies.iloc[0].to_dict() if not companies.empty else {}
+
+    def pattern_rows(pattern_type: str) -> list[dict]:
+        rows = patterns[
+            patterns["pattern_type"].astype(str).str.lower() == pattern_type
+        ]
+        return [
+            {
+                "pattern": str(row.pattern_value),
+                "app_count": None if pd.isna(row.app_count) else int(row.app_count),
+            }
+            for row in rows.itertuples(index=False)
+            if pd.notna(row.pattern_value)
+        ]
+
+    return {
+        "sdk_id": sdk_id,
+        "sdk_name": (
+            apps.iloc[0]["sdk_name"]
+            if not apps.empty
+            else owner.get("sdk_name") or sdk_slug
+        ),
+        "apps": apps.to_dict(orient="records"),
+        "owner": owner,
+        "companies": companies.to_dict(orient="records"),
+        "patterns": {
+            "package_patterns": pattern_rows("package"),
+            "paths": pattern_rows("path"),
+            "mediation_patterns": pattern_rows("mediation"),
+            "adapter_patterns": pattern_rows("adapter"),
+        },
+    }
 
 
 class SdksController(Controller):
@@ -137,70 +198,26 @@ class SdksController(Controller):
         logger.info(f"{self.path}/{value_pattern} took {duration}ms")
         return overview_resp
 
+    @get(path="/{value_pattern:str}/count", cache=3600)
+    async def sdks_pattern_count(
+        self: Self, state: State, value_pattern: str
+    ) -> dict[str, int]:
+        """Return the exact-match app count for an SDK pattern."""
+        return {"total_count": get_sdk_pattern_count(state, value_pattern)}
+
     @get(path="/appgoblin/{sdk_slug:str}", cache=3600)
     async def sdk_detail(
         self: Self, state: State, sdk_slug: str, include_apps: bool = True
     ) -> dict:
         """Return metadata, mapped patterns, the owner, and top apps for one SDK."""
-        companies = get_sdk_companies(state, sdk_slug)
-        sdk_id = (
-            int(companies.iloc[0]["sdk_id"])
-            if not companies.empty and pd.notna(companies.iloc[0]["sdk_id"])
-            else None
+        return _build_sdk_detail_response(
+            state, sdk_slug, include_apps=include_apps
         )
-        apps = (
-            get_sdk(state, sdk_id, limit=10)
-            if include_apps and sdk_id is not None
-            else pd.DataFrame()
-        )
-        patterns = get_sdk_patterns(state, sdk_slug)
-        if not companies.empty and "company_domain" in companies.columns:
-            company_logos = get_company_logos_df(state).drop_duplicates(
-                subset=["company_domain"], keep="first"
-            )
-            companies = companies.merge(
-                company_logos[["company_domain", "company_logo_url"]],
-                on="company_domain",
-                how="left",
-                validate="m:1",
-            )
-        owner = companies.iloc[0].to_dict() if not companies.empty else {}
-
-        def pattern_rows(pattern_type: str) -> list[dict]:
-            rows = patterns[
-                patterns["pattern_type"].astype(str).str.lower() == pattern_type
-            ]
-            return [
-                {
-                    "pattern": str(row.pattern_value),
-                    "app_count": None if pd.isna(row.app_count) else int(row.app_count),
-                }
-                for row in rows.itertuples(index=False)
-                if pd.notna(row.pattern_value)
-            ]
-
-        return {
-            "sdk_id": sdk_id,
-            "sdk_name": (
-                apps.iloc[0]["sdk_name"]
-                if not apps.empty
-                else owner.get("sdk_name") or sdk_slug
-            ),
-            "apps": apps.to_dict(orient="records"),
-            "owner": owner,
-            "companies": companies.to_dict(orient="records"),
-            "patterns": {
-                "package_patterns": pattern_rows("package"),
-                "paths": pattern_rows("path"),
-                "mediation_patterns": pattern_rows("mediation"),
-                "adapter_patterns": pattern_rows("adapter"),
-            },
-        }
 
     @get(path="/appgoblin/{sdk_slug:str}/metadata", cache=3600)
     async def sdk_metadata(self: Self, state: State, sdk_slug: str) -> dict:
         """Return mapped SDK metadata without looking up its associated apps."""
-        return await self.sdk_detail(state, sdk_slug, include_apps=False)
+        return _build_sdk_detail_response(state, sdk_slug, include_apps=False)
 
     @get(path="/{value_pattern:str}/companies", cache=3600)
     async def sdks_companies(

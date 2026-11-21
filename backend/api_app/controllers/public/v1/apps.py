@@ -43,11 +43,11 @@ from dbcon.queries import (
     get_app_sdk_details,
     get_app_sdk_history,
     get_app_version_timeline,
-    insert_sdk_scan_request,
     get_ranks_for_app,
     get_ranks_for_app_overview,
     get_single_app,
     get_single_apps_adstxt_by_relationship,
+    insert_sdk_scan_request,
     search_v1_apps,
     search_v1_developer_apps,
 )
@@ -365,7 +365,9 @@ def _normalize_store_ids(data: dict) -> list[str]:
     """Validate and de-duplicate a store ID request payload."""
     store_ids = data.get("store_ids")
     if not isinstance(store_ids, list) or not store_ids:
-        raise ClientException(status_code=400, detail="store_ids must be a non-empty list")
+        raise ClientException(
+            status_code=400, detail="store_ids must be a non-empty list"
+        )
 
     normalized: list[str] = []
     seen: set[str] = set()
