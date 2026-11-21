@@ -8,7 +8,11 @@ import pandas as pd
 
 from config import MODULE_DIR, get_logger
 from dbcon.connections import get_db_connection
-from dbcon.queries import get_sitemap_apps, get_sitemap_companies
+from dbcon.queries import (
+    get_sitemap_apps,
+    get_sitemap_companies,
+    get_sitemap_mapped_sdks,
+)
 from dbcon.static import (
     build_app_categories_overview,
     load_appstore_categories,
@@ -197,6 +201,13 @@ dbcon = get_db_connection("madrone")
 apps = get_sitemap_apps(dbcon)
 
 
+mapped_sdks = get_sitemap_mapped_sdks(dbcon)
+mapped_sdks["url"] = (
+    "https://appgoblin.info/sdks/mapped/" + mapped_sdks["sdk_slug"]
+)
+mapped_sdks = set_df_sitemap_columns(mapped_sdks, 0.7, "weekly")
+
+
 cdf = get_sitemap_companies(dbcon)
 
 
@@ -281,6 +292,7 @@ allurls = pd.concat(
         company_type_categories,
         companies,
         apps,
+        mapped_sdks,
     ],
     ignore_index=True,
 )

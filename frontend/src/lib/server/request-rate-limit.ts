@@ -28,7 +28,9 @@ export function isNoindexPath(pathname: string): boolean {
 }
 
 export function isStaticAssetPath(pathname: string): boolean {
-	return pathname.startsWith('/_app') || pathname.startsWith('/favicon');
+	return (
+		pathname.startsWith('/_app') || pathname.startsWith('/favicon') || pathname === '/sitemap.xml/'
+	);
 }
 
 /**
