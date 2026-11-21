@@ -3,6 +3,7 @@
 	import type { AppFullDetails } from '../../../../types';
 	import RankChart from '#lib/RankChart.svelte';
 	import { countryCodeToEmoji } from '#lib/utils/countryCodeToEmoji.js';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	interface Props {
 		data: AppFullDetails;
@@ -158,4 +159,5 @@
 			{/if}
 		</section>
 	</div>
+	<ApiDataNote endpoint={'/api/v1/apps/{store_id}/ranks'} />
 </div>

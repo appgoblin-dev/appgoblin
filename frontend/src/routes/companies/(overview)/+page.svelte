@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -206,4 +207,5 @@
 			</section>
 		</div>
 	{/if}
+	<ApiDataNote endpoint="/api/v1/companies" />
 </div>

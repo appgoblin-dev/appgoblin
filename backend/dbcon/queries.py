@@ -1040,6 +1040,60 @@ def get_single_apps_adstxt_by_relationship(
     )
 
 
+def get_company_recent_api_activity(state: State, company_domain: str) -> pd.DataFrame:
+    """Fetch bounded recent calls for the same company scope as top apps."""
+    is_secondary = company_domain in get_company_secondary_domains(state)
+    params = {
+        "company_domain": company_domain,
+        "is_secondary": is_secondary,
+        "is_parent": not is_secondary and company_domain in get_parent_companies(state),
+        "sample_limit": 1000,
+    }
+    return pd.read_sql(sql.company_recent_api_calls, state.dbcon.engine, params=params)
+
+
+def get_company_api_response_types(state: State, company_domain: str) -> list[dict]:
+    """Return bounded MV rows, retaining per-domain distinct counts without summing.
+
+    Unmapped observed domains are included only for an exact-domain request.
+    Null observed domains cannot be attributed to a company.
+    """
+    is_secondary = company_domain in get_company_secondary_domains(state)
+    params = {
+        "company_domain": company_domain,
+        "is_secondary": is_secondary,
+        "is_parent": not is_secondary and company_domain in get_parent_companies(state),
+    }
+    with state.dbcon.engine.connect() as conn:
+        rows = conn.execute(sql.company_api_response_types, params).mappings().all()
+    return [dict(row) for row in rows]
+
+
+def get_api_apps_for_company(
+    state: State, company_domain: str, limit: int = 10
+) -> pd.DataFrame:
+    """Return API-using apps ranked within each store for the company scope."""
+    if company_domain in get_company_secondary_domains(state):
+        query = sql.company_api_apps_secondary
+    elif company_domain in get_parent_companies(state):
+        query = sql.company_api_apps_parent
+    else:
+        query = sql.company_api_apps_company
+
+    df = pd.read_sql(
+        query,
+        con=state.dbcon.engine,
+        params={"company_domain": company_domain, "mylimit": limit},
+    )
+    if not df.empty:
+        df["rating"] = 5
+        df["installs"] = 0
+        df["rating_count"] = 0
+        df = clean_app_df(df)
+        df = df.sort_values(by="rank", ascending=True)
+    return df
+
+
 def get_topapps_for_company_secondary(
     state: State,
     company_domain: str,
@@ -1290,6 +1344,16 @@ def get_sdk_pattern(state: State, value_pattern: str) -> pd.DataFrame:
     return df
 
 
+def get_sdk_pattern_count(state: State, value_pattern: str) -> int:
+    """Get the matching row count from refreshed SDK string statistics."""
+    with state.dbcon.engine.connect() as conn:
+        return int(
+            conn.execute(
+                sql.sdk_pattern_count, {"value_pattern": value_pattern}
+            ).scalar_one()
+        )
+
+
 def get_sdk_pattern_export(state: State, value_pattern: str) -> pd.DataFrame:
     """Get every app matching an SDK pattern for a B2B export."""
     df = pd.read_sql(
@@ -1480,6 +1544,12 @@ def get_sitemap_companies(dbcon: PostgresCon) -> pd.DataFrame:
 def get_sitemap_apps(dbcon: PostgresCon) -> pd.DataFrame:
     """Get sitemap apps."""
     df = pd.read_sql(sql.sitemap_apps, dbcon.engine)
+    return df
+
+
+def get_sitemap_mapped_sdks(dbcon: PostgresCon) -> pd.DataFrame:
+    """Get sitemap URLs for mapped SDK detail pages."""
+    df = pd.read_sql(sql.sitemap_mapped_sdks, dbcon.engine)
     return df
 
 

@@ -16,7 +16,7 @@ SELECT
         sa.icon_64
     ) AS app_icon_url
 FROM adtech.app_sdks_latestq AS asd
-JOIN adtech.sdks AS sd
+INNER JOIN adtech.sdks AS sd
     ON asd.sdk_id = sd.id
 LEFT JOIN frontend.store_apps_overview AS sa
     ON asd.store_app = sa.id

@@ -55,12 +55,16 @@
 	const plans: Plan[] = [
 		{
 			key: 'free',
-			name: '',
+			name: 'Basic',
+			includedSeats: 1,
 			monthlyPrice: 'Free',
 			yearlyPrice: 'Free',
 			description: 'Indie devs, casual users',
 			freeTier: true,
 			highlights: [
+				'Logged in benefits',
+				'API calls daily: 1,000',
+				'API calls monthly: 10,000',
 				'MAU, Revenue & app metrics',
 				'ASO app keyword dash',
 				'Track keywords',
@@ -80,9 +84,11 @@
 			additionalSeatPrice: '$99/mo',
 			highlights: [
 				'Everything in Free, plus...',
+				'API calls daily: 50,000',
+				'API calls monthly: 1 million',
+				'Request SDK scans: 100/day',
 				'CSV exports of SDK & API app lists',
 				'Latest apps added & lost reports',
-				'100,000 daily API requests',
 				'Full access to App Explorer',
 				'Full Monthly Advertiser reports'
 			]
@@ -93,13 +99,16 @@
 			monthlyPrice: '$899',
 			yearlyPrice: '$8,650',
 			period: '/mo',
-			description: 'Larger companies, security teams, ad networks, hedge funds',
+			description: 'large teams, security, ad networks, finance',
 			b2b: true,
 			featured: false,
 			includedSeats: 10,
 			additionalSeatPrice: '$49/mo',
 			highlights: [
 				'Everything in paid plans, plus...',
+				'API calls daily: 100,000',
+				'API calls monthly: 5 million',
+				'Request SDK scans: 200/day',
 				'Custom reports & features',
 				'Compliance & security requests',
 				'Deeper integration options'
@@ -116,7 +125,7 @@
 	};
 
 	/** Features that are identical across every tier */
-	const commonFeatures = ['Limited API access', 'Request free SDK/API scans'];
+	const commonFeatures = ['Limited API access', 'Request SDK/API scans'];
 
 	interface ComparisonFeature {
 		category: string;
@@ -246,16 +255,15 @@
 <div class="px-2 lg:px-4 xl:px-16 grid grid-cols-1 gap-4 md:gap-4 lg:gap-8">
 	<h1 class="h2 {titlePadding}">AppGoblin B2B Pricing</h1>
 	<div class={contentPadding}>
-		<p>
-			For paying via bank transfers, PayPal or crypto please reach out to us at <a
-				href="mailto:contact@appgoblin.info">contact@appgoblin.info</a
-			>. Yearly invoices receive an additional +5% discount. NET30 invoices are available for the
-			premium B2B.
-		</p>
-
 		<p class="mt-3">
-			Paid plans are billed monthly. You can cancel anytime, and your access will remain active
-			through the end of your current billing period. Payments already made are non-refundable.
+			You can cancel anytime, and access will remain active through the end of your current billing
+			period.
+		</p>
+		<p>Payments already made are non-refundable.</p>
+		<p class="mt-3">
+			To pay via bank transfer, PayPal or crypto please email <a
+				href="mailto:contact@appgoblin.info">contact@appgoblin.info</a
+			>.
 		</p>
 
 		{#if data.user && data.currentPlanKey && data.currentPlanLabel}
@@ -608,5 +616,10 @@
 				</p>
 			</div>
 		</div>
+
+		<p class="mt-8 text-sm opacity-80">
+			Data also available via the <a href="http://localhost:5173/api-docs">AppGoblin MCP and API</a>
+			(<code>{'/api/v1/companies/{company_domain}'}</code>).
+		</p>
 	</div>
 </div>

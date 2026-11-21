@@ -37,6 +37,7 @@
 		if (pathname.includes('/apps-lost-adstxt')) return 'apps-lost-adstxt';
 		if (pathname.includes('/apps-added')) return 'apps-added';
 		if (pathname.includes('/apps-lost')) return 'apps-lost';
+		if (pathname.includes('/api-calls')) return 'api-apps';
 		if (pathname.includes('/creatives')) return 'creatives';
 		if (pathname.includes('/data-exports')) return 'data-exports';
 		if (pathname.includes('/mediation/partners')) return 'mediation-partners';
@@ -108,6 +109,8 @@
 				return `${companyDisplayName} Mediation Adapter Coverage | AppGoblin`;
 			case 'mediation-partners':
 				return `${companyDisplayName} Adapter Mediation Partners | AppGoblin`;
+			case 'api-apps':
+				return `Apps Using ${companyDisplayName} APIs | AppGoblin`;
 			case 'creatives':
 				return `${companyDisplayName} Ad Creatives and Campaign Signals | AppGoblin`;
 			case 'app-adstxt':
@@ -139,6 +142,8 @@
 				return `Explore adapters integrated with ${companyDisplayName} as a mediation platform across mobile apps.`;
 			case 'mediation-partners':
 				return `Explore mediation platforms where ${companyDisplayName} is detected as an adapter across mobile apps.`;
+			case 'api-apps':
+				return `Explore mobile apps observed making API calls associated with ${companyDisplayName}.`;
 			case 'creatives':
 				return `Browse recent creatives linked to ${companyDisplayName} to monitor ad campaign activity, placement signals, and market behavior.`;
 			case 'app-adstxt':
@@ -223,6 +228,7 @@
 			'apps-added-adstxt': 'Apps Added (ads.txt)',
 			'apps-lost-adstxt': 'Apps Lost (ads.txt)',
 			creatives: 'Creatives',
+			'api-apps': 'Apps Using API',
 			trends: 'Trends',
 			sdks: 'SDKs',
 			mediation: 'Mediation Adapters',

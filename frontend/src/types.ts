@@ -455,6 +455,7 @@ export interface SdkPatternCompany {
 	company_logo_url: string | null;
 	parent_company_domain: string | null;
 	sdk_name: string;
+	sdk_slug: string | null;
 	pattern_type: string;
 	pattern_value: string;
 	app_count: number | null;

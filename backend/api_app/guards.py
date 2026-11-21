@@ -8,6 +8,7 @@ import redis
 from litestar import Request
 from litestar.exceptions import (
     NotAuthorizedException,
+    PermissionDeniedException,
     ServiceUnavailableException,
     TooManyRequestsException,
 )
@@ -33,17 +34,22 @@ class TierLimits:
 
 
 PUBLIC_TIER_LIMITS: dict[str, TierLimits] = {
-    "free": TierLimits(requests_per_minute=20, requests_per_day=1_000),
-    "b2b_sdk": TierLimits(requests_per_minute=200, requests_per_day=100_000),
-    "b2b_appads": TierLimits(requests_per_minute=200, requests_per_day=100_000),
-    "b2b_premium": TierLimits(requests_per_minute=200, requests_per_day=500_000),
+    "free": TierLimits(requests_per_minute=60, requests_per_day=1_000),
+    "b2b_sdk": TierLimits(requests_per_minute=100, requests_per_day=100_000),
+    "b2b_appads": TierLimits(requests_per_minute=100, requests_per_day=100_000),
+    "b2b_premium": TierLimits(requests_per_minute=150, requests_per_day=200_000),
 }
 
 LEGACY_TIER_LIMITS: dict[str, TierLimits] = {
-    "premium_access": TierLimits(requests_per_minute=200, requests_per_day=10_000),
+    "premium_access": TierLimits(requests_per_minute=100, requests_per_day=10_000),
 }
 
 TIER_LIMITS: dict[str, TierLimits] = {**PUBLIC_TIER_LIMITS, **LEGACY_TIER_LIMITS}
+
+SCRY_APP_DAILY_LIMITS: dict[str, int] = {
+    "b2b_sdk": 100,
+    "b2b_premium": 200,
+}
 
 # Stripe/provider price IDs are configured by the application at startup.
 # Direct tier labels are also accepted for normalized subscription rows.
@@ -141,6 +147,22 @@ redis.call('EXPIREAT', key, (day + 1) * 86400)
 return count
 """
 
+_AMOUNT_DAILY_QUOTA_SCRIPT = """
+local clock = redis.call('TIME')
+local now = tonumber(clock[1])
+local day = math.floor(now / 86400)
+local key = KEYS[1] .. ':' .. day
+local amount = tonumber(ARGV[1])
+local limit = tonumber(ARGV[2])
+local count = tonumber(redis.call('GET', key)) or 0
+if count + amount <= limit then
+    count = redis.call('INCRBY', key, amount)
+    redis.call('EXPIREAT', key, (day + 1) * 86400)
+    return {1, count, math.max(0, limit - count)}
+end
+return {0, count, math.max(0, limit - count)}
+"""
+
 
 class _RateLimiter:
     """Redis-backed token bucket shared by all workers."""
@@ -170,8 +192,27 @@ class _DailyQuotaTracker:
         return count <= daily_limit, daily_limit, max(0, daily_limit - count)
 
 
+class _AmountDailyQuotaTracker:
+    """Redis-backed UTC-daily quota that can consume several units atomically."""
+
+    def __init__(self, client: redis.Redis = _redis_client) -> None:
+        self._client = client
+
+    def check(self, key: str, amount: int, daily_limit: int) -> tuple[bool, int, int]:
+        """Reserve amount units only if the complete reservation fits the limit."""
+        allowed, count, remaining = self._client.eval(
+            _AMOUNT_DAILY_QUOTA_SCRIPT,
+            1,
+            f"appgoblin:rate:scry-daily:{key}",
+            amount,
+            daily_limit,
+        )
+        return bool(allowed), daily_limit, int(remaining)
+
+
 _rate_limiter = _RateLimiter()
 _daily_quota = _DailyQuotaTracker()
+_scry_app_quota = _AmountDailyQuotaTracker()
 
 
 def _rate_limit_key(user_id: int, organization_id: int | None) -> str:
@@ -195,6 +236,37 @@ def _check_minute_limit(key: str, limit: int) -> tuple[bool, int, int, int]:
     except redis.exceptions.RedisError as exc:
         logger.exception("Redis rate limit check failed")
         raise ServiceUnavailableException(detail="Rate limiting unavailable") from exc
+
+
+def check_scry_app_quota(
+    context: ApiKeyContext, app_count: int
+) -> tuple[bool, int, int]:
+    """Atomically reserve SDK scan app quota for the API key owner."""
+    if app_count < 1:
+        raise ServiceUnavailableException(detail="Invalid SDK scan app count")
+
+    daily_limit = SCRY_APP_DAILY_LIMITS.get(context.tier)
+    if daily_limit is None:
+        raise PermissionDeniedException(
+            detail="SDK scan requests require B2B SDK or B2B Premium"
+        )
+
+    key = _rate_limit_key(context.user_id, context.organization_id)
+    try:
+        allowed, limit, remaining = _scry_app_quota.check(key, app_count, daily_limit)
+    except redis.exceptions.RedisError as exc:
+        logger.exception("Redis Scry app quota check failed")
+        raise ServiceUnavailableException(detail="SDK scan quota unavailable") from exc
+
+    if not allowed:
+        raise TooManyRequestsException(
+            detail="Daily SDK scan app quota exceeded",
+            headers={
+                "X-Scan-Quota-Limit": str(limit),
+                "X-Scan-Quota-Remaining": str(remaining),
+            },
+        )
+    return allowed, limit, remaining
 
 
 # ---------------------------------------------------------------------------
@@ -228,6 +300,7 @@ class ApiKeyContext:
     tier: str
     key_hash: str
     limits: TierLimits
+    organization_id: int | None = None
 
 
 def _query_key(engine: Engine, key_hash: str) -> _CachedKey | None:
@@ -438,6 +511,7 @@ def validate_api_key(request: Request, state) -> ApiKeyContext:
         tier=tier,
         key_hash=key_hash,
         limits=limits,
+        organization_id=organization_id,
     )
     set_request_analytics_context(request, user_id=context.user_id)
     return context

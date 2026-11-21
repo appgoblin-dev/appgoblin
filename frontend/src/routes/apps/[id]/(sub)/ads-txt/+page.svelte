@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AdsTxtTable from '#lib/AdsTxtTable.svelte';
 	import type { AdsTxtEntriesResult } from '../../../../../types';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 	let { data }: { data: AdsTxtEntriesResult } = $props();
 </script>
 
@@ -27,4 +28,5 @@
 			</section>
 		</div>
 	{/await}
+	<ApiDataNote endpoint={'/api/v1/apps/{store_id}/adstxt/overview'} />
 </div>

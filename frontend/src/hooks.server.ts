@@ -171,6 +171,12 @@ const cacheAndRoutingHandle: Handle = async ({ event, resolve }) => {
 	const route = event.url.pathname;
 
 	// --- Handle redirects first (no need to wait for cache) ---
+	if (route === '/sitemap.xml/') {
+		return new Response(undefined, {
+			status: 301,
+			headers: { Location: `/sitemap.xml${event.url.search}` }
+		});
+	}
 	if (route.startsWith('/networks')) {
 		return new Response(undefined, {
 			status: 301,

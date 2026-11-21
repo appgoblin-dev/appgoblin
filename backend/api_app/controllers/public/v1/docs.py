@@ -23,6 +23,7 @@ APP_BASICS_EXAMPLE_RESPONSE = {
     "store_id": APP_BASICS_EXAMPLE_STORE_ID,
     "store": "Google Play",
     "category": "tools",
+    "original_icon_url": "https://example.com/store-icon.png",
     "rating": 0,
     "rating_count": 0,
     "installs": 37,
@@ -474,7 +475,9 @@ V1_OPERATION_DOCS = {
             "description": (
                 "Endpoint: `GET /api/v1/apps/{store_id}`\n\n"
                 "Returns stable public app metadata plus MAU, recent install, and "
-                "estimated revenue signals for a single app."
+                "estimated revenue signals for a single app. `original_icon_url` "
+                "is the original store-provided icon URL, usually 512 × 512 pixels; "
+                "it may be null."
             ),
         }
     },
@@ -1310,8 +1313,6 @@ def build_v1_openapi_schema(request: Request) -> dict[str, Any]:
             "\n"
             "- App basics include stable store metadata plus MAU, recent install, and "
             "estimated revenue metrics\n"
-            "- Public app payloads intentionally omit internal IDs, app icon URLs, and "
-            "creative inventory counters\n"
             "- App endpoints accept valid public API tokens\n"
             "- Company endpoints require a paid subscription tier"
         ),

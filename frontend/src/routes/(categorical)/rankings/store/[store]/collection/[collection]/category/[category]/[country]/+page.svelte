@@ -5,6 +5,7 @@
 	import AppRankTable from '#lib/AppRankTable.svelte';
 	import { countryCodeToEmoji } from '#lib/utils/countryCodeToEmoji.js';
 	import { prettyName } from '#lib/utils/prettyNames.js';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	interface Props {
 		data: StoreCategoryRanks;
@@ -131,4 +132,5 @@
 			{/await}
 		</div>
 	</div>
+	<ApiDataNote endpoint={'/api/v1/rankings/{store}/{collection}/{category}'} />
 </div>

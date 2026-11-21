@@ -31,10 +31,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	let additionalInfo: { store_id: string } | null = null;
-	if (body.mapType === 'app_sdk') {
-		const storeId = body.additionalInfo?.store_id?.trim();
+	if (body.mapType === 'app_sdk' && body.additionalInfo != null) {
+		const storeId = body.additionalInfo.store_id?.trim();
 		if (!storeId) {
-			return badRequest('store_id is required for app SDK mappings');
+			return badRequest('store_id is required when additional info is provided');
 		}
 		additionalInfo = { store_id: storeId };
 	}

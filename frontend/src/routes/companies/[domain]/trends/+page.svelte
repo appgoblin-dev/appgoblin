@@ -1,6 +1,8 @@
 <script lang="ts">
 	import CompanyTrendsDash from '#lib/CompanyTrendsDash.svelte';
+	import CompanySectionLink from '#lib/utils/CompanySectionLink.svelte';
 	import type { CompanyTrendsDetails } from '../../../../types';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	interface Props {
 		data: CompanyTrendsDetails;
@@ -22,7 +24,12 @@
 	<p class="mb-4 text-sm">
 		Quarterly market share trends for {companyName}, separated into iOS and Android signal pools so
 		SDK/API and app-ads.txt DIRECT movement can be compared without cross-platform distortion.
+		Explore <CompanySectionLink slug="sdks">SDKs</CompanySectionLink>,
+		<CompanySectionLink slug="app-adstxt">app-ads.txt publisher IDs</CompanySectionLink>,
+		<CompanySectionLink slug="apps-added">recently added apps</CompanySectionLink>, and
+		<CompanySectionLink slug="apps-lost">recently lost apps</CompanySectionLink> for more detail.
 	</p>
 </section>
 
 <CompanyTrendsDash trends={data.companyTrends} />
+<ApiDataNote endpoint={'/api/v1/companies/{company_domain}'} />

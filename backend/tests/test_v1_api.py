@@ -766,8 +766,8 @@ class TestV1CompaniesRateLimitHeaders:
             )
 
         assert resp.status_code == 200
-        assert resp.headers["x-ratelimit-limit"] == "200"
-        assert resp.headers["x-ratelimit-remaining"] == "199"
+        assert resp.headers["x-ratelimit-limit"] == "100"
+        assert resp.headers["x-ratelimit-remaining"] == "99"
 
     def test_daily_quota_headers_present(self):
         app = _make_test_app()
@@ -934,9 +934,9 @@ class TestV1CompaniesTierRateLimits:
     @pytest.mark.parametrize(
         "tier,expected_minute",
         [
-            ("premium_access", "200"),
-            ("b2b_sdk", "2000"),
-            ("b2b_premium", "10000"),
+            ("premium_access", "100"),
+            ("b2b_sdk", "100"),
+            ("b2b_premium", "150"),
         ],
     )
     def test_tier_minute_limit_in_header(self, tier, expected_minute):
@@ -1308,6 +1308,67 @@ class TestV1CompanyAppChanges:
 
 
 class TestV1Apps:
+    def test_sdk_scan_request_requires_paid_tier(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("free"),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.post(
+                "/api/v1/apps/request-sdk-scans",
+                json={"store_ids": ["com.example.app"]},
+                headers={"X-API-Key": "ag_scan_free"},
+            )
+
+        assert resp.status_code == 403
+
+    def test_sdk_scan_request_counts_unique_apps(self):
+        app = _make_test_app()
+        with (
+            _patch_key_found("b2b_sdk"),
+            patch(
+                "api_app.controllers.public.v1.apps.insert_sdk_scan_request"
+            ) as insert_request,
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.post(
+                "/api/v1/apps/request-sdk-scans",
+                json={
+                    "store_ids": [
+                        "com.example.app",
+                        "com.example.app",
+                        "com.other.app",
+                    ]
+                },
+                headers={"X-API-Key": "ag_scan_sdk"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.text == ""
+        assert resp.headers["X-Scan-Quota-Limit"] == "100"
+        assert resp.headers["X-Scan-Quota-Remaining"] == "98"
+        assert insert_request.called
+        assert insert_request.call_args.args[1] == [
+            "com.example.app",
+            "com.other.app",
+        ]
+
+    def test_sdk_scan_request_rejects_over_tier_app_limit(self):
+        app = _make_test_app()
+        store_ids = [f"com.example.app{i}" for i in range(101)]
+        with (
+            _patch_key_found("b2b_sdk"),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.post(
+                "/api/v1/apps/request-sdk-scans",
+                json={"store_ids": store_ids},
+                headers={"X-API-Key": "ag_scan_too_many"},
+            )
+
+        assert resp.status_code == 429
+        assert "quota" in resp.json()["detail"].lower()
+
     def test_mapped_sdks_requires_b2b_sdk_tier(self):
         app = _make_test_app()
         with (
@@ -1690,6 +1751,7 @@ class TestV1Apps:
             "ad_supported": True,
             "in_app_purchases": False,
             "tv_supported": True,
+            "original_icon_url": "https://store.example.com/original-icon.png",
             "app_icon_url": "https://media.appgoblin.info/icon.png",
             "store_link": "https://play.google.com/store/apps/details?id=com.example.app",
             "ad_creative_count": 12,
@@ -1712,6 +1774,7 @@ class TestV1Apps:
             "store_id": "com.example.app",
             "store": "Google Play",
             "category": "tools",
+            "original_icon_url": "https://store.example.com/original-icon.png",
             "rating": 4.5,
             "rating_count": 100,
             "installs": 50000,
@@ -1736,6 +1799,26 @@ class TestV1Apps:
         assert "app_icon_url" not in resp.json()
         assert "ad_creative_count" not in resp.json()
         assert "ad_monetized_creative_count" not in resp.json()
+
+    def test_app_basics_does_not_fallback_to_cached_icon(self):
+        app = _make_test_app()
+        app_row = {
+            "store_id": "com.example.app",
+            "original_icon_url": None,
+            "app_icon_url": "https://media.appgoblin.info/icon.png",
+        }
+        with (
+            _patch_key_found("free"),
+            _patch_single_app(app_row),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/apps/com.example.app",
+                headers={"X-API-Key": "ag_appkey"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json()["original_icon_url"] is None
 
     def test_app_basics_returns_404_for_unknown_store_id(self):
         app = _make_test_app()
@@ -1780,6 +1863,7 @@ class TestV1Apps:
 
         assert resp.status_code == 200
         assert resp.json()["tv_supported"] is expected
+        assert resp.json()["original_icon_url"] is None
 
     def test_app_ranks_returns_expected_shape(self):
         app = _make_test_app()
@@ -3053,6 +3137,9 @@ class TestV1Docs:
         assert examples["appgoblin_android_app"]["value"]["name"] == (
             "AppGoblin: Scan Trackers & SDK"
         )
+        assert examples["appgoblin_android_app"]["value"]["original_icon_url"] == (
+            "https://example.com/store-icon.png"
+        )
         assert "id" not in examples["appgoblin_android_app"]["value"]
         assert "app_icon_url" not in examples["appgoblin_android_app"]["value"]
         assert "ad_creative_count" not in examples["appgoblin_android_app"]["value"]
@@ -3065,7 +3152,9 @@ class TestV1Docs:
             app_basics_operation["description"]
             == "Endpoint: `GET /api/v1/apps/{store_id}`\n\n"
             "Returns stable public app metadata plus MAU, recent install, and "
-            "estimated revenue signals for a single app."
+            "estimated revenue signals for a single app. `original_icon_url` "
+            "is the original store-provided icon URL, usually 512 × 512 pixels; "
+            "it may be null."
         )
         app_ranks_operation = data["paths"]["/api/v1/apps/{store_id}/ranks"]["get"]
         assert [

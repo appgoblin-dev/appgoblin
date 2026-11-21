@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import CtvAppRanksTable from '#lib/CtvAppRanksTable.svelte';
 	import type { CtvAppRanksResponse } from '../../../types.js';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	interface Props {
 		data: {
@@ -67,4 +68,5 @@
 	{:else}
 		<p>No CTV apps found for this store.</p>
 	{/if}
+	<ApiDataNote endpoint={'/api/v1/rankings/ctv/{store}'} />
 </div>

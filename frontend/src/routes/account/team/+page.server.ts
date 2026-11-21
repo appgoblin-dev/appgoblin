@@ -26,8 +26,10 @@ export const load: PageServerLoad = async (event) => {
 		 JOIN tier_prices tp ON tp.id = s.tier_price_id
 		 WHERE s.organization_id = $1
 		   AND tp.provider_name = 'stripe'
-		   AND s.status IN ('active', 'trialing')
-		   AND (s.cancel_at IS NULL OR s.cancel_at > NOW())
+		   AND (
+		     (s.cancel_at IS NOT NULL AND s.cancel_at > NOW())
+		     OR (s.cancel_at IS NULL AND s.status IN ('active', 'trialing'))
+		   )
 		 LIMIT 1`,
 		[organization.organizationId]
 	);

@@ -5,6 +5,7 @@
 /companies/{company_domain}/apps-added returns recently added apps for a specific company.
 /companies/{company_domain}/apps-lost returns recently lost apps for a specific company.
 /companies/{company_domain}/topapps returns top apps for a specific company.
+/companies/{company_domain}/api-apps returns top API-using apps for a company.
 /companies/{company_domain}/tree returns parent/child company tree for a specific company.
 /companies/categories/{category} returns list of top companies for a specific category.
 # /companies/countries returns list of countries where companies are located.
@@ -32,6 +33,8 @@ from api_app.models import (
     ChildCompany,
     CompaniesCategoryOverview,
     CompaniesOverview,
+    CompanyApiAppsOverview,
+    CompanyApiResponseType,
     CompanyAppChangesOverview,
     CompanyCategoryOverview,
     CompanyDetail,
@@ -58,6 +61,7 @@ from api_app.models import (
 )
 from config import get_logger
 from dbcon.queries import (
+    get_api_apps_for_company,
     get_category_type_stats,
     get_combined_companies_history,
     get_companies_landing,
@@ -68,10 +72,12 @@ from dbcon.queries import (
     get_company_adstxt_publisher_id_apps_overview,
     get_company_adstxt_publisher_id_apps_raw,
     get_company_adstxt_publishers_overview,
+    get_company_api_response_types,
     get_company_app_changes,
     get_company_categories_counts,
     get_company_country_apps,
     get_company_follow_lookup,
+    get_company_recent_api_activity,
     get_company_s3_reports,
     get_company_sdks,
     get_company_stats,
@@ -239,6 +245,13 @@ def get_company_apps(
             limit=limit,
         )
 
+    return _group_company_apps(df, company_domain)
+
+
+def _group_company_apps(
+    df: pd.DataFrame, company_domain: str
+) -> CompanyPlatformOverview:
+    """Group company apps by platform using the existing top-apps response shape."""
     df = df[~df["store"].isna()]
 
     android_df = df[(df["store"].str.startswith("Google"))]
@@ -255,6 +268,84 @@ def get_company_apps(
         ),
     )
     return results
+
+
+_RECENT_API_ACTIVITY_LIMIT = 20
+
+
+def _build_company_recent_api_activity(
+    calls: pd.DataFrame,
+) -> tuple[list[dict[str, str]], list[dict[str, str | None]]]:
+    """Build bounded, newest-first endpoint and request samples."""
+    endpoints: list[dict[str, str]] = []
+    requests: list[dict[str, str | None]] = []
+    endpoint_keys: set[tuple[str, str]] = set()
+    for row in calls.itertuples(index=False):
+        if not isinstance(row.url, str) or not row.url or pd.isna(row.called_at):
+            continue
+        try:
+            parsed = urllib.parse.urlsplit(
+                row.url if "://" in row.url else f"//{row.url}"
+            )
+            host = parsed.hostname
+            if parsed.scheme not in ("", "http", "https") or not host:
+                continue
+            path = parsed.path or "/"
+            if ":" in host:
+                host = f"[{host}]"
+            if parsed.port is not None:
+                host = f"{host}:{parsed.port}"
+        except ValueError:
+            continue
+        slash_count = 0
+        path_end = len(path)
+        for index, character in enumerate(path):
+            if character == "/":
+                slash_count += 1
+                if slash_count == 3 and index < len(path) - 1:
+                    path_end = index + 1
+                    break
+        endpoint = host + path[:path_end]
+        truncated = path_end < len(path)
+        if len(endpoint) + (3 if truncated else 0) > 120:
+            endpoint = endpoint[:117]
+            truncated = True
+        if truncated:
+            endpoint += "..."
+        display_host = endpoint[: len(host)]
+        display_path = endpoint[len(host) :]
+        called_at = pd.Timestamp(row.called_at).isoformat()
+        key = (display_host, display_path)
+        if key not in endpoint_keys and len(endpoints) < _RECENT_API_ACTIVITY_LIMIT:
+            endpoint_keys.add(key)
+            endpoints.append(
+                {"host": display_host, "path": display_path, "last_seen": called_at}
+            )
+        if len(requests) < _RECENT_API_ACTIVITY_LIMIT:
+            requests.append(
+                {
+                    "host": display_host,
+                    "path": display_path,
+                    "called_at": called_at,
+                    **{
+                        field: (
+                            None
+                            if pd.isna(getattr(row, field))
+                            else getattr(row, field)
+                        )
+                        for field in (
+                            "store_id",
+                            "name",
+                            "icon_64",
+                            "request_mime_type",
+                            "response_mime_type",
+                        )
+                    },
+                }
+            )
+        if len(endpoints) == len(requests) == _RECENT_API_ACTIVITY_LIMIT:
+            break
+    return endpoints, requests
 
 
 def _parse_company_trends_period(latest_period: str | None) -> tuple[int, int] | None:
@@ -2290,6 +2381,26 @@ class CompaniesController(Controller):
             f"GET /api/companies/{company_domain}/topapps {category=} took {duration}ms"
         )
         return results
+
+    @get(path="/companies/{company_domain:str}/api-apps", cache=86400)
+    async def company_api_apps(
+        self: Self, state: State, company_domain: str
+    ) -> CompanyApiAppsOverview:
+        """Return top apps and recent bounded API activity for the company scope."""
+        df = get_api_apps_for_company(state=state, company_domain=company_domain)
+        groups = _group_company_apps(df, company_domain)
+        calls = get_company_recent_api_activity(state, company_domain)
+        endpoints, requests = _build_company_recent_api_activity(calls)
+        return CompanyApiAppsOverview(
+            android=groups.android,
+            ios=groups.ios,
+            recent_endpoints=endpoints,
+            recent_requests=requests,
+            response_types=[
+                CompanyApiResponseType(**row)
+                for row in get_company_api_response_types(state, company_domain)
+            ],
+        )
 
     @get(
         path="/companies/{company_domain:str}/parentcategories",

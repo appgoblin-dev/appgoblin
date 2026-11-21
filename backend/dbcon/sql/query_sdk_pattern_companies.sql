@@ -3,6 +3,7 @@ SELECT
     sp.company_domain,
     sp.parent_company_domain,
     sp.sdk_name,
+    sp.sdk_slug,
     sp.pattern_type,
     sp.pattern_value,
     sp.app_count,

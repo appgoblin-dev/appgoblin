@@ -16,6 +16,11 @@
 	import CompanyTableGrid from '#lib/CompanyTableGrid.svelte';
 	import HierarchyTree from '#lib/HierarchyTree.svelte';
 	import WhiteCard from '#lib/WhiteCard.svelte';
+	import CompanySectionLink from '#lib/utils/CompanySectionLink.svelte';
+	import { companySectionHasData } from '#lib/utils/companySectionAvailability.js';
+	import { page } from '$app/state';
+	import type { CompanyLayoutDetails } from '../../../../types';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 	interface Props {
 		data: CompanyFullDetails;
 	}
@@ -137,43 +142,77 @@
 		return names;
 	});
 
-	let dynamicDescription = $derived.by(() => {
-		const subject = companyTypeLabel
-			? `${companyName}, a mobile ${companyTypeLabel},`
-			: companyName;
-
-		const dataPoints: string[] = [];
-		if (sdkApps > 0) dataPoints.push(`${formatCount(sdkApps)} apps with detected SDKs`);
-		if (apiApps > 0) dataPoints.push(`${formatCount(apiApps)} apps making API calls`);
-		if (adstxtApps > 0) dataPoints.push(`${formatCount(adstxtApps)} app-ads.txt listings`);
-
-		const sentences: string[] = [];
-
-		if (totalApps > 0) {
-			const detail = dataPoints.length ? `, including ${joinWithAnd(dataPoints)}` : '';
-			sentences.push(`${subject} is tied to ${formatCount(totalApps)} mobile apps${detail}.`);
-		} else {
-			sentences.push(
-				`AppGoblin tracks ${subject} across SDKs, API calls, and app-ads.txt records.`
-			);
-		}
-
-		if (notableApps.length > 0) {
-			sentences.push(`Top apps using ${companyName} include ${joinWithAnd(notableApps)}.`);
-		}
-
-		return sentences.join(' ');
-	});
+	let subject = $derived(
+		companyTypeLabel ? `${companyName}, a mobile ${companyTypeLabel},` : companyName
+	);
+	let signalCounts = $derived(
+		[
+			{ slug: 'sdks' as const, value: sdkApps, label: 'apps with detected SDKs' },
+			{ slug: 'api-apps' as const, value: apiApps, label: 'apps making API calls' },
+			{ slug: 'app-adstxt' as const, value: adstxtApps, label: 'app-ads.txt listings' }
+		].filter((signal) => signal.value > 0)
+	);
+	const relatedSections = [
+		{ slug: 'creatives', label: 'creatives' },
+		{ slug: 'trends', label: 'trends' },
+		{ slug: 'mediation', label: 'mediation adapters' },
+		{ slug: 'mediation-partners', label: 'mediation partners' },
+		{ slug: 'apps-added', label: 'SDK/API additions' },
+		{ slug: 'apps-lost', label: 'SDK/API losses' },
+		{ slug: 'apps-added-adstxt', label: 'app-ads.txt additions' },
+		{ slug: 'apps-lost-adstxt', label: 'app-ads.txt losses' },
+		{ slug: 'data-exports', label: 'data exports' }
+	] as const;
+	let companyLayout = $derived(page.data as CompanyLayoutDetails);
+	let availableSections = $derived(
+		relatedSections.filter((section) =>
+			companySectionHasData(
+				section.slug,
+				companyLayout.tabIndicators,
+				companyLayout.mediationPartners?.length
+			)
+		)
+	);
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
 	<div class="md:col-span-2 space-y-2">
-		<p class="text-base">{dynamicDescription}</p>
 		<p class="text-base">
-			AppGoblin intelligence for {companyName} maps SDK integrations, API calls, and app-ads.txt records
-			to real mobile app IDs. Explore {companyName} creatives and mediation relationships to evaluate
-			technical footprint and competitive position quickly.
+			{#if totalApps > 0}
+				{subject} is tied to {formatCount(totalApps)} mobile apps{#if signalCounts.length > 0},
+					including
+					{#each signalCounts as signal, i (signal.slug)}
+						{#if i > 0}{i === signalCounts.length - 1
+								? signalCounts.length > 2
+									? ', and '
+									: ' and '
+								: ', '}{/if}<CompanySectionLink slug={signal.slug}
+							>{formatCount(signal.value)} {signal.label}</CompanySectionLink
+						>
+					{/each}{/if}.
+			{:else}
+				AppGoblin tracks {companyName} across <CompanySectionLink slug="sdks"
+					>SDKs</CompanySectionLink
+				>,
+				<CompanySectionLink slug="api-apps">API calls</CompanySectionLink>, and
+				<CompanySectionLink slug="app-adstxt">app-ads.txt records</CompanySectionLink>.
+			{/if}
+			{#if notableApps.length > 0}
+				Top apps using {companyName} include {joinWithAnd(notableApps)}.
+			{/if}
 		</p>
+		{#if availableSections.length > 0}
+			<p class="text-base">
+				Explore {#each availableSections as section, i (section.slug)}{#if i > 0}{i ===
+						availableSections.length - 1
+							? availableSections.length > 2
+								? ', and '
+								: ' and '
+							: ', '}{/if}<CompanySectionLink slug={section.slug}
+						>{section.label}</CompanySectionLink
+					>{/each}.
+			</p>
+		{/if}
 	</div>
 	<div class="md:row-span-2">
 		<WhiteCard>
@@ -401,3 +440,4 @@
 		/>
 	</section>
 {/if}
+<ApiDataNote endpoint={'/api/v1/companies/{company_domain}'} />

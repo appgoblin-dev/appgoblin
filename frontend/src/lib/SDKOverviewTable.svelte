@@ -8,9 +8,10 @@
 	interface Props {
 		entries_table: SdkOverview[];
 		previewMode?: boolean;
+		showMatchPath?: boolean;
 	}
 
-	let { entries_table, previewMode = false }: Props = $props();
+	let { entries_table, previewMode = false, showMatchPath = false }: Props = $props();
 
 	function tableHasRemoved(table: SdkOverview[]) {
 		return table.some((row) => row.is_removed != null);
@@ -18,6 +19,7 @@
 
 	const baseColumns = [
 		{ title: 'Matched SDK String', accessorKey: 'value_name', isSortable: true },
+		{ title: 'Match Path', accessorKey: 'xml_path', isSortable: true },
 		{ title: 'App', accessorKey: 'app_name', isSortable: true },
 		{ title: 'Store', accessorKey: 'store', isSortable: true },
 		{ title: 'Category', accessorKey: 'category', isSortable: true },
@@ -34,7 +36,9 @@
 		get columns() {
 			return genericColumns(
 				baseColumns.filter(
-					(column) => column.accessorKey !== 'is_removed' || tableHasRemoved(entries_table)
+					(column) =>
+						(column.accessorKey !== 'is_removed' || tableHasRemoved(entries_table)) &&
+						(column.accessorKey !== 'xml_path' || showMatchPath)
 				)
 			);
 		}
@@ -48,6 +52,7 @@
 				<tr>
 					<th class="table-cell-fit">#</th>
 					<th class="table-cell-fit">Matched SDK String</th>
+					{#if showMatchPath}<th class="table-cell-fit">Match Path</th>{/if}
 					<th class="table-cell-fit">App</th>
 					<th class="table-cell-fit">Store</th>
 					<th class="table-cell-fit">Category</th>
@@ -66,6 +71,7 @@
 								>{row.original.value_name}</a
 							>
 						</td>
+						{#if showMatchPath}<td class="table-cell-fit">{row.original.xml_path ?? '-'}</td>{/if}
 						<td class="table-cell-fit">
 							<a href={`/apps/${row.original.store_id}`} class="flex items-center gap-2">
 								<img
@@ -95,6 +101,11 @@
 							<td class="table-cell-fit text-gray-500">{index + 4}</td>
 							<td class="table-cell-fit"><div class="h-3 w-32 rounded bg-surface-200-800"></div></td
 							>
+							{#if showMatchPath}
+								<td class="table-cell-fit"
+									><div class="h-3 w-32 rounded bg-surface-200-800"></div></td
+								>
+							{/if}
 							<td class="table-cell-fit"><div class="h-3 w-40 rounded bg-surface-200-800"></div></td
 							>
 							<td class="table-cell-fit"><div class="h-3 w-20 rounded bg-surface-200-800"></div></td
@@ -120,7 +131,7 @@
 								<a href="/pricing" class="font-semibold underline hover:text-primary-600-400"
 									>Upgrade to B2B</a
 								>
-								to see all apps
+								{showMatchPath ? 'to access the full report' : 'to see all apps'}
 							</p>
 						</td>
 					</tr>

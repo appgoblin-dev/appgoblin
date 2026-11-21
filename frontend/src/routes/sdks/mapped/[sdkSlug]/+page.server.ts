@@ -1,16 +1,19 @@
 import type { PageServerLoad } from './$types';
 import { createApiClient } from '#lib/server/api.js';
-import { requireAuthOr401, requireAuthOrMachinePayment } from '#lib/server/auth/auth.js';
+import { requireAuthOr401 } from '#lib/server/auth/auth.js';
 import { userHasTierAccess } from '#lib/server/subscription.js';
 
 export const load: PageServerLoad = async (event) => {
-	const { user } = requireAuthOrMachinePayment(event);
+	const user = event.locals.user;
+	const isSignedIn = user !== null;
+	const sdkPath = `/sdks/appgoblin/${encodeURIComponent(event.params.sdkSlug)}`;
 	const detail = await createApiClient(event.fetch).get(
-		`/sdks/appgoblin/${encodeURIComponent(event.params.sdkSlug)}`,
+		isSignedIn ? sdkPath : `${sdkPath}/metadata`,
 		'SDK Details'
 	);
 	return {
 		...detail,
+		isSignedIn,
 		hasB2BSdkAccess: user ? await userHasTierAccess(user.id, 'b2b_sdk', 'b2b_premium') : false
 	};
 };

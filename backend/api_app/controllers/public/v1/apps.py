@@ -5,7 +5,8 @@ from dataclasses import fields as dataclass_fields
 from typing import Self
 
 import pandas as pd
-from litestar import Controller, Request, Response, get
+from litestar import Controller, Request, Response, get, post
+from litestar.background_tasks import BackgroundTask
 from litestar.datastructures import State
 from litestar.exceptions import (
     ClientException,
@@ -14,7 +15,10 @@ from litestar.exceptions import (
 )
 from litestar.params import Parameter
 
-from api_app.analytics import PUBLIC_API_HOSTNAME, build_request_page_view_task
+from api_app.analytics import (
+    PUBLIC_API_HOSTNAME,
+    build_request_page_view_task,
+)
 from api_app.controllers.apps import (
     create_app_country_plot_dict,
     create_app_plot_df,
@@ -29,7 +33,7 @@ from api_app.controllers.public.v1.public_models import (
     PublicAppSdkHistory,
     PublicAppSearchResult,
 )
-from api_app.guards import validate_api_key
+from api_app.guards import check_scry_app_quota, validate_api_key
 from config import get_logger
 from dbcon.queries import (
     get_app_adstxt_overview,
@@ -43,6 +47,7 @@ from dbcon.queries import (
     get_ranks_for_app_overview,
     get_single_app,
     get_single_apps_adstxt_by_relationship,
+    insert_sdk_scan_request,
     search_v1_apps,
     search_v1_developer_apps,
 )
@@ -356,11 +361,68 @@ def _search_apps_payload(
     return _build_search_results(query(state, _validate_search_term(term), limit))
 
 
+def _normalize_store_ids(data: dict) -> list[str]:
+    """Validate and de-duplicate a store ID request payload."""
+    store_ids = data.get("store_ids")
+    if not isinstance(store_ids, list) or not store_ids:
+        raise ClientException(
+            status_code=400, detail="store_ids must be a non-empty list"
+        )
+
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for store_id in store_ids:
+        if not isinstance(store_id, str) or not store_id.strip():
+            raise ClientException(
+                status_code=400,
+                detail="store_ids must contain only non-empty strings",
+            )
+        value = store_id.strip()
+        if value not in seen:
+            normalized.append(value)
+            seen.add(value)
+    return normalized
+
+
+def _process_v1_sdk_scan_request(
+    state: State, store_ids: list[str], user_id: int
+) -> None:
+    """Insert the SDK scan request from a B2B v1 API call."""
+    try:
+        insert_sdk_scan_request(state, store_ids, user_id)
+        logger.info(f"inserted v1 sdk scan request for {len(store_ids)} store_ids")
+    except Exception:
+        logger.exception("Error inserting v1 sdk scan request")
+
+
 class V1AppsController(Controller):
     """Public API v1 — app endpoints (API key required)."""
 
     path = "/api/v1/"
     guards = [_api_key_guard]
+
+    @post(path="/apps/request-sdk-scans", guards=[_b2b_sdk_guard])
+    async def request_sdk_scans(
+        self: Self, state: State, request: Request, data: dict
+    ) -> None:
+        """Request SDK scans for a batch of app store IDs."""
+        store_ids = _normalize_store_ids(data)
+        context = request.scope["_api_key_context"]
+        _, limit, remaining = check_scry_app_quota(context, len(store_ids))
+        return Response(
+            content=b"",
+            status_code=200,
+            headers={
+                "X-Scan-Quota-Limit": str(limit),
+                "X-Scan-Quota-Remaining": str(remaining),
+            },
+            background=BackgroundTask(
+                _process_v1_sdk_scan_request,
+                state,
+                store_ids,
+                context.user_id,
+            ),
+        )
 
     @get(path="/apps/search")
     async def search_apps(

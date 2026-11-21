@@ -95,8 +95,10 @@ async function getSubscriptionAccess(userId: number) {
 		`SELECT s.id FROM subscriptions s
 		 JOIN organization_members om ON om.organization_id = s.organization_id
 		 WHERE om.user_id = $1
-		 AND status IN ('active', 'trialing')
-		 AND (cancel_at IS NULL OR cancel_at > NOW())
+		 AND (
+		   (cancel_at IS NOT NULL AND cancel_at > NOW())
+		   OR (cancel_at IS NULL AND status IN ('active', 'trialing'))
+		 )
 		 LIMIT 1`,
 		[userId]
 	);

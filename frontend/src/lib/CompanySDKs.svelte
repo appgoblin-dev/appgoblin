@@ -69,7 +69,7 @@
 										data-umami-event-sdk={patterns.sdk_slug}
 										data-umami-event-userid={page.data.user?.id}
 									>
-										<Mail size={14} /> All App Versions
+										<Mail size={14} /> Including Historical App Versions
 									</button>
 								</form>
 								<form method="POST" action="?/emailExport">

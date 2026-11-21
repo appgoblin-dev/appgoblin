@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { AppGlobalMetrics, AppCountryMetrics } from '../../../../../types';
 	import AppTrendsDashboard from '#lib/AppTrendsDash.svelte';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	interface Props {
 		data: {
@@ -28,4 +29,5 @@
 			<div class="text-lg text-gray-500">No historical data found.</div>
 		</div>
 	{/if}
+	<ApiDataNote endpoint={'/api/v1/apps/{store_id}/global-metrics-history'} />
 </section>

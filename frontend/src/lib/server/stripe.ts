@@ -121,7 +121,10 @@ export async function updateSubscriptionSeats(userId: number, totalSeats: number
 		 JOIN organization_members om ON om.organization_id = s.organization_id
 		 WHERE om.user_id = $1
 		   AND tp.provider_name = 'stripe'
-		   AND s.status IN ('active', 'trialing')
+		   AND (
+		     (s.cancel_at IS NOT NULL AND s.cancel_at > NOW())
+		     OR (s.cancel_at IS NULL AND s.status IN ('active', 'trialing'))
+		   )
 		 ORDER BY s.updated_at DESC
 		 LIMIT 1`,
 		[userId]

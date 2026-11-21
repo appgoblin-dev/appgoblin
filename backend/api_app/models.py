@@ -652,6 +652,35 @@ class CompanyPlatformOverview:
 
 
 @dataclass
+class CompanyApiResponseType:
+    """Raw counts for one company, observed domain, and response type.
+
+    App counts are distinct only within each row and must not be summed.
+    Unmapped observed domains are included only for an exact-domain request;
+    null observed domains cannot be attributed to a company.
+    """
+
+    company_domain: str
+    tld_url: str | None
+    response_type: str | None
+    app_count_30d: int
+    observed_call_count_30d: int
+    app_count_alltime: int
+    observed_call_count_alltime: int
+
+
+@dataclass
+class CompanyApiAppsOverview:
+    """API-using apps and bounded recent observed activity."""
+
+    ios: AppGroup
+    android: AppGroup
+    recent_endpoints: list[dict[str, str]]
+    recent_requests: list[dict[str, str | None]]
+    response_types: list[CompanyApiResponseType]
+
+
+@dataclass
 class CompanyAppChangesOverview:
     """Quarterly added/lost apps for a company split by platform."""
 
@@ -761,9 +790,10 @@ class SdksUserRequested:
 
 @dataclass
 class SdkOverview:
-    """Contains a list of sdk overview objects."""
+    """Contains a preview of SDK matches and the last refreshed matching row count."""
 
     apps: list[dict]
+    total_count: int
 
 
 @dataclass
