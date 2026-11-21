@@ -86,7 +86,7 @@
 				'Everything in Free, plus...',
 				'API calls daily: 50,000',
 				'API calls monthly: 1 million',
-				'Request SDK scans: 20/day',
+				'Request SDK scans: 100/day',
 				'CSV exports of SDK & API app lists',
 				'Latest apps added & lost reports',
 				'Full access to App Explorer',
@@ -108,7 +108,7 @@
 				'Everything in paid plans, plus...',
 				'API calls daily: 100,000',
 				'API calls monthly: 5 million',
-				'Request SDK scans: 100/day',
+				'Request SDK scans: 200/day',
 				'Custom reports & features',
 				'Compliance & security requests',
 				'Deeper integration options'

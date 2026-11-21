@@ -155,8 +155,10 @@ export async function getOrganizationSeatSummary(organizationId: number) {
 		 FROM organizations o
 		 LEFT JOIN subscriptions s
 		   ON s.organization_id = o.id
-		  AND s.status IN ('active', 'trialing')
-		  AND (s.cancel_at IS NULL OR s.cancel_at > NOW())
+		  AND (
+		    (s.cancel_at IS NOT NULL AND s.cancel_at > NOW())
+		    OR (s.cancel_at IS NULL AND s.status IN ('active', 'trialing'))
+		  )
 		 LEFT JOIN tier_prices tp ON tp.id = s.tier_price_id
 		 LEFT JOIN tiers t ON t.id = tp.tier_id
 		 LEFT JOIN organization_members om ON om.organization_id = o.id
@@ -298,8 +300,10 @@ export async function getOrganizationSubscriptionAccess(userId: number) {
 		 LEFT JOIN tier_prices tp ON tp.id = s.tier_price_id
 		 LEFT JOIN tiers t ON t.id = tp.tier_id
 		 WHERE om.user_id = $1
-		   AND s.status IN ('active', 'trialing')
-		   AND (s.cancel_at IS NULL OR s.cancel_at > NOW())
+		   AND (
+		     (s.cancel_at IS NOT NULL AND s.cancel_at > NOW())
+		     OR (s.cancel_at IS NULL AND s.status IN ('active', 'trialing'))
+		   )
 		 ORDER BY s.updated_at DESC
 		 LIMIT 1`,
 		[userId]
