@@ -33,14 +33,14 @@ class TierLimits:
 
 
 PUBLIC_TIER_LIMITS: dict[str, TierLimits] = {
-    "free": TierLimits(requests_per_minute=20, requests_per_day=1_000),
-    "b2b_sdk": TierLimits(requests_per_minute=200, requests_per_day=100_000),
-    "b2b_appads": TierLimits(requests_per_minute=200, requests_per_day=100_000),
-    "b2b_premium": TierLimits(requests_per_minute=200, requests_per_day=500_000),
+    "free": TierLimits(requests_per_minute=60, requests_per_day=1_000),
+    "b2b_sdk": TierLimits(requests_per_minute=120, requests_per_day=100_000),
+    "b2b_appads": TierLimits(requests_per_minute=120, requests_per_day=100_000),
+    "b2b_premium": TierLimits(requests_per_minute=180, requests_per_day=200_000),
 }
 
 LEGACY_TIER_LIMITS: dict[str, TierLimits] = {
-    "premium_access": TierLimits(requests_per_minute=200, requests_per_day=10_000),
+    "premium_access": TierLimits(requests_per_minute=100, requests_per_day=10_000),
 }
 
 TIER_LIMITS: dict[str, TierLimits] = {**PUBLIC_TIER_LIMITS, **LEGACY_TIER_LIMITS}
