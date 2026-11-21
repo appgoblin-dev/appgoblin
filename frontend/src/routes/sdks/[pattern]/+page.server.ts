@@ -17,11 +17,15 @@ export const load: PageServerLoad = async (event) => {
 	const matchedApps = isSignedIn
 		? api.get(`/sdks/${value_pattern}`, 'Sdks Pattern')
 		: Promise.resolve(null);
+	const matchedCount = isSignedIn
+		? null
+		: api.get(`/sdks/${encodeURIComponent(value_pattern)}/count`, 'SDK Pattern Count');
 	const matchedCompanies = api.get(`/sdks/${value_pattern}/companies`, 'Sdks Pattern Companies');
 
 	return {
 		matchedCompanies,
 		matchedApps,
+		matchedCount,
 		isSignedIn,
 		hasB2BSdkAccess
 	};

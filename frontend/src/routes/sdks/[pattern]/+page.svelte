@@ -29,12 +29,39 @@
 		<h1 class="text-3xl md:text-4xl font-bold break-all">{pattern}</h1>
 	</header>
 
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 px-2 md:px-4">
+	<section class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 px-2 md:px-4">
+		<div>
+			<p class="text-xs font-medium uppercase tracking-wider text-surface-600-400">
+				Exact SDK string match
+			</p>
+			<p class="text-lg font-semibold">
+				{#if data.isSignedIn}
+					{#await data.matchedApps}
+						Checking app count...
+					{:then myMatchedApps}
+						<code>{pattern}</code> was found in {countFormatter.format(myMatchedApps.total_count)}
+						{myMatchedApps.total_count === 1 ? 'app' : 'apps'}.
+					{/await}
+				{:else}
+					{#await data.matchedCount}
+						Checking app count...
+					{:then myMatchedCount}
+						<code>{pattern}</code> was found in {countFormatter.format(myMatchedCount.total_count)}
+						{myMatchedCount.total_count === 1 ? 'app' : 'apps'}.
+					{/await}
+				{/if}
+			</p>
+			<p class="text-sm text-surface-600-400">
+				Counts apps where this exact SDK string appears in a manifest, Info.plist, directory, or
+				file.
+			</p>
+		</div>
+
 		{#await data.matchedCompanies}
 			loading
 		{:then myMatchedCompanies}
 			{#if myMatchedCompanies.companies.length > 0}
-				<SDKPatternCompany matches={myMatchedCompanies.companies} />
+				<SDKPatternCompany matches={myMatchedCompanies.companies} {pattern} />
 			{:else}
 				<div class="p-2 md:p-4 space-y-3 text-sm md:text-base">
 					<p>
@@ -50,17 +77,7 @@
 				</div>
 			{/if}
 		{/await}
-
-		<WhiteCard>
-			{#snippet title()}
-				Info
-			{/snippet}
-			<p class="p-2 md:p-4 text-sm md:text-base">
-				This page matches SDK parts like <code>com.xx*</code> found in Android manifests, Info.plist files,
-				directories, or files.
-			</p>
-		</WhiteCard>
-	</div>
+	</section>
 
 	<section class="px-2 md:px-4">
 		<WhiteCard>
@@ -100,9 +117,12 @@
 						{#if isExporting}<Loader2 size={16} class="animate-spin" />{:else}<Mail
 								size={16}
 							/>{/if}
-						{isExporting ? 'Queueing CSV Email...' : 'Generate & Email Full Report'}
+						{isExporting ? 'Queueing CSV Email...' : 'Generate & Email Prefix-Match Report'}
 					</button>
 				</form>
+				<p class="text-sm text-surface-600-400">
+					This report includes SDK values that start with <code>{pattern}*</code>.
+				</p>
 				{#if exportMessage}<p class="text-success-900-100 text-sm">{exportMessage}</p>{/if}
 				{#if exportError}<p class="text-error-900-100 text-sm">{exportError}</p>{/if}
 			</div>
@@ -147,7 +167,16 @@
 	{:else}
 		<section class="px-2 md:px-4">
 			<WhiteCard>
-				{#snippet title()}Matched Apps{/snippet}
+				{#snippet title()}
+					Matched Apps
+					<span class="text-sm font-normal text-surface-600-400">
+						{#await data.matchedCount}
+							(count loading)
+						{:then myMatchedCount}
+							({countFormatter.format(myMatchedCount.total_count)})
+						{/await}
+					</span>
+				{/snippet}
 				<p class="p-4 text-sm">
 					<a
 						class="underline"

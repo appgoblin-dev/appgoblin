@@ -10,10 +10,37 @@
 	import WhiteCard from '#lib/WhiteCard.svelte';
 	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
+	type MappedSdkCompany = {
+		company_domain?: string | null;
+		company_name?: string | null;
+		company_logo_url?: string | null;
+	};
+
 	let { data, form } = $props();
-	const companies = $derived(
-		data.companies?.length ? data.companies : data.owner?.company_domain ? [data.owner] : []
-	);
+	const companies = $derived.by(() => {
+		const source: MappedSdkCompany[] = data.companies?.length
+			? data.companies
+			: data.owner?.company_domain
+				? [data.owner]
+				: [];
+		const seen = new Set();
+		return source.filter((company) => {
+			const key = company.company_domain ?? company.company_name;
+			if (seen.has(key)) return false;
+			seen.add(key);
+			return true;
+		});
+	});
+	const maxPackageAppCount = $derived.by(() => {
+		const packagePatterns: { app_count: number | null }[] = data.patterns.package_patterns;
+		return packagePatterns.reduce(
+			(maximum, pattern) =>
+				pattern.app_count === null
+					? maximum
+					: Math.max(maximum ?? pattern.app_count, pattern.app_count),
+			null as number | null
+		);
+	});
 	let isExporting = $state(false);
 	let exportMessage = $derived(typeof form?.exportMessage === 'string' ? form.exportMessage : '');
 	let exportError = $derived(typeof form?.error === 'string' ? form.error : '');
@@ -36,13 +63,17 @@
 				<p>
 					This SDK is mapped from package, path, mediation, and adapter patterns found in mobile
 					apps.
+					{#if maxPackageAppCount !== null}
+						Its most-matched package pattern appears in {formatNumber(maxPackageAppCount)}
+						{maxPackageAppCount === 1 ? 'app' : 'apps'}.
+					{/if}
 				</p>
 				{#if companies.length > 0}
 					<div class="flex flex-wrap gap-2">
 						{#each companies as company (company.company_domain ?? company.company_name)}
 							{#if company.company_domain}
 								<CompanyButton
-									companyName={company.company_name}
+									companyName={company.company_name ?? undefined}
 									companyDomain={company.company_domain}
 									companyLogoUrl={company.company_logo_url ?? undefined}
 									size="md"
@@ -102,7 +133,7 @@
 						Generate &amp; Email Full Report
 					</p>
 					<div class="flex flex-wrap gap-2">
-						{#each [{ latestOnly: false, label: 'All App Versions', report: 'sdk-mapped-all-versions' }, { latestOnly: true, label: 'Latest App Versions Only', report: 'sdk-mapped-latest-versions' }] as report}
+						{#each [{ latestOnly: false, label: 'All Apps including Historical Versions', report: 'sdk-mapped-all-versions' }, { latestOnly: true, label: 'All Apps by Latest Version', report: 'sdk-mapped-latest-versions' }] as report}
 							<form
 								method="POST"
 								action="?/emailExport"
