@@ -210,9 +210,7 @@ class SdksController(Controller):
         self: Self, state: State, sdk_slug: str, include_apps: bool = True
     ) -> dict:
         """Return metadata, mapped patterns, the owner, and top apps for one SDK."""
-        return _build_sdk_detail_response(
-            state, sdk_slug, include_apps=include_apps
-        )
+        return _build_sdk_detail_response(state, sdk_slug, include_apps=include_apps)
 
     @get(path="/appgoblin/{sdk_slug:str}/metadata", cache=3600)
     async def sdk_metadata(self: Self, state: State, sdk_slug: str) -> dict:

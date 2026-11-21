@@ -7,12 +7,13 @@ WITH ranked_apps AS (
     FROM frontend.company_domains_top_apps
     WHERE company_domain = :company_domain AND api_call = true
 )
+
 SELECT
     ra.company_domain,
     ra.store,
     ra.name,
     ra.store_id,
-    NULL AS developer_name,
+    null AS developer_name,
     ra.icon_64,
     ra.api_rank AS rank,
     ra.installs_d30,

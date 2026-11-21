@@ -8,8 +8,10 @@ SELECT
     ac.request_mime_type,
     ac.response_mime_type
 FROM api_calls AS ac
-INNER JOIN store_apps AS sa ON sa.id = ac.store_app
-INNER JOIN domains AS observed_domain ON observed_domain.domain_name = ac.tld_url
+INNER JOIN store_apps AS sa ON ac.store_app = sa.id
+INNER JOIN
+    domains AS observed_domain
+    ON ac.tld_url = observed_domain.domain_name
 WHERE
     sa.store = 1
     AND sa.store_id IS NOT NULL
@@ -17,16 +19,34 @@ WHERE
     AND EXISTS (
         SELECT 1
         FROM adtech.company_domain_mapping AS mapping
-        INNER JOIN adtech.companies AS company ON company.id = mapping.company_id
-        INNER JOIN domains AS primary_domain ON primary_domain.id = company.domain_id
-        LEFT JOIN adtech.companies AS parent ON parent.id = company.parent_company_id
-        LEFT JOIN domains AS parent_domain ON parent_domain.id = parent.domain_id
+        INNER JOIN
+            adtech.companies AS company
+            ON mapping.company_id = company.id
+        INNER JOIN
+            domains AS primary_domain
+            ON company.domain_id = primary_domain.id
+        LEFT JOIN
+            adtech.companies AS parent
+            ON company.parent_company_id = parent.id
+        LEFT JOIN
+            domains AS parent_domain
+            ON parent.domain_id = parent_domain.id
         WHERE
             mapping.domain_id = observed_domain.id
             AND (
-                (:is_secondary AND observed_domain.domain_name = :company_domain)
-                OR (NOT :is_secondary AND primary_domain.domain_name = :company_domain)
-                OR (NOT :is_secondary AND :is_parent AND parent_domain.domain_name = :company_domain)
+                (
+                    :is_secondary
+                    AND observed_domain.domain_name = :company_domain
+                )
+                OR (
+                    NOT :is_secondary
+                    AND primary_domain.domain_name = :company_domain
+                )
+                OR (
+                    NOT :is_secondary
+                    AND :is_parent
+                    AND parent_domain.domain_name = :company_domain
+                )
             )
     )
 ORDER BY ac.called_at DESC, ac.id DESC

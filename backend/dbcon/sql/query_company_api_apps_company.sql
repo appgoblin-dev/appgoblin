@@ -7,6 +7,7 @@ WITH ranked_apps AS (
     FROM frontend.company_top_apps
     WHERE company_domain = :company_domain AND api_call = true
 )
+
 SELECT
     ra.company_domain,
     ra.store,
