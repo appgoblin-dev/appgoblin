@@ -15,7 +15,6 @@ Disallow: /apps/*/sdks
 Disallow: /apps/*/sdks/
 Disallow: /apps/*/trends/
 Disallow: /apps/*/ranks/
-Disallow: /sdks/*/
 Disallow: /companies/*/app-adstxt/
 Allow: /
 Allow: /.well-known/

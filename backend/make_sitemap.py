@@ -202,9 +202,7 @@ apps = get_sitemap_apps(dbcon)
 
 
 mapped_sdks = get_sitemap_mapped_sdks(dbcon)
-mapped_sdks["url"] = (
-    "https://appgoblin.info/sdks/mapped/" + mapped_sdks["sdk_slug"]
-)
+mapped_sdks["url"] = "https://appgoblin.info/sdks/mapped/" + mapped_sdks["sdk_slug"]
 mapped_sdks = set_df_sitemap_columns(mapped_sdks, 0.7, "weekly")
 
 

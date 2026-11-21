@@ -1547,6 +1547,12 @@ def get_sitemap_apps(dbcon: PostgresCon) -> pd.DataFrame:
     return df
 
 
+def get_sitemap_mapped_sdks(dbcon: PostgresCon) -> pd.DataFrame:
+    """Get sitemap URLs for mapped SDK detail pages."""
+    df = pd.read_sql(sql.sitemap_mapped_sdks, dbcon.engine)
+    return df
+
+
 def get_company_tab_indicators(state: State, company_domain: str) -> pd.DataFrame:
     """Get tab-level indicator flags from frontend.companies_overview MV."""
     df = pd.read_sql(
