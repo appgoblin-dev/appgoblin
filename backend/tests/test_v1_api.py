@@ -1690,6 +1690,7 @@ class TestV1Apps:
             "ad_supported": True,
             "in_app_purchases": False,
             "tv_supported": True,
+            "original_icon_url": "https://store.example.com/original-icon.png",
             "app_icon_url": "https://media.appgoblin.info/icon.png",
             "store_link": "https://play.google.com/store/apps/details?id=com.example.app",
             "ad_creative_count": 12,
@@ -1712,6 +1713,7 @@ class TestV1Apps:
             "store_id": "com.example.app",
             "store": "Google Play",
             "category": "tools",
+            "original_icon_url": "https://store.example.com/original-icon.png",
             "rating": 4.5,
             "rating_count": 100,
             "installs": 50000,
@@ -1736,6 +1738,26 @@ class TestV1Apps:
         assert "app_icon_url" not in resp.json()
         assert "ad_creative_count" not in resp.json()
         assert "ad_monetized_creative_count" not in resp.json()
+
+    def test_app_basics_does_not_fallback_to_cached_icon(self):
+        app = _make_test_app()
+        app_row = {
+            "store_id": "com.example.app",
+            "original_icon_url": None,
+            "app_icon_url": "https://media.appgoblin.info/icon.png",
+        }
+        with (
+            _patch_key_found("free"),
+            _patch_single_app(app_row),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/apps/com.example.app",
+                headers={"X-API-Key": "ag_appkey"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json()["original_icon_url"] is None
 
     def test_app_basics_returns_404_for_unknown_store_id(self):
         app = _make_test_app()
@@ -1780,6 +1802,7 @@ class TestV1Apps:
 
         assert resp.status_code == 200
         assert resp.json()["tv_supported"] is expected
+        assert resp.json()["original_icon_url"] is None
 
     def test_app_ranks_returns_expected_shape(self):
         app = _make_test_app()
@@ -3053,6 +3076,9 @@ class TestV1Docs:
         assert examples["appgoblin_android_app"]["value"]["name"] == (
             "AppGoblin: Scan Trackers & SDK"
         )
+        assert examples["appgoblin_android_app"]["value"]["original_icon_url"] == (
+            "https://example.com/store-icon.png"
+        )
         assert "id" not in examples["appgoblin_android_app"]["value"]
         assert "app_icon_url" not in examples["appgoblin_android_app"]["value"]
         assert "ad_creative_count" not in examples["appgoblin_android_app"]["value"]
@@ -3065,7 +3091,9 @@ class TestV1Docs:
             app_basics_operation["description"]
             == "Endpoint: `GET /api/v1/apps/{store_id}`\n\n"
             "Returns stable public app metadata plus MAU, recent install, and "
-            "estimated revenue signals for a single app."
+            "estimated revenue signals for a single app. `original_icon_url` "
+            "is the original store-provided icon URL, usually 512 × 512 pixels; "
+            "it may be null."
         )
         app_ranks_operation = data["paths"]["/api/v1/apps/{store_id}/ranks"]["get"]
         assert [

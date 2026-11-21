@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import AppRankTable from '#lib/AppRankTable.svelte';
 	import type { KeywordScore } from '../../../../types';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	type KeywordApps = {
 		google?: { ranks: any[] };
@@ -484,3 +485,4 @@
 		</div>
 	</section>
 </div>
+<ApiDataNote endpoint={'/api/v1/keywords/{keyword}'} />

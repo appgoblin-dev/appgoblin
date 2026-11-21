@@ -1,8 +1,10 @@
 <script lang="ts">
 	import Crown from '@lucide/svelte/icons/crown';
 	import CompanyAppChangesTable from '#lib/CompanyAppChangesTable.svelte';
+	import CompanySectionLink from '#lib/utils/CompanySectionLink.svelte';
 	import type { CompanyOverviewApps, CompanyTabIndicators } from '../../../../types';
 	import { formatNumber } from '#lib/utils/formatNumber.js';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	type MergedAppChanges = {
 		android: CompanyOverviewApps[];
@@ -29,18 +31,14 @@
 	<h2 class="text-xl font-semibold">Recently Added Apps</h2>
 	<p class="text-sm mb-3">
 		This view tracks the quarterly adoption of this company's SDK and API-call signals across the
-		latest available quarter and the quarter before it.
+		latest available quarter and the quarter before it. Compare
+		<CompanySectionLink slug="apps-added-adstxt">app-ads.txt additions</CompanySectionLink> and
+		<CompanySectionLink slug="apps-lost">SDK/API losses</CompanySectionLink>.
 		{#if addedCount > 0}
 			<span class="opacity-70">
 				{formatNumber(addedCount)} app{addedCount === 1 ? '' : 's'} added across the latest two quarters.
 			</span>
 		{/if}
-	</p>
-	<p class="text-sm opacity-70">
-		This data is also available via the <a
-			href="/api-docs"
-			class="underline hover:text-primary-600-400">AppGoblin API</a
-		>.
 	</p>
 </section>
 
@@ -76,3 +74,4 @@
 	previewMode={!data.hasB2BSdkAccess}
 	statusLabel="Added"
 />
+<ApiDataNote endpoint={'/api/v1/companies/{company_domain}/app-changes'} />

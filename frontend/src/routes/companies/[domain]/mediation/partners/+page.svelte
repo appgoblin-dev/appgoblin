@@ -2,6 +2,7 @@
 	import type { CompanyLayoutDetails } from '../../../../../types';
 	import CompanyButton from '#lib/CompanyButton.svelte';
 	import WhiteCard from '#lib/WhiteCard.svelte';
+	import CompanySectionLink from '#lib/utils/CompanySectionLink.svelte';
 	import { formatNumberLocale } from '#lib/utils/formatNumber.js';
 
 	let { data }: { data: CompanyLayoutDetails } = $props();
@@ -12,7 +13,8 @@
 	<p class="text-sm mb-3">
 		These mediation platforms are associated with this company's adapter in detected apps. Results
 		use the exact domain and sum the available adapter counts across app categories; apps present in
-		multiple source rows may be counted more than once.
+		multiple source rows may be counted more than once. Explore this company
+		<CompanySectionLink slug="mediation">as a mediation partner</CompanySectionLink> to see its adapters.
 	</p>
 </section>
 

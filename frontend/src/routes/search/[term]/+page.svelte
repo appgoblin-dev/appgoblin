@@ -6,6 +6,7 @@
 	import StoreIcon from '#lib/StoreIcon.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { sanitizeSearchTerm } from '#lib/search.js';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	interface Props {
 		data: SearchResponse;
@@ -188,4 +189,5 @@
 		<a href="/contact" class="underline underline-offset-2 hover:opacity-100">Contact us</a> and we'll
 		take a look.
 	</div>
+	<ApiDataNote endpoint="/api/v1/apps/search and /api/v1/companies/search" />
 </div>

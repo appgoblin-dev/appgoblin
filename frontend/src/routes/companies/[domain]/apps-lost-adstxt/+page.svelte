@@ -1,8 +1,10 @@
 <script lang="ts">
 	import Crown from '@lucide/svelte/icons/crown';
 	import CompanyAppChangesTable from '#lib/CompanyAppChangesTable.svelte';
+	import CompanySectionLink from '#lib/utils/CompanySectionLink.svelte';
 	import type { CompanyOverviewApps, CompanyTabIndicators } from '../../../../types';
 	import { formatNumber } from '#lib/utils/formatNumber.js';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	type MergedAppChanges = {
 		android: CompanyOverviewApps[];
@@ -30,18 +32,13 @@
 		latest available quarter and the quarter before it. Apps on this list can be affected by App
 		Store removals, app publishers changing domain names as well as a developer removing lines from
 		their App-Ads.txt. As such the churn on these lists can be much higher and less deterministic
-		than the SDK & API apps loss list.
+		than the <CompanySectionLink slug="apps-lost">SDK & API apps loss list</CompanySectionLink>.
+		Compare <CompanySectionLink slug="apps-added-adstxt">app-ads.txt additions</CompanySectionLink>.
 		{#if lostCount > 0}
 			<span class="opacity-70">
 				{formatNumber(lostCount)} app{lostCount === 1 ? '' : 's'} lost across the latest two quarters.
 			</span>
 		{/if}
-	</p>
-	<p class="text-sm opacity-70">
-		This data is also available via the <a
-			href="/api-docs"
-			class="underline hover:text-primary-600-400">AppGoblin API</a
-		>.
 	</p>
 </section>
 
@@ -77,3 +74,4 @@
 	previewMode={!data.hasB2BSdkAccess}
 	statusLabel="removed"
 />
+<ApiDataNote endpoint={'/api/v1/companies/{company_domain}/app-changes'} />

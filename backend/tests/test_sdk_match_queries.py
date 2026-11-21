@@ -2,8 +2,14 @@
 
 import sqlite3
 from pathlib import Path
+from unittest.mock import patch
 
+import pandas as pd
 import pytest
+from litestar import Litestar
+from litestar.testing import TestClient
+
+from api_app.controllers.sdks import SdksController
 
 
 SQL_DIR = Path(__file__).resolve().parents[1] / "dbcon" / "sql"
@@ -58,6 +64,79 @@ def test_latest_sdk_queries_filter_to_requested_sdk(database, filename):
         ("SDK A", "app.one")
     ]
     assert query(database, filename, sdk_id=99, mylimit=10) == []
+
+
+@pytest.mark.parametrize("pattern", ["com.example", "COM.EXAMPLE", "missing"])
+def test_pattern_preview_count_matches_unlimited_export(database, pattern):
+    database.executescript("""
+        CREATE TABLE version_strings (id INT, xml_path TEXT, value_name TEXT);
+        CREATE TABLE adtech.app_sdk_strings (store_app INT, string_id INT, sdk_id INT);
+        CREATE TABLE adtech.sdk_string_stats (string_id INT, sdk_id INT, app_count INT);
+        INSERT INTO version_strings VALUES
+            (1, 'manifest', 'com.example.sdk'),
+            (2, 'file', 'com.example.adapter'),
+            (3, 'file', 'other.sdk');
+        INSERT INTO adtech.app_sdk_strings VALUES
+            (1, 1, 10), (1, 2, 10), (2, 3, 10), (99, 1, 20);
+    """)
+    database.executemany(
+        "INSERT INTO adtech.app_sdk_strings VALUES (?, 1, 10)", [(1,)] * 105
+    )
+    database.execute("""
+        INSERT INTO adtech.sdk_string_stats
+        SELECT string_id, sdk_id, COUNT(*) FROM adtech.app_sdk_strings
+        GROUP BY string_id, sdk_id
+    """)
+    preview = query(database, "query_sdk_pattern.sql", value_pattern=pattern)
+    export = query(database, "query_sdk_pattern_export.sql", value_pattern=pattern)
+    count = query(database, "query_sdk_pattern_count.sql", value_pattern=pattern)
+    assert len(preview) == min(100, len(export))
+    assert count == [{"total_count": len(export)}]
+    assert len(export) == (0 if pattern == "missing" else 108)
+    assert all("total_count" not in row for row in preview)
+
+
+@pytest.mark.parametrize("rows, total", [([{"store_id": "app.one"}], 108), ([], 7), ([], 0)])
+def test_pattern_endpoint_returns_stats_count_independently_of_preview(rows, total):
+    frame = pd.DataFrame(rows, columns=["store_id"])
+    app = Litestar(route_handlers=[SdksController])
+    with (
+        patch("api_app.controllers.sdks.get_sdk_pattern", return_value=frame),
+        patch("api_app.controllers.sdks.get_sdk_pattern_count", return_value=total) as count,
+        TestClient(app=app, raise_server_exceptions=False) as client,
+    ):
+        response = client.get("/api/sdks/com.example")
+    assert response.status_code == 200
+    assert count.call_args.args[1] == "com.example"
+    assert response.json() == {
+        "apps": [{"store_id": "app.one"}] if rows else [],
+        "total_count": total,
+    }
+
+
+def test_pattern_company_query_returns_sdk_slug(database):
+    database.executescript("""
+        DROP TABLE frontend.companies_sdks_overview;
+        CREATE TABLE frontend.companies_sdks_overview (
+            company_name TEXT, company_domain TEXT, parent_company_domain TEXT,
+            sdk_name TEXT, sdk_slug TEXT, pattern_type TEXT, pattern_value TEXT,
+            app_count INT, parent_company_name TEXT
+        );
+        INSERT INTO frontend.companies_sdks_overview VALUES
+            ('Adjust', 'adjust.com', NULL, 'Adjust SDK', 'adjust-sdk',
+             'package', 'com.adjust', 10, NULL);
+    """)
+    # SQLite uses LIKE in place of PostgreSQL's case-insensitive ILIKE.
+    sql = (SQL_DIR / "query_sdk_pattern_companies.sql").read_text(encoding="utf-8")
+    rows = [
+        dict(row)
+        for row in database.execute(
+            sql.replace("ILIKE", "LIKE"), {"value_pattern": "com.adjust"}
+        )
+    ]
+    assert [(row["sdk_name"], row["sdk_slug"]) for row in rows] == [
+        ("Adjust SDK", "adjust-sdk")
+    ]
 
 
 def test_mapped_sdks_excludes_historical_matches(database):

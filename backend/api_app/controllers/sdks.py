@@ -138,7 +138,9 @@ class SdksController(Controller):
         return overview_resp
 
     @get(path="/appgoblin/{sdk_slug:str}", cache=3600)
-    async def sdk_detail(self: Self, state: State, sdk_slug: str) -> dict:
+    async def sdk_detail(
+        self: Self, state: State, sdk_slug: str, include_apps: bool = True
+    ) -> dict:
         """Return metadata, mapped patterns, the owner, and top apps for one SDK."""
         companies = get_sdk_companies(state, sdk_slug)
         sdk_id = (
@@ -147,19 +149,22 @@ class SdksController(Controller):
             else None
         )
         apps = (
-            get_sdk(state, sdk_id, limit=10) if sdk_id is not None else pd.DataFrame()
+            get_sdk(state, sdk_id, limit=10)
+            if include_apps and sdk_id is not None
+            else pd.DataFrame()
         )
         patterns = get_sdk_patterns(state, sdk_slug)
-        owner = companies.iloc[0].to_dict() if not companies.empty else {}
-        if owner.get("company_domain"):
+        if not companies.empty and "company_domain" in companies.columns:
             company_logos = get_company_logos_df(state).drop_duplicates(
                 subset=["company_domain"], keep="first"
             )
-            logo = company_logos[
-                company_logos["company_domain"] == owner["company_domain"]
-            ]
-            if not logo.empty:
-                owner["company_logo_url"] = logo.iloc[0].get("company_logo_url")
+            companies = companies.merge(
+                company_logos[["company_domain", "company_logo_url"]],
+                on="company_domain",
+                how="left",
+                validate="m:1",
+            )
+        owner = companies.iloc[0].to_dict() if not companies.empty else {}
 
         def pattern_rows(pattern_type: str) -> list[dict]:
             rows = patterns[
@@ -176,9 +181,14 @@ class SdksController(Controller):
 
         return {
             "sdk_id": sdk_id,
-            "sdk_name": apps.iloc[0]["sdk_name"] if not apps.empty else sdk_slug,
+            "sdk_name": (
+                apps.iloc[0]["sdk_name"]
+                if not apps.empty
+                else owner.get("sdk_name") or sdk_slug
+            ),
             "apps": apps.to_dict(orient="records"),
             "owner": owner,
+            "companies": companies.to_dict(orient="records"),
             "patterns": {
                 "package_patterns": pattern_rows("package"),
                 "paths": pattern_rows("path"),
@@ -186,6 +196,11 @@ class SdksController(Controller):
                 "adapter_patterns": pattern_rows("adapter"),
             },
         }
+
+    @get(path="/appgoblin/{sdk_slug:str}/metadata", cache=3600)
+    async def sdk_metadata(self: Self, state: State, sdk_slug: str) -> dict:
+        """Return mapped SDK metadata without looking up its associated apps."""
+        return await self.sdk_detail(state, sdk_slug, include_apps=False)
 
     @get(path="/{value_pattern:str}/companies", cache=3600)
     async def sdks_companies(

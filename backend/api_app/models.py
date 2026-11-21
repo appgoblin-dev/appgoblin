@@ -652,13 +652,32 @@ class CompanyPlatformOverview:
 
 
 @dataclass
+class CompanyApiResponseType:
+    """Raw counts for one company, observed domain, and response type.
+
+    App counts are distinct only within each row and must not be summed.
+    Unmapped observed domains are included only for an exact-domain request;
+    null observed domains cannot be attributed to a company.
+    """
+
+    company_domain: str
+    tld_url: str | None
+    response_type: str | None
+    app_count_30d: int
+    observed_call_count_30d: int
+    app_count_alltime: int
+    observed_call_count_alltime: int
+
+
+@dataclass
 class CompanyApiAppsOverview:
     """API-using apps and bounded recent observed activity."""
 
     ios: AppGroup
     android: AppGroup
     recent_endpoints: list[dict[str, str]]
-    recent_scanned_apps: list[dict[str, str | None]]
+    recent_requests: list[dict[str, str | None]]
+    response_types: list[CompanyApiResponseType]
 
 
 @dataclass

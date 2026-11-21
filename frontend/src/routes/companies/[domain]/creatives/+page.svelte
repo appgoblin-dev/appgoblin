@@ -4,6 +4,7 @@
 	import WhiteCard from '#lib/WhiteCard.svelte';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	interface Props {
 		data: PageData;
@@ -83,3 +84,4 @@
 {:else}
 	<p class="text-center p-4">No creatives found for this company.</p>
 {/if}
+<ApiDataNote endpoint={'/api/v1/advertisers/{host_domain}/creatives'} />

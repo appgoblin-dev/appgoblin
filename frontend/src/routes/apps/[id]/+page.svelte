@@ -5,6 +5,7 @@
 	import AppSDKOverview from '#lib/AppSDKOverview.svelte';
 	import AppOverviewSummary from '#lib/AppOverviewSummary.svelte';
 	import { formatNumber } from '#lib/utils/formatNumber.js';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	interface Props {
 		data: AppFullDetails;
@@ -280,6 +281,7 @@
 		</section>
 	</div>
 </section>
+<ApiDataNote endpoint={'/api/v1/apps/{store_id}'} />
 
 <style>
 	.bar-spacer {

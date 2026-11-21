@@ -14,6 +14,7 @@ from dbcon.static import (
     load_appstore_categories,
     write_app_categories_json,
 )
+from make_llms_txt import create_llms_txt
 
 logger = get_logger(__name__)
 
@@ -292,3 +293,6 @@ app_categories_path = write_app_categories_json(
     app_categories, SITEMAP_DIR / "appCategories.json"
 )
 logger.info(f"Generated {app_categories_path.name}")
+
+llms_path = create_llms_txt()
+logger.info(f"Generated {llms_path.name}")

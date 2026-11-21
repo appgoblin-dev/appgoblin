@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DataExportColumnDocs from '#lib/components/docs/DataExportColumnDocs.svelte';
+	import CompanySectionLink from '#lib/utils/CompanySectionLink.svelte';
 
 	interface Props {
 		data: {
@@ -64,12 +65,14 @@
 	<h1 class="h1">{data.companyName} Client App Downloads</h1>
 
 	<p class="text-base md:text-lg max-w-3xl">
-		Download all client apps data for {data.companyName}. Data comes in two styles: App-Ads.txt and
-		SDK/API Verified. App-Ads.txt data is fuzzier and covers all known apps and domains, this is
-		useful for fraud tracking. SDK/API verified apps are a smaller subset of the apps among the top
-		200k apps that were verified to be using {data.companyName} via the presence of their SDK or via API
-		calls to domains they own. SDK/API data is much more deterministic though it by it's nature covers
-		a smaller portion of the whole. Please feel free to reach out if you have questions.
+		Download all client apps data for {data.companyName}. Data comes in two styles:
+		<CompanySectionLink slug="app-adstxt">App-Ads.txt</CompanySectionLink> and
+		<CompanySectionLink slug="sdks">SDK</CompanySectionLink>/API Verified. App-Ads.txt data is
+		fuzzier and covers all known apps and domains, this is useful for fraud tracking. SDK/API
+		verified apps are a smaller subset of the apps among the top 200k apps that were verified to be
+		using {data.companyName} via the presence of their SDK or via API calls to domains they own. SDK/API
+		data is much more deterministic though it by it's nature covers a smaller portion of the whole. Please
+		feel free to reach out if you have questions.
 	</p>
 
 	<!-- Value Propositions -->

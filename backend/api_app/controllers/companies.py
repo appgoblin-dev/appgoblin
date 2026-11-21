@@ -34,6 +34,7 @@ from api_app.models import (
     CompaniesCategoryOverview,
     CompaniesOverview,
     CompanyApiAppsOverview,
+    CompanyApiResponseType,
     CompanyAppChangesOverview,
     CompanyCategoryOverview,
     CompanyDetail,
@@ -71,6 +72,7 @@ from dbcon.queries import (
     get_company_adstxt_publisher_id_apps_overview,
     get_company_adstxt_publisher_id_apps_raw,
     get_company_adstxt_publishers_overview,
+    get_company_api_response_types,
     get_company_app_changes,
     get_company_categories_counts,
     get_company_country_apps,
@@ -246,7 +248,9 @@ def get_company_apps(
     return _group_company_apps(df, company_domain)
 
 
-def _group_company_apps(df: pd.DataFrame, company_domain: str) -> CompanyPlatformOverview:
+def _group_company_apps(
+    df: pd.DataFrame, company_domain: str
+) -> CompanyPlatformOverview:
     """Group company apps by platform using the existing top-apps response shape."""
     df = df[~df["store"].isna()]
 
@@ -267,78 +271,81 @@ def _group_company_apps(df: pd.DataFrame, company_domain: str) -> CompanyPlatfor
 
 
 _RECENT_API_ACTIVITY_LIMIT = 20
-_SAFE_API_PATH_SEGMENTS = frozenset(
-    {"api", "v1", "v2", "v3", "v4", "events", "event", "collect", "config", "sdk"}
-)
-
-
-def _safe_observed_endpoint(url: object, domain: object) -> tuple[str, str] | None:
-    """Reduce an observed URL to a mapped domain and conservatively redacted path."""
-    if not isinstance(url, str) or not isinstance(domain, str):
-        return None
-    if not re.fullmatch(r"[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?", domain):
-        return None
-    try:
-        parsed = urllib.parse.urlsplit(url if "://" in url else f"//{url}")
-        host = parsed.hostname
-        if (
-            parsed.scheme not in ("", "http", "https")
-            or parsed.username is not None
-            or parsed.password is not None
-            or host is None
-            or (host != domain and not host.endswith(f".{domain}"))
-        ):
-            return None
-    except ValueError:
-        return None
-    segments = [segment for segment in parsed.path.split("/") if segment]
-    path = "/" + "/".join(
-        segment if segment in _SAFE_API_PATH_SEGMENTS else "{redacted}"
-        for segment in segments
-    )
-    return domain, path
 
 
 def _build_company_recent_api_activity(
-    calls: pd.DataFrame, scans: pd.DataFrame
+    calls: pd.DataFrame,
 ) -> tuple[list[dict[str, str]], list[dict[str, str | None]]]:
-    """Deduplicate the bounded, newest-first samples without exposing raw URLs."""
+    """Build bounded, newest-first endpoint and request samples."""
     endpoints: list[dict[str, str]] = []
+    requests: list[dict[str, str | None]] = []
     endpoint_keys: set[tuple[str, str]] = set()
     for row in calls.itertuples(index=False):
-        key = _safe_observed_endpoint(row.url, row.tld_url)
-        if key is None or key in endpoint_keys or pd.isna(row.called_at):
+        if not isinstance(row.url, str) or not row.url or pd.isna(row.called_at):
             continue
-        endpoint_keys.add(key)
-        endpoints.append(
-            {
-                "host": key[0],
-                "path": key[1],
-                "last_seen": pd.Timestamp(row.called_at).isoformat(),
-            }
-        )
-        if len(endpoints) == _RECENT_API_ACTIVITY_LIMIT:
-            break
-
-    apps: list[dict[str, str | None]] = []
-    app_keys: set[tuple[object, object]] = set()
-    for row in scans.itertuples(index=False):
-        key = (row.store, row.store_id)
-        if key in app_keys or row.store not in (1, 2) or pd.isna(row.scanned_at):
+        try:
+            parsed = urllib.parse.urlsplit(
+                row.url if "://" in row.url else f"//{row.url}"
+            )
+            host = parsed.hostname
+            if parsed.scheme not in ("", "http", "https") or not host:
+                continue
+            path = parsed.path or "/"
+            if ":" in host:
+                host = f"[{host}]"
+            if parsed.port is not None:
+                host = f"{host}:{parsed.port}"
+        except ValueError:
             continue
-        app_keys.add(key)
-        apps.append(
-            {
-                "store": "Google Play" if row.store == 1 else "Apple App Store",
-                "store_id": row.store_id,
-                "name": None if pd.isna(row.name) else row.name,
-                "icon_64": None if pd.isna(row.icon_64) else row.icon_64,
-                "scanned_at": pd.Timestamp(row.scanned_at).isoformat(),
-            }
-        )
-        if len(apps) == _RECENT_API_ACTIVITY_LIMIT:
+        slash_count = 0
+        path_end = len(path)
+        for index, character in enumerate(path):
+            if character == "/":
+                slash_count += 1
+                if slash_count == 3 and index < len(path) - 1:
+                    path_end = index + 1
+                    break
+        endpoint = host + path[:path_end]
+        truncated = path_end < len(path)
+        if len(endpoint) + (3 if truncated else 0) > 120:
+            endpoint = endpoint[:117]
+            truncated = True
+        if truncated:
+            endpoint += "..."
+        display_host = endpoint[: len(host)]
+        display_path = endpoint[len(host) :]
+        called_at = pd.Timestamp(row.called_at).isoformat()
+        key = (display_host, display_path)
+        if key not in endpoint_keys and len(endpoints) < _RECENT_API_ACTIVITY_LIMIT:
+            endpoint_keys.add(key)
+            endpoints.append(
+                {"host": display_host, "path": display_path, "last_seen": called_at}
+            )
+        if len(requests) < _RECENT_API_ACTIVITY_LIMIT:
+            requests.append(
+                {
+                    "host": display_host,
+                    "path": display_path,
+                    "called_at": called_at,
+                    **{
+                        field: (
+                            None
+                            if pd.isna(getattr(row, field))
+                            else getattr(row, field)
+                        )
+                        for field in (
+                            "store_id",
+                            "name",
+                            "icon_64",
+                            "request_mime_type",
+                            "response_mime_type",
+                        )
+                    },
+                }
+            )
+        if len(endpoints) == len(requests) == _RECENT_API_ACTIVITY_LIMIT:
             break
-    return endpoints, apps
+    return endpoints, requests
 
 
 def _parse_company_trends_period(latest_period: str | None) -> tuple[int, int] | None:
@@ -2382,13 +2389,17 @@ class CompaniesController(Controller):
         """Return top apps and recent bounded API activity for the company scope."""
         df = get_api_apps_for_company(state=state, company_domain=company_domain)
         groups = _group_company_apps(df, company_domain)
-        calls, scans = get_company_recent_api_activity(state, company_domain)
-        endpoints, apps = _build_company_recent_api_activity(calls, scans)
+        calls = get_company_recent_api_activity(state, company_domain)
+        endpoints, requests = _build_company_recent_api_activity(calls)
         return CompanyApiAppsOverview(
             android=groups.android,
             ios=groups.ios,
             recent_endpoints=endpoints,
-            recent_scanned_apps=apps,
+            recent_requests=requests,
+            response_types=[
+                CompanyApiResponseType(**row)
+                for row in get_company_api_response_types(state, company_domain)
+            ],
         )
 
     @get(

@@ -2,6 +2,8 @@
 	import type { CompanyFullDetails } from '../../../../types';
 	import CompanySDKs from '#lib/CompanySDKs.svelte';
 	import WhiteCard from '#lib/WhiteCard.svelte';
+	import CompanySectionLink from '#lib/utils/CompanySectionLink.svelte';
+	import ApiDataNote from '#lib/ApiDataNote.svelte';
 
 	interface Props {
 		data: CompanyFullDetails;
@@ -14,7 +16,10 @@
 	<h2 class="text-xl font-semibold">SDKs</h2>
 	<p class="text-sm mb-3">
 		This SDK section shows which mobile libraries are linked to this company across real apps,
-		helping you compare adtech, analytics, and tooling distribution at app level.
+		helping you compare adtech, analytics, and tooling distribution at app level. Explore
+		<CompanySectionLink slug="trends">quarterly trends</CompanySectionLink>,
+		<CompanySectionLink slug="apps-added">recently added apps</CompanySectionLink>, and
+		<CompanySectionLink slug="apps-lost">recently lost apps</CompanySectionLink> for changes over time.
 	</p>
 </section>
 
@@ -38,3 +43,4 @@
 {:else}
 	<p class="text-center p-4">SDK information is not available for secondary domains.</p>
 {/if}
+<ApiDataNote endpoint={'/api/v1/companies/{company_domain}/sdks'} />

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CompanyFullDetails } from '../../../../types';
 	import AdsTxtPubIDsTable from '#lib/AdsTxtPubIDsTable.svelte';
+	import CompanySectionLink from '#lib/utils/CompanySectionLink.svelte';
 
 	interface Props {
 		data: CompanyFullDetails;
@@ -14,6 +15,9 @@
 	<p class="text-sm mb-3">
 		App-ads.txt records are mapped to real app IDs and updated daily, so you can audit direct and
 		reseller relationships for fraud detection, supply-path analysis, and partner prospecting.
+		Explore <CompanySectionLink slug="apps-added-adstxt">recently added</CompanySectionLink> and
+		<CompanySectionLink slug="apps-lost-adstxt">recently lost app-ads.txt apps</CompanySectionLink>,
+		or see <CompanySectionLink slug="data-exports">client app exports</CompanySectionLink>.
 	</p>
 </section>
 

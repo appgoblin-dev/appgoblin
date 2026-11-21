@@ -4,6 +4,7 @@
 	import type { CompanyTabIndicators } from '../../types';
 	import SubNavTabs from './SubNavTabs.svelte';
 	import type { SubNavTabItem } from './SubNavTabs.svelte';
+	import { companySectionHasData } from './companySectionAvailability.js';
 	import Home from '@lucide/svelte/icons/home';
 	import Image from '@lucide/svelte/icons/image';
 	import TrendingUp from '@lucide/svelte/icons/trending-up';
@@ -13,6 +14,7 @@
 	import Puzzle from '@lucide/svelte/icons/puzzle';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Download from '@lucide/svelte/icons/download';
+	import Network from '@lucide/svelte/icons/network';
 
 	let {
 		tabIndicators,
@@ -33,6 +35,7 @@
 		if (pathname.includes('/apps-lost-adstxt')) return 'apps-lost-adstxt';
 		if (pathname.includes('/apps-added')) return 'apps-added';
 		if (pathname.includes('/apps-lost')) return 'apps-lost';
+		if (pathname.includes('/api-calls')) return 'api-apps';
 		if (pathname.includes('/creatives')) return 'creatives';
 		if (pathname.includes('/data-exports')) return 'data-exports';
 		if (pathname.includes('/mediation/partners')) return 'mediation-partners';
@@ -87,43 +90,7 @@
 	}
 
 	function tabHasData(slug: string): boolean {
-		if (!tabIndicators)
-			return slug === 'overview' || slug === 'data-exports' || slug === 'app-adstxt';
-		switch (slug) {
-			case 'overview':
-				return true;
-			case 'creatives':
-				return Boolean(tabIndicators.creatives_app_count);
-			case 'trends':
-				return Boolean(tabIndicators.has_trends);
-			case 'apps-added':
-				return Boolean(tabIndicators.apps_sdk_added_count);
-			case 'apps-lost':
-				return Boolean(tabIndicators.apps_sdk_lost_count);
-			case 'apps-added-adstxt':
-				return Boolean(tabIndicators.apps_adstxt_direct_added_count);
-			case 'apps-lost-adstxt':
-				return Boolean(tabIndicators.apps_adstxt_direct_lost_count);
-			case 'sdks':
-				return Boolean(tabIndicators.sdk_count);
-			case 'mediation':
-				return Boolean(tabIndicators.mediation_adapter_count);
-			case 'app-adstxt':
-				return (
-					Boolean(tabIndicators.adstxt_direct_app_count) ||
-					Boolean(tabIndicators.adstxt_parent_app_count)
-				);
-			case 'data-exports':
-				return (
-					Boolean(tabIndicators.has_api_signal) ||
-					Boolean(tabIndicators.adstxt_direct_app_count) ||
-					Boolean(tabIndicators.adstxt_direct_app_count) ||
-					Boolean(tabIndicators.adstxt_parent_app_count) ||
-					Boolean(tabIndicators.sdk_count)
-				);
-			default:
-				return true;
-		}
+		return companySectionHasData(slug, tabIndicators, mediationPartnerCount);
 	}
 
 	let sectionSlug = $derived(getSectionSlug(page.url.pathname));
@@ -145,6 +112,12 @@
 				href: `/companies/${companyDomain}`,
 				icon: Home,
 				count: null
+			},
+			{
+				slug: 'api-apps',
+				label: 'Apps Using API',
+				href: `/companies/${companyDomain}/api-calls`,
+				icon: Network
 			},
 			{
 				slug: 'creatives',

@@ -2,10 +2,7 @@
 
 from pathlib import Path
 
-
-LLMS_PATH = (
-    Path(__file__).resolve().parent.parent / "frontend" / "static" / "llms.txt"
-)
+LLMS_PATH = Path(__file__).resolve().parent.parent / "frontend" / "static" / "llms.txt"
 
 LLMS_CONTENT = """# AppGoblin
 

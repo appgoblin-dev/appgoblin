@@ -1040,10 +1040,8 @@ def get_single_apps_adstxt_by_relationship(
     )
 
 
-def get_company_recent_api_activity(
-    state: State, company_domain: str
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Fetch bounded recent calls and scans for the same company scope as top apps."""
+def get_company_recent_api_activity(state: State, company_domain: str) -> pd.DataFrame:
+    """Fetch bounded recent calls for the same company scope as top apps."""
     is_secondary = company_domain in get_company_secondary_domains(state)
     params = {
         "company_domain": company_domain,
@@ -1051,9 +1049,24 @@ def get_company_recent_api_activity(
         "is_parent": not is_secondary and company_domain in get_parent_companies(state),
         "sample_limit": 1000,
     }
-    calls = pd.read_sql(sql.company_recent_api_calls, state.dbcon.engine, params=params)
-    scans = pd.read_sql(sql.company_recent_api_scans, state.dbcon.engine, params=params)
-    return calls, scans
+    return pd.read_sql(sql.company_recent_api_calls, state.dbcon.engine, params=params)
+
+
+def get_company_api_response_types(state: State, company_domain: str) -> list[dict]:
+    """Return bounded MV rows, retaining per-domain distinct counts without summing.
+
+    Unmapped observed domains are included only for an exact-domain request.
+    Null observed domains cannot be attributed to a company.
+    """
+    is_secondary = company_domain in get_company_secondary_domains(state)
+    params = {
+        "company_domain": company_domain,
+        "is_secondary": is_secondary,
+        "is_parent": not is_secondary and company_domain in get_parent_companies(state),
+    }
+    with state.dbcon.engine.connect() as conn:
+        rows = conn.execute(sql.company_api_response_types, params).mappings().all()
+    return [dict(row) for row in rows]
 
 
 def get_api_apps_for_company(

@@ -162,7 +162,7 @@ async function verifyCode(event: RequestEvent) {
 	if (typeof redirectTo === 'string' && isSafeRedirect(redirectTo)) {
 		return redirect(302, redirectTo);
 	}
-	return redirect(302, '/');
+	return redirect(302, '/pricing');
 }
 
 async function resendEmail(event: RequestEvent) {
