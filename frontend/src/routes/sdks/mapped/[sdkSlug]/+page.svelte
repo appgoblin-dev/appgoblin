@@ -167,7 +167,14 @@
 						{/each}
 					</div>
 				</div>
-				{#if exportMessage}<p class="text-success-900-100 text-sm">{exportMessage}</p>{/if}
+				{#if exportMessage}
+					<p class="text-success-900-100 text-sm">
+						{exportMessage}
+						<a href="/account/reports" class="underline hover:text-primary-600-400">
+							View Generated Reports
+						</a>
+					</p>
+				{/if}
 				{#if exportError}<p class="text-error-900-100 text-sm">{exportError}</p>{/if}
 			</div>
 		</WhiteCard>

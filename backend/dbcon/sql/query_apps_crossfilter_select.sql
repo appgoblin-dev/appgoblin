@@ -8,6 +8,11 @@ SELECT
     sao.monthly_active_users,
     sao.in_app_purchases,
     sao.ad_supported,
+    sao.tv_supported,
+    sao.is_removed,
+    sao.developer_name,
+    sao.developer_id,
+    sao.developer_url,
     sao.store,
     sao.icon_64,
     sao.monthly_ad_revenue
