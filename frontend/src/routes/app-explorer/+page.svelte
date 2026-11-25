@@ -908,7 +908,12 @@
 			</form>
 
 			{#if exportFeedback}
-				<p class="text-success-900-100 text-sm text-center">{exportFeedback}</p>
+				<p class="text-success-900-100 text-sm text-center">
+					{exportFeedback}
+					<a href="/account/reports" class="underline hover:text-primary-600-400">
+						View Generated Reports
+					</a>
+				</p>
 			{/if}
 
 			{#if exportError}

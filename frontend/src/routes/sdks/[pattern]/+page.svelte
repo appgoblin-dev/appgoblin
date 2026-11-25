@@ -123,7 +123,14 @@
 				<p class="text-sm text-surface-600-400">
 					This report includes SDK values that start with <code>{pattern}*</code>.
 				</p>
-				{#if exportMessage}<p class="text-success-900-100 text-sm">{exportMessage}</p>{/if}
+				{#if exportMessage}
+					<p class="text-success-900-100 text-sm">
+						{exportMessage}
+						<a href="/account/reports" class="underline hover:text-primary-600-400">
+							View Generated Reports
+						</a>
+					</p>
+				{/if}
 				{#if exportError}<p class="text-error-900-100 text-sm">{exportError}</p>{/if}
 			</div>
 		</WhiteCard>
