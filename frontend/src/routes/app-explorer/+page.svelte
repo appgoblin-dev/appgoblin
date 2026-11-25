@@ -73,6 +73,8 @@
 	let requireSdkApi = $state(false);
 	let requireIap = $state(false);
 	let requireAds = $state(false);
+	let includeRemovedApps = $state(false);
+	let tvSupportedOnly = $state(false);
 
 	let selectedCategory = $state<string>('');
 	let selectedStore = $state<number | ''>('');
@@ -120,6 +122,8 @@
 		formData.set('require_sdk_api', requireSdkApi.toString());
 		formData.set('require_iap', requireIap.toString());
 		formData.set('require_ads', requireAds.toString());
+		formData.set('include_removed_apps', includeRemovedApps.toString());
+		formData.set('tv_supported_only', tvSupportedOnly.toString());
 		formData.set('mydate', myDate);
 
 		if (rankingFilter) {
@@ -396,6 +400,8 @@
 		requireSdkApi = false;
 		requireIap = false;
 		requireAds = false;
+		includeRemovedApps = false;
+		tvSupportedOnly = false;
 		selectedCategory = '';
 		selectedStore = '';
 		rankingFilter = '';
@@ -551,6 +557,17 @@
 								<option value={cat.id}>{cat.name}</option>
 							{/each}
 						</select>
+					</div>
+
+					<div class="space-y-2">
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input type="checkbox" class="checkbox" bind:checked={includeRemovedApps} />
+							<span class="text-sm">Include Removed Apps</span>
+						</label>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input type="checkbox" class="checkbox" bind:checked={tvSupportedOnly} />
+							<span class="text-sm">TV Supported Only</span>
+						</label>
 					</div>
 
 					<!-- Metrics -->

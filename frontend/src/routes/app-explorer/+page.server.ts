@@ -12,6 +12,8 @@ interface CrossfilterPayload {
 	require_sdk_api: boolean;
 	require_iap: boolean;
 	require_ads: boolean;
+	include_removed_apps: boolean;
+	tv_supported_only: boolean;
 	ranking_country: string | null;
 	mydate: string | null;
 	category: string | null;
@@ -58,6 +60,8 @@ function buildCrossfilterPayload(data: FormData, hasB2BSdkAccess: boolean): Cros
 		require_sdk_api: data.get('require_sdk_api') === 'true',
 		require_iap: data.get('require_iap') === 'true',
 		require_ads: data.get('require_ads') === 'true',
+		include_removed_apps: data.get('include_removed_apps') === 'true',
+		tv_supported_only: data.get('tv_supported_only') === 'true',
 		ranking_country: data.get('ranking_country')?.toString() || null,
 		mydate: data.get('mydate')?.toString() || null,
 		category: data.get('category')?.toString() || null,
@@ -78,6 +82,7 @@ function hasExportFilters(payload: CrossfilterPayload): boolean {
 		payload.require_sdk_api ||
 		payload.require_iap ||
 		payload.require_ads ||
+		payload.tv_supported_only ||
 		payload.ranking_country != null ||
 		payload.category != null ||
 		payload.store != null ||
