@@ -201,6 +201,11 @@ COMPANY_OVERVIEW_EXAMPLE_RESPONSE = {
             "estimated_rows": 16381,
             "url": "exampl.csv",
         },
+        "app_ads_txt": {
+            "available": True,
+            "estimated_rows": 23456,
+            "url": "example.csv",
+        },
     },
 }
 COMPANY_APPS_ADDED_EXAMPLE_RESPONSE = {
