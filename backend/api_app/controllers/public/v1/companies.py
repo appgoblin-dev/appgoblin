@@ -161,25 +161,28 @@ def _build_company_datasets(
         else None
     )
 
-    def parent_company_report(platform: str) -> CompanyDatasetTarget:
-        """Build a parent-company export target only when its file is registered."""
+    def registered_report(
+        path_segment: str, platform: str | None = None
+    ) -> CompanyDatasetTarget:
+        """Build an export target only when its file is registered."""
         if reports is None:
             return CompanyDatasetTarget(available=False, estimated_rows=0, url=None)
 
         matching = reports[
-            reports["file_key"]
-            .astype(str)
-            .str.contains("downloads/parent-company-verified-apps/", regex=False)
-            & reports["file_key"]
-            .astype(str)
-            .str.contains(f"_{platform}_verified_apps.csv", regex=False)
+            reports["file_key"].astype(str).str.contains(path_segment, regex=False)
         ]
+        if platform is not None:
+            matching = matching[
+                matching["file_key"]
+                .astype(str)
+                .str.contains(f"_{platform}_verified_apps.csv", regex=False)
+            ]
         if matching.empty:
             return CompanyDatasetTarget(available=False, estimated_rows=0, url=None)
 
         file_key = str(matching.iloc[0]["file_key"])
         row_count = matching.iloc[0].get("row_count")
-        estimated_rows = int(row_count) if row_count is not None else 0
+        estimated_rows = 0 if pd.isna(row_count) else int(row_count)
         return CompanyDatasetTarget(
             available=True,
             estimated_rows=estimated_rows,
@@ -205,8 +208,13 @@ def _build_company_datasets(
                 else None
             ),
         ),
-        parent_company_android=parent_company_report("android"),
-        parent_company_ios=parent_company_report("ios"),
+        parent_company_android=registered_report(
+            "downloads/parent-company-verified-apps/", "android"
+        ),
+        parent_company_ios=registered_report(
+            "downloads/parent-company-verified-apps/", "ios"
+        ),
+        app_ads_txt=registered_report("downloads/app-ads-txt/"),
     )
 
 

@@ -75,7 +75,12 @@ MIN_SCANS_FOR_DIFF = 2
 def has_crossfilter_export_filters(payload: dict) -> bool:
     """Return True when at least one meaningful export filter is set."""
     array_fields = ("include_company_ids", "exclude_company_ids")
-    boolean_fields = ("require_sdk_api", "require_iap", "require_ads")
+    boolean_fields = (
+        "require_sdk_api",
+        "require_iap",
+        "require_ads",
+        "tv_supported_only",
+    )
     value_fields = (
         "ranking_country",
         "category",
@@ -1318,6 +1323,8 @@ class AppController(Controller):
         require_sdk_api = bool(data.get("require_sdk_api", False))
         require_iap = bool(data.get("require_iap", False))
         require_ads = bool(data.get("require_ads", False))
+        include_removed_apps = bool(data.get("include_removed_apps", False))
+        tv_supported_only = bool(data.get("tv_supported_only", False))
         ranking_country = data.get("ranking_country")
         mydate = data.get("mydate", "2024-01-01")
         category = data.get("category")
@@ -1345,6 +1352,8 @@ class AppController(Controller):
             f"Crossfilter query: include={len(include_company_ids)} companies, "
             f"exclude={len(exclude_company_ids)} companies, sdk_api={require_sdk_api}, "
             f"iap={require_iap}, ads={require_ads}, "
+            f"include_removed_apps={include_removed_apps}, "
+            f"tv_supported_only={tv_supported_only}, "
             f"ranking_country={ranking_country}, date={mydate}, "
             f"category={category}, store={store}"
         )
@@ -1357,6 +1366,8 @@ class AppController(Controller):
                 require_sdk_api=require_sdk_api,
                 require_iap=require_iap,
                 require_ads=require_ads,
+                include_removed_apps=include_removed_apps,
+                tv_supported_only=tv_supported_only,
                 ranking_country=ranking_country,
                 mydate=mydate,
                 category=category,

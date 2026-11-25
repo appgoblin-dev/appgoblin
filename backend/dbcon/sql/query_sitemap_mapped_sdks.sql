@@ -1,5 +1,4 @@
-SELECT DISTINCT
-    sdk_slug
+SELECT DISTINCT sdk_slug
 FROM frontend.companies_sdks_overview
 WHERE
     sdk_slug IS NOT NULL

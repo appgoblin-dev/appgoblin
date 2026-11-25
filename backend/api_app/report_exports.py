@@ -252,6 +252,8 @@ def create_crossfilter_export_csv(state: State, payload: dict) -> tuple[bytes, i
         require_sdk_api=bool(payload.get("require_sdk_api", False)),
         require_iap=bool(payload.get("require_iap", False)),
         require_ads=bool(payload.get("require_ads", False)),
+        include_removed_apps=bool(payload.get("include_removed_apps", False)),
+        tv_supported_only=bool(payload.get("tv_supported_only", False)),
         ranking_country=payload.get("ranking_country"),
         mydate=payload.get("mydate", "2024-01-01"),
         category=payload.get("category"),

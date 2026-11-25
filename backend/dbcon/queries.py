@@ -1392,6 +1392,8 @@ def query_apps_crossfilter(
     require_sdk_api: bool = False,
     require_iap: bool = False,
     require_ads: bool = False,
+    include_removed_apps: bool = False,
+    tv_supported_only: bool = False,
     ranking_country: str | None = None,
     mydate: str = "2024-01-01",
     category: str | None = None,
@@ -1421,6 +1423,8 @@ def query_apps_crossfilter(
     params = {
         "require_iap": bool(require_iap),
         "require_ads": bool(require_ads),
+        "include_removed_apps": bool(include_removed_apps),
+        "tv_supported_only": bool(tv_supported_only),
         "ranking_country": ranking_country,
         "mydate": parsed_date,
         "category": category,

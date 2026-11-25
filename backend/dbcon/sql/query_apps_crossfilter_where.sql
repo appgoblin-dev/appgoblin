@@ -1,5 +1,13 @@
 WHERE
     sao.store_last_updated > cast(:mydate AS date)
+    AND (
+        cast(:include_removed_apps AS boolean)
+        OR sao.is_removed = FALSE
+    )
+    AND (
+        NOT cast(:tv_supported_only AS boolean)
+        OR sao.tv_supported = TRUE
+    )
     AND (NOT cast(:require_iap AS boolean) OR sao.in_app_purchases = TRUE)
     AND (NOT cast(:require_ads AS boolean) OR sao.ad_supported = TRUE)
     AND (cast(:category AS text) IS NULL OR sao.category LIKE :category)

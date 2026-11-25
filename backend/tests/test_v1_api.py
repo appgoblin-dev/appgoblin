@@ -997,6 +997,9 @@ class TestV1CompanyDetail:
                 parent_company_ios=CompanyDatasetTarget(
                     available=False, estimated_rows=0, url=None
                 ),
+                app_ads_txt=CompanyDatasetTarget(
+                    available=False, estimated_rows=0, url=None
+                ),
             ),
             mapping_notice=None,
         )
@@ -1066,6 +1069,11 @@ class TestV1CompanyDetail:
                     "url": None,
                 },
                 "parent_company_ios": {
+                    "available": False,
+                    "estimated_rows": 0,
+                    "url": None,
+                },
+                "app_ads_txt": {
                     "available": False,
                     "estimated_rows": 0,
                     "url": None,
@@ -2114,6 +2122,58 @@ class TestV1Apps:
                 "estimated_rows": 0,
                 "url": None,
             },
+            "app_ads_txt": {
+                "available": False,
+                "estimated_rows": 0,
+                "url": None,
+            },
+        }
+
+    def test_company_detail_includes_registered_app_ads_dataset(self):
+        app = _make_test_app()
+        app.state.dbcon = MagicMock()
+        overview = FakeCompanyCategoryOverview(
+            categories={"all": CategoryCompanyStats()},
+            company_types=["ad-network"],
+        )
+        reports = pd.DataFrame(
+            [
+                {
+                    "file_key": (
+                        "downloads/app-ads-txt/domains/domain=google.com/"
+                        "appgoblin_google.com_app_ads_txt.csv"
+                    ),
+                    "row_count": 1234,
+                }
+            ]
+        )
+
+        with (
+            _patch_key_found("b2b_sdk"),
+            _patch_raw_company_detail(overview),
+            patch(
+                "api_app.controllers.public.v1.companies.get_company_s3_reports",
+                return_value=reports,
+            ),
+            patch(
+                "api_app.controllers.public.v1.companies.get_signed_download_url",
+                side_effect=lambda key: f"signed://{key}",
+            ),
+            TestClient(app=app, raise_server_exceptions=False) as client,
+        ):
+            resp = client.get(
+                "/api/v1/companies/google.com",
+                headers={"X-API-Key": "ag_companydetail"},
+            )
+
+        assert resp.status_code == 200
+        assert resp.json()["datasets"]["app_ads_txt"] == {
+            "available": True,
+            "estimated_rows": 1234,
+            "url": (
+                "signed://downloads/app-ads-txt/domains/domain=google.com/"
+                "appgoblin_google.com_app_ads_txt.csv"
+            ),
         }
 
     def test_app_sdks_returns_empty_shape_when_missing(self):
